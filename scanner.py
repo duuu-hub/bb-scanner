@@ -50,6 +50,61 @@ _last_api_start = 0.0
 RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
 NEAR_BB_PCT = float(os.getenv("NEAR_BB_PCT", "3.0"))
 
+# Candidate 2 live-paper strategy.
+# Backtest success rates are the stress-inclusive TEST30 win rates from the
+# +1 minute precision replay (LSK/TUT/LAB/ALLO included).
+STRATEGY_RULES = {
+    "L1": {
+        "name": "모멘텀 LONG",
+        "direction": "LONG",
+        "priority": 1,
+        "tp_pct": 10.0,
+        "sl_pct": 5.0,
+        "rr": 2.0,
+        "bt_win_rate": 53.3,
+        "bt_n": 45,
+        # Observed central ~60% move from +1m to +3m in the precision replay.
+        "entry_low_pct": -1.3,
+        "entry_high_pct": 1.1,
+    },
+    "L2": {
+        "name": "폭발추세 LONG",
+        "direction": "LONG",
+        "priority": 2,
+        "tp_pct": 10.0,
+        "sl_pct": 2.5,
+        "rr": 4.0,
+        "bt_win_rate": 42.1,
+        "bt_n": 19,
+        "entry_low_pct": -0.9,
+        "entry_high_pct": 1.7,
+    },
+    "L3": {
+        "name": "4H 지연 LONG",
+        "direction": "LONG",
+        "priority": 3,
+        "tp_pct": 10.0,
+        "sl_pct": 4.0,
+        "rr": 2.5,
+        "bt_win_rate": 46.7,
+        "bt_n": 15,
+        "entry_low_pct": -0.4,
+        "entry_high_pct": 0.4,
+    },
+    "S1": {
+        "name": "극단반전 SHORT",
+        "direction": "SHORT",
+        "priority": 4,
+        "tp_pct": 10.0,
+        "sl_pct": 4.0,
+        "rr": 2.5,
+        "bt_win_rate": 44.4,
+        "bt_n": 18,
+        "entry_low_pct": -1.1,
+        "entry_high_pct": 0.8,
+    },
+}
+
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 MANUAL_RUN = os.getenv("GITHUB_EVENT_NAME", "") in ("workflow_dispatch", "push")
@@ -189,9 +244,15 @@ def bollinger_live(symbol, granularity, live_price):
     for row in rows:
         try:
             ts = int(row[0])
+            open_price = float(row[1])
             close = float(row[4])
-            if math.isfinite(close) and close > 0:
-                parsed.append((ts, close))
+            if (
+                math.isfinite(open_price)
+                and open_price > 0
+                and math.isfinite(close)
+                and close > 0
+            ):
+                parsed.append((ts, open_price, close))
         except (ValueError, TypeError, IndexError):
             continue
 
@@ -212,22 +273,42 @@ def bollinger_live(symbol, granularity, live_price):
         return None
 
     # Current BB = previous 19 completed closes + current live trade price.
-    live_window = [x[1] for x in completed[-(BB_PERIOD - 1):]] + [live_price]
+    live_window = [x[2] for x in completed[-(BB_PERIOD - 1):]] + [live_price]
     basis = sum(live_window) / BB_PERIOD
     std = statistics.pstdev(live_window)
     upper = basis + BB_STD * std
     lower = basis - BB_STD * std
     distance_pct = (live_price / upper - 1.0) * 100.0 if upper > 0 else 0.0
 
-    completed_close = completed[-1][1]
+    completed_close = completed[-1][2]
     completed_above = False
     completed_upper = None
     if len(completed) >= BB_PERIOD:
-        completed20 = [x[1] for x in completed[-BB_PERIOD:]]
+        completed20 = [x[2] for x in completed[-BB_PERIOD:]]
         completed_basis = sum(completed20) / BB_PERIOD
         completed_std = statistics.pstdev(completed20)
         completed_upper = completed_basis + BB_STD * completed_std
         completed_above = completed_close > completed_upper
+
+    ret_1h_pct = None
+    ret_4h_pct = None
+    if granularity == "15m":
+        # Backtest momentum uses the 15m boundary price versus the boundary
+        # price 4/16 candles earlier. In live mode the freshest ticker is used
+        # as the current price and the historical candle OPEN anchors the
+        # earlier 15m boundary.
+        current_candle_ts = (
+            parsed[-1][0]
+            if has_current_row
+            else (now_ms // duration_ms) * duration_ms
+        )
+        open_by_ts = {ts: open_price for ts, open_price, _ in parsed}
+        base_1h = open_by_ts.get(current_candle_ts - 4 * duration_ms)
+        base_4h = open_by_ts.get(current_candle_ts - 16 * duration_ms)
+        if base_1h and base_1h > 0:
+            ret_1h_pct = (live_price / base_1h - 1.0) * 100.0
+        if base_4h and base_4h > 0:
+            ret_4h_pct = (live_price / base_4h - 1.0) * 100.0
 
     return {
         "close": live_price,
@@ -241,6 +322,8 @@ def bollinger_live(symbol, granularity, live_price):
         "completed_above": completed_above,
         "candle_ts": completed[-1][0],
         "rows_received": len(parsed),
+        "ret_1h_pct": ret_1h_pct,
+        "ret_4h_pct": ret_4h_pct,
     }
 
 
@@ -375,6 +458,87 @@ def stage_label(stage):
     }.get(stage, f"{stage}/7")
 
 
+
+def strategy_matches(candidate):
+    """Return Candidate-2 strategy matches in recommendation order."""
+    tf_results = candidate["tf_results"]
+    score = score_candidate(tf_results)
+    r15 = tf_results.get("15M") or {}
+    ret_1h = r15.get("ret_1h_pct")
+    ret_4h = r15.get("ret_4h_pct")
+
+    matches = []
+
+    # L1: >=6/7 + recent 1h >= +10%
+    if score["rank"] >= 6 and ret_1h is not None and ret_1h >= 10.0:
+        matches.append("L1")
+
+    # L2: >=6/7 + recent 4h >= +30%
+    if score["rank"] >= 6 and ret_4h is not None and ret_4h >= 30.0:
+        matches.append("L2")
+
+    # L3: exactly 6/7, with 4H as the only non-breakout timeframe.
+    if score["exact_count"] == 6:
+        missing = [
+            tf for tf, _ in TIMEFRAMES
+            if not tf_results.get(tf, {}).get("above")
+        ]
+        if missing == ["4H"]:
+            matches.append("L3")
+
+    # S1 improved: 7/7 extreme, but block LSK-style runaway momentum.
+    # Only short when 4h momentum is +10% to +35%.
+    if (
+        score["rank"] == 7
+        and ret_4h is not None
+        and 10.0 <= ret_4h <= 35.0
+    ):
+        matches.append("S1")
+
+    return sorted(matches, key=lambda code: STRATEGY_RULES[code]["priority"])
+
+
+def primary_strategy(candidate):
+    matches = candidate.get("strategies") or strategy_matches(candidate)
+    return matches[0] if matches else None
+
+
+def strategy_sort_key(candidate):
+    code = primary_strategy(candidate)
+    priority = STRATEGY_RULES[code]["priority"] if code else 99
+    return (
+        priority,
+        -len(candidate.get("strategies", [])),
+        -int(candidate.get("streak", 1)),
+        -int(candidate.get("stage", 0)),
+        candidate["symbol"],
+    )
+
+
+def trade_levels(candidate, strategy_code):
+    cfg = STRATEGY_RULES[strategy_code]
+    price = candidate["ticker"].get("last_price")
+    if not price:
+        return None
+
+    entry_low = price * (1.0 + cfg["entry_low_pct"] / 100.0)
+    entry_high = price * (1.0 + cfg["entry_high_pct"] / 100.0)
+
+    if cfg["direction"] == "LONG":
+        tp = price * (1.0 + cfg["tp_pct"] / 100.0)
+        sl = price * (1.0 - cfg["sl_pct"] / 100.0)
+    else:
+        tp = price * (1.0 - cfg["tp_pct"] / 100.0)
+        sl = price * (1.0 + cfg["sl_pct"] / 100.0)
+
+    return {
+        "entry_low": min(entry_low, entry_high),
+        "entry_high": max(entry_low, entry_high),
+        "tp": tp,
+        "sl": sl,
+    }
+
+
 def telegram_send(text):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("[INFO] Telegram secrets not configured; message not sent.")
@@ -404,47 +568,76 @@ def build_alert(candidate, reason):
     near_kr = [TF_KR[x] for x in score["near"]]
     far_kr = [TF_KR[x] for x in score["far"]]
 
-    # Mobile-first Telegram layout: put the symbol on the very first line,
-    # then the stage and actionable summary. Keep details below a visual divider.
     streak = int(candidate.get("streak", 1))
-    repeat_tag = f"  🔁 {streak}회 연속" if streak >= 2 else ""
+    strategy_code = primary_strategy(candidate)
+    cfg = STRATEGY_RULES[strategy_code]
+    levels = trade_levels(candidate, strategy_code)
+    matches = candidate.get("strategies", [strategy_code])
+    price = ticker.get("last_price")
+    prev_scan_price = candidate.get("previous_scan_price")
+
+    rank_emoji = {
+        1: "🥇",
+        2: "🥈",
+        3: "🥉",
+        4: "4️⃣",
+    }.get(cfg["priority"], "🎯")
 
     lines = [
-        f"🪙 {symbol}{repeat_tag}",
-        f"{stage_label(stage)}",
-        f"현재가 {fmt_price(ticker.get('last_price'))}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
-        f"사유 {reason}",
+        f"🪙 {symbol}" + (f"  🔁 {streak}회 연속" if streak >= 2 else ""),
+        f"{rank_emoji} 추천 {cfg['priority']}순위 · {cfg['direction']} · {strategy_code} {cfg['name']}",
+        f"상태 {reason}",
+        f"현재가 {fmt_price(price)}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
+    ]
+
+    if streak >= 2 and prev_scan_price and price:
+        scan_move = (price / float(prev_scan_price) - 1.0) * 100.0
+        lines.append(
+            f"지난스캔 {fmt_price(float(prev_scan_price))} → "
+            f"현재 {fmt_price(price)}  ({scan_move:+.2f}%)"
+        )
+
+    if levels:
+        lines += [
+            "────────────",
+            f"진입권장 {fmt_price(levels['entry_low'])} ~ {fmt_price(levels['entry_high'])}",
+            f"TP {fmt_price(levels['tp'])} ({cfg['tp_pct']:+.1f}%)"
+            f"  |  SL {fmt_price(levels['sl'])} (-{cfg['sl_pct']:.1f}%)",
+            f"손익비 1:{cfg['rr']:.1f}  |  BT성공률 {cfg['bt_win_rate']:.1f}% (검증 {cfg['bt_n']}회)",
+            "비중 시드 30% · 총 노출 100% 이내",
+        ]
+
+    if len(matches) > 1:
+        lines.append("동시충족 " + " + ".join(matches))
+
+    r15 = tf_results.get("15M") or {}
+    ret_1h = r15.get("ret_1h_pct")
+    ret_4h = r15.get("ret_4h_pct")
+    lines += [
         "────────────",
-        f"✅ 돌파 {len(exact_kr)}/7" + (f"  ·  {', '.join(exact_kr)}" if exact_kr else ""),
+        f"{stage_label(stage)}",
+        f"최근 1H {fmt_pct(ret_1h)}  |  최근 4H {fmt_pct(ret_4h)}",
+        f"✅ 돌파 {len(exact_kr)}/7" + (f" · {', '.join(exact_kr)}" if exact_kr else ""),
     ]
 
     if near_kr:
-        lines.append(f"🟨 근접  ·  {', '.join(near_kr)}")
+        lines.append(f"🟨 근접 · {', '.join(near_kr)}")
     if far_kr:
-        lines.append(f"❌ 미달  ·  {', '.join(far_kr)}")
+        lines.append(f"❌ 미달 · {', '.join(far_kr)}")
 
-    lines.append("────────────")
-    lines.append("BB 상단 대비")
-
+    lines.append("BB상단 대비")
     for tf, _ in TIMEFRAMES:
         r = tf_results.get(tf)
-        name = TF_KR[tf]
         if not r:
-            lines.append(f"{name}: ?")
             continue
-
         d = r.get("distance_pct")
         if r.get("above"):
-            mark = "✅ 돌파"
+            mark = "✅"
         elif d is not None and d >= -NEAR_BB_PCT:
-            mark = "🟨 근접"
+            mark = "🟨"
         else:
-            mark = "❌ 미달"
-
-        lines.append(f"{name}: {mark}  {fmt_pct(d)}")
-
-    if stage == 7:
-        lines += ["", f"7/7 포착가: {fmt_price(ticker.get('last_price'))}"]
+            mark = "❌"
+        lines.append(f"{TF_KR[tf]} {mark} {fmt_pct(d)}")
 
     return "\n".join(lines)
 
@@ -542,15 +735,33 @@ def telegram_send_batched(messages, max_chars=3800):
 
 
 def should_alert(candidate, previous):
+    """Alert only Candidate-2 actionable signals.
+
+    A fresh strategy match is an entry signal. The second consecutive scan is
+    sent once as a persistence update (not a new entry), then later repeats are
+    quiet unless stage rises or price moves materially.
+    """
+    current_codes = candidate.get("strategies", [])
+    if not current_codes:
+        return False, ""
+
     stage = candidate["stage"]
     price = candidate["ticker"].get("last_price")
 
     if previous is None:
-        return True, "신규 포착"
+        return True, "신규 진입신호"
+
+    prev_codes = set(previous.get("active_strategies", []))
+    new_codes = [code for code in current_codes if code not in prev_codes]
+    if new_codes:
+        return True, "신규 전략 " + "+".join(new_codes)
 
     prev_stage = int(previous.get("stage", 0))
     if stage > prev_stage:
         return True, f"단계 상승 {prev_stage}/7 → {stage}/7"
+
+    if int(candidate.get("streak", 1)) == 2:
+        return True, "2회 연속 확인 · 추가진입 아님"
 
     last_alert_price = previous.get("last_alert_price")
     if (
@@ -561,7 +772,7 @@ def should_alert(candidate, previous):
     ):
         signed_move = (price / float(last_alert_price) - 1.0) * 100.0
         if abs(signed_move) >= RE_ALERT_PRICE_MOVE_PCT:
-            return True, f"이전 알림가 대비 {signed_move:+.2f}%"
+            return True, f"이전 알림가 대비 {signed_move:+.2f}% · 상태갱신"
 
     return False, ""
 
@@ -708,11 +919,14 @@ def main():
             if previous is not None
             else 1
         )
+        candidate["previous_scan_price"] = (
+            previous.get("last_price") if previous else None
+        )
+        candidate["strategies"] = strategy_matches(candidate)
 
-    # Higher stage first; within the same stage, repeated appearances are surfaced first.
-    candidates.sort(
-        key=lambda x: (-x["stage"], -int(x.get("streak", 1)), x["symbol"])
-    )
+    # Actionable Candidate-2 signals first, ordered by the backtest-supported
+    # recommendation priority. Non-actionable BB candidates stay in state only.
+    candidates.sort(key=strategy_sort_key)
 
     alerts_sent = 0
     telegram_messages_sent = 0
@@ -738,6 +952,7 @@ def main():
             "streak": int(candidate.get("streak", 1)),
             "last_price": price,
             "last_alert_price": prev_alert_price,
+            "active_strategies": candidate.get("strategies", []),
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
@@ -754,9 +969,13 @@ def main():
         stage_counts = {4: 0, 5: 0, 6: 0, 7: 0}
         for candidate in candidates:
             stage_counts[candidate["stage"]] += 1
+        actionable_count = sum(
+            1 for candidate in candidates if candidate.get("strategies")
+        )
         summary = (
             "✅ BB 스캔 완료\n"
-            f"전체: {len(symbols)}종목 | 후보: {len(candidates)}종목\n"
+            f"전체: {len(symbols)}종목 | BB후보: {len(candidates)}종목 | "
+            f"후보2 신호: {actionable_count}종목\n"
             f"관찰4={stage_counts[4]} / 근접5={stage_counts[5]} / "
             f"과열6={stage_counts[6]} / 전봉7={stage_counts[7]}\n"
             f"실제 돌파 수: 주봉 {gate_stats['1W']} | 일봉 {gate_stats['1D']} | "
