@@ -1,0 +1,49 @@
+name: Bitget BB Scanner
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 1 minute after each 15-minute candle boundary (UTC minute is the same worldwide).
+    - cron: '1,16,31,46 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bitget-bb-scanner
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scan Bitget
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RE_ALERT_PRICE_MOVE_PCT: '5.0'
+        run: python scanner.py
+
+      - name: Persist scanner state
+        run: |
+          if git diff --quiet -- state.json; then
+            echo 'No state change.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add state.json
+          git commit -m 'chore: update scanner state'
+          git push
