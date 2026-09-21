@@ -2,6 +2,11 @@ name: Bitget BB Scanner
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'scanner.py'
+      - '.github/workflows/scan.yml'
+      - 'requirements.txt'
   schedule:
     # 1 minute after each 15-minute candle boundary (UTC minute is the same worldwide).
     - cron: '1,16,31,46 * * * *'
