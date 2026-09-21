@@ -6,7 +6,7 @@ import pandas as pd
 
 from precision_backtest import (
     SIGNAL_COLS, load_with_extras, candidate_rank, first_cross,
-    fetch_all_minutes, one_trade, calc_pf, STRATEGY_RULES, MIN, FEE_PCT
+    fetch_all_minutes, one_trade, calc_pf, MIN
 )
 
 POSITION_FRACTION = 0.30
