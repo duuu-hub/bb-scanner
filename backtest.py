@@ -40,11 +40,12 @@ CORE_SYMBOLS = [
     "龙虾USDT", "NILUSDT", "INITUSDT", "METISUSDT",
 ]
 
-MAX_WORKERS = int(__import__("os").getenv("BACKTEST_WORKERS", "16"))
-API_STARTS_PER_SEC = float(__import__("os").getenv("BACKTEST_API_RPS", "18"))
+MAX_WORKERS = int(__import__("os").getenv("BACKTEST_WORKERS", "8"))
+API_STARTS_PER_SEC = float(__import__("os").getenv("BACKTEST_API_RPS", "8"))
 _thread_local = threading.local()
 _rate_lock = threading.Lock()
 _last_call = 0.0
+_cooldown_until = 0.0
 
 
 def get_session():
@@ -56,17 +57,21 @@ def get_session():
     return sess
 
 
-def api_get(path, params, retries=4):
-    """Bitget public GET with a conservative global request pace."""
-    global _last_call
+def api_get(path, params, retries=8):
+    """Bitget public GET with shared pacing and 429-aware backoff."""
+    global _last_call, _cooldown_until
     url = BASE_URL + path
     last_error = None
 
     for attempt in range(retries):
         try:
-            # Share one request-start budget across worker threads. Network
-            # waits happen outside the lock, so latency is hidden by concurrency.
+            # One shared start-rate budget + one shared cooldown. If any worker
+            # hits 429, all workers briefly back off instead of stampeding.
             with _rate_lock:
+                now = time.monotonic()
+                if now < _cooldown_until:
+                    time.sleep(_cooldown_until - now)
+
                 gap = 1.0 / API_STARTS_PER_SEC
                 now = time.monotonic()
                 wait = gap - (now - _last_call)
@@ -74,7 +79,28 @@ def api_get(path, params, retries=4):
                     time.sleep(wait)
                 _last_call = time.monotonic()
 
-            r = get_session().get(url, params=params, timeout=20)
+            r = get_session().get(url, params=params, timeout=25)
+
+            if r.status_code == 429:
+                retry_after = r.headers.get("Retry-After")
+                try:
+                    retry_after_s = float(retry_after) if retry_after else 0.0
+                except ValueError:
+                    retry_after_s = 0.0
+
+                backoff = max(
+                    retry_after_s,
+                    min(30.0, 2.0 * (2 ** attempt)),
+                )
+                with _rate_lock:
+                    _cooldown_until = max(
+                        _cooldown_until,
+                        time.monotonic() + backoff,
+                    )
+                raise RuntimeError(
+                    f"429 Too Many Requests; shared backoff {backoff:.1f}s"
+                )
+
             r.raise_for_status()
             body = r.json()
             if str(body.get("code")) != "00000":
@@ -83,10 +109,14 @@ def api_get(path, params, retries=4):
                     f"path={path} params={params}"
                 )
             return body.get("data") or []
+
         except Exception as exc:
             last_error = exc
             if attempt < retries - 1:
-                time.sleep(0.8 * (attempt + 1))
+                # Non-429 transient errors get a short retry delay. For 429,
+                # the shared cooldown above is enforced before the next start.
+                if "429 Too Many Requests" not in str(exc):
+                    time.sleep(min(8.0, 1.0 * (attempt + 1)))
 
     raise RuntimeError(f"GET {path} failed: {last_error}")
 
