@@ -52,58 +52,82 @@ _last_api_start = 0.0
 RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
 NEAR_BB_PCT = float(os.getenv("NEAR_BB_PCT", "3.0"))
 
-# Candidate 2 live-paper strategy.
-# Backtest success rates are the stress-inclusive TEST30 win rates from the
-# +1 minute precision replay (LSK/TUT/LAB/ALLO included).
+# Candidate 1 live-paper strategy (six sub-strategies).
+# Success rates are stress-inclusive +1m TEST30 results with
+# LSK/TUT/LAB/ALLO included. Priority follows TRAIN70 profit factor so
+# recommendation order is not chosen from the test set.
 STRATEGY_RULES = {
     "L1": {
         "name": "모멘텀 LONG",
         "direction": "LONG",
-        "priority": 1,
+        "priority": 3,
         "tp_pct": 10.0,
         "sl_pct": 5.0,
         "rr": 2.0,
         "bt_win_rate": 53.3,
         "bt_n": 45,
-        # Observed central ~60% move from +1m to +3m in the precision replay.
-        "entry_low_pct": -1.3,
-        "entry_high_pct": 1.1,
+        "entry_low_pct": -0.82,
+        "entry_high_pct": 0.95,
     },
     "L2": {
         "name": "폭발추세 LONG",
         "direction": "LONG",
-        "priority": 2,
+        "priority": 1,
         "tp_pct": 10.0,
         "sl_pct": 2.5,
         "rr": 4.0,
         "bt_win_rate": 42.1,
         "bt_n": 19,
-        "entry_low_pct": -0.9,
-        "entry_high_pct": 1.7,
+        "entry_low_pct": -0.69,
+        "entry_high_pct": 1.81,
     },
     "L3": {
         "name": "4H 지연 LONG",
         "direction": "LONG",
-        "priority": 3,
+        "priority": 2,
         "tp_pct": 10.0,
         "sl_pct": 4.0,
         "rr": 2.5,
         "bt_win_rate": 46.7,
         "bt_n": 15,
-        "entry_low_pct": -0.4,
-        "entry_high_pct": 0.4,
+        "entry_low_pct": -0.43,
+        "entry_high_pct": 0.43,
     },
     "S1": {
-        "name": "극단반전 SHORT",
+        "name": "7/7 극단반전 SHORT",
         "direction": "SHORT",
-        "priority": 4,
+        "priority": 5,
         "tp_pct": 10.0,
         "sl_pct": 4.0,
         "rr": 2.5,
-        "bt_win_rate": 44.4,
-        "bt_n": 18,
-        "entry_low_pct": -1.1,
-        "entry_high_pct": 0.8,
+        "bt_win_rate": 36.0,
+        "bt_n": 25,
+        "entry_low_pct": -0.98,
+        "entry_high_pct": 1.05,
+    },
+    "S2": {
+        "name": "15M 지연 SHORT",
+        "direction": "SHORT",
+        "priority": 6,
+        "tp_pct": 10.0,
+        "sl_pct": 4.0,
+        "rr": 2.5,
+        "bt_win_rate": 50.0,
+        "bt_n": 34,
+        "entry_low_pct": -0.42,
+        "entry_high_pct": 0.46,
+    },
+    "S3": {
+        "name": "8회 지속 SHORT",
+        "direction": "SHORT",
+        "priority": 4,
+        "tp_pct": 10.0,
+        "sl_pct": 5.0,
+        "rr": 2.0,
+        "bt_win_rate": 47.8,
+        "bt_n": 23,
+        "entry_low_pct": -0.13,
+        "entry_high_pct": 0.35,
     },
 }
 
@@ -462,7 +486,7 @@ def stage_label(stage):
 
 
 def strategy_matches(candidate):
-    """Return Candidate-2 strategy matches in recommendation order."""
+    """Return Candidate-1 six-strategy matches in recommendation order."""
     tf_results = candidate["tf_results"]
     score = score_candidate(tf_results)
     r15 = tf_results.get("15M") or {}
@@ -471,31 +495,45 @@ def strategy_matches(candidate):
 
     matches = []
 
-    # L1: >=6/7 + recent 1h >= +10%
+    # L1: rank >= 6 and +10% or more over the latest 1h.
     if score["rank"] >= 6 and ret_1h is not None and ret_1h >= 10.0:
         matches.append("L1")
 
-    # L2: >=6/7 + recent 4h >= +30%
+    # L2: rank >= 6 and +30% or more over the latest 4h.
     if score["rank"] >= 6 and ret_4h is not None and ret_4h >= 30.0:
         matches.append("L2")
 
-    # L3: exactly 6/7, with 4H as the only non-breakout timeframe.
-    if score["exact_count"] == 6:
-        missing = [
-            tf for tf, _ in TIMEFRAMES
-            if not tf_results.get(tf, {}).get("above")
-        ]
-        if missing == ["4H"]:
-            matches.append("L3")
+    missing = [
+        tf for tf, _ in TIMEFRAMES
+        if not tf_results.get(tf, {}).get("above")
+    ]
 
-    # S1 improved: 7/7 extreme, but block LSK-style runaway momentum.
-    # Only short when 4h momentum is +10% to +35%.
+    # L3: exactly 6/7, only 4H is missing.
+    if score["exact_count"] == 6 and missing == ["4H"]:
+        matches.append("L3")
+
+    # S1: original Candidate-1 rule: 7/7 plus 4h momentum >= +10%.
+    # No +35% upper gate here; that gate belonged to Candidate 2.
     if (
         score["rank"] == 7
         and ret_4h is not None
-        and 10.0 <= ret_4h <= 35.0
+        and ret_4h >= 10.0
     ):
         matches.append("S1")
+
+    # S2: exactly 6/7, only 15M missing, and within 1% of its upper BB.
+    d15 = r15.get("distance_pct")
+    if (
+        score["exact_count"] == 6
+        and missing == ["15M"]
+        and d15 is not None
+        and d15 >= -1.0
+    ):
+        matches.append("S2")
+
+    # S3: Candidate has persisted for exactly 8 consecutive scans.
+    if score["rank"] >= 4 and int(candidate.get("streak", 0)) == 8:
+        matches.append("S3")
 
     return sorted(matches, key=lambda code: STRATEGY_RULES[code]["priority"])
 
@@ -541,15 +579,11 @@ def trade_levels(candidate, strategy_code):
     }
 
 
-def append_paper_signal(candidate, reason):
-    """Persist only actual NEW paper entries; repeat/status alerts are not new trades."""
-    strategy_code = primary_strategy(candidate)
+def append_paper_signal(candidate, reason, strategy_code):
+    """Persist actual NEW Candidate-1 paper entries only."""
     if not strategy_code:
         return False
-    if not (
-        reason.startswith("신규")
-        or reason.startswith("추천전환")
-    ):
+    if not reason.startswith("신규"):
         return False
 
     cfg = STRATEGY_RULES[strategy_code]
@@ -610,7 +644,7 @@ def telegram_send(text):
     return True
 
 
-def build_alert(candidate, reason):
+def build_alert(candidate, reason, strategy_code=None):
     symbol = candidate["symbol"]
     stage = candidate["stage"]
     tf_results = candidate["tf_results"]
@@ -622,7 +656,7 @@ def build_alert(candidate, reason):
     far_kr = [TF_KR[x] for x in score["far"]]
 
     streak = int(candidate.get("streak", 1))
-    strategy_code = primary_strategy(candidate)
+    strategy_code = strategy_code or primary_strategy(candidate)
     cfg = STRATEGY_RULES[strategy_code]
     levels = trade_levels(candidate, strategy_code)
     matches = candidate.get("strategies", [strategy_code])
@@ -634,6 +668,8 @@ def build_alert(candidate, reason):
         2: "🥈",
         3: "🥉",
         4: "4️⃣",
+        5: "5️⃣",
+        6: "6️⃣",
     }.get(cfg["priority"], "🎯")
 
     lines = [
@@ -657,24 +693,24 @@ def build_alert(candidate, reason):
             f"TP {fmt_price(levels['tp'])} ({cfg['tp_pct']:+.1f}%)"
             f"  |  SL {fmt_price(levels['sl'])} (-{cfg['sl_pct']:.1f}%)",
             f"손익비 1:{cfg['rr']:.1f}  |  BT성공률 {cfg['bt_win_rate']:.1f}% (검증 {cfg['bt_n']}회)",
-            "비중 시드 30% · 총 노출 100% 이내",
+            "기준 비중 시드 30%",
         ]
 
     same_direction = [
         code for code in matches
-        if STRATEGY_RULES[code]["direction"] == cfg["direction"]
+        if code != strategy_code
+        and STRATEGY_RULES[code]["direction"] == cfg["direction"]
     ]
     opposite_direction = [
         code for code in matches
         if STRATEGY_RULES[code]["direction"] != cfg["direction"]
     ]
-    if len(same_direction) > 1:
-        lines.append("동방향 동시충족 " + " + ".join(same_direction))
+    if same_direction:
+        lines.append("동방향 동시신호 " + " + ".join(same_direction))
     if opposite_direction:
         lines.append(
-            "반대조건 억제 "
-            + " + ".join(opposite_direction)
-            + f" · 상위 {strategy_code} 우선"
+            "⚠️ 반대방향 동시신호 " + " + ".join(opposite_direction)
+            + " · 후보1은 별도 신호로 유지"
         )
 
     r15 = tf_results.get("15M") or {}
@@ -801,39 +837,38 @@ def telegram_send_batched(messages, max_chars=3800):
     return sent
 
 
-def should_alert(candidate, previous):
-    """Alert only Candidate-2 actionable signals.
+def alert_events(candidate, previous):
+    """Return Candidate-1 Telegram events.
 
-    A fresh strategy match is an entry signal. The second consecutive scan is
-    sent once as a persistence update (not a new entry), then later repeats are
-    quiet unless stage rises or price moves materially.
+    Every newly-active sub-strategy is emitted separately, matching the
+    six-strategy backtest where duplicate/opposite-direction signals can coexist.
+    Status-only repeats emit one update for the current primary strategy.
     """
     current_codes = candidate.get("strategies", [])
     if not current_codes:
-        return False, ""
+        return []
 
     stage = candidate["stage"]
     price = candidate["ticker"].get("last_price")
 
     if previous is None:
-        return True, "신규 진입신호"
-
-    current_primary = primary_strategy(candidate)
-    prev_primary = previous.get("primary_strategy")
-    if prev_primary and current_primary and current_primary != prev_primary:
-        return True, f"추천전환 {prev_primary} → {current_primary}"
+        return [(code, "신규 진입신호") for code in current_codes]
 
     prev_codes = set(previous.get("active_strategies", []))
     new_codes = [code for code in current_codes if code not in prev_codes]
     if new_codes:
-        return True, "신규 전략 " + "+".join(new_codes)
+        return [(code, f"신규 전략 {code}") for code in new_codes]
+
+    primary = primary_strategy(candidate)
+    if not primary:
+        return []
 
     prev_stage = int(previous.get("stage", 0))
     if stage > prev_stage:
-        return True, f"단계 상승 {prev_stage}/7 → {stage}/7"
+        return [(primary, f"단계 상승 {prev_stage}/7 → {stage}/7")]
 
     if int(candidate.get("streak", 1)) == 2:
-        return True, "2회 연속 확인 · 추가진입 아님"
+        return [(primary, "2회 연속 확인 · 추가진입 아님")]
 
     last_alert_price = previous.get("last_alert_price")
     if (
@@ -844,12 +879,55 @@ def should_alert(candidate, previous):
     ):
         signed_move = (price / float(last_alert_price) - 1.0) * 100.0
         if abs(signed_move) >= RE_ALERT_PRICE_MOVE_PCT:
-            return True, f"이전 알림가 대비 {signed_move:+.2f}% · 상태갱신"
+            return [
+                (
+                    primary,
+                    f"이전 알림가 대비 {signed_move:+.2f}% · 상태갱신",
+                )
+            ]
 
-    return False, ""
+    return []
+
+
+def wait_for_quarter_boundary():
+    """Scheduled runs wake ~10m early and align the scan to :00/:15/:30/:45.
+
+    When GitHub starts the job up to 4m after the intended boundary, scan
+    immediately. If it starts in the pre-boundary phase (:05..:14 modulo 15),
+    keep the runner alive and wait for the next exact quarter-hour.
+    """
+    if os.getenv("GITHUB_EVENT_NAME", "") != "schedule":
+        return
+
+    now = datetime.now(timezone.utc)
+    phase_min = now.minute % 15
+
+    # :00..:04 means the early trigger was delayed across the intended
+    # boundary; scanning now is better than waiting another 15 minutes.
+    if phase_min < 5:
+        print(
+            f"[SCHEDULE] boundary already passed by "
+            f"{phase_min:02d}:{now.second:02d}; scanning immediately"
+        )
+        return
+
+    seconds_into_phase = phase_min * 60 + now.second + now.microsecond / 1_000_000
+    wait_sec = 15 * 60 - seconds_into_phase
+    if wait_sec <= 0:
+        return
+
+    target_epoch = time.time() + wait_sec
+    target = datetime.fromtimestamp(target_epoch, tz=timezone.utc)
+    print(
+        f"[SCHEDULE] early wake at {now.isoformat()} -> "
+        f"waiting {wait_sec:.1f}s for {target.strftime('%H:%M:%S')} UTC"
+    )
+    time.sleep(wait_sec)
+    print(f"[SCHEDULE] quarter boundary reached: {datetime.now(timezone.utc).isoformat()}")
 
 
 def main():
+    wait_for_quarter_boundary()
     state = load_state()
     previous_symbols = state.get("symbols", {})
     new_symbols_state = {}
@@ -996,8 +1074,8 @@ def main():
         )
         candidate["strategies"] = strategy_matches(candidate)
 
-    # Actionable Candidate-2 signals first, ordered by the backtest-supported
-    # recommendation priority. Non-actionable BB candidates stay in state only.
+    # Actionable Candidate-1 signals first, ordered by TRAIN70-PF priority.
+    # Non-actionable BB candidates stay in state only.
     candidates.sort(key=strategy_sort_key)
 
     alerts_sent = 0
@@ -1007,21 +1085,22 @@ def main():
     for candidate in candidates:
         symbol = candidate["symbol"]
         previous = previous_symbols.get(symbol)
-        alert, reason = should_alert(candidate, previous)
+        events = alert_events(candidate, previous)
 
         price = candidate["ticker"].get("last_price")
         prev_alert_price = previous.get("last_alert_price") if previous else None
 
-        if alert:
-            message = build_alert(candidate, reason)
+        for strategy_code, reason in events:
+            message = build_alert(candidate, reason, strategy_code)
             print("\n" + message + "\n")
             pending_alerts.append(message)
             try:
-                append_paper_signal(candidate, reason)
+                append_paper_signal(candidate, reason, strategy_code)
             except Exception as exc:
-                print(f"[WARN] paper log {symbol}: {exc}")
-            if price:
-                prev_alert_price = price
+                print(f"[WARN] paper log {symbol}/{strategy_code}: {exc}")
+
+        if events and price:
+            prev_alert_price = price
 
         new_symbols_state[symbol] = {
             "stage": candidate["stage"],
@@ -1052,7 +1131,7 @@ def main():
         summary = (
             "✅ BB 스캔 완료\n"
             f"전체: {len(symbols)}종목 | BB후보: {len(candidates)}종목 | "
-            f"후보2 신호: {actionable_count}종목\n"
+            f"후보1 신호: {actionable_count}종목\n"
             f"관찰4={stage_counts[4]} / 근접5={stage_counts[5]} / "
             f"과열6={stage_counts[6]} / 전봉7={stage_counts[7]}\n"
             f"실제 돌파 수: 주봉 {gate_stats['1W']} | 일봉 {gate_stats['1D']} | "
