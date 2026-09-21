@@ -404,20 +404,24 @@ def build_alert(candidate, reason):
     near_kr = [TF_KR[x] for x in score["near"]]
     far_kr = [TF_KR[x] for x in score["far"]]
 
+    # Mobile-first Telegram layout: put the symbol on the very first line,
+    # then the stage and actionable summary. Keep details below a visual divider.
     lines = [
-        f"{stage_label(stage)} | {symbol}",
-        f"사유: {reason}",
-        f"현재가: {fmt_price(ticker.get('last_price'))} | 24시간: {fmt_pct(ticker.get('change24h_pct'))}",
-        f"돌파: {len(exact_kr)}개" + (f" ({', '.join(exact_kr)})" if exact_kr else ""),
+        f"🪙 {symbol}",
+        f"{stage_label(stage)}",
+        f"현재가 {fmt_price(ticker.get('last_price'))}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
+        f"사유 {reason}",
+        "────────────",
+        f"✅ 돌파 {len(exact_kr)}/7" + (f"  ·  {', '.join(exact_kr)}" if exact_kr else ""),
     ]
 
     if near_kr:
-        lines.append(f"근접(-{NEAR_BB_PCT:.0f}% 이내): {', '.join(near_kr)}")
+        lines.append(f"🟨 근접  ·  {', '.join(near_kr)}")
     if far_kr:
-        lines.append(f"미달: {', '.join(far_kr)}")
+        lines.append(f"❌ 미달  ·  {', '.join(far_kr)}")
 
-    lines.append("")
-    lines.append("상단밴드 대비:")
+    lines.append("────────────")
+    lines.append("BB 상단 대비")
 
     for tf, _ in TIMEFRAMES:
         r = tf_results.get(tf)
