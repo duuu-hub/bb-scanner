@@ -37,6 +37,7 @@ MAX_WORKERS = int(os.getenv("MAX_WORKERS", "24"))
 _rate_lock = threading.Lock()
 _last_api_start = 0.0
 RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
+NEAR_BB_PCT = float(os.getenv("NEAR_BB_PCT", "3.0"))
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
@@ -283,17 +284,57 @@ def get_ticker(symbol):
         return {"last_price": None, "mark_price": None, "change24h_pct": None}
 
 
-def determine_stage(tf_results):
-    if not all(tf_results.get(tf, {}).get("above") for tf in GATE_TFS):
-        return 0
-    if not tf_results.get("1H", {}).get("above"):
-        return 4
-    if not tf_results.get("30M", {}).get("above"):
-        return 5
-    if not tf_results.get("15M", {}).get("above"):
-        return 6
-    return 7
+def score_candidate(tf_results):
+    """Flexible 7-TF heat score.
 
+    Exact pass = live price above the current upper BB.
+    Near miss = live price below upper BB but within NEAR_BB_PCT.
+    """
+    exact = []
+    near = []
+    far = []
+    for tf, _ in TIMEFRAMES:
+        r = tf_results.get(tf)
+        if not r:
+            far.append(tf)
+            continue
+        if r.get("above"):
+            exact.append(tf)
+        elif r.get("distance_pct") is not None and r["distance_pct"] >= -NEAR_BB_PCT:
+            near.append(tf)
+        else:
+            far.append(tf)
+
+    exact_count = len(exact)
+
+    if exact_count == 7:
+        label = "EXTREME 7/7"
+        rank = 7
+    elif exact_count == 6:
+        label = "HOT 6/7"
+        rank = 6
+    elif exact_count == 5 and len(far) == 0:
+        label = "NEAR-HEAT 5/7"
+        rank = 5
+    elif exact_count == 4 and len(far) == 0:
+        label = "WATCH 4/7"
+        rank = 4
+    else:
+        label = "IGNORE"
+        rank = 0
+
+    return {
+        "rank": rank,
+        "label": label,
+        "exact": exact,
+        "near": near,
+        "far": far,
+        "exact_count": exact_count,
+    }
+
+
+def determine_stage(tf_results):
+    return score_candidate(tf_results)["rank"]
 
 def next_unmet_tf(stage):
     return {4: "1H", 5: "30M", 6: "15M"}.get(stage)
@@ -316,14 +357,12 @@ def fmt_price(value):
 
 
 def stage_label(stage):
-    if stage == 7:
-        return "🚨 EXTREME 7/7"
     return {
-        4: "🟡 PRE-HEAT 4/7",
-        5: "🟠 PRE-HEAT 5/7",
-        6: "🔥 PRE-HEAT 6/7",
+        7: "🚨 EXTREME 7/7",
+        6: "🔥 HOT 6/7",
+        5: "🟠 NEAR-HEAT 5/7",
+        4: "🟡 WATCH 4/7",
     }.get(stage, f"{stage}/7")
-
 
 def telegram_send(text):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -348,9 +387,12 @@ def build_alert(candidate, reason):
     stage = candidate["stage"]
     tf_results = candidate["tf_results"]
     ticker = candidate["ticker"]
+    score = score_candidate(tf_results)
     lines = [
         f"{stage_label(stage)} — {symbol}",
         f"Reason: {reason}",
+        f"Heat score: {score['exact_count']}/7 exact",
+        f"Near misses (within {NEAR_BB_PCT:.1f}%): {', '.join(score['near']) if score['near'] else '-'}",
         f"Live: {fmt_price(ticker.get('last_price'))}",
         f"24H: {fmt_pct(ticker.get('change24h_pct'))}",
         "",
@@ -493,39 +535,20 @@ def main():
     errors = 0
     tf_store = {}
 
-    # Fast pipeline: cheap single-request TFs first. Weekly is the expensive
-    # two-chunk fetch, so only symbols surviving 1D/12H/4H reach it.
-    pipeline = [
+    # Flexible scan: cheap TFs first, but do NOT require hierarchical passes.
+    # We keep symbols that still have a realistic path to >=4/7 heat.
+    cheap_pipeline = [
         ("1D", "1D"),
         ("12H", "12H"),
         ("4H", "4H"),
-        ("1W", "1W"),
+        ("1H", "1H"),
+        ("30M", "30m"),
+        ("15M", "15m"),
     ]
 
-    survivors = [s for s in symbols if s in ticker_map]
-    pipeline_counts = []
-    for tf, granularity in pipeline:
-        started = time.monotonic()
-        survivors = filter_stage(
-            survivors, tf, granularity, ticker_map, tf_store
-        )
-        elapsed = time.monotonic() - started
-        pipeline_counts.append((tf, len(survivors)))
-        print(
-            f"[INFO] gate {tf}: {len(survivors)} passed "
-            f"({elapsed:.1f}s)"
-        )
-        if not survivors:
-            break
+    survivors = [sym for sym in symbols if sym in ticker_map]
 
-    # Only the small 4/7 survivor set needs the lower timeframes.
-    lower_pipeline = [("1H", "1H"), ("30M", "30m"), ("15M", "15m")]
-    active = list(survivors)
-    for tf, granularity in lower_pipeline:
-        if not active:
-            break
-        # Evaluate this TF for ALL 4/7 survivors so stage can be determined
-        # hierarchically without scanning the whole market.
+    for idx, (tf, granularity) in enumerate(cheap_pipeline, start=1):
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
             futures = [
                 pool.submit(
@@ -536,32 +559,77 @@ def main():
                     ticker_map[symbol],
                 )
                 for symbol in survivors
-                if symbol in ticker_map
             ]
             for future in as_completed(futures):
                 symbol, _, result = future.result()
                 if result is not None:
                     tf_store.setdefault(symbol, {})[tf] = result
 
+        # Prune only symbols that can no longer reach a useful heat state
+        # even after adding the unscanned TFs (including 1W).
+        remaining_after_this = len(cheap_pipeline) - idx + 1  # +1 for weekly
+        kept = []
+        for symbol in survivors:
+            results = tf_store.get(symbol, {})
+            exact_now = sum(
+                1 for r in results.values() if r and r.get("above")
+            )
+            near_now = sum(
+                1 for r in results.values()
+                if r and (not r.get("above"))
+                and r.get("distance_pct") is not None
+                and r["distance_pct"] >= -NEAR_BB_PCT
+            )
+            max_exact_possible = exact_now + remaining_after_this
+
+            # Keep if 4 exact is still possible, OR if a 5/7 near-heat
+            # configuration is still possible with current near misses.
+            if max_exact_possible >= 4:
+                kept.append(symbol)
+            elif exact_now + near_now + remaining_after_this >= 5:
+                kept.append(symbol)
+        survivors = kept
+        print(f"[INFO] flex gate {tf}: {len(survivors)} remain")
+
+        if not survivors:
+            break
+
+    # Weekly is expensive: only query the symbols that survived the cheap scan.
+    if survivors:
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = [
+                pool.submit(
+                    fetch_tf_for_symbol,
+                    symbol,
+                    "1W",
+                    "1W",
+                    ticker_map[symbol],
+                )
+                for symbol in survivors
+            ]
+            for future in as_completed(futures):
+                symbol, _, result = future.result()
+                if result is not None:
+                    tf_store.setdefault(symbol, {})["1W"] = result
+
     for symbol in survivors:
         results = tf_store.get(symbol, {})
-        # Missing lower TF data means skip rather than emit a bad stage.
         if not all(tf in results for tf, _ in TIMEFRAMES):
             continue
-        candidate = build_candidate(symbol, results, ticker_map[symbol])
-        if candidate["stage"] >= 4:
+        score = score_candidate(results)
+        if score["rank"] >= 4:
+            candidate = {
+                "symbol": symbol,
+                "stage": score["rank"],
+                "tf_results": results,
+                "ticker": ticker_map[symbol],
+            }
             candidates.append(candidate)
 
     gate_stats = {tf: 0 for tf, _ in TIMEFRAMES}
-    # These are pipeline counts, not standalone-market counts.
-    count_map = dict(pipeline_counts)
-    gate_stats["1D"] = count_map.get("1D", 0)
-    gate_stats["12H"] = count_map.get("12H", 0)
-    gate_stats["4H"] = count_map.get("4H", 0)
-    gate_stats["1W"] = count_map.get("1W", 0)
-    for c in candidates:
-        for tf in LOWER_TFS:
-            if c["tf_results"].get(tf, {}).get("above"):
+    for symbol, results in tf_store.items():
+        for tf, _ in TIMEFRAMES:
+            if results.get(tf, {}).get("above"):
                 gate_stats[tf] += 1
 
     candidates.sort(key=lambda x: (-x["stage"], x["symbol"]))
@@ -602,10 +670,11 @@ def main():
             "✅ Bitget BB scanner manual run complete\n"
             f"Scanned: {len(symbols)} symbols\n"
             f"Candidates: {len(candidates)} "
-            f"(4/7={stage_counts[4]}, 5/7={stage_counts[5]}, "
-            f"6/7={stage_counts[6]}, 7/7={stage_counts[7]})\n"
-            f"Gate pipeline: 1D={gate_stats['1D']} → 12H={gate_stats['12H']} "
-            f"→ 4H={gate_stats['4H']} → 1W={gate_stats['1W']}\n"
+            f"(WATCH4={stage_counts[4]}, NEAR5={stage_counts[5]}, "
+            f"HOT6={stage_counts[6]}, EXTREME7={stage_counts[7]})\n"
+            f"Exact BB breaks: 1W={gate_stats['1W']}, 1D={gate_stats['1D']}, "
+            f"12H={gate_stats['12H']}, 4H={gate_stats['4H']}, "
+            f"1H={gate_stats['1H']}, 30M={gate_stats['30M']}, 15M={gate_stats['15M']}\n"
             f"API symbol errors: {errors}"
         )
         print(summary)
