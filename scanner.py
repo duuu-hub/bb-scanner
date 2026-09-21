@@ -93,18 +93,18 @@ def get_symbols():
 
 
 def bollinger_live(symbol, granularity, live_price):
-    """Build the current BB from 19 completed closes + the live mark price.
+    """Calculate BB(20,2) for the CURRENT market candle.
 
-    This matches the intended live scanner much better than requiring the
-    previous completed candle itself to have closed above the band.
+    We use normal market/trade-price candles so the result tracks the Bitget
+    chart. The live ticker price is used as the current candle close.
     """
     rows = api_get(
-        "/api/v2/mix/market/history-mark-candles",
+        "/api/v2/mix/market/candles",
         {
             "symbol": symbol,
             "productType": PRODUCT_TYPE,
             "granularity": granularity,
-            "limit": 40,
+            "limit": 30,
         },
     ) or []
 
@@ -130,28 +130,38 @@ def bollinger_live(symbol, granularity, live_price):
             continue
 
     parsed.sort(key=lambda x: x[0])
-
-    # If the endpoint includes an in-progress candle, exclude it.
-    completed = [(ts, close) for ts, close in parsed if ts + duration_ms <= now_ms]
-    if len(completed) < BB_PERIOD:
+    if not parsed:
         return None
 
-    completed20 = [x[1] for x in completed[-BB_PERIOD:]]
-    completed_close = completed20[-1]
-    completed_basis = sum(completed20) / BB_PERIOD
-    completed_std = statistics.pstdev(completed20)
-    completed_upper = completed_basis + BB_STD * completed_std
-    completed_above = completed_close > completed_upper
+    # The regular candles endpoint normally includes the in-progress candle.
+    # Detect and remove it from the completed history before rebuilding the
+    # current BB with the freshest ticker price.
+    has_current_row = parsed[-1][0] + duration_ms > now_ms
+    completed = parsed[:-1] if has_current_row else parsed
+
+    if len(completed) < BB_PERIOD - 1:
+        return None
 
     if live_price is None or not math.isfinite(live_price) or live_price <= 0:
         return None
 
+    # Current BB = previous 19 completed closes + current live trade price.
     live_window = [x[1] for x in completed[-(BB_PERIOD - 1):]] + [live_price]
     basis = sum(live_window) / BB_PERIOD
     std = statistics.pstdev(live_window)
     upper = basis + BB_STD * std
     lower = basis - BB_STD * std
     distance_pct = (live_price / upper - 1.0) * 100.0 if upper > 0 else 0.0
+
+    completed_close = completed[-1][1]
+    completed_above = False
+    completed_upper = None
+    if len(completed) >= BB_PERIOD:
+        completed20 = [x[1] for x in completed[-BB_PERIOD:]]
+        completed_basis = sum(completed20) / BB_PERIOD
+        completed_std = statistics.pstdev(completed20)
+        completed_upper = completed_basis + BB_STD * completed_std
+        completed_above = completed_close > completed_upper
 
     return {
         "close": live_price,
@@ -164,6 +174,7 @@ def bollinger_live(symbol, granularity, live_price):
         "completed_upper": completed_upper,
         "completed_above": completed_above,
         "candle_ts": completed[-1][0],
+        "rows_received": len(parsed),
     }
 
 def get_ticker(symbol):
@@ -263,7 +274,7 @@ def build_alert(candidate, reason):
         f"Live: {fmt_price(ticker.get('last_price'))}",
         f"24H: {fmt_pct(ticker.get('change24h_pct'))}",
         "",
-        "BB(20,2) CURRENT bars (19 closed + live mark):",
+        "BB(20,2) CURRENT bars (19 closed + live trade price):",
     ]
     for tf, _ in TIMEFRAMES:
         r = tf_results.get(tf)
@@ -295,7 +306,7 @@ def build_alert(candidate, reason):
 def scan_symbol(symbol, gate_stats):
     tf_results = {}
     ticker = get_ticker(symbol)
-    live_price = ticker.get("mark_price") or ticker.get("last_price")
+    live_price = ticker.get("last_price") or ticker.get("mark_price")
     if not live_price:
         return None
 
