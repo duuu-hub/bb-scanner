@@ -34,7 +34,7 @@ RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
-MANUAL_RUN = os.getenv("GITHUB_EVENT_NAME", "") == "workflow_dispatch"
+MANUAL_RUN = os.getenv("GITHUB_EVENT_NAME", "") in ("workflow_dispatch", "push")
 
 session = requests.Session()
 session.headers.update({"User-Agent": "bb-scanner/1.0"})
