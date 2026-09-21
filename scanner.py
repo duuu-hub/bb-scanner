@@ -13,6 +13,7 @@ PRODUCT_TYPE = "usdt-futures"
 BB_PERIOD = 20
 BB_STD = 2.0
 STATE_PATH = Path("state.json")
+DEBUG_SYMBOLS = {"龙虾USDT"}
 
 # Upper timeframes first. We stop early until the 4h gate is reached.
 TIMEFRAMES = [
@@ -338,6 +339,27 @@ def scan_symbol(symbol, gate_stats):
         "ticker": ticker,
     }
 
+def debug_symbol(symbol):
+    """Print full BB diagnostics for a known visual-reference symbol."""
+    ticker = get_ticker(symbol)
+    live_price = ticker.get("last_price") or ticker.get("mark_price")
+    print(f"[DEBUG] {symbol} live={live_price}")
+    for tf, granularity in TIMEFRAMES:
+        try:
+            r = bollinger_live(symbol, granularity, live_price)
+            if not r:
+                print(f"[DEBUG] {symbol} {tf}: NO_DATA")
+                continue
+            print(
+                f"[DEBUG] {symbol} {tf}: "
+                f"price={r['close']} upper={r['upper']} "
+                f"dist={r['distance_pct']:+.3f}% above={r['above']} "
+                f"rows={r.get('rows_received')}"
+            )
+        except Exception as exc:
+            print(f"[DEBUG] {symbol} {tf}: ERROR {exc}")
+
+
 def should_alert(candidate, previous):
     stage = candidate["stage"]
     price = candidate["ticker"].get("last_price")
@@ -370,6 +392,12 @@ def main():
 
     symbols = get_symbols()
     print(f"[INFO] scanning {len(symbols)} active USDT perpetual symbols")
+
+    for debug_symbol_name in DEBUG_SYMBOLS:
+        if debug_symbol_name in symbols:
+            debug_symbol(debug_symbol_name)
+        else:
+            print(f"[DEBUG] {debug_symbol_name}: NOT FOUND in contract list")
 
     candidates = []
     errors = 0
