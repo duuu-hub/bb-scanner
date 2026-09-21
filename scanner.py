@@ -1,3 +1,4 @@
+import csv
 import json
 import math
 import os
@@ -15,6 +16,7 @@ PRODUCT_TYPE = "usdt-futures"
 BB_PERIOD = 20
 BB_STD = 2.0
 STATE_PATH = Path("state.json")
+PAPER_LOG_PATH = Path("paper_signals.csv")
 DEBUG_SYMBOLS = {
     x.strip() for x in os.getenv("DEBUG_SYMBOLS", "").split(",") if x.strip()
 }
@@ -539,6 +541,57 @@ def trade_levels(candidate, strategy_code):
     }
 
 
+def append_paper_signal(candidate, reason):
+    """Persist only actual NEW paper entries; repeat/status alerts are not new trades."""
+    strategy_code = primary_strategy(candidate)
+    if not strategy_code:
+        return False
+    if not (
+        reason.startswith("신규")
+        or reason.startswith("추천전환")
+    ):
+        return False
+
+    cfg = STRATEGY_RULES[strategy_code]
+    levels = trade_levels(candidate, strategy_code)
+    price = candidate["ticker"].get("last_price")
+    r15 = candidate["tf_results"].get("15M") or {}
+    score = score_candidate(candidate["tf_results"])
+
+    row = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "symbol": candidate["symbol"],
+        "strategy": strategy_code,
+        "direction": cfg["direction"],
+        "reason": reason,
+        "streak": int(candidate.get("streak", 1)),
+        "stage": int(candidate.get("stage", 0)),
+        "exact_count": int(score["exact_count"]),
+        "entry_price": price,
+        "entry_low": levels["entry_low"] if levels else None,
+        "entry_high": levels["entry_high"] if levels else None,
+        "tp_price": levels["tp"] if levels else None,
+        "sl_price": levels["sl"] if levels else None,
+        "tp_pct": cfg["tp_pct"],
+        "sl_pct": cfg["sl_pct"],
+        "rr": cfg["rr"],
+        "bt_win_rate": cfg["bt_win_rate"],
+        "bt_n": cfg["bt_n"],
+        "ret_1h_pct": r15.get("ret_1h_pct"),
+        "ret_4h_pct": r15.get("ret_4h_pct"),
+        "all_matches": "+".join(candidate.get("strategies", [])),
+    }
+
+    fieldnames = list(row.keys())
+    write_header = not PAPER_LOG_PATH.exists()
+    with PAPER_LOG_PATH.open("a", encoding="utf-8", newline="") as fp:
+        writer = csv.DictWriter(fp, fieldnames=fieldnames)
+        if write_header:
+            writer.writeheader()
+        writer.writerow(row)
+    return True
+
+
 def telegram_send(text):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("[INFO] Telegram secrets not configured; message not sent.")
@@ -607,8 +660,22 @@ def build_alert(candidate, reason):
             "비중 시드 30% · 총 노출 100% 이내",
         ]
 
-    if len(matches) > 1:
-        lines.append("동시충족 " + " + ".join(matches))
+    same_direction = [
+        code for code in matches
+        if STRATEGY_RULES[code]["direction"] == cfg["direction"]
+    ]
+    opposite_direction = [
+        code for code in matches
+        if STRATEGY_RULES[code]["direction"] != cfg["direction"]
+    ]
+    if len(same_direction) > 1:
+        lines.append("동방향 동시충족 " + " + ".join(same_direction))
+    if opposite_direction:
+        lines.append(
+            "반대조건 억제 "
+            + " + ".join(opposite_direction)
+            + f" · 상위 {strategy_code} 우선"
+        )
 
     r15 = tf_results.get("15M") or {}
     ret_1h = r15.get("ret_1h_pct")
@@ -750,6 +817,11 @@ def should_alert(candidate, previous):
 
     if previous is None:
         return True, "신규 진입신호"
+
+    current_primary = primary_strategy(candidate)
+    prev_primary = previous.get("primary_strategy")
+    if prev_primary and current_primary and current_primary != prev_primary:
+        return True, f"추천전환 {prev_primary} → {current_primary}"
 
     prev_codes = set(previous.get("active_strategies", []))
     new_codes = [code for code in current_codes if code not in prev_codes]
@@ -944,6 +1016,10 @@ def main():
             message = build_alert(candidate, reason)
             print("\n" + message + "\n")
             pending_alerts.append(message)
+            try:
+                append_paper_signal(candidate, reason)
+            except Exception as exc:
+                print(f"[WARN] paper log {symbol}: {exc}")
             if price:
                 prev_alert_price = price
 
@@ -953,6 +1029,7 @@ def main():
             "last_price": price,
             "last_alert_price": prev_alert_price,
             "active_strategies": candidate.get("strategies", []),
+            "primary_strategy": primary_strategy(candidate),
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
