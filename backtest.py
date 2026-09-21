@@ -1,5 +1,7 @@
 import argparse
+import hashlib
 import math
+import re
 import time
 from pathlib import Path
 
@@ -29,6 +31,12 @@ HORIZONS = {
     "24h": 96,
 }
 NEAR_THRESHOLDS = [1.0, 3.0, 5.0, 7.0, 10.0]
+
+CORE_SYMBOLS = [
+    "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT",
+    "BNBUSDT", "SUIUSDT", "PEPEUSDT", "WIFUSDT",
+    "龙虾USDT", "NILUSDT", "INITUSDT", "METISUSDT",
+]
 
 session = requests.Session()
 session.headers.update({"User-Agent": "bb-scanner-backtest/2.0"})
@@ -66,6 +74,58 @@ def api_get(path, params, retries=4):
 
     raise RuntimeError(f"GET {path} failed: {last_error}")
 
+
+
+def get_active_symbols():
+    data = api_get(
+        "/api/v2/mix/market/contracts",
+        {"productType": PRODUCT_TYPE},
+    )
+    symbols = []
+    for item in data:
+        if item.get("symbolType") != "perpetual":
+            continue
+        if item.get("symbolStatus") != "normal":
+            continue
+        if str(item.get("quoteCoin", "")).upper() != "USDT":
+            continue
+        symbol = item.get("symbol")
+        if symbol:
+            symbols.append(symbol)
+    return sorted(set(symbols))
+
+
+def resolve_symbols(raw):
+    raw = raw.strip()
+    m = re.fullmatch(r"AUTO(\d+)", raw.upper())
+    if not m:
+        return [x.strip() for x in raw.split(",") if x.strip()]
+
+    target = max(1, int(m.group(1)))
+    active = get_active_symbols()
+    active_set = set(active)
+
+    chosen = [s for s in CORE_SYMBOLS if s in active_set]
+    chosen_set = set(chosen)
+
+    # Deterministic broad sample across the currently active universe.
+    # The fixed hash seed makes AUTO50 reproducible while avoiding alphabetical
+    # or manually cherry-picked selection of only famous coins.
+    others = [s for s in active if s not in chosen_set]
+    others.sort(
+        key=lambda x: hashlib.sha256(
+            ("bb-research-v1|" + x).encode("utf-8")
+        ).hexdigest()
+    )
+
+    chosen.extend(others[:max(0, target - len(chosen))])
+    chosen = chosen[:target]
+
+    print(
+        f"[AUTO] selected {len(chosen)} of {len(active)} active USDT perpetuals"
+    )
+    print("[AUTO] symbols=" + ",".join(chosen))
+    return chosen
 
 def fetch_history_page(symbol, granularity, start_ms, end_ms):
     """Fetch one page from Bitget's *historical* market-candle endpoint.
@@ -546,17 +606,17 @@ def parse_args():
     )
     p.add_argument(
         "--symbols",
-        default="龙虾USDT,NILUSDT,INITUSDT,METISUSDT",
-        help="comma-separated Bitget symbols",
+        default="AUTO50",
+        help="comma-separated Bitget symbols, or AUTO30/AUTO50/AUTO100",
     )
-    p.add_argument("--days", type=int, default=60, help="test-window days")
+    p.add_argument("--days", type=int, default=120, help="test-window days")
     p.add_argument("--outdir", default="backtest_results")
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-    symbols = [x.strip() for x in args.symbols.split(",") if x.strip()]
+    symbols = resolve_symbols(args.symbols)
     if not symbols:
         raise SystemExit("No symbols supplied.")
     if args.days < 7:
