@@ -509,6 +509,35 @@ def debug_symbol(symbol, ticker):
             print(f"[DEBUG] {symbol} {tf}: ERROR {exc}")
 
 
+
+def telegram_send_batched(messages, max_chars=3800):
+    """Send scan alerts in as few Telegram notifications as possible."""
+    if not messages:
+        return 0
+
+    header = f"📡 BB 알림 {len(messages)}건"
+    chunks = []
+    current = header
+
+    for message in messages:
+        block = "\n\n" + message
+        if len(current) + len(block) <= max_chars:
+            current += block
+            continue
+
+        chunks.append(current)
+        current = header + block
+
+    if current:
+        chunks.append(current)
+
+    sent = 0
+    for chunk in chunks:
+        if telegram_send(chunk):
+            sent += 1
+    return sent
+
+
 def should_alert(candidate, previous):
     stage = candidate["stage"]
     price = candidate["ticker"].get("last_price")
@@ -672,6 +701,9 @@ def main():
     candidates.sort(key=lambda x: (-x["stage"], x["symbol"]))
 
     alerts_sent = 0
+    telegram_messages_sent = 0
+    pending_alerts = []
+
     for candidate in candidates:
         symbol = candidate["symbol"]
         previous = previous_symbols.get(symbol)
@@ -683,11 +715,7 @@ def main():
         if alert:
             message = build_alert(candidate, reason)
             print("\n" + message + "\n")
-            try:
-                if telegram_send(message):
-                    alerts_sent += 1
-            except Exception as exc:
-                print(f"[ERROR] Telegram send failed for {symbol}: {exc}")
+            pending_alerts.append(message)
             if price:
                 prev_alert_price = price
 
@@ -697,6 +725,14 @@ def main():
             "last_alert_price": prev_alert_price,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
+
+    if pending_alerts:
+        try:
+            telegram_messages_sent = telegram_send_batched(pending_alerts)
+            if telegram_messages_sent:
+                alerts_sent = len(pending_alerts)
+        except Exception as exc:
+            print(f"[ERROR] Telegram batch send failed: {exc}")
 
     # Manual runs always send a compact completion message, which doubles as a Telegram test.
     if MANUAL_RUN:
@@ -729,7 +765,8 @@ def main():
     save_state(state)
 
     print(
-        f"[DONE] candidates={len(candidates)}, alerts_sent={alerts_sent}, errors={errors}"
+        f"[DONE] candidates={len(candidates)}, alerts_sent={alerts_sent}, "
+        f"telegram_messages={telegram_messages_sent}, errors={errors}"
     )
 
 
