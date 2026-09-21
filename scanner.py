@@ -94,21 +94,61 @@ def get_symbols():
     return sorted(set(symbols))
 
 
+
+def fetch_market_candles(symbol, granularity):
+    """Fetch enough market candles for BB(20,2).
+
+    Bitget's long-range candle queries are effectively bounded by a time
+    window. Weekly BB20 needs about 140 days, so 1W is fetched in two
+    non-overlapping 89-day chunks and merged by timestamp.
+    """
+    if granularity != "1W":
+        return api_get(
+            "/api/v2/mix/market/candles",
+            {
+                "symbol": symbol,
+                "productType": PRODUCT_TYPE,
+                "granularity": granularity,
+                "limit": 30,
+            },
+        ) or []
+
+    now_ms = int(time.time() * 1000)
+    day_ms = 24 * 60 * 60 * 1000
+    chunk_ms = 89 * day_ms
+    merged = {}
+
+    # Two 89-day chunks = 178 days, comfortably enough for
+    # 19 completed weekly closes + the current week.
+    for chunk_index in range(2):
+        end_ms = now_ms - chunk_index * chunk_ms
+        start_ms = end_ms - chunk_ms
+        rows = api_get(
+            "/api/v2/mix/market/candles",
+            {
+                "symbol": symbol,
+                "productType": PRODUCT_TYPE,
+                "granularity": granularity,
+                "startTime": str(start_ms),
+                "endTime": str(end_ms),
+                "limit": 30,
+            },
+        ) or []
+        for row in rows:
+            try:
+                merged[int(row[0])] = row
+            except (ValueError, TypeError, IndexError):
+                continue
+
+    return [merged[ts] for ts in sorted(merged)]
+
 def bollinger_live(symbol, granularity, live_price):
     """Calculate BB(20,2) for the CURRENT market candle.
 
     We use normal market/trade-price candles so the result tracks the Bitget
     chart. The live ticker price is used as the current candle close.
     """
-    rows = api_get(
-        "/api/v2/mix/market/candles",
-        {
-            "symbol": symbol,
-            "productType": PRODUCT_TYPE,
-            "granularity": granularity,
-            "limit": 30,
-        },
-    ) or []
+    rows = fetch_market_candles(symbol, granularity)
 
     duration_ms = {
         "15m": 15 * 60 * 1000,
@@ -178,6 +218,31 @@ def bollinger_live(symbol, granularity, live_price):
         "candle_ts": completed[-1][0],
         "rows_received": len(parsed),
     }
+
+
+def get_all_tickers():
+    """Fetch all USDT-futures tickers in one request."""
+    data = api_get(
+        "/api/v2/mix/market/tickers",
+        {"productType": PRODUCT_TYPE},
+    ) or []
+    ticker_map = {}
+    for item in data:
+        try:
+            symbol = item.get("symbol")
+            if not symbol:
+                continue
+            last_price = item.get("lastPr") or item.get("last") or item.get("markPrice")
+            mark_price = item.get("markPrice")
+            change24h = item.get("change24h")
+            ticker_map[symbol] = {
+                "last_price": float(last_price) if last_price not in (None, "") else None,
+                "mark_price": float(mark_price) if mark_price not in (None, "") else None,
+                "change24h_pct": float(change24h) * 100.0 if change24h not in (None, "") else None,
+            }
+        except (ValueError, TypeError):
+            continue
+    return ticker_map
 
 def get_ticker(symbol):
     try:
@@ -305,9 +370,8 @@ def build_alert(candidate, reason):
     return "\n".join(lines)
 
 
-def scan_symbol(symbol, gate_stats):
+def scan_symbol(symbol, gate_stats, ticker):
     tf_results = {}
-    ticker = get_ticker(symbol)
     live_price = ticker.get("last_price") or ticker.get("mark_price")
     if not live_price:
         return None
@@ -349,16 +413,16 @@ def scan_symbol(symbol, gate_stats):
         "ticker": ticker,
     }
 
-def debug_symbol(symbol):
+def debug_symbol(symbol, ticker):
     """Print full BB diagnostics for a known visual-reference symbol."""
-    ticker = get_ticker(symbol)
     live_price = ticker.get("last_price") or ticker.get("mark_price")
     print(f"[DEBUG] {symbol} live={live_price}")
     for tf, granularity in TIMEFRAMES:
         try:
             r = bollinger_live(symbol, granularity, live_price)
             if not r:
-                print(f"[DEBUG] {symbol} {tf}: NO_DATA")
+                raw_rows = fetch_market_candles(symbol, granularity)
+                print(f"[DEBUG] {symbol} {tf}: NO_DATA raw_rows={len(raw_rows)}")
                 continue
             print(
                 f"[DEBUG] {symbol} {tf}: "
@@ -401,11 +465,15 @@ def main():
     new_symbols_state = {}
 
     symbols = get_symbols()
-    print(f"[INFO] scanning {len(symbols)} active USDT perpetual symbols")
+    ticker_map = get_all_tickers()
+    print(
+        f"[INFO] scanning {len(symbols)} active USDT perpetual symbols "
+        f"with {len(ticker_map)} bulk tickers"
+    )
 
     for debug_symbol_name in DEBUG_SYMBOLS:
         if debug_symbol_name in symbols:
-            debug_symbol(debug_symbol_name)
+            debug_symbol(debug_symbol_name, ticker_map.get(debug_symbol_name, {}))
         else:
             print(f"[DEBUG] {debug_symbol_name}: NOT FOUND in contract list")
 
@@ -415,7 +483,10 @@ def main():
 
     for index, symbol in enumerate(symbols, start=1):
         try:
-            candidate = scan_symbol(symbol, gate_stats)
+            ticker = ticker_map.get(symbol)
+            if not ticker:
+                raise RuntimeError("ticker missing from bulk ticker response")
+            candidate = scan_symbol(symbol, gate_stats, ticker)
             if candidate and candidate["stage"] >= 4:
                 candidates.append(candidate)
         except Exception as exc:
