@@ -406,8 +406,11 @@ def build_alert(candidate, reason):
 
     # Mobile-first Telegram layout: put the symbol on the very first line,
     # then the stage and actionable summary. Keep details below a visual divider.
+    streak = int(candidate.get("streak", 1))
+    repeat_tag = f"  🔁 {streak}회 연속" if streak >= 2 else ""
+
     lines = [
-        f"🪙 {symbol}",
+        f"🪙 {symbol}{repeat_tag}",
         f"{stage_label(stage)}",
         f"현재가 {fmt_price(ticker.get('last_price'))}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
         f"사유 {reason}",
@@ -698,7 +701,18 @@ def main():
             if results.get(tf, {}).get("above"):
                 gate_stats[tf] += 1
 
-    candidates.sort(key=lambda x: (-x["stage"], x["symbol"]))
+    for candidate in candidates:
+        previous = previous_symbols.get(candidate["symbol"])
+        candidate["streak"] = (
+            int(previous.get("streak", 0)) + 1
+            if previous is not None
+            else 1
+        )
+
+    # Higher stage first; within the same stage, repeated appearances are surfaced first.
+    candidates.sort(
+        key=lambda x: (-x["stage"], -int(x.get("streak", 1)), x["symbol"])
+    )
 
     alerts_sent = 0
     telegram_messages_sent = 0
@@ -721,6 +735,7 @@ def main():
 
         new_symbols_state[symbol] = {
             "stage": candidate["stage"],
+            "streak": int(candidate.get("streak", 1)),
             "last_price": price,
             "last_alert_price": prev_alert_price,
             "updated_at": datetime.now(timezone.utc).isoformat(),
