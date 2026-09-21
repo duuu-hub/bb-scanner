@@ -3,6 +3,8 @@ import hashlib
 import math
 import re
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -38,9 +40,20 @@ CORE_SYMBOLS = [
     "龙虾USDT", "NILUSDT", "INITUSDT", "METISUSDT",
 ]
 
-session = requests.Session()
-session.headers.update({"User-Agent": "bb-scanner-backtest/2.0"})
+MAX_WORKERS = int(__import__("os").getenv("BACKTEST_WORKERS", "16"))
+API_STARTS_PER_SEC = float(__import__("os").getenv("BACKTEST_API_RPS", "18"))
+_thread_local = threading.local()
+_rate_lock = threading.Lock()
 _last_call = 0.0
+
+
+def get_session():
+    sess = getattr(_thread_local, "session", None)
+    if sess is None:
+        sess = requests.Session()
+        sess.headers.update({"User-Agent": "bb-scanner-backtest/3.0"})
+        _thread_local.session = sess
+    return sess
 
 
 def api_get(path, params, retries=4):
@@ -51,14 +64,17 @@ def api_get(path, params, retries=4):
 
     for attempt in range(retries):
         try:
-            gap = 1.0 / 18.0
-            now = time.monotonic()
-            wait = gap - (now - _last_call)
-            if wait > 0:
-                time.sleep(wait)
-            _last_call = time.monotonic()
+            # Share one request-start budget across worker threads. Network
+            # waits happen outside the lock, so latency is hidden by concurrency.
+            with _rate_lock:
+                gap = 1.0 / API_STARTS_PER_SEC
+                now = time.monotonic()
+                wait = gap - (now - _last_call)
+                if wait > 0:
+                    time.sleep(wait)
+                _last_call = time.monotonic()
 
-            r = session.get(url, params=params, timeout=20)
+            r = get_session().get(url, params=params, timeout=20)
             r.raise_for_status()
             body = r.json()
             if str(body.get("code")) != "00000":
@@ -325,20 +341,43 @@ def coverage_row(
     }
 
 
-def bb_state_at(live_price, eval_ts, tf_df):
-    """Rebuild live BB exactly as the scanner concept: 19 closed + live price."""
-    close_times = tf_df["close_ts"].to_numpy(dtype=np.int64)
-    closes = tf_df["close"].to_numpy(dtype=float)
+def prepare_bb_arrays(data):
+    """Prepare immutable NumPy arrays once per symbol/TF.
 
-    # At eval_ts, candles whose close time is <= eval_ts are already closed.
+    Prefix sums remove millions of tiny 19-candle array allocations during a
+    large backtest.
+    """
+    prepared = {}
+    for tf_name, df in data.items():
+        close_times = df["close_ts"].to_numpy(dtype=np.int64)
+        closes = df["close"].to_numpy(dtype=float)
+        prefix = np.empty(len(closes) + 1, dtype=float)
+        prefix_sq = np.empty(len(closes) + 1, dtype=float)
+        prefix[0] = 0.0
+        prefix_sq[0] = 0.0
+        np.cumsum(closes, out=prefix[1:])
+        np.cumsum(closes * closes, out=prefix_sq[1:])
+        prepared[tf_name] = (close_times, closes, prefix, prefix_sq)
+    return prepared
+
+
+def bb_state_at(live_price, eval_ts, prepared_tf):
+    """Rebuild live BB as 19 closed candles + the evaluation price."""
+    close_times, closes, prefix, prefix_sq = prepared_tf
     idx = np.searchsorted(close_times, eval_ts, side="right")
-    if idx < BB_PERIOD - 1:
+    n_prev = BB_PERIOD - 1
+    if idx < n_prev:
         return None
 
-    prev19 = closes[idx - (BB_PERIOD - 1):idx]
-    window = np.append(prev19, live_price)
-    basis = float(window.mean())
-    std = float(window.std(ddof=0))
+    start = idx - n_prev
+    sum_prev = prefix[idx] - prefix[start]
+    sumsq_prev = prefix_sq[idx] - prefix_sq[start]
+    total = sum_prev + live_price
+    total_sq = sumsq_prev + live_price * live_price
+
+    basis = total / BB_PERIOD
+    variance = max(0.0, total_sq / BB_PERIOD - basis * basis)
+    std = math.sqrt(variance)
     upper = basis + BB_STD * std
     if upper <= 0:
         return None
@@ -414,17 +453,44 @@ def fetch_symbol_data(symbol, test_start_ms, test_end_ms):
 
 def build_snapshots(symbol, data, test_start_ms, test_end_ms):
     base = data["15M"]
+    prepared = prepare_bb_arrays(data)
 
-    # Phase-1 research evaluates at the exact 15m boundary using the new
-    # candle's OPEN. That price is known at that instant and therefore does
-    # not introduce look-ahead. A later precision pass can use 1m data to
-    # emulate the live scanner's boundary+1m timing.
+    # Evaluate at the exact 15m boundary using the new candle OPEN.
     eval_df = base[
         (base["ts"] >= test_start_ms) & (base["ts"] <= test_end_ms)
     ].copy()
-    records = []
 
     base_ts = base["ts"].to_numpy(dtype=np.int64)
+    base_high = base["high"].to_numpy(dtype=float)
+    base_low = base["low"].to_numpy(dtype=float)
+    base_close = base["close"].to_numpy(dtype=float)
+
+    # Precompute forward excursions once. This replaces millions of repeated
+    # DataFrame slices/max/min calls in the inner signal loop.
+    future_metrics = {}
+    high_series = pd.Series(base_high)
+    low_series = pd.Series(base_low)
+    close_series = pd.Series(base_close)
+
+    for label, bars in HORIZONS.items():
+        max_high = (
+            high_series.iloc[::-1]
+            .rolling(window=bars, min_periods=bars)
+            .max()
+            .iloc[::-1]
+            .to_numpy(dtype=float)
+        )
+        min_low = (
+            low_series.iloc[::-1]
+            .rolling(window=bars, min_periods=bars)
+            .min()
+            .iloc[::-1]
+            .to_numpy(dtype=float)
+        )
+        future_close = close_series.shift(-(bars - 1)).to_numpy(dtype=float)
+        future_metrics[label] = (max_high, min_low, future_close)
+
+    records = []
 
     for row in eval_df.itertuples(index=False):
         eval_ts = int(row.ts)
@@ -439,7 +505,7 @@ def build_snapshots(symbol, data, test_start_ms, test_end_ms):
         exact = 0
         valid = True
         for tf_name in TF:
-            state = bb_state_at(live, eval_ts, data[tf_name])
+            state = bb_state_at(live, eval_ts, prepared[tf_name])
             if state is None:
                 valid = False
                 break
@@ -457,30 +523,28 @@ def build_snapshots(symbol, data, test_start_ms, test_end_ms):
                 rec[f"{tf_name}_dist"] >= -threshold for tf_name in TF
             )
 
-        # Index by timestamp without repeated DataFrame scans.
         i = int(np.searchsorted(base_ts, eval_ts))
-        if i >= len(base) or int(base_ts[i]) != eval_ts:
+        if i >= len(base_ts) or int(base_ts[i]) != eval_ts:
             continue
 
-        # Future path from the signal price. max_up is adverse excursion for a
-        # short; max_drop is favorable excursion.
-        for label, bars in HORIZONS.items():
-            future = base.iloc[i:i + bars]
-            if len(future) < bars:
+        for label in HORIZONS:
+            max_high, min_low, future_close = future_metrics[label]
+            if (
+                i >= len(max_high)
+                or not math.isfinite(max_high[i])
+                or not math.isfinite(min_low[i])
+                or not math.isfinite(future_close[i])
+            ):
                 rec[f"{label}_max_up_pct"] = np.nan
                 rec[f"{label}_max_drop_pct"] = np.nan
                 rec[f"{label}_close_ret_pct"] = np.nan
                 continue
 
-            max_up = (float(future["high"].max()) / live - 1.0) * 100.0
-            max_drop = (1.0 - float(future["low"].min()) / live) * 100.0
-            close_ret = (
-                float(future.iloc[-1]["close"]) / live - 1.0
+            rec[f"{label}_max_up_pct"] = (max_high[i] / live - 1.0) * 100.0
+            rec[f"{label}_max_drop_pct"] = (1.0 - min_low[i] / live) * 100.0
+            rec[f"{label}_close_ret_pct"] = (
+                future_close[i] / live - 1.0
             ) * 100.0
-
-            rec[f"{label}_max_up_pct"] = max_up
-            rec[f"{label}_max_drop_pct"] = max_drop
-            rec[f"{label}_close_ret_pct"] = close_ret
 
         records.append(rec)
 
@@ -614,7 +678,21 @@ def parse_args():
     return p.parse_args()
 
 
+
+def process_symbol(symbol, test_start_ms, test_end_ms):
+    started = time.monotonic()
+    data, coverage = fetch_symbol_data(symbol, test_start_ms, test_end_ms)
+    snapshots = build_snapshots(symbol, data, test_start_ms, test_end_ms)
+    elapsed = time.monotonic() - started
+    return {
+        "symbol": symbol,
+        "snapshots": snapshots,
+        "coverage": coverage,
+        "elapsed": elapsed,
+    }
+
 def main():
+    wall_started = time.monotonic()
     args = parse_args()
     symbols = resolve_symbols(args.symbols)
     if not symbols:
@@ -643,29 +721,51 @@ def main():
 
     all_snapshots = []
     all_coverage = []
+    failures = []
 
-    for symbol in symbols:
-        print(f"\n=== {symbol}: {args.days}d research window ===")
-        try:
-            data, coverage = fetch_symbol_data(
+    print(
+        f"[PERF] workers={MAX_WORKERS} api_start_rate={API_STARTS_PER_SEC:.1f}/s"
+    )
+
+    # Symbols are independent. Fetch/process them concurrently while api_get()
+    # enforces one shared request-start rate. This hides HTTP latency without
+    # increasing the configured Bitget request rate.
+    with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(symbols))) as pool:
+        futures = {
+            pool.submit(
+                process_symbol,
                 symbol,
                 test_start_ms,
                 test_end_ms,
-            )
-            snapshots = build_snapshots(
-                symbol,
-                data,
-                test_start_ms,
-                test_end_ms,
-            )
-            print(
-                f"[SNAP] {symbol}: {len(snapshots)} valid 15m snapshots "
-                f"(target about {args.days * 96})"
-            )
-            all_snapshots.append(snapshots)
-            all_coverage.extend(coverage)
-        except Exception as exc:
-            print(f"[ERROR] {symbol}: {exc}")
+            ): symbol
+            for symbol in symbols
+        }
+
+        total = len(futures)
+        completed = 0
+        for future in as_completed(futures):
+            symbol = futures[future]
+            completed += 1
+            try:
+                result = future.result()
+                snapshots = result["snapshots"]
+                all_snapshots.append(snapshots)
+                all_coverage.extend(result["coverage"])
+                print(
+                    f"[PROGRESS] {completed}/{total} {symbol}: "
+                    f"{len(snapshots)} snapshots in {result['elapsed']:.1f}s"
+                )
+            except Exception as exc:
+                failures.append((symbol, str(exc)))
+                print(
+                    f"[ERROR] {completed}/{total} {symbol}: {exc}"
+                )
+
+    if failures:
+        print(
+            f"[WARN] {len(failures)}/{len(symbols)} symbols failed. "
+            "See errors above."
+        )
 
     if not all_snapshots:
         raise SystemExit("No backtest data produced.")
@@ -676,7 +776,13 @@ def main():
     near = near_profile(events)
     coverage_df = pd.DataFrame(all_coverage)
 
-    snapshots.to_csv(outdir / "snapshots.csv", index=False)
+    # Large AUTO runs can produce hundreds of thousands of rows. Gzip keeps
+    # artifact upload/storage small while retaining the complete raw snapshot set.
+    snapshots.to_csv(
+        outdir / "snapshots.csv.gz",
+        index=False,
+        compression="gzip",
+    )
     events.to_csv(outdir / "events.csv", index=False)
     summary.to_csv(outdir / "summary.csv", index=False)
     near.to_csv(outdir / "near_profile.csv", index=False)
@@ -718,7 +824,8 @@ def main():
     print(f"Saved: {outdir}/summary.csv")
     print(f"Saved: {outdir}/near_profile.csv")
     print(f"Saved: {outdir}/events.csv")
-    print(f"Saved: {outdir}/snapshots.csv")
+    print(f"Saved: {outdir}/snapshots.csv.gz")
+    print(f"[DONE] total_elapsed={time.monotonic() - wall_started:.1f}s")
 
 
 if __name__ == "__main__":
