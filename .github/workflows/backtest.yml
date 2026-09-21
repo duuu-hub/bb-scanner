@@ -11,11 +11,6 @@ on:
         description: 'Research-window days'
         required: false
         default: '120'
-  push:
-    paths:
-      - 'backtest.py'
-      - '.github/workflows/backtest.yml'
-      - 'requirements-backtest.txt'
 
 jobs:
   backtest:
@@ -35,14 +30,9 @@ jobs:
 
       - name: Run research backtest
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            SYMBOLS='龙虾USDT,NILUSDT,INITUSDT,METISUSDT'
-            DAYS='30'
-          else
-            SYMBOLS="${{ inputs.symbols || 'AUTO50' }}"
-            DAYS="${{ inputs.days || '120' }}"
-          fi
-          python backtest.py --symbols "$SYMBOLS" --days "$DAYS"
+          python backtest.py \
+            --symbols "${{ inputs.symbols || 'AUTO50' }}" \
+            --days "${{ inputs.days || '120' }}"
 
       - name: Upload backtest results
         if: always()
