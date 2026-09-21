@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from backtest import fetch_range, rows_to_df
+from backtest import fetch_range, rows_to_df, fetch_symbol_data, build_snapshots
 
 MIN = 60_000
 FEE_PCT = 0.12
@@ -42,6 +42,7 @@ def parse_args():
     p.add_argument("--source", required=True)
     p.add_argument("--outdir", default="precision_results")
     p.add_argument("--workers", type=int, default=6)
+    p.add_argument("--extra-symbols", default="")
     return p.parse_args()
 
 
@@ -68,14 +69,55 @@ def first_cross(mask, symbols):
     return mask & ~prev
 
 
+SIGNAL_COLS = [
+    "symbol", "ts", "time_utc", "price", "exact_count",
+    "within_3pct_count", "1W_above", "1D_above", "12H_above",
+    "4H_above", "1H_above", "30M_above", "15M_above",
+    "15M_dist",
+]
+
+
+def load_with_extras(source, extra_symbols):
+    df = pd.read_csv(source, usecols=SIGNAL_COLS)
+    existing = set(df["symbol"].unique())
+    extras = [x.strip() for x in extra_symbols.split(",") if x.strip()]
+    if not extras:
+        return df, [], []
+
+    start_ms = int(df["ts"].min())
+    end_ms = int(df["ts"].max())
+    added = []
+    failures = []
+
+    for symbol in extras:
+        if symbol in existing:
+            print(f"[EXTRA] {symbol}: already present in source")
+            continue
+        try:
+            data, _coverage = fetch_symbol_data(symbol, start_ms, end_ms)
+            snap = build_snapshots(symbol, data, start_ms, end_ms)
+            if snap.empty:
+                raise RuntimeError("0 valid snapshots")
+            missing = [c for c in SIGNAL_COLS if c not in snap.columns]
+            if missing:
+                raise RuntimeError(f"missing columns: {missing}")
+            df = pd.concat([df, snap[SIGNAL_COLS]], ignore_index=True)
+            existing.add(symbol)
+            added.append(symbol)
+            print(f"[EXTRA] {symbol}: added {len(snap)} snapshots")
+        except Exception as exc:
+            failures.append((symbol, str(exc)))
+            print(f"[EXTRA-ERROR] {symbol}: {exc}")
+
+    df = df.drop_duplicates(["symbol", "ts"], keep="last")
+    return df, added, failures
+
+
 def build_signals(source):
-    usecols = [
-        "symbol", "ts", "time_utc", "price", "exact_count",
-        "within_3pct_count", "1W_above", "1D_above", "12H_above",
-        "4H_above", "1H_above", "30M_above", "15M_above",
-        "15M_dist",
-    ]
-    df = pd.read_csv(source, usecols=usecols)
+    if isinstance(source, pd.DataFrame):
+        df = source[SIGNAL_COLS].copy()
+    else:
+        df = pd.read_csv(source, usecols=SIGNAL_COLS)
     df = df.sort_values(["symbol", "ts"]).reset_index(drop=True)
     df["rank"] = candidate_rank(df)
     df["candidate"] = df["rank"] >= 4
@@ -300,6 +342,210 @@ def one_trade(signal, minute_df, delay_min):
     }
 
 
+
+def one_trade_no_sl(signal, minute_df, delay_min):
+    """Same Candidate-1 entry/TP/time-exit, but with NO stop loss."""
+    if minute_df is None or minute_df.empty:
+        return None
+
+    signal_ts = int(signal.ts)
+    entry_candle_ts = signal_ts + (delay_min - 1) * MIN
+    entry_rows = minute_df[minute_df["ts"] == entry_candle_ts]
+    if entry_rows.empty:
+        return None
+
+    entry_price = float(entry_rows.iloc[-1]["close"])
+    if not math.isfinite(entry_price) or entry_price <= 0:
+        return None
+
+    entry_time = signal_ts + delay_min * MIN
+    end_time = entry_time + int(signal.horizon_min) * MIN
+    path = minute_df[
+        (minute_df["ts"] >= entry_time)
+        & (minute_df["ts"] < end_time)
+    ]
+    if path.empty:
+        return None
+
+    direction = signal.direction
+    tp_pct = float(signal.tp_pct)
+    tp_price = (
+        entry_price * (1.0 + tp_pct / 100.0)
+        if direction == "LONG"
+        else entry_price * (1.0 - tp_pct / 100.0)
+    )
+
+    outcome = "TIME"
+    exit_price = float(path.iloc[-1]["close"])
+    exit_ts = int(path.iloc[-1]["ts"]) + MIN
+
+    for bar in path.itertuples(index=False):
+        hit_tp = (
+            float(bar.high) >= tp_price
+            if direction == "LONG"
+            else float(bar.low) <= tp_price
+        )
+        if hit_tp:
+            outcome = "TP"
+            exit_price = tp_price
+            exit_ts = int(bar.ts) + MIN
+            break
+
+    gross_pct = (
+        (exit_price / entry_price - 1.0) * 100.0
+        if direction == "LONG"
+        else (1.0 - exit_price / entry_price) * 100.0
+    )
+    net_pct = gross_pct - FEE_PCT
+
+    return {
+        "delay_min": delay_min,
+        "symbol": signal.symbol,
+        "strategy": signal.strategy,
+        "direction": direction,
+        "split": signal.split,
+        "signal_ts": signal_ts,
+        "entry_ts": entry_time,
+        "exit_ts": exit_ts,
+        "signal_price": float(signal.price),
+        "entry_price": entry_price,
+        "exit_price": exit_price,
+        "tp_pct": tp_pct,
+        "horizon_min": int(signal.horizon_min),
+        "outcome": outcome,
+        "gross_pct": gross_pct,
+        "net_pct": net_pct,
+    }
+
+
+def simulate_mtm_from_trades(trades, minute_map, delay_min, mode_name, position_fraction=0.30):
+    """30% current-equity entries, duplicates allowed, total notional capped at 100%."""
+    t = trades[trades["delay_min"] == delay_min].copy()
+    if t.empty:
+        return {}, pd.DataFrame()
+
+    train = t[t["split"] == "train70"]
+    train_pf = {
+        name: calc_pf(g["net_pct"])
+        for name, g in train.groupby("strategy")
+    }
+
+    by_ts = {
+        int(ts): g.sort_values(
+            "strategy",
+            key=lambda col: col.map(lambda x: -train_pf.get(x, 0.0))
+        )
+        for ts, g in t.groupby("entry_ts")
+    }
+
+    price_maps = {
+        symbol: dict(zip(m["ts"].astype(int), m["close"].astype(float)))
+        for symbol, m in minute_map.items()
+        if m is not None and not m.empty
+    }
+
+    start_ts = min(by_ts)
+    end_ts = int(t["exit_ts"].max())
+    balance = 1.0
+    open_pos = []
+    accepted = []
+    peak_equity = 1.0
+    max_dd = 0.0
+    min_equity = 1.0
+    peak_open = 0
+    peak_exposure = 0.0
+    skipped_cap = 0
+
+    def price_at(symbol, ts, fallback):
+        px = price_maps.get(symbol, {}).get(ts)
+        if px is not None:
+            return px
+        m = minute_map.get(symbol)
+        if m is None or m.empty:
+            return fallback
+        rr = m[m["ts"] <= ts]
+        return float(rr.iloc[-1]["close"]) if not rr.empty else fallback
+
+    def mark_equity(ts):
+        unreal = 0.0
+        for p in open_pos:
+            px = price_at(p["symbol"], ts, p["entry_price"])
+            raw = (
+                px / p["entry_price"] - 1.0
+                if p["direction"] == "LONG"
+                else 1.0 - px / p["entry_price"]
+            )
+            unreal += p["size"] * raw
+        return balance + unreal
+
+    for ts in range(start_ts, end_ts + MIN, MIN):
+        still = []
+        for p in open_pos:
+            if p["exit_ts"] <= ts:
+                balance += p["size"] * (p["net_pct"] / 100.0)
+                accepted.append(p)
+            else:
+                still.append(p)
+        open_pos = still
+
+        batch = by_ts.get(ts)
+        if batch is not None:
+            for r in batch.itertuples(index=False):
+                equity_now = mark_equity(ts)
+                size = max(0.0, equity_now * position_fraction)
+                reserved = sum(p["size"] for p in open_pos)
+                if equity_now <= 0 or reserved + size > equity_now * CAPITAL_CAP + 1e-12:
+                    skipped_cap += 1
+                    continue
+                p = {
+                    "symbol": r.symbol,
+                    "strategy": r.strategy,
+                    "direction": r.direction,
+                    "split": r.split,
+                    "entry_ts": int(r.entry_ts),
+                    "exit_ts": int(r.exit_ts),
+                    "entry_price": float(r.entry_price),
+                    "exit_price": float(r.exit_price),
+                    "net_pct": float(r.net_pct),
+                    "outcome": r.outcome,
+                    "size": size,
+                }
+                open_pos.append(p)
+                peak_open = max(peak_open, len(open_pos))
+
+        equity_now = mark_equity(ts)
+        peak_equity = max(peak_equity, equity_now)
+        min_equity = min(min_equity, equity_now)
+        if peak_equity > 0:
+            max_dd = min(max_dd, equity_now / peak_equity - 1.0)
+        if equity_now > 0:
+            peak_exposure = max(
+                peak_exposure,
+                sum(p["size"] for p in open_pos) / equity_now
+            )
+
+    for p in open_pos:
+        balance += p["size"] * (p["net_pct"] / 100.0)
+        accepted.append(p)
+
+    acc = pd.DataFrame(accepted)
+    return {
+        "mode": mode_name,
+        "delay_min": delay_min,
+        "position_fraction_pct": position_fraction * 100.0,
+        "signals_available": len(t),
+        "trades_taken": len(acc),
+        "skipped_cap": skipped_cap,
+        "final_equity_multiple": balance,
+        "return_pct": (balance - 1.0) * 100.0,
+        "max_drawdown_pct": max_dd * 100.0,
+        "min_marked_equity": min_equity,
+        "peak_open_positions": peak_open,
+        "peak_exposure_pct": peak_exposure * 100.0,
+        "win_rate_pct": (acc["net_pct"] > 0).mean() * 100.0 if not acc.empty else np.nan,
+        "profit_factor": calc_pf(acc["net_pct"]) if not acc.empty else np.nan,
+    }, acc
+
 def calc_pf(ret):
     pos = ret[ret > 0].sum()
     neg = -ret[ret < 0].sum()
@@ -412,7 +658,7 @@ def simulate_portfolio(trades, delay_min, capped=True):
     return {
         "delay_min": delay_min,
         "mode": "CAP_100" if capped else "UNCAPPED",
-        "position_fraction_pct": position_fraction * 100.0,
+        "position_fraction_pct": POSITION_FRACTION * 100.0,
         "signals_available": len(t),
         "trades_taken": len(accepted),
         "skipped_cap": skipped_cap,
@@ -581,7 +827,7 @@ def simulate_nostop_mtm(signals, minute_map, delay_min, position_fraction):
 
     return {
         "delay_min": delay_min,
-        "position_fraction_pct": POSITION_FRACTION * 100.0,
+        "position_fraction_pct": position_fraction * 100.0,
         "final_equity_multiple": balance,
         "return_pct": (balance - 1.0) * 100.0,
         "max_drawdown_pct": max_dd * 100.0,
@@ -599,10 +845,20 @@ def main():
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
+    print("[STEP] load base universe + requested stress symbols")
+    combined_source, added_symbols, extra_failures = load_with_extras(
+        args.source, args.extra_symbols
+    )
+    combined_source.to_csv(outdir / "combined_signal_source.csv.gz", index=False, compression="gzip")
+
     print("[STEP] build strategy signals")
-    signals = build_signals(args.source)
+    signals = build_signals(combined_source)
     print(signals["strategy"].value_counts().sort_index().to_string())
     signals.to_csv(outdir / "signals.csv", index=False)
+    if extra_failures:
+        pd.DataFrame(extra_failures, columns=["symbol", "error"]).to_csv(
+            outdir / "extra_symbol_failures.csv", index=False
+        )
 
     print("[STEP] fetch targeted 1m windows")
     minute_map, failures = fetch_all_minutes(signals, args.workers)
@@ -622,6 +878,17 @@ def main():
 
     trades = pd.DataFrame(trade_rows)
     trades.to_csv(outdir / "precision_trades.csv", index=False)
+
+    print("[STEP] replay same signals with TP but NO stop loss")
+    nosl_rows = []
+    for signal in signals.itertuples(index=False):
+        minute_df = minute_map.get(signal.symbol)
+        for delay in (1, 2, 3):
+            row = one_trade_no_sl(signal, minute_df, delay)
+            if row:
+                nosl_rows.append(row)
+    nosl_trades = pd.DataFrame(nosl_rows)
+    nosl_trades.to_csv(outdir / "no_sl_trades.csv", index=False)
 
     summary = summarize_trades(trades)
     summary.to_csv(outdir / "strategy_summary.csv", index=False)
@@ -706,6 +973,64 @@ def main():
             outdir / "nostop_portfolio_trades.csv", index=False
         )
 
+    compare_rows = []
+    compare_trade_parts = []
+    stress_symbols = {"LSKUSDT", "TUTUSDT", "LABUSDT", "ALLOUSDT"}
+
+    for delay in (1, 2, 3):
+        for mode_name, table in (("CANDIDATE1_TP_SL", trades), ("NO_SL_KEEP_TP", nosl_trades)):
+            row, acc = simulate_mtm_from_trades(
+                table, minute_map, delay, mode_name, POSITION_FRACTION
+            )
+            if row:
+                row["cohort"] = "ALL_COMBINED"
+                compare_rows.append(row)
+            if not acc.empty:
+                acc["mode"] = mode_name
+                acc["delay_min"] = delay
+                acc["cohort"] = "ALL_COMBINED"
+                compare_trade_parts.append(acc)
+
+            stress_table = table[table["symbol"].isin(stress_symbols)]
+            if not stress_table.empty:
+                sr, sa = simulate_mtm_from_trades(
+                    stress_table, minute_map, delay, mode_name, POSITION_FRACTION
+                )
+                if sr:
+                    sr["cohort"] = "STRESS4_ONLY"
+                    compare_rows.append(sr)
+                if not sa.empty:
+                    sa["mode"] = mode_name
+                    sa["delay_min"] = delay
+                    sa["cohort"] = "STRESS4_ONLY"
+                    compare_trade_parts.append(sa)
+
+    comparison = pd.DataFrame(compare_rows)
+    comparison.to_csv(outdir / "candidate1_vs_no_sl.csv", index=False)
+    if compare_trade_parts:
+        pd.concat(compare_trade_parts, ignore_index=True).to_csv(
+            outdir / "candidate1_vs_no_sl_trades.csv", index=False
+        )
+
+    stress_trade_stats = []
+    for mode_name, table in (("CANDIDATE1_TP_SL", trades), ("NO_SL_KEEP_TP", nosl_trades)):
+        q = table[table["symbol"].isin(stress_symbols)]
+        for (delay, symbol), g in q.groupby(["delay_min", "symbol"]):
+            stress_trade_stats.append({
+                "mode": mode_name,
+                "delay_min": int(delay),
+                "symbol": symbol,
+                "n": len(g),
+                "win_rate_pct": (g["net_pct"] > 0).mean() * 100.0,
+                "avg_net_pct": g["net_pct"].mean(),
+                "profit_factor": calc_pf(g["net_pct"]),
+                "worst_trade_pct": g["net_pct"].min(),
+                "best_trade_pct": g["net_pct"].max(),
+            })
+    pd.DataFrame(stress_trade_stats).to_csv(
+        outdir / "stress4_trade_stats.csv", index=False
+    )
+
     print("\n=== STRATEGY SUMMARY ===")
     print(summary.to_string(index=False))
     print("\n=== NO-STOP RISK SUMMARY ===")
@@ -714,7 +1039,14 @@ def main():
     print(portfolio.to_string(index=False))
     print("\n=== NO-STOP 30% MTM PORTFOLIO ===")
     print(nostop_portfolio.to_string(index=False))
-    print(f"\n[DONE] signals={len(signals)} precision_trades={len(trades)} failures={len(failures)}")
+    print("\n=== CANDIDATE1 VS NO-SL (30% / duplicate entries / 100% cap) ===")
+    print(comparison.to_string(index=False))
+    print(
+        f"\n[DONE] symbols={combined_source['symbol'].nunique()} "
+        f"added={added_symbols} signals={len(signals)} "
+        f"precision_trades={len(trades)} failures={len(failures)} "
+        f"extra_failures={len(extra_failures)}"
+    )
 
 
 if __name__ == "__main__":
