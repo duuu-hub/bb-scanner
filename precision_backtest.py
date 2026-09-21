@@ -412,7 +412,7 @@ def simulate_portfolio(trades, delay_min, capped=True):
     return {
         "delay_min": delay_min,
         "mode": "CAP_100" if capped else "UNCAPPED",
-        "position_fraction_pct": POSITION_FRACTION * 100.0,
+        "position_fraction_pct": position_fraction * 100.0,
         "signals_available": len(t),
         "trades_taken": len(accepted),
         "skipped_cap": skipped_cap,
@@ -433,7 +433,7 @@ def simulate_portfolio(trades, delay_min, capped=True):
 
 
 
-def simulate_nostop_mtm(signals, minute_map, delay_min):
+def simulate_nostop_mtm(signals, minute_map, delay_min, position_fraction):
     """Replay Candidate-1 with no SL, 30% of equity per entry, duplicate entries allowed.
 
     1x notional exposure, at most 100% total reserved notional. Positions exit only
@@ -543,7 +543,7 @@ def simulate_nostop_mtm(signals, minute_map, delay_min):
         batch = sorted(batch, key=lambda x: (-priority.get(x["strategy"], 0.0), x["strategy"], x["symbol"]))
         for e in batch:
             equity_now = mark_equity(ts)
-            size = max(0.0, equity_now * POSITION_FRACTION)
+            size = max(0.0, equity_now * position_fraction)
             reserved = sum(p["size"] for p in open_pos)
             if equity_now <= 0 or reserved + size > equity_now * CAPITAL_CAP + 1e-12:
                 skipped_cap += 1
@@ -689,12 +689,16 @@ def main():
     nostop_portfolio_rows = []
     nostop_trade_parts = []
     for delay in (1, 2, 3):
-        row, acc = simulate_nostop_mtm(signals, minute_map, delay)
-        if row:
-            nostop_portfolio_rows.append(row)
-        if not acc.empty:
-            acc["delay_min"] = delay
-            nostop_trade_parts.append(acc)
+        for fraction in (0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00):
+            row, acc = simulate_nostop_mtm(
+                signals, minute_map, delay, fraction
+            )
+            if row:
+                nostop_portfolio_rows.append(row)
+            if not acc.empty and abs(fraction - 0.30) < 1e-9:
+                acc["delay_min"] = delay
+                acc["position_fraction_pct"] = fraction * 100.0
+                nostop_trade_parts.append(acc)
     nostop_portfolio = pd.DataFrame(nostop_portfolio_rows)
     nostop_portfolio.to_csv(outdir / "nostop_portfolio_summary.csv", index=False)
     if nostop_trade_parts:
