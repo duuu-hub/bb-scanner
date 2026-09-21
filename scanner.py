@@ -36,6 +36,7 @@ RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 MANUAL_RUN = os.getenv("GITHUB_EVENT_NAME", "") in ("workflow_dispatch", "push")
+DEBUG_SYMBOL = "龙虾USDT"
 
 session = requests.Session()
 session.headers.update({"User-Agent": "bb-scanner/1.0"})
@@ -317,6 +318,15 @@ def scan_symbol(symbol, gate_stats):
         if result is None:
             return None
         tf_results[tf] = result
+        if symbol == DEBUG_SYMBOL:
+            print(
+                f"[DEBUG {symbol}] {tf} live={live_price:.10g} "
+                f"basis={result['basis']:.10g} upper={result['upper']:.10g} "
+                f"dist={result['distance_pct']:+.3f}% above={result['above']} "
+                f"prev_close={result['completed_close']:.10g} "
+                f"prev_upper={result['completed_upper']:.10g} "
+                f"prev_above={result['completed_above']}"
+            )
         if result["above"]:
             gate_stats[tf] += 1
         else:
