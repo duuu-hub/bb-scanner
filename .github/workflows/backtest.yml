@@ -6,16 +6,18 @@ on:
       symbols:
         description: 'Comma-separated symbols, or AUTO30/AUTO50/AUTO100'
         required: false
-        default: 'AUTO50'
+        default: 'AUTO100'
       days:
         description: 'Research-window days'
         required: false
         default: '120'
+  push:
+    paths:
+      - 'backtest-run.txt'
 
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,9 +32,14 @@ jobs:
 
       - name: Run research backtest
         run: |
-          python backtest.py \
-            --symbols "${{ inputs.symbols || 'AUTO50' }}" \
-            --days "${{ inputs.days || '120' }}"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            SYMBOLS='AUTO100'
+            DAYS='120'
+          else
+            SYMBOLS="${{ inputs.symbols || 'AUTO100' }}"
+            DAYS="${{ inputs.days || '120' }}"
+          fi
+          python backtest.py --symbols "$SYMBOLS" --days "$DAYS"
 
       - name: Upload backtest results
         if: always()
