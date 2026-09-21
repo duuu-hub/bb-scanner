@@ -42,7 +42,8 @@ jobs:
           python precision_backtest.py \
             --source source_backtest/snapshots.csv.gz \
             --outdir precision_results \
-            --workers 6
+            --workers 6 \
+            --extra-symbols "LSKUSDT,TUTUSDT,LABUSDT,ALLOUSDT"
 
       - name: Upload precision results
         if: always()
