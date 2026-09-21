@@ -4,23 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       symbols:
-        description: 'Comma-separated Bitget symbols'
+        description: 'Comma-separated symbols, or AUTO30/AUTO50/AUTO100'
         required: false
-        default: '龙虾USDT,NILUSDT,INITUSDT,METISUSDT'
+        default: 'AUTO50'
       days:
         description: 'Research-window days'
         required: false
-        default: '60'
-  push:
-    paths:
-      - 'backtest.py'
-      - 'requirements-backtest.txt'
-      - '.github/workflows/backtest.yml'
+        default: '120'
 
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,8 +31,8 @@ jobs:
       - name: Run research backtest
         run: |
           python backtest.py \
-            --symbols "${{ inputs.symbols || '龙虾USDT,NILUSDT,INITUSDT,METISUSDT' }}" \
-            --days "${{ inputs.days || '60' }}"
+            --symbols "${{ inputs.symbols || 'AUTO50' }}" \
+            --days "${{ inputs.days || '120' }}"
 
       - name: Upload backtest results
         if: always()
