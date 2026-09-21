@@ -221,9 +221,17 @@ def one_trade(signal, minute_df, delay_min):
     if direction == "LONG":
         tp_price = entry_price * (1.0 + tp_pct / 100.0)
         sl_price = entry_price * (1.0 - sl_pct / 100.0)
+        # No-stop risk metrics across the full holding horizon.
+        worst_adverse_pct = (1.0 - float(path["low"].min()) / entry_price) * 100.0
+        best_favorable_pct = (float(path["high"].max()) / entry_price - 1.0) * 100.0
+        hold_close_pct = (float(path.iloc[-1]["close"]) / entry_price - 1.0) * 100.0
     else:
         tp_price = entry_price * (1.0 - tp_pct / 100.0)
         sl_price = entry_price * (1.0 + sl_pct / 100.0)
+        # For shorts, adverse move is price rising above entry.
+        worst_adverse_pct = (float(path["high"].max()) / entry_price - 1.0) * 100.0
+        best_favorable_pct = (1.0 - float(path["low"].min()) / entry_price) * 100.0
+        hold_close_pct = (1.0 - float(path.iloc[-1]["close"]) / entry_price) * 100.0
 
     outcome = "TIME"
     exit_price = float(path.iloc[-1]["close"])
@@ -281,6 +289,9 @@ def one_trade(signal, minute_df, delay_min):
         "outcome": outcome,
         "gross_pct": gross_pct,
         "net_pct": net_pct,
+        "nostop_worst_adverse_pct": worst_adverse_pct,
+        "nostop_best_favorable_pct": best_favorable_pct,
+        "nostop_hold_close_pct": hold_close_pct,
     }
 
 
@@ -448,6 +459,49 @@ def main():
     summary = summarize_trades(trades)
     summary.to_csv(outdir / "strategy_summary.csv", index=False)
 
+    # No-stop account damage table. Account loss ~= position fraction * adverse move
+    # for 1x exposure; with leverage multiply the effective exposure accordingly.
+    risk_rows = []
+    for (delay, strategy, split), g in trades.groupby(
+        ["delay_min", "strategy", "split"], dropna=False
+    ):
+        mae = g["nostop_worst_adverse_pct"].dropna()
+        if mae.empty:
+            continue
+        worst_idx = mae.idxmax()
+        worst = trades.loc[worst_idx]
+        row = {
+            "delay_min": int(delay),
+            "strategy": strategy,
+            "split": split,
+            "n": len(g),
+            "worst_adverse_pct": float(mae.max()),
+            "p95_adverse_pct": float(mae.quantile(0.95)),
+            "p99_adverse_pct": float(mae.quantile(0.99)),
+            "worst_symbol": worst["symbol"],
+            "worst_signal_ts": int(worst["signal_ts"]),
+            "worst_entry_price": float(worst["entry_price"]),
+            "worst_hold_close_pct": float(worst["nostop_hold_close_pct"]),
+        }
+        for frac in (0.10, 0.30, 0.50, 1.00):
+            row[f"acct_loss_at_{int(frac*100)}pct_pos"] = float(mae.max()) * frac
+        # Position fraction required for a given account drawdown at 1x.
+        for target in (10, 20, 30, 50, 100):
+            row[f"pos_frac_for_{target}pct_acct_loss"] = (
+                target / float(mae.max()) * 100.0
+                if float(mae.max()) > 0 else np.inf
+            )
+        risk_rows.append(row)
+
+    risk = pd.DataFrame(risk_rows)
+    risk.to_csv(outdir / "nostop_risk_summary.csv", index=False)
+
+    # Worst individual trades across all six strategies.
+    worst_trades = trades.sort_values(
+        "nostop_worst_adverse_pct", ascending=False
+    ).head(100)
+    worst_trades.to_csv(outdir / "nostop_worst_trades.csv", index=False)
+
     portfolio_rows = []
     accepted_parts = []
     for delay in (1, 2, 3):
@@ -467,6 +521,8 @@ def main():
 
     print("\n=== STRATEGY SUMMARY ===")
     print(summary.to_string(index=False))
+    print("\n=== NO-STOP RISK SUMMARY ===")
+    print(risk.to_string(index=False))
     print("\n=== PORTFOLIO SUMMARY ===")
     print(portfolio.to_string(index=False))
     print(f"\n[DONE] signals={len(signals)} precision_trades={len(trades)} failures={len(failures)}")
