@@ -8,8 +8,9 @@ on:
       - '.github/workflows/scan.yml'
       - 'requirements.txt'
   schedule:
-    # 1 minute after each 15-minute candle boundary (UTC minute is the same worldwide).
-    - cron: '1,16,31,46 * * * *'
+    # Wake about 10 minutes before each 15-minute boundary.
+    # scanner.py waits inside the runner until :00/:15/:30/:45 exactly.
+    - cron: '5,20,35,50 * * * *'
 
 permissions:
   contents: write
@@ -21,7 +22,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
