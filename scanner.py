@@ -15,7 +15,18 @@ PRODUCT_TYPE = "usdt-futures"
 BB_PERIOD = 20
 BB_STD = 2.0
 STATE_PATH = Path("state.json")
-DEBUG_SYMBOLS = {"龙虾USDT"}
+DEBUG_SYMBOLS = {
+    x.strip() for x in os.getenv("DEBUG_SYMBOLS", "").split(",") if x.strip()
+}
+TF_KR = {
+    "1W": "주봉",
+    "1D": "일봉",
+    "12H": "12시간",
+    "4H": "4시간",
+    "1H": "1시간",
+    "30M": "30분",
+    "15M": "15분",
+}
 
 # Upper timeframes first. We stop early until the 4h gate is reached.
 TIMEFRAMES = [
@@ -32,8 +43,8 @@ GATE_TFS = ["1W", "1D", "12H", "4H"]
 LOWER_TFS = ["1H", "30M", "15M"]
 
 REQUEST_TIMEOUT_SEC = int(os.getenv("REQUEST_TIMEOUT_SEC", "12"))
-API_STARTS_PER_SEC = float(os.getenv("API_STARTS_PER_SEC", "18"))
-MAX_WORKERS = int(os.getenv("MAX_WORKERS", "24"))
+API_STARTS_PER_SEC = float(os.getenv("API_STARTS_PER_SEC", "19"))
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", "32"))
 _rate_lock = threading.Lock()
 _last_api_start = 0.0
 RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
@@ -42,7 +53,6 @@ NEAR_BB_PCT = float(os.getenv("NEAR_BB_PCT", "3.0"))
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 MANUAL_RUN = os.getenv("GITHUB_EVENT_NAME", "") in ("workflow_dispatch", "push")
-DEBUG_SYMBOL = "龙虾USDT"
 
 session = requests.Session()
 session.headers.update({"User-Agent": "bb-scanner/1.0"})
@@ -285,7 +295,7 @@ def get_ticker(symbol):
 
 
 def score_candidate(tf_results):
-    """Flexible 7-TF heat score.
+    """7개 타임프레임 과열 점수.
 
     Exact pass = live price above the current upper BB.
     Near miss = live price below upper BB but within NEAR_BB_PCT.
@@ -358,11 +368,12 @@ def fmt_price(value):
 
 def stage_label(stage):
     return {
-        7: "🚨 EXTREME 7/7",
-        6: "🔥 HOT 6/7",
-        5: "🟠 NEAR-HEAT 5/7",
-        4: "🟡 WATCH 4/7",
+        7: "🚨 전봉 돌파 7/7",
+        6: "🔥 과열후보 6/7",
+        5: "🟠 근접후보 5/7",
+        4: "🟡 관찰후보 4/7",
     }.get(stage, f"{stage}/7")
+
 
 def telegram_send(text):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -388,39 +399,45 @@ def build_alert(candidate, reason):
     tf_results = candidate["tf_results"]
     ticker = candidate["ticker"]
     score = score_candidate(tf_results)
+
+    exact_kr = [TF_KR[x] for x in score["exact"]]
+    near_kr = [TF_KR[x] for x in score["near"]]
+    far_kr = [TF_KR[x] for x in score["far"]]
+
     lines = [
-        f"{stage_label(stage)} — {symbol}",
-        f"Reason: {reason}",
-        f"Heat score: {score['exact_count']}/7 exact",
-        f"Near misses (within {NEAR_BB_PCT:.1f}%): {', '.join(score['near']) if score['near'] else '-'}",
-        f"Live: {fmt_price(ticker.get('last_price'))}",
-        f"24H: {fmt_pct(ticker.get('change24h_pct'))}",
-        "",
-        "BB(20,2) CURRENT bars (19 closed + live trade price):",
+        f"{stage_label(stage)} | {symbol}",
+        f"사유: {reason}",
+        f"현재가: {fmt_price(ticker.get('last_price'))} | 24시간: {fmt_pct(ticker.get('change24h_pct'))}",
+        f"돌파: {len(exact_kr)}개" + (f" ({', '.join(exact_kr)})" if exact_kr else ""),
     ]
+
+    if near_kr:
+        lines.append(f"근접(-{NEAR_BB_PCT:.0f}% 이내): {', '.join(near_kr)}")
+    if far_kr:
+        lines.append(f"미달: {', '.join(far_kr)}")
+
+    lines.append("")
+    lines.append("상단밴드 대비:")
+
     for tf, _ in TIMEFRAMES:
         r = tf_results.get(tf)
+        name = TF_KR[tf]
         if not r:
-            lines.append(f"{tf}: ?")
+            lines.append(f"{name}: ?")
             continue
-        mark = "✅" if r["above"] else "❌"
-        closed = "C✅" if r.get("completed_above") else "C·"
-        lines.append(f"{tf}: {mark} {fmt_pct(r['distance_pct'])}  {closed}")
 
-    unmet = next_unmet_tf(stage)
-    if unmet and tf_results.get(unmet):
-        upper = tf_results[unmet]["upper"]
-        live = ticker.get("last_price")
-        if live and upper > 0:
-            live_dist = (live / upper - 1.0) * 100.0
-            lines += [
-                "",
-                f"Next: {unmet}",
-                f"Live vs current {unmet} upper BB: {fmt_pct(live_dist)}",
-            ]
+        d = r.get("distance_pct")
+        if r.get("above"):
+            mark = "✅ 돌파"
+        elif d is not None and d >= -NEAR_BB_PCT:
+            mark = "🟨 근접"
+        else:
+            mark = "❌ 미달"
+
+        lines.append(f"{name}: {mark}  {fmt_pct(d)}")
 
     if stage == 7:
-        lines += ["", f"7/7 reference price: {fmt_price(ticker.get('last_price'))}"]
+        lines += ["", f"7/7 포착가: {fmt_price(ticker.get('last_price'))}"]
 
     return "\n".join(lines)
 
@@ -493,11 +510,11 @@ def should_alert(candidate, previous):
     price = candidate["ticker"].get("last_price")
 
     if previous is None:
-        return True, f"NEW {stage}/7"
+        return True, "신규 포착"
 
     prev_stage = int(previous.get("stage", 0))
     if stage > prev_stage:
-        return True, f"UPGRADE {prev_stage}/7 → {stage}/7"
+        return True, f"단계 상승 {prev_stage}/7 → {stage}/7"
 
     last_alert_price = previous.get("last_alert_price")
     if (
@@ -506,9 +523,9 @@ def should_alert(candidate, previous):
         and last_alert_price
         and float(last_alert_price) > 0
     ):
-        move = abs(price / float(last_alert_price) - 1.0) * 100.0
-        if move >= RE_ALERT_PRICE_MOVE_PCT:
-            return True, f"PRICE MOVED {move:.2f}% since last alert"
+        signed_move = (price / float(last_alert_price) - 1.0) * 100.0
+        if abs(signed_move) >= RE_ALERT_PRICE_MOVE_PCT:
+            return True, f"이전 알림가 대비 {signed_move:+.2f}%"
 
     return False, ""
 
@@ -565,31 +582,47 @@ def main():
                 if result is not None:
                     tf_store.setdefault(symbol, {})[tf] = result
 
-        # Prune only symbols that can no longer reach a useful heat state
-        # even after adding the unscanned TFs (including 1W).
+        # Exact feasibility pruning for our final rules:
+        # - 6/7 may have only ONE non-exact TF (near or far).
+        # - 5/7 and 4/7 are allowed only when every non-exact TF is NEAR.
+        # Once a symbol can no longer satisfy either path, drop it immediately.
         remaining_after_this = len(cheap_pipeline) - idx + 1  # +1 for weekly
         kept = []
         for symbol in survivors:
             results = tf_store.get(symbol, {})
-            exact_now = sum(
-                1 for r in results.values() if r and r.get("above")
-            )
-            near_now = sum(
-                1 for r in results.values()
-                if r and (not r.get("above"))
-                and r.get("distance_pct") is not None
-                and r["distance_pct"] >= -NEAR_BB_PCT
-            )
-            max_exact_possible = exact_now + remaining_after_this
+            exact_now = 0
+            near_now = 0
+            far_now = 0
 
-            # Keep if 4 exact is still possible, OR if a 5/7 near-heat
-            # configuration is still possible with current near misses.
-            if max_exact_possible >= 4:
+            for r in results.values():
+                if r.get("above"):
+                    exact_now += 1
+                elif (
+                    r.get("distance_pct") is not None
+                    and r["distance_pct"] >= -NEAR_BB_PCT
+                ):
+                    near_now += 1
+                else:
+                    far_now += 1
+
+            # A missing API result in a timeframe already checked is treated
+            # as a far miss so it cannot keep wasting requests downstream.
+            far_now += max(0, idx - len(results))
+
+            possible = False
+            if far_now == 0:
+                # 4/7 or better remains possible if enough unchecked TFs
+                # can still become exact.
+                possible = exact_now + remaining_after_this >= 4
+            elif far_now == 1 and near_now == 0:
+                # With one far miss, only HOT 6/7 remains possible.
+                possible = exact_now + remaining_after_this >= 6
+
+            if possible:
                 kept.append(symbol)
-            elif exact_now + near_now + remaining_after_this >= 5:
-                kept.append(symbol)
+
         survivors = kept
-        print(f"[INFO] flex gate {tf}: {len(survivors)} remain")
+        print(f"[INFO] {tf} 검사 후 잔존: {len(survivors)}개")
 
         if not survivors:
             break
@@ -667,15 +700,14 @@ def main():
         for candidate in candidates:
             stage_counts[candidate["stage"]] += 1
         summary = (
-            "✅ Bitget BB scanner manual run complete\n"
-            f"Scanned: {len(symbols)} symbols\n"
-            f"Candidates: {len(candidates)} "
-            f"(WATCH4={stage_counts[4]}, NEAR5={stage_counts[5]}, "
-            f"HOT6={stage_counts[6]}, EXTREME7={stage_counts[7]})\n"
-            f"Exact BB breaks: 1W={gate_stats['1W']}, 1D={gate_stats['1D']}, "
-            f"12H={gate_stats['12H']}, 4H={gate_stats['4H']}, "
-            f"1H={gate_stats['1H']}, 30M={gate_stats['30M']}, 15M={gate_stats['15M']}\n"
-            f"API symbol errors: {errors}"
+            "✅ BB 스캔 완료\n"
+            f"전체: {len(symbols)}종목 | 후보: {len(candidates)}종목\n"
+            f"관찰4={stage_counts[4]} / 근접5={stage_counts[5]} / "
+            f"과열6={stage_counts[6]} / 전봉7={stage_counts[7]}\n"
+            f"실제 돌파 수: 주봉 {gate_stats['1W']} | 일봉 {gate_stats['1D']} | "
+            f"12시간 {gate_stats['12H']} | 4시간 {gate_stats['4H']} | "
+            f"1시간 {gate_stats['1H']} | 30분 {gate_stats['30M']} | 15분 {gate_stats['15M']}\n"
+            f"API 오류: {errors}"
         )
         print(summary)
         try:
