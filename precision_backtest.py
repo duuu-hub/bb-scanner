@@ -222,14 +222,18 @@ def one_trade(signal, minute_df, delay_min):
         tp_price = entry_price * (1.0 + tp_pct / 100.0)
         sl_price = entry_price * (1.0 - sl_pct / 100.0)
         # No-stop risk metrics across the full holding horizon.
-        worst_adverse_pct = (1.0 - float(path["low"].min()) / entry_price) * 100.0
+        worst_row = path.loc[path["low"].idxmin()]
+        worst_adverse_pct = (1.0 - float(worst_row["low"]) / entry_price) * 100.0
+        worst_adverse_ts = int(worst_row["ts"])
         best_favorable_pct = (float(path["high"].max()) / entry_price - 1.0) * 100.0
         hold_close_pct = (float(path.iloc[-1]["close"]) / entry_price - 1.0) * 100.0
     else:
         tp_price = entry_price * (1.0 - tp_pct / 100.0)
         sl_price = entry_price * (1.0 + sl_pct / 100.0)
         # For shorts, adverse move is price rising above entry.
-        worst_adverse_pct = (float(path["high"].max()) / entry_price - 1.0) * 100.0
+        worst_row = path.loc[path["high"].idxmax()]
+        worst_adverse_pct = (float(worst_row["high"]) / entry_price - 1.0) * 100.0
+        worst_adverse_ts = int(worst_row["ts"])
         best_favorable_pct = (1.0 - float(path["low"].min()) / entry_price) * 100.0
         hold_close_pct = (1.0 - float(path.iloc[-1]["close"]) / entry_price) * 100.0
 
@@ -290,6 +294,7 @@ def one_trade(signal, minute_df, delay_min):
         "gross_pct": gross_pct,
         "net_pct": net_pct,
         "nostop_worst_adverse_pct": worst_adverse_pct,
+        "nostop_worst_adverse_ts": worst_adverse_ts,
         "nostop_best_favorable_pct": best_favorable_pct,
         "nostop_hold_close_pct": hold_close_pct,
     }
@@ -427,6 +432,168 @@ def simulate_portfolio(trades, delay_min, capped=True):
     }, accepted_df
 
 
+
+def simulate_nostop_mtm(signals, minute_map, delay_min):
+    """Replay Candidate-1 with no SL, 30% of equity per entry, duplicate entries allowed.
+
+    1x notional exposure, at most 100% total reserved notional. Positions exit only
+    at their strategy time horizon. Equity is marked to market every minute.
+    """
+    # Build executable entries.
+    entries = []
+    for sig in signals.itertuples(index=False):
+        minute_df = minute_map.get(sig.symbol)
+        if minute_df is None or minute_df.empty:
+            continue
+        entry_candle_ts = int(sig.ts) + (delay_min - 1) * MIN
+        row = minute_df[minute_df["ts"] == entry_candle_ts]
+        if row.empty:
+            continue
+        entry_price = float(row.iloc[-1]["close"])
+        entry_ts = int(sig.ts) + delay_min * MIN
+        exit_ts = entry_ts + int(sig.horizon_min) * MIN
+        entries.append({
+            "symbol": sig.symbol,
+            "strategy": sig.strategy,
+            "direction": sig.direction,
+            "split": sig.split,
+            "entry_ts": entry_ts,
+            "exit_ts": exit_ts,
+            "entry_price": entry_price,
+        })
+
+    if not entries:
+        return {}, pd.DataFrame()
+
+    # Priority from the stopped precision TRAIN results, to match Candidate-1
+    # behavior when too many simultaneous entries compete for the 100% cap.
+    priority = {name: 1.0 for name in STRATEGIES}
+
+    entries_by_ts = {}
+    for e in entries:
+        entries_by_ts.setdefault(e["entry_ts"], []).append(e)
+
+    # Fast per-symbol minute close lookup.
+    price_maps = {}
+    for symbol, m in minute_map.items():
+        if m is None or m.empty:
+            continue
+        price_maps[symbol] = dict(zip(m["ts"].astype(int), m["close"].astype(float)))
+
+    start_ts = min(entries_by_ts)
+    end_ts = max(e["exit_ts"] for e in entries)
+    balance = 1.0
+    open_pos = []
+    accepted = []
+    peak_equity = 1.0
+    min_equity = 1.0
+    max_dd = 0.0
+    peak_open = 0
+    worst_ts = start_ts
+    skipped_cap = 0
+
+    def mark_equity(ts):
+        unreal = 0.0
+        for p in open_pos:
+            px = price_maps.get(p["symbol"], {}).get(ts)
+            if px is None:
+                # Use last known close at/before ts from the symbol frame.
+                m = minute_map[p["symbol"]]
+                rr = m[m["ts"] <= ts]
+                if rr.empty:
+                    px = p["entry_price"]
+                else:
+                    px = float(rr.iloc[-1]["close"])
+            if p["direction"] == "LONG":
+                ret = px / p["entry_price"] - 1.0
+            else:
+                ret = 1.0 - px / p["entry_price"]
+            unreal += p["size"] * ret
+        return balance + unreal
+
+    ts = start_ts
+    while ts <= end_ts:
+        # Close timed-out positions at current/last known close.
+        still_open = []
+        for p in open_pos:
+            if p["exit_ts"] <= ts:
+                px = price_maps.get(p["symbol"], {}).get(ts - MIN)
+                if px is None:
+                    m = minute_map[p["symbol"]]
+                    rr = m[m["ts"] < ts]
+                    px = float(rr.iloc[-1]["close"]) if not rr.empty else p["entry_price"]
+                if p["direction"] == "LONG":
+                    ret = px / p["entry_price"] - 1.0
+                else:
+                    ret = 1.0 - px / p["entry_price"]
+                pnl = p["size"] * ret
+                balance += pnl
+                p["exit_price"] = px
+                p["return_pct"] = ret * 100.0
+                p["pnl_equity"] = pnl
+                accepted.append(p)
+            else:
+                still_open.append(p)
+        open_pos = still_open
+
+        equity_now = mark_equity(ts)
+
+        # New entries; 30% of current marked equity each, cap reserved notional at 100%.
+        batch = entries_by_ts.get(ts, [])
+        batch = sorted(batch, key=lambda x: (-priority.get(x["strategy"], 0.0), x["strategy"], x["symbol"]))
+        for e in batch:
+            equity_now = mark_equity(ts)
+            size = max(0.0, equity_now * POSITION_FRACTION)
+            reserved = sum(p["size"] for p in open_pos)
+            if equity_now <= 0 or reserved + size > equity_now * CAPITAL_CAP + 1e-12:
+                skipped_cap += 1
+                continue
+            p = dict(e)
+            p["size"] = size
+            open_pos.append(p)
+            peak_open = max(peak_open, len(open_pos))
+
+        equity_now = mark_equity(ts)
+        if equity_now > peak_equity:
+            peak_equity = equity_now
+        if equity_now < min_equity:
+            min_equity = equity_now
+        if peak_equity > 0:
+            dd = equity_now / peak_equity - 1.0
+            if dd < max_dd:
+                max_dd = dd
+                worst_ts = ts
+
+        ts += MIN
+
+    # Close any remaining positions at the last available price.
+    for p in open_pos:
+        m = minute_map[p["symbol"]]
+        rr = m[m["ts"] <= end_ts]
+        px = float(rr.iloc[-1]["close"]) if not rr.empty else p["entry_price"]
+        ret = px / p["entry_price"] - 1.0 if p["direction"] == "LONG" else 1.0 - px / p["entry_price"]
+        pnl = p["size"] * ret
+        balance += pnl
+        p["exit_price"] = px
+        p["return_pct"] = ret * 100.0
+        p["pnl_equity"] = pnl
+        accepted.append(p)
+
+    return {
+        "delay_min": delay_min,
+        "position_fraction_pct": POSITION_FRACTION * 100.0,
+        "final_equity_multiple": balance,
+        "return_pct": (balance - 1.0) * 100.0,
+        "max_drawdown_pct": max_dd * 100.0,
+        "min_marked_equity": min_equity,
+        "worst_mtm_ts": worst_ts,
+        "peak_open_positions": peak_open,
+        "trades_taken": len(accepted),
+        "skipped_cap": skipped_cap,
+        "ever_equity_le_zero": bool(min_equity <= 0),
+    }, pd.DataFrame(accepted)
+
+
 def main():
     args = parse_args()
     outdir = Path(args.outdir)
@@ -519,12 +686,30 @@ def main():
             outdir / "portfolio_trades.csv", index=False
         )
 
+    nostop_portfolio_rows = []
+    nostop_trade_parts = []
+    for delay in (1, 2, 3):
+        row, acc = simulate_nostop_mtm(signals, minute_map, delay)
+        if row:
+            nostop_portfolio_rows.append(row)
+        if not acc.empty:
+            acc["delay_min"] = delay
+            nostop_trade_parts.append(acc)
+    nostop_portfolio = pd.DataFrame(nostop_portfolio_rows)
+    nostop_portfolio.to_csv(outdir / "nostop_portfolio_summary.csv", index=False)
+    if nostop_trade_parts:
+        pd.concat(nostop_trade_parts, ignore_index=True).to_csv(
+            outdir / "nostop_portfolio_trades.csv", index=False
+        )
+
     print("\n=== STRATEGY SUMMARY ===")
     print(summary.to_string(index=False))
     print("\n=== NO-STOP RISK SUMMARY ===")
     print(risk.to_string(index=False))
     print("\n=== PORTFOLIO SUMMARY ===")
     print(portfolio.to_string(index=False))
+    print("\n=== NO-STOP 30% MTM PORTFOLIO ===")
+    print(nostop_portfolio.to_string(index=False))
     print(f"\n[DONE] signals={len(signals)} precision_trades={len(trades)} failures={len(failures)}")
 
 
