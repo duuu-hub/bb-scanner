@@ -92,18 +92,33 @@ def get_symbols():
     return sorted(set(symbols))
 
 
-def bollinger_for_latest_completed(symbol, granularity):
-    # Bitget documents this endpoint as returning finished mark-price K-lines.
+def bollinger_live(symbol, granularity, live_price):
+    """Build the current BB from 19 completed closes + the live mark price.
+
+    This matches the intended live scanner much better than requiring the
+    previous completed candle itself to have closed above the band.
+    """
     rows = api_get(
         "/api/v2/mix/market/history-mark-candles",
         {
             "symbol": symbol,
             "productType": PRODUCT_TYPE,
             "granularity": granularity,
-            "limit": 30,
+            "limit": 40,
         },
     ) or []
 
+    duration_ms = {
+        "15m": 15 * 60 * 1000,
+        "30m": 30 * 60 * 1000,
+        "1H": 60 * 60 * 1000,
+        "4H": 4 * 60 * 60 * 1000,
+        "12H": 12 * 60 * 60 * 1000,
+        "1D": 24 * 60 * 60 * 1000,
+        "1W": 7 * 24 * 60 * 60 * 1000,
+    }[granularity]
+
+    now_ms = int(time.time() * 1000)
     parsed = []
     for row in rows:
         try:
@@ -115,27 +130,41 @@ def bollinger_for_latest_completed(symbol, granularity):
             continue
 
     parsed.sort(key=lambda x: x[0])
-    if len(parsed) < BB_PERIOD:
+
+    # If the endpoint includes an in-progress candle, exclude it.
+    completed = [(ts, close) for ts, close in parsed if ts + duration_ms <= now_ms]
+    if len(completed) < BB_PERIOD:
         return None
 
-    window = [x[1] for x in parsed[-BB_PERIOD:]]
-    close = window[-1]
-    basis = sum(window) / BB_PERIOD
-    std = statistics.pstdev(window)
+    completed20 = [x[1] for x in completed[-BB_PERIOD:]]
+    completed_close = completed20[-1]
+    completed_basis = sum(completed20) / BB_PERIOD
+    completed_std = statistics.pstdev(completed20)
+    completed_upper = completed_basis + BB_STD * completed_std
+    completed_above = completed_close > completed_upper
+
+    if live_price is None or not math.isfinite(live_price) or live_price <= 0:
+        return None
+
+    live_window = [x[1] for x in completed[-(BB_PERIOD - 1):]] + [live_price]
+    basis = sum(live_window) / BB_PERIOD
+    std = statistics.pstdev(live_window)
     upper = basis + BB_STD * std
     lower = basis - BB_STD * std
-    distance_pct = (close / upper - 1.0) * 100.0 if upper > 0 else 0.0
+    distance_pct = (live_price / upper - 1.0) * 100.0 if upper > 0 else 0.0
 
     return {
-        "close": close,
+        "close": live_price,
         "basis": basis,
         "upper": upper,
         "lower": lower,
-        "above": close > upper,
+        "above": live_price > upper,
         "distance_pct": distance_pct,
-        "candle_ts": parsed[-1][0],
+        "completed_close": completed_close,
+        "completed_upper": completed_upper,
+        "completed_above": completed_above,
+        "candle_ts": completed[-1][0],
     }
-
 
 def get_ticker(symbol):
     try:
@@ -152,13 +181,15 @@ def get_ticker(symbol):
 
         last_price = item.get("lastPr") or item.get("last") or item.get("markPrice")
         change24h = item.get("change24h")
+        mark_price = item.get("markPrice")
         return {
             "last_price": float(last_price) if last_price not in (None, "") else None,
+            "mark_price": float(mark_price) if mark_price not in (None, "") else None,
             "change24h_pct": float(change24h) * 100.0 if change24h not in (None, "") else None,
         }
     except Exception as exc:
         print(f"[WARN] ticker {symbol}: {exc}")
-        return {"last_price": None, "change24h_pct": None}
+        return {"last_price": None, "mark_price": None, "change24h_pct": None}
 
 
 def determine_stage(tf_results):
@@ -232,7 +263,7 @@ def build_alert(candidate, reason):
         f"Live: {fmt_price(ticker.get('last_price'))}",
         f"24H: {fmt_pct(ticker.get('change24h_pct'))}",
         "",
-        "BB(20,2) latest completed candles:",
+        "BB(20,2) CURRENT bars (19 closed + live mark):",
     ]
     for tf, _ in TIMEFRAMES:
         r = tf_results.get(tf)
@@ -240,7 +271,8 @@ def build_alert(candidate, reason):
             lines.append(f"{tf}: ?")
             continue
         mark = "✅" if r["above"] else "❌"
-        lines.append(f"{tf}: {mark} {fmt_pct(r['distance_pct'])}")
+        closed = "C✅" if r.get("completed_above") else "C·"
+        lines.append(f"{tf}: {mark} {fmt_pct(r['distance_pct'])}  {closed}")
 
     unmet = next_unmet_tf(stage)
     if unmet and tf_results.get(unmet):
@@ -251,7 +283,7 @@ def build_alert(candidate, reason):
             lines += [
                 "",
                 f"Next: {unmet}",
-                f"Live vs last completed {unmet} upper BB: {fmt_pct(live_dist)}",
+                f"Live vs current {unmet} upper BB: {fmt_pct(live_dist)}",
             ]
 
     if stage == 7:
@@ -260,34 +292,40 @@ def build_alert(candidate, reason):
     return "\n".join(lines)
 
 
-def scan_symbol(symbol):
+def scan_symbol(symbol, gate_stats):
     tf_results = {}
+    ticker = get_ticker(symbol)
+    live_price = ticker.get("mark_price") or ticker.get("last_price")
+    if not live_price:
+        return None
 
-    # Gate from 1W -> 4H. If any upper timeframe fails, it cannot be 4/7.
+    # Gate from 1W -> 4H using the CURRENT bar state.
     for tf, granularity in TIMEFRAMES[:4]:
-        result = bollinger_for_latest_completed(symbol, granularity)
+        result = bollinger_live(symbol, granularity, live_price)
         if result is None:
             return None
         tf_results[tf] = result
-        if not result["above"]:
+        if result["above"]:
+            gate_stats[tf] += 1
+        else:
             return None
 
-    # It passed the 4/7 gate. Fetch all lower TFs so the status table is complete.
+    # Once the upper-timeframe gate passes, inspect all lower TFs as well.
     for tf, granularity in TIMEFRAMES[4:]:
-        result = bollinger_for_latest_completed(symbol, granularity)
+        result = bollinger_live(symbol, granularity, live_price)
         if result is None:
             return None
         tf_results[tf] = result
+        if result["above"]:
+            gate_stats[tf] += 1
 
     stage = determine_stage(tf_results)
-    ticker = get_ticker(symbol)
     return {
         "symbol": symbol,
         "stage": stage,
         "tf_results": tf_results,
         "ticker": ticker,
     }
-
 
 def should_alert(candidate, previous):
     stage = candidate["stage"]
@@ -324,10 +362,11 @@ def main():
 
     candidates = []
     errors = 0
+    gate_stats = {tf: 0 for tf, _ in TIMEFRAMES}
 
     for index, symbol in enumerate(symbols, start=1):
         try:
-            candidate = scan_symbol(symbol)
+            candidate = scan_symbol(symbol, gate_stats)
             if candidate and candidate["stage"] >= 4:
                 candidates.append(candidate)
         except Exception as exc:
@@ -335,7 +374,12 @@ def main():
             print(f"[WARN] {symbol}: {exc}")
 
         if index % 50 == 0:
-            print(f"[INFO] progress {index}/{len(symbols)}, candidates={len(candidates)}, errors={errors}")
+            print(
+                f"[INFO] progress {index}/{len(symbols)}, candidates={len(candidates)}, "
+                f"errors={errors}, gates="
+                f"1W:{gate_stats['1W']} 1D:{gate_stats['1D']} "
+                f"12H:{gate_stats['12H']} 4H:{gate_stats['4H']}"
+            )
 
     candidates.sort(key=lambda x: (-x["stage"], x["symbol"]))
 
@@ -377,6 +421,8 @@ def main():
             f"Candidates: {len(candidates)} "
             f"(4/7={stage_counts[4]}, 5/7={stage_counts[5]}, "
             f"6/7={stage_counts[6]}, 7/7={stage_counts[7]})\n"
+            f"Gate counts: 1W={gate_stats['1W']} → 1D={gate_stats['1D']} "
+            f"→ 12H={gate_stats['12H']} → 4H={gate_stats['4H']}\n"
             f"API symbol errors: {errors}"
         )
         print(summary)
