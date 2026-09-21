@@ -3,6 +3,8 @@ import math
 import os
 import statistics
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,8 +31,11 @@ TIMEFRAMES = [
 GATE_TFS = ["1W", "1D", "12H", "4H"]
 LOWER_TFS = ["1H", "30M", "15M"]
 
-REQUEST_INTERVAL_SEC = float(os.getenv("REQUEST_INTERVAL_SEC", "0.07"))
 REQUEST_TIMEOUT_SEC = int(os.getenv("REQUEST_TIMEOUT_SEC", "12"))
+API_STARTS_PER_SEC = float(os.getenv("API_STARTS_PER_SEC", "18"))
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", "24"))
+_rate_lock = threading.Lock()
+_last_api_start = 0.0
 RE_ALERT_PRICE_MOVE_PCT = float(os.getenv("RE_ALERT_PRICE_MOVE_PCT", "5.0"))
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
@@ -45,9 +50,17 @@ session.headers.update({"User-Agent": "bb-scanner/1.0"})
 def api_get(path, params=None, retries=3):
     url = BASE_URL + path
     last_error = None
+    global _last_api_start
     for attempt in range(retries):
         try:
-            time.sleep(REQUEST_INTERVAL_SEC)
+            # Global rate limiter shared by all worker threads.
+            with _rate_lock:
+                now = time.monotonic()
+                min_gap = 1.0 / API_STARTS_PER_SEC
+                wait = min_gap - (now - _last_api_start)
+                if wait > 0:
+                    time.sleep(wait)
+                _last_api_start = time.monotonic()
             response = session.get(url, params=params or {}, timeout=REQUEST_TIMEOUT_SEC)
             response.raise_for_status()
             payload = response.json()
@@ -370,41 +383,39 @@ def build_alert(candidate, reason):
     return "\n".join(lines)
 
 
-def scan_symbol(symbol, gate_stats, ticker):
-    tf_results = {}
+def fetch_tf_for_symbol(symbol, tf, granularity, ticker):
     live_price = ticker.get("last_price") or ticker.get("mark_price")
     if not live_price:
-        return None
+        return symbol, tf, None
+    try:
+        return symbol, tf, bollinger_live(symbol, granularity, live_price)
+    except Exception as exc:
+        print(f"[WARN] {symbol} {tf}: {exc}")
+        return symbol, tf, None
 
-    # Gate from 1W -> 4H using the CURRENT bar state.
-    for tf, granularity in TIMEFRAMES[:4]:
-        result = bollinger_live(symbol, granularity, live_price)
-        if result is None:
-            return None
-        tf_results[tf] = result
-        if symbol == DEBUG_SYMBOL:
-            print(
-                f"[DEBUG {symbol}] {tf} live={live_price:.10g} "
-                f"basis={result['basis']:.10g} upper={result['upper']:.10g} "
-                f"dist={result['distance_pct']:+.3f}% above={result['above']} "
-                f"prev_close={result['completed_close']:.10g} "
-                f"prev_upper={result['completed_upper']:.10g} "
-                f"prev_above={result['completed_above']}"
-            )
-        if result["above"]:
-            gate_stats[tf] += 1
-        else:
-            return None
 
-    # Once the upper-timeframe gate passes, inspect all lower TFs as well.
-    for tf, granularity in TIMEFRAMES[4:]:
-        result = bollinger_live(symbol, granularity, live_price)
-        if result is None:
-            return None
-        tf_results[tf] = result
-        if result["above"]:
-            gate_stats[tf] += 1
+def filter_stage(symbols, tf, granularity, ticker_map, tf_store):
+    """Evaluate one timeframe in parallel and keep only upper-BB breakouts."""
+    passed = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        futures = []
+        for symbol in symbols:
+            ticker = ticker_map.get(symbol)
+            if ticker:
+                futures.append(
+                    pool.submit(fetch_tf_for_symbol, symbol, tf, granularity, ticker)
+                )
+        for future in as_completed(futures):
+            symbol, _, result = future.result()
+            if result is None:
+                continue
+            tf_store.setdefault(symbol, {})[tf] = result
+            if result["above"]:
+                passed.append(symbol)
+    return passed
 
+
+def build_candidate(symbol, tf_results, ticker):
     stage = determine_stage(tf_results)
     return {
         "symbol": symbol,
@@ -412,6 +423,7 @@ def scan_symbol(symbol, gate_stats, ticker):
         "tf_results": tf_results,
         "ticker": ticker,
     }
+
 
 def debug_symbol(symbol, ticker):
     """Print full BB diagnostics for a known visual-reference symbol."""
@@ -479,27 +491,78 @@ def main():
 
     candidates = []
     errors = 0
+    tf_store = {}
+
+    # Fast pipeline: cheap single-request TFs first. Weekly is the expensive
+    # two-chunk fetch, so only symbols surviving 1D/12H/4H reach it.
+    pipeline = [
+        ("1D", "1D"),
+        ("12H", "12H"),
+        ("4H", "4H"),
+        ("1W", "1W"),
+    ]
+
+    survivors = [s for s in symbols if s in ticker_map]
+    pipeline_counts = []
+    for tf, granularity in pipeline:
+        started = time.monotonic()
+        survivors = filter_stage(
+            survivors, tf, granularity, ticker_map, tf_store
+        )
+        elapsed = time.monotonic() - started
+        pipeline_counts.append((tf, len(survivors)))
+        print(
+            f"[INFO] gate {tf}: {len(survivors)} passed "
+            f"({elapsed:.1f}s)"
+        )
+        if not survivors:
+            break
+
+    # Only the small 4/7 survivor set needs the lower timeframes.
+    lower_pipeline = [("1H", "1H"), ("30M", "30m"), ("15M", "15m")]
+    active = list(survivors)
+    for tf, granularity in lower_pipeline:
+        if not active:
+            break
+        # Evaluate this TF for ALL 4/7 survivors so stage can be determined
+        # hierarchically without scanning the whole market.
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+            futures = [
+                pool.submit(
+                    fetch_tf_for_symbol,
+                    symbol,
+                    tf,
+                    granularity,
+                    ticker_map[symbol],
+                )
+                for symbol in survivors
+                if symbol in ticker_map
+            ]
+            for future in as_completed(futures):
+                symbol, _, result = future.result()
+                if result is not None:
+                    tf_store.setdefault(symbol, {})[tf] = result
+
+    for symbol in survivors:
+        results = tf_store.get(symbol, {})
+        # Missing lower TF data means skip rather than emit a bad stage.
+        if not all(tf in results for tf, _ in TIMEFRAMES):
+            continue
+        candidate = build_candidate(symbol, results, ticker_map[symbol])
+        if candidate["stage"] >= 4:
+            candidates.append(candidate)
+
     gate_stats = {tf: 0 for tf, _ in TIMEFRAMES}
-
-    for index, symbol in enumerate(symbols, start=1):
-        try:
-            ticker = ticker_map.get(symbol)
-            if not ticker:
-                raise RuntimeError("ticker missing from bulk ticker response")
-            candidate = scan_symbol(symbol, gate_stats, ticker)
-            if candidate and candidate["stage"] >= 4:
-                candidates.append(candidate)
-        except Exception as exc:
-            errors += 1
-            print(f"[WARN] {symbol}: {exc}")
-
-        if index % 50 == 0:
-            print(
-                f"[INFO] progress {index}/{len(symbols)}, candidates={len(candidates)}, "
-                f"errors={errors}, gates="
-                f"1W:{gate_stats['1W']} 1D:{gate_stats['1D']} "
-                f"12H:{gate_stats['12H']} 4H:{gate_stats['4H']}"
-            )
+    # These are pipeline counts, not standalone-market counts.
+    count_map = dict(pipeline_counts)
+    gate_stats["1D"] = count_map.get("1D", 0)
+    gate_stats["12H"] = count_map.get("12H", 0)
+    gate_stats["4H"] = count_map.get("4H", 0)
+    gate_stats["1W"] = count_map.get("1W", 0)
+    for c in candidates:
+        for tf in LOWER_TFS:
+            if c["tf_results"].get(tf, {}).get("above"):
+                gate_stats[tf] += 1
 
     candidates.sort(key=lambda x: (-x["stage"], x["symbol"]))
 
@@ -541,8 +604,8 @@ def main():
             f"Candidates: {len(candidates)} "
             f"(4/7={stage_counts[4]}, 5/7={stage_counts[5]}, "
             f"6/7={stage_counts[6]}, 7/7={stage_counts[7]})\n"
-            f"Gate counts: 1W={gate_stats['1W']} → 1D={gate_stats['1D']} "
-            f"→ 12H={gate_stats['12H']} → 4H={gate_stats['4H']}\n"
+            f"Gate pipeline: 1D={gate_stats['1D']} → 12H={gate_stats['12H']} "
+            f"→ 4H={gate_stats['4H']} → 1W={gate_stats['1W']}\n"
             f"API symbol errors: {errors}"
         )
         print(summary)
