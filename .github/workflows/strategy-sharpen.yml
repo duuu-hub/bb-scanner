@@ -1,0 +1,53 @@
+name: Strategy Sharpening
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'strategy_sharpen.py'
+      - '.github/workflows/strategy-sharpen.yml'
+
+jobs:
+  sharpen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download 77-symbol stress source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p stress_source
+          gh run download 35618163960 -n precision-stress-results -D stress_source
+
+      - name: Run sharpening research
+        env:
+          BACKTEST_WORKERS: '6'
+          BACKTEST_API_RPS: '6'
+        run: |
+          python strategy_sharpen.py \
+            --source stress_source/combined_signal_source.csv.gz \
+            --outdir sharpen_results \
+            --workers 6
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strategy-sharpen-results
+          path: sharpen_results/
+          if-no-files-found: warn
