@@ -61,6 +61,7 @@ STRATEGY_RULES = {
         "name": "모멘텀 LONG",
         "direction": "LONG",
         "priority": 3,
+        "horizon_min": 720,
         "tp_pct": 10.0,
         "sl_pct": 5.0,
         "rr": 2.0,
@@ -73,6 +74,7 @@ STRATEGY_RULES = {
         "name": "폭발추세 LONG",
         "direction": "LONG",
         "priority": 1,
+        "horizon_min": 60,
         "tp_pct": 10.0,
         "sl_pct": 2.5,
         "rr": 4.0,
@@ -85,6 +87,7 @@ STRATEGY_RULES = {
         "name": "4H 지연 LONG",
         "direction": "LONG",
         "priority": 2,
+        "horizon_min": 720,
         "tp_pct": 10.0,
         "sl_pct": 4.0,
         "rr": 2.5,
@@ -97,6 +100,7 @@ STRATEGY_RULES = {
         "name": "7/7 극단반전 SHORT",
         "direction": "SHORT",
         "priority": 5,
+        "horizon_min": 720,
         "tp_pct": 10.0,
         "sl_pct": 4.0,
         "rr": 2.5,
@@ -109,6 +113,7 @@ STRATEGY_RULES = {
         "name": "15M 지연 SHORT",
         "direction": "SHORT",
         "priority": 6,
+        "horizon_min": 240,
         "tp_pct": 10.0,
         "sl_pct": 4.0,
         "rr": 2.5,
@@ -121,6 +126,7 @@ STRATEGY_RULES = {
         "name": "8회 지속 SHORT",
         "direction": "SHORT",
         "priority": 4,
+        "horizon_min": 60,
         "tp_pct": 10.0,
         "sl_pct": 5.0,
         "rr": 2.0,
@@ -475,6 +481,14 @@ def fmt_price(value):
     return f"{value:.10f}".rstrip("0").rstrip(".")
 
 
+def fmt_horizon(minutes):
+    minutes = int(minutes)
+    if minutes % 60 == 0:
+        hours = minutes // 60
+        return f"{hours}H"
+    return f"{minutes}M"
+
+
 def stage_label(stage):
     return {
         7: "🚨 전봉 돌파 7/7",
@@ -693,6 +707,7 @@ def build_alert(candidate, reason, strategy_code=None):
             f"TP {fmt_price(levels['tp'])} ({cfg['tp_pct']:+.1f}%)"
             f"  |  SL {fmt_price(levels['sl'])} (-{cfg['sl_pct']:.1f}%)",
             f"손익비 1:{cfg['rr']:.1f}  |  BT성공률 {cfg['bt_win_rate']:.1f}% (검증 {cfg['bt_n']}회)",
+            f"⏱ TIME LIMIT {fmt_horizon(cfg['horizon_min'])} · TP/SL 미도달 시 시간종료",
             "기준 비중 시드 30%",
         ]
 
