@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from precision_backtest import (
-    build_signals, fetch_all_minutes, calc_pf, FEE_PCT, MIN
+    build_signals, fetch_all_minutes, calc_pf, FEE_PCT, MIN, load_with_extras
 )
 from exposure_risk import simulate
 
@@ -226,10 +226,12 @@ def main():
     ap.add_argument("--source",required=True)
     ap.add_argument("--outdir",default="sharpen_results")
     ap.add_argument("--workers",type=int,default=6)
+    ap.add_argument("--extra-symbols",default="LSKUSDT,TUTUSDT,LABUSDT,ALLOUSDT")
     args=ap.parse_args()
     out=Path(args.outdir); out.mkdir(parents=True,exist_ok=True)
 
-    source=pd.read_csv(args.source)
+    source,added,extra_fail=load_with_extras(args.source,args.extra_symbols)
+    print(f"[SOURCE] extra_added={added} extra_failures={extra_fail}")
     signals=build_signals(source).copy()
     extra=source[["symbol","ts","15M_dist"]].drop_duplicates(["symbol","ts"])
     signals=signals.merge(extra,on=["symbol","ts"],how="left")
