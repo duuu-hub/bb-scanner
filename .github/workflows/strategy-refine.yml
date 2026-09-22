@@ -1,0 +1,54 @@
+name: Strategy Refine
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'strategy_refine.py'
+      - '.github/workflows/strategy-refine.yml'
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download source backtest artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p source_backtest
+          gh run download 35584621765 -n bb-backtest-results -D source_backtest
+
+      - name: Run refinement
+        env:
+          BACKTEST_WORKERS: '6'
+          BACKTEST_API_RPS: '6'
+        run: |
+          python strategy_refine.py \
+            --source source_backtest/snapshots.csv.gz \
+            --outdir strategy_refine_results \
+            --workers 6 \
+            --extra-symbols "LSKUSDT,TUTUSDT,LABUSDT,ALLOUSDT"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strategy-refine-results
+          path: strategy_refine_results/
+          if-no-files-found: warn
