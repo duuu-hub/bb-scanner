@@ -128,7 +128,7 @@ def eval_tp(sig, minute_map, tp, horizon_map):
     rows=[]
     for r in sig.itertuples(index=False):
         for d in (1,2,3):
-            tr=dynamic_trade(r,minute_map,d,tp,horizon_map[r.strategy])
+            tr=dynamic_trade(r,minute_map.get(r.symbol),d,tp,horizon_map[r.strategy])
             if tr: rows.append(tr)
     return pd.DataFrame(rows)
 
@@ -139,7 +139,7 @@ def eval_mapping(sig, minute_map, tp_map, horizon_map):
         tp=tp_map[r.vol_bucket]
         horizon=horizon_map[r.strategy]
         for d in (1,2,3):
-            tr=dynamic_trade(r,minute_map,d,tp,horizon)
+            tr=dynamic_trade(r,minute_map.get(r.symbol),d,tp,horizon)
             if tr: rows.append(tr)
     return pd.DataFrame(rows)
 
