@@ -27,6 +27,15 @@ VARIANTS = {
         | (x["strategy"]=="S2_15M_LAG_NEAR1")
     ),
     "CORE_LONG": lambda x: x["direction"]=="LONG",
+    "CORE_S1C35": lambda x: (
+        x["direction"].eq("LONG")
+        | ((x["strategy"]=="S1_EXTREME_7_7") & (x["ret_4h"] <= 35.0))
+    ),
+    "CORE_S1C35_S3": lambda x: (
+        x["direction"].eq("LONG")
+        | ((x["strategy"]=="S1_EXTREME_7_7") & (x["ret_4h"] <= 35.0))
+        | (x["strategy"]=="S3_PERSIST_8")
+    ),
 }
 
 COSTS = [0.12, 0.20, 0.30, 0.50]
