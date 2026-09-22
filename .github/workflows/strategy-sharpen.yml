@@ -27,12 +27,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-backtest.txt
 
-      - name: Download 77-symbol stress source
+      - name: Download base snapshot source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p stress_source
-          gh run download 35618163960 -n precision-stress-results -D stress_source
+          gh run download 35584621765 -n bb-backtest-results -D stress_source
 
       - name: Run sharpening research
         env:
@@ -40,9 +40,10 @@ jobs:
           BACKTEST_API_RPS: '6'
         run: |
           python strategy_sharpen.py \
-            --source stress_source/combined_signal_source.csv.gz \
+            --source stress_source/snapshots.csv.gz \
             --outdir sharpen_results \
-            --workers 6
+            --workers 6 \
+            --extra-symbols "LSKUSDT,TUTUSDT,LABUSDT,ALLOUSDT"
 
       - name: Upload results
         if: always()
