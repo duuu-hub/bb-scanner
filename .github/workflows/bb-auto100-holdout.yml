@@ -1,0 +1,72 @@
+name: BB AUTO100 Holdout
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-bb-auto100-holdout
+    paths:
+      - '.research/bb_auto100_holdout_once'
+
+permissions:
+  contents: read
+
+jobs:
+  frozen-h1-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Resolve truly new AUTO100 symbols
+        run: |
+          HOLDOUT=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text(encoding="utf-8"))
+          print(",".join(s for s in x["symbols"] if s not in ORIGINAL_AUTO50))
+          PY
+          )
+          echo "HOLDOUT_SYMBOLS=$HOLDOUT" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text(encoding="utf-8"))
+          overlap=[s for s in x["symbols"] if s in ORIGINAL_AUTO50]
+          holdout=[s for s in x["symbols"] if s not in ORIGINAL_AUTO50]
+          print(f"AUTO100={len(x['symbols'])} overlap_old_AUTO50={len(overlap)} truly_new={len(holdout)}")
+          print("NEW="+",".join(holdout))
+          PY
+
+      - name: Rebuild exact multi-timeframe BB snapshots for new symbols
+        run: |
+          python backtest.py             --symbols "$HOLDOUT_SYMBOLS"             --days 180             --outdir bb_auto100_holdout_source
+
+      - name: Run frozen L1 BTC-vol-MID short holdout
+        run: |
+          python research/bb_auto100_holdout.py             --source bb_auto100_holdout_source/snapshots.csv.gz             --selection market_data_store/bitget/research_auto100_15m/selection.json             --market-root market_data_store/bitget/15m             --outdir bb_auto100_holdout_results             --workers 8
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-auto100-holdout-results
+          path: |
+            bb_auto100_holdout_results/
+            bb_auto100_holdout_source/coverage.csv
+            bb_auto100_holdout_source/summary.csv
+          if-no-files-found: warn
+          retention-days: 14
