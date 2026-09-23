@@ -31,10 +31,10 @@ jobs:
           python -m py_compile research/vendor/lsob_reference.py
           python -m py_compile research/lsob_benchmark.py
 
-      - name: Run BTC LSOB baseline on 1h and 15m
+      - name: Run ETH LSOB confirmation sweep on 1h and 15m
         run: |
           python research/lsob_benchmark.py \
-            --symbol BTCUSDT \
+            --symbol ETHUSDT \
             --timeframes 1h,15m \
             --start 2024-08-24 \
             --end 2026-08-24 \
@@ -51,6 +51,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lsob-btc-confirmation-sweep
+          name: lsob-eth-confirmation-sweep
           path: research/results/
           if-no-files-found: warn
