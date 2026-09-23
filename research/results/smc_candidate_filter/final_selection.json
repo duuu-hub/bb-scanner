@@ -1,0 +1,102 @@
+{
+  "generated_at_utc": "2026-09-23T12:56:20Z",
+  "purpose": "Strict shortlist for Bitget-native SMC/LSOB sub-strategy research",
+  "production_candidates": [
+    {
+      "strategy": "ETH_D3",
+      "symbol": "ETHUSDT",
+      "timeframe": "1H",
+      "displacement_bars": 3,
+      "status": "KEEP",
+      "evidence": {
+        "history_start": "2019-08-10",
+        "history_end": "2026-09-23",
+        "trades": 987,
+        "profit_factor": 1.1313988511,
+        "expectancy_r": 0.1235428942,
+        "profit_factor_cost_1_5x": 1.0664970674,
+        "profit_factor_cost_2x": 1.0114372937,
+        "positive_quarters_pct": 79.3103448276,
+        "positive_years_pct": 87.5,
+        "max_loss_streak": 10,
+        "long3_daily_corr": 0.0575173989,
+        "long3_weekly_corr": 0.0116357120
+      }
+    },
+    {
+      "strategy": "XRP_D3",
+      "symbol": "XRPUSDT",
+      "timeframe": "1H",
+      "displacement_bars": 3,
+      "status": "KEEP",
+      "evidence": {
+        "history_start": "2019-08-28",
+        "history_end": "2026-09-22",
+        "trades": 989,
+        "profit_factor": 1.1116231322,
+        "expectancy_r": 0.1273560528,
+        "profit_factor_cost_1_5x": 1.0618267619,
+        "profit_factor_cost_2x": 1.0223645720,
+        "positive_years": "7/8",
+        "long3_daily_corr": -0.0503487370,
+        "long3_weekly_corr": -0.1021506865
+      }
+    }
+  ],
+  "conditional_research": [
+    {
+      "strategy": "BTC_D4",
+      "symbol": "BTCUSDT",
+      "status": "CONDITIONAL_ONLY",
+      "reason": "Long-history base edge exists but is regime-dependent and fails 2x cost stress.",
+      "profit_factor": 1.1244434210,
+      "profit_factor_cost_1_5x": 1.0119044610,
+      "profit_factor_cost_2x": 0.9167363721
+    }
+  ],
+  "watch_only": [
+    {
+      "strategy": "NDX_D4",
+      "symbol": "NDX100USDT",
+      "status": "WATCH_ONLY",
+      "reason": "Only 9 trades in available Bitget history; insufficient sample."
+    }
+  ],
+  "dropped": [
+    {
+      "strategy": "BTC_D3",
+      "symbol": "BTCUSDT",
+      "reason": "Fails 1.5x cost stress and long-history time stability."
+    },
+    {
+      "strategy": "SP500_D3_D4",
+      "symbol": "SP500USDT",
+      "reason": "Bitget-native overlap test failed after costs."
+    },
+    {
+      "strategy": "ETH_D4",
+      "symbol": "ETHUSDT",
+      "reason": "Recent two-year causal performance below break-even."
+    },
+    {
+      "strategy": "SOL_D3_D4",
+      "symbol": "SOLUSDT",
+      "reason": "Edge too thin; fails cost stress."
+    },
+    {
+      "strategy": "BNB_D3_D4",
+      "symbol": "BNBUSDT",
+      "reason": "Weak full-period edge and second-half deterioration."
+    },
+    {
+      "strategy": "DOGE_D3_D4",
+      "symbol": "DOGEUSDT",
+      "reason": "Near-noise full-period edge; fails cost stress."
+    }
+  ],
+  "notes": [
+    "KEEP means research/forward candidate, not live-money activation.",
+    "LONG3 correlation uses the overlapping historical artifact window in 2026 and should be rechecked as forward data accumulates.",
+    "The backtests used 2% account risk per 1R for equity/DD calculations; sub-strategy deployment should use lower risk until forward validation."
+  ]
+}
