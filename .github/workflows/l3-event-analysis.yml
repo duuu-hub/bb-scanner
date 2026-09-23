@@ -1,0 +1,37 @@
+name: L3 Independent Event Analysis
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-robustness-killtest]
+    paths: ['.research/l3_event_analysis_once']
+permissions:
+  actions: read
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Download prior regime artifact
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: |
+          mkdir -p prior_regime
+          gh run download 35816642180 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir prior_regime
+      - name: Download prior context artifact
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: |
+          mkdir -p prior_context
+          gh run download 35835708997 --repo duuu-hub/bb-scanner --name context-direction-research --dir prior_context
+      - run: python research/l3_event_analysis.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: l3-independent-event-analysis
+          path: l3_event_analysis_results/
+          retention-days: 14
