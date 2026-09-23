@@ -93,16 +93,11 @@ def load_trades(old_zip: str, new_zip: str, overlap: set[str], holdout: set[str]
     new = new[new["symbol"].isin(holdout)].copy()
     new["universe_group"] = "NEW66"
 
-    # Normalize the mirror name in the older artifact.
+    # Normalize the older mirror name; BTC percentile is not needed for this analysis.
     old["strategy"] = "L1_MOMENTUM_1H10"
-    keep = sorted(set(old.columns).intersection(new.columns) | {
-        "symbol","signal_ts","delay_min","direction","net_pct","outcome",
-        "signal_price","btc_vol_state","btc_rv7d_pctile365","universe_group",
-    })
-    # Keep only columns present in both; the required fields are added above.
     base_cols = [
         "symbol","signal_ts","delay_min","direction","net_pct","outcome",
-        "signal_price","btc_vol_state","btc_rv7d_pctile365","universe_group",
+        "signal_price","btc_vol_state","universe_group",
     ]
     old = old[base_cols].copy()
     new = new[base_cols].copy()
@@ -235,7 +230,7 @@ def pivot_events(trades: pd.DataFrame):
     # One row per L1 event, with long/short outcomes for each entry delay.
     event_meta = trades.sort_values(["symbol","signal_ts","delay_min"]).drop_duplicates(
         ["symbol","signal_ts"]
-    )[["symbol","signal_ts","signal_price","btc_vol_state","btc_rv7d_pctile365","universe_group"]]
+    )[["symbol","signal_ts","signal_price","btc_vol_state","universe_group"]]
 
     p = trades.pivot_table(
         index=["symbol","signal_ts"],
