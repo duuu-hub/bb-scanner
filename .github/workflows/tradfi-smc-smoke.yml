@@ -1,0 +1,39 @@
+name: TradFi SMC Smoke
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "research/tradfi_smc_smoke.py"
+      - ".github/workflows/tradfi-smc-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install -r requirements-backtest.txt
+          pip install yfinance
+      - name: Run SPY QQQ ES NQ smoke
+        run: python -m research.tradfi_smc_smoke
+      - name: Persist results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/tradfi_smc_smoke
+          git commit -m "research: persist TradFi SMC smoke results"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
