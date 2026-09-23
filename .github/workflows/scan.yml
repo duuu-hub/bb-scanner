@@ -46,6 +46,28 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python auto_trader.py
 
+      - name: Finalize three-minute Maker window
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if python - <<'PY'
+          import json, pathlib, sys
+          p = pathlib.Path("state/trading_state.json")
+          data = json.loads(p.read_text()) if p.exists() else {}
+          sys.exit(0 if data.get("pending_entries") else 1)
+          PY
+          then
+            echo "Maker order pending; waiting 185 seconds for the 3-minute fill window."
+            sleep 185
+            python auto_trader.py
+          else
+            echo "No Maker order pending; no wait needed."
+          fi
+
       - name: Persist scanner, signal, trading state and audit logs
         run: |
           paths="state.json paper_signals.csv scan_runtime.json signals/pending.jsonl state/trading_state.json logs/executions.jsonl"
