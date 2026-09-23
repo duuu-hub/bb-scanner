@@ -81,5 +81,26 @@ class ContractFilterTests(unittest.TestCase):
             self.assertEqual(chosen, ["BTCUSDT", "ETHUSDT"])
 
 
+    def test_market_regime_excludes_rwa_and_major_bases(self):
+        import market_regime
+
+        rows = [
+            self.rwa,
+            self.crypto,
+            {**self.crypto, "symbol": "ETHUSDT", "baseCoin": "ETH"},
+            {**self.crypto, "symbol": "ALLOUSDT", "baseCoin": "ALLO"},
+        ]
+        rows[0]["baseCoin"] = "AAPL"
+        rows[1]["baseCoin"] = "BTC"
+
+        with patch("market_regime.api_get", return_value=rows):
+            symbols, meta = market_regime.contract_universe()
+
+        self.assertEqual(symbols, ["ALLOUSDT"])
+        self.assertEqual(meta["rwa_excluded_count"], 1)
+        self.assertEqual(meta["active_usdt_perpetual_count"], 4)
+        self.assertEqual(meta["universe_scope"], "crypto_alt_usdt_perpetual")
+
+
 if __name__ == "__main__":
     unittest.main()
