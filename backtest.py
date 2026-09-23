@@ -409,14 +409,19 @@ def bb_state_at(live_price, eval_ts, prepared_tf):
     variance = max(0.0, total_sq / BB_PERIOD - basis * basis)
     std = math.sqrt(variance)
     upper = basis + BB_STD * std
-    if upper <= 0:
+    lower = basis - BB_STD * std
+    if upper <= 0 or basis <= 0:
         return None
 
     dist = (live_price / upper - 1.0) * 100.0
     return {
+        "basis": basis,
         "upper": upper,
+        "lower": lower,
         "dist": dist,
         "above": live_price > upper,
+        "above_basis": live_price > basis,
+        "below_lower": live_price < lower,
     }
 
 
@@ -541,6 +546,8 @@ def build_snapshots(symbol, data, test_start_ms, test_end_ms):
                 break
             rec[f"{tf_name}_dist"] = state["dist"]
             rec[f"{tf_name}_above"] = int(state["above"])
+            rec[f"{tf_name}_above_basis"] = int(state["above_basis"])
+            rec[f"{tf_name}_below_lower"] = int(state["below_lower"])
             exact += int(state["above"])
 
         if not valid:
