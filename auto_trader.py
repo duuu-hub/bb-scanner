@@ -68,6 +68,10 @@ def load_config() -> dict:
         raise RuntimeError("Only DEMO mode is permitted in this branch.")
     if bool(cfg.get("live_trading_enabled")):
         raise RuntimeError("live_trading_enabled must remain false.")
+    active = str(cfg.get("active_strategy", "OFF")).upper()
+    allowed = {str(x).upper() for x in cfg.get("allowed_strategies", [])}
+    if active != "OFF" and active not in allowed:
+        raise RuntimeError(f"active_strategy={active} is not in allowed_strategies.")
     return cfg
 
 
@@ -117,6 +121,30 @@ def matching_position(rows: list[dict], symbol: str, side: str) -> dict | None:
         if str(row.get("symbol", "")).upper() == symbol.upper() and str(row.get("holdSide", "")).lower() == hold:
             return row
     return None
+
+
+def wait_for_protected_position(
+    client: BitgetDemoClassic,
+    symbol: str,
+    side: str,
+    require_tp_sl: bool = True,
+    attempts: int = 10,
+) -> dict | None:
+    last = None
+    for _ in range(attempts):
+        rows = client.private_get(
+            "/api/v2/mix/position/single-position",
+            {
+                "symbol": symbol,
+                "productType": PRODUCT_TYPE,
+                "marginCoin": MARGIN_COIN,
+            },
+        ) or []
+        last = matching_position(rows, symbol, side)
+        if last and (not require_tp_sl or (last.get("takeProfit") and last.get("stopLoss"))):
+            return last
+        time.sleep(0.5)
+    return last
 
 
 def symbol_has_position(rows: list[dict], symbol: str) -> bool:
@@ -380,17 +408,14 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
     state["processed_signal_ids"].append(signal.signal_id)
 
     # Verify exchange-side protection after the fill. If absent, close our exact size.
-    time.sleep(0.5)
-    pos_rows = client.private_get(
-        "/api/v2/mix/position/single-position",
-        {
-            "symbol": signal.symbol,
-            "productType": PRODUCT_TYPE,
-            "marginCoin": MARGIN_COIN,
-        },
-    ) or []
-    pos = matching_position(pos_rows, signal.symbol, signal.side)
-    if not pos or (bool(cfg.get("require_exchange_tp_sl", True)) and (not pos.get("takeProfit") or not pos.get("stopLoss"))):
+    require_tp_sl = bool(cfg.get("require_exchange_tp_sl", True))
+    pos = wait_for_protected_position(
+        client,
+        signal.symbol,
+        signal.side,
+        require_tp_sl=require_tp_sl,
+    )
+    if not pos or (require_tp_sl and (not pos.get("takeProfit") or not pos.get("stopLoss"))):
         emergency_trade = {
             "signal_id": signal.signal_id,
             "symbol": signal.symbol,
