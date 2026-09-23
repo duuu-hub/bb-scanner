@@ -3,7 +3,9 @@ import argparse, json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import sys\nsys.path.insert(0, str(Path(__file__).resolve().parents[1]))\nfrom precision_backtest import build_signals, calc_pf
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from precision_backtest import build_signals, calc_pf
 
 BAR=900_000
 LONG3={"L1_MOMENTUM_1H10","L2_EXPLOSIVE_4H30","L3_4H_LAG"}
