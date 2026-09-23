@@ -241,7 +241,7 @@ def main():
         "auto100_breadth_selection":len(auto100),
         "frozen_rule":"L1 + BTC-vol MID; SHORT if >=2 of: ret1h>=15.0020102359, 1h BB width>=31.5636142807, AUTO100-available breadth positive4h<=49.1039426523, BTC4h<=0.3309109471.",
         "warning":"Chronologically earlier replay, but NOT pristine untouched OOS: this older period was inspected in prior BB/regime research. No thresholds are changed here.",
-        "breadth_note":"Breadth is reconstructed point-in-time from the current-survivor AUTO100 selection; symbols without historical candles at an event are excluded from that event denominator.",
+        "breadth_note":"Breadth is reconstructed point-in-time from the frozen current-survivor AUTO100 selection; symbols without historical candles at an event are excluded from that event denominator.",\n        "breadth_bug_fix":"Fixed an off-by-one API end boundary that previously returned only 16 completed 15m candles and forced breadth_universe_n=0. Thresholds/rule unchanged.",
     }
     (out/"meta.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
