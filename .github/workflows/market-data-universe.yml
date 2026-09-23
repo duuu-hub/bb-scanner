@@ -42,6 +42,7 @@ on:
     - cron: "27 0 * * *"
   push:
     branches:
+      - main
       - market-data-universe-v2
     paths:
       - "market_data/universe_collector.py"
@@ -82,7 +83,7 @@ jobs:
           python -m py_compile market_data/universe_store.py
 
       - name: Branch smoke test
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref_name != 'main'
         run: |
           rm -rf universe_test_output
           python market_data/universe_collector.py \
@@ -121,7 +122,7 @@ jobs:
           PY
 
       - name: Collect production/manual data
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || github.ref_name == 'main'
         shell: bash
         run: |
           MODE="sync"
@@ -146,7 +147,7 @@ jobs:
           python market_data/universe_collector.py "${ARGS[@]}"
 
       - name: Commit immutable partitions
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.commit_data)
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.commit_data) || (github.event_name == 'push' && github.ref_name == 'main')
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -163,7 +164,7 @@ jobs:
           git push origin "HEAD:$GITHUB_REF_NAME"
 
       - name: Upload smoke-test data
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.ref_name != 'main'
         uses: actions/upload-artifact@v4
         with:
           name: universe-v2-smoke
