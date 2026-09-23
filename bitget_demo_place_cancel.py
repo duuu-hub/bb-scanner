@@ -105,7 +105,7 @@ def main():
 
     symbol = os.getenv("DEMO_SYMBOL", "BTCUSDT").strip().upper()
     side = os.getenv("DEMO_SIDE", "buy").strip().lower()
-    position_mode = os.getenv("DEMO_POSITION_MODE", "one_way").strip().lower()
+    position_mode = "hedge"  # Demo account confirmed by user to be Hedge Mode
     target_notional = Decimal(os.getenv("DEMO_NOTIONAL_USDT", "10").strip())
 
     if side not in {"buy", "sell"}:
