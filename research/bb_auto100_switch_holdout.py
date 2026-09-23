@@ -7,7 +7,32 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from research.exhaustive_context_study import load_total, asof_frame
+BAR2H_MS = 2 * 60 * 60_000
+
+
+def load_total(path, prefix):
+    df = pd.read_csv(path).sort_values("timestamp_ms").reset_index(drop=True)
+    df["timestamp_ms"] = pd.to_numeric(df["timestamp_ms"], errors="coerce")
+    df["close"] = pd.to_numeric(df["close"], errors="coerce")
+    df = df.dropna(subset=["timestamp_ms", "close"]).copy()
+    df["timestamp_ms"] = df["timestamp_ms"].astype("int64")
+    # A 2h TradingView candle is usable only after it has fully closed.
+    df["available_ts"] = df["timestamp_ms"] + BAR2H_MS
+    df[f"{prefix}_ret_24h"] = (df["close"] / df["close"].shift(12) - 1.0) * 100.0
+    return df
+
+
+def asof_frame(df, signal_times, prefix):
+    times = df["available_ts"].to_numpy(dtype=np.int64)
+    vals = df[f"{prefix}_ret_24h"].to_numpy(dtype=float)
+    rows = []
+    for ts in signal_times:
+        i = int(np.searchsorted(times, int(ts), side="right") - 1)
+        rows.append({
+            "signal_ts": int(ts),
+            f"{prefix}_ret_24h": vals[i] if i >= 0 else float("nan"),
+        })
+    return pd.DataFrame(rows)
 
 RNG = np.random.default_rng(20260923)
 
