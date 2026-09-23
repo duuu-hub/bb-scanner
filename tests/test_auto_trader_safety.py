@@ -44,6 +44,9 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertEqual(cfg["position_size_pct"], 30.0)
         self.assertEqual(cfg["max_total_exposure_pct"], 200.0)
         self.assertEqual(cfg["max_open_positions"], 6)
+        self.assertEqual(cfg["entry_order_type"], "MAKER_LIMIT")
+        self.assertTrue(cfg["maker_post_only"])
+        self.assertEqual(cfg["maker_wait_seconds"], 180)
 
     def test_spread_pct_uses_bid_ask_midpoint(self):
         self.assertAlmostEqual(
