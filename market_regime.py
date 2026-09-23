@@ -13,6 +13,8 @@ from pathlib import Path
 
 import requests
 
+from market_data.contract_filters import is_active_usdt_perpetual, is_rwa_contract
+
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
 INTERVAL_MS = 15 * 60 * 1000
@@ -22,6 +24,9 @@ REQUEST_TIMEOUT_SEC = int(os.getenv("REGIME_REQUEST_TIMEOUT_SEC", "12"))
 
 STATE_PATH = Path("market_regime_state.json")
 HISTORY_PATH = Path("market_regime_history.csv")
+LEGACY_HISTORY_ARCHIVE_PATH = Path(
+    "research/archive/market_regime_history_legacy_rwa_mixed_2026-09-23.csv"
+)
 EXTERNAL_ROOT = Path("market_data_store/tradingview")
 
 # BTC/ETH are intentionally excluded because this layer is meant to describe
@@ -47,6 +52,9 @@ _last_api_start = 0.0
 
 HISTORY_FIELDS = [
     "timestamp_utc",
+    "universe_scope",
+    "active_usdt_perpetual_count",
+    "rwa_excluded_count",
     "bucket_start_utc",
     "regime",
     "score",
@@ -105,30 +113,36 @@ def api_get(path: str, params: dict | None = None, retries: int = 4):
     raise RuntimeError(f"GET {path} failed: {last_error}")
 
 
-def contract_universe() -> list[str]:
+def contract_universe() -> tuple[list[str], dict]:
+    """Return crypto-only altcoin USDT perpetuals plus audit metadata."""
     rows = api_get(
         "/api/v2/mix/market/contracts",
         {"productType": PRODUCT_TYPE},
     ) or []
 
+    active_usdt = [
+        row
+        for row in rows
+        if is_active_usdt_perpetual(row, include_rwa=True)
+    ]
+    rwa_excluded = sum(1 for row in active_usdt if is_rwa_contract(row))
+
     symbols: list[str] = []
-    for row in rows:
-        if row.get("symbolType") != "perpetual":
-            continue
-        if row.get("symbolStatus") != "normal":
+    for row in active_usdt:
+        if is_rwa_contract(row):
             continue
 
         symbol = str(row.get("symbol") or "").upper()
-        quote = str(row.get("quoteCoin") or "").upper()
         base = str(row.get("baseCoin") or "").upper()
-
-        if not symbol or quote != "USDT":
-            continue
         if base in EXCLUDED_BASES:
             continue
         symbols.append(symbol)
 
-    return sorted(set(symbols))
+    return sorted(set(symbols)), {
+        "universe_scope": "crypto_alt_usdt_perpetual",
+        "active_usdt_perpetual_count": len(active_usdt),
+        "rwa_excluded_count": rwa_excluded,
+    }
 
 
 def bulk_24h_changes() -> dict[str, float]:
@@ -334,7 +348,7 @@ def classify_regime(metrics: dict) -> dict:
 
 
 def build_snapshot() -> dict:
-    symbols = contract_universe()
+    symbols, universe_meta = contract_universe()
     changes_24h = bulk_24h_changes()
 
     ret_1h_by_symbol: dict[str, float] = {}
@@ -387,6 +401,7 @@ def build_snapshot() -> dict:
     return {
         "timestamp_utc": now.isoformat(),
         "bucket_start_utc": bucket.isoformat(),
+        **universe_meta,
         **metrics,
     }
 
@@ -395,6 +410,36 @@ def write_state(snapshot: dict) -> None:
     STATE_PATH.write_text(
         json.dumps(snapshot, ensure_ascii=False, indent=2, sort_keys=True),
         encoding="utf-8",
+    )
+
+
+def migrate_legacy_history_if_needed() -> None:
+    """Archive the pre-crypto-filter history once, then start a clean schema."""
+    if not HISTORY_PATH.exists():
+        return
+
+    try:
+        first_line = HISTORY_PATH.read_text(encoding="utf-8").splitlines()[0]
+    except (OSError, IndexError):
+        return
+
+    if "universe_scope" in first_line:
+        return
+
+    LEGACY_HISTORY_ARCHIVE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not LEGACY_HISTORY_ARCHIVE_PATH.exists():
+        LEGACY_HISTORY_ARCHIVE_PATH.write_text(
+            HISTORY_PATH.read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    with HISTORY_PATH.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=HISTORY_FIELDS, lineterminator="\n")
+        writer.writeheader()
+
+    print(
+        "[MIGRATE] archived mixed RWA regime history to "
+        f"{LEGACY_HISTORY_ARCHIVE_PATH}"
     )
 
 
@@ -434,6 +479,7 @@ def fmt(value: float | None) -> str:
 
 
 def main() -> None:
+    migrate_legacy_history_if_needed()
     snapshot = build_snapshot()
     write_state(snapshot)
     upsert_history(snapshot)
@@ -442,7 +488,9 @@ def main() -> None:
         "[REGIME] "
         f"{snapshot['regime']} score={snapshot['score']:+d} "
         f"bull_votes={snapshot['bull_votes']} bear_votes={snapshot['bear_votes']} "
-        f"universe={snapshot['universe_count']} sample={snapshot['sample_1h_4h_count']}"
+        f"scope={snapshot['universe_scope']} "
+        f"universe={snapshot['universe_count']} sample={snapshot['sample_1h_4h_count']} "
+        f"rwa_excluded={snapshot['rwa_excluded_count']}"
     )
     print(
         "[BREADTH] "
