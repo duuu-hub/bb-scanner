@@ -1,0 +1,47 @@
+name: Context Direction Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - regime-breadth-research
+    paths:
+      - '.research/context_direction_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download prior regime research artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior_artifact
+          gh run download 35816642180             --repo duuu-hub/bb-scanner             --name regime-breadth-research             --dir prior_artifact
+
+      - name: Add BTC ETH and breadth context
+        run: |
+          python context_direction_research.py             --artifact-dir prior_artifact/regime_breadth_results             --market-root market_data_store/bitget/15m             --outdir context_direction_results
+
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-direction-research
+          path: context_direction_results/
+          if-no-files-found: warn
+          retention-days: 14
