@@ -444,33 +444,6 @@ def finalize_maker_fill(
         return False
 
     protected = bool(detail.get("presetStopSurplusPrice") and detail.get("presetStopLossPrice"))
-    pos = wait_for_position(client, str(pending["symbol"]), str(pending["side"]))
-    if not pos or (bool(cfg.get("require_exchange_tp_sl", True)) and not protected):
-        emergency = {
-            "signal_id": pending["signal_id"],
-            "strategy": pending.get("strategy"),
-            "symbol": pending["symbol"],
-            "side": pending["side"],
-            "qty": str(filled_qty),
-            "entry_avg_price": str(avg_fill),
-        }
-        close_tracked_trade(client, emergency, "MAKER_PROTECTION_VERIFY_FAILED")
-        log_event(
-            {
-                "event": "MAKER_ENTRY_ABORTED",
-                "signal_id": pending["signal_id"],
-                "strategy": pending.get("strategy"),
-                "symbol": pending["symbol"],
-                "reason": "MAKER_PROTECTION_VERIFY_FAILED",
-            }
-        )
-        mark_signal_shadow_execution(state, str(pending["signal_id"]), "MAKER_ENTRY_ABORTED")
-        notify(
-            cfg,
-            f"🚨 Demo Maker 체결 후 복구청산\n{pending.get('strategy')} {pending['symbol']}\nTP/SL 또는 포지션 확인 실패",
-        )
-        return True
-
     filled_ms = int(detail.get("uTime") or detail.get("cTime") or ts_ms)
     signal_deadline = int(pending["signal_time_ms"]) + int(pending["max_hold_minutes"]) * 60_000
     trade = {
@@ -491,6 +464,70 @@ def finalize_maker_fill(
         "entry_order_type": "MAKER_LIMIT",
         "maker_limit_price": pending.get("maker_limit_price"),
     }
+
+    pos = wait_for_position(client, str(pending["symbol"]), str(pending["side"]))
+    if not pos:
+        # The maker order may have filled and then hit preset TP/SL before the
+        # 3-minute finalizer woke up. Reconstruct that exchange-side close
+        # instead of attempting to close a position that no longer exists.
+        close_info = resolve_exchange_close(client, trade, ts_ms)
+        if close_info.get("reason") != "EXCHANGE_POSITION_GONE" or close_info.get("avg_price") is not None:
+            trade.update(
+                {
+                    "closed_at_ms": ts_ms,
+                    "close_reason": close_info.get("reason", "EXCHANGE_POSITION_GONE"),
+                    "return_pct": close_info.get("return_pct"),
+                    "exit_avg_price": close_info.get("avg_price"),
+                    "exit_order_id": close_info.get("order_id"),
+                    "exit_order_source": close_info.get("order_source"),
+                }
+            )
+            state.setdefault("closed_trades", []).append(trade)
+            log_event(
+                {
+                    "event": "MAKER_FILL_ALREADY_CLOSED",
+                    "signal_id": pending["signal_id"],
+                    "strategy": pending.get("strategy"),
+                    "symbol": pending["symbol"],
+                    "reason": trade["close_reason"],
+                    "return_pct": trade.get("return_pct"),
+                }
+            )
+            mark_signal_shadow_execution(state, str(pending["signal_id"]), "DEMO_MAKER_FILL_CLOSED")
+            notify(
+                cfg,
+                f"✅ Demo Maker 체결·종료 확인\n{pending.get('strategy')} {pending['symbol']}\n"
+                f"reason={trade['close_reason']} return={trade.get('return_pct')}",
+            )
+            return True
+
+    if (not pos) or (bool(cfg.get("require_exchange_tp_sl", True)) and not protected):
+        emergency = {
+            "signal_id": pending["signal_id"],
+            "strategy": pending.get("strategy"),
+            "symbol": pending["symbol"],
+            "side": pending["side"],
+            "qty": str(filled_qty),
+            "entry_avg_price": str(avg_fill),
+        }
+        if pos:
+            close_tracked_trade(client, emergency, "MAKER_PROTECTION_VERIFY_FAILED")
+        log_event(
+            {
+                "event": "MAKER_ENTRY_ABORTED",
+                "signal_id": pending["signal_id"],
+                "strategy": pending.get("strategy"),
+                "symbol": pending["symbol"],
+                "reason": "MAKER_PROTECTION_VERIFY_FAILED",
+            }
+        )
+        mark_signal_shadow_execution(state, str(pending["signal_id"]), "MAKER_ENTRY_ABORTED")
+        notify(
+            cfg,
+            f"🚨 Demo Maker 체결 후 보호 확인 실패\n{pending.get('strategy')} {pending['symbol']}",
+        )
+        return True
+
     if not any(x.get("signal_id") == trade["signal_id"] for x in state.get("open_trades", [])):
         state.setdefault("open_trades", []).append(trade)
 
