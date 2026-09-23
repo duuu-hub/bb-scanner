@@ -6,6 +6,7 @@ from auto_trader import (
     order_size,
     position_exposure_usdt,
     symbol_has_position,
+    load_config,
 )
 
 
@@ -33,6 +34,20 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
     def test_order_size_rounds_up_step(self):
         cfg = {"minTradeNum": "0.001", "sizeMultiplier": "0.001", "minTradeUSDT": "0", "volumePlace": "3"}
         self.assertEqual(order_size(cfg, Decimal("100"), Decimal("10.01")), "0.101")
+
+    def test_frozen_long3_risk_config(self):
+        cfg = load_config()
+        self.assertEqual(cfg["active_portfolio"], "LONG3")
+        self.assertEqual(cfg["enabled_strategies"], ["L1", "L2", "L3"])
+        self.assertEqual(cfg["position_size_pct"], 30.0)
+        self.assertEqual(cfg["max_total_exposure_pct"], 200.0)
+        self.assertEqual(cfg["max_open_positions"], 6)
+
+    def test_repository_default_is_demo_and_auto_off(self):
+        cfg = load_config()
+        self.assertEqual(cfg["trading_mode"], "DEMO")
+        self.assertFalse(cfg["live_trading_enabled"])
+        self.assertFalse(cfg["demo_auto_execute"])
 
 
 if __name__ == "__main__":
