@@ -6,6 +6,7 @@ from auto_trader import (
     order_size,
     position_exposure_usdt,
     symbol_has_position,
+    spread_pct,
     load_config,
 )
 
@@ -42,6 +43,13 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertEqual(cfg["position_size_pct"], 30.0)
         self.assertEqual(cfg["max_total_exposure_pct"], 200.0)
         self.assertEqual(cfg["max_open_positions"], 6)
+
+    def test_spread_pct_uses_bid_ask_midpoint(self):
+        self.assertAlmostEqual(
+            spread_pct(Decimal("99"), Decimal("101")),
+            2.0,
+            places=9,
+        )
 
     def test_repository_is_demo_and_live_disabled(self):
         cfg = load_config()
