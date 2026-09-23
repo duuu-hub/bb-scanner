@@ -53,10 +53,12 @@ class RuntimePlumbingTests(unittest.TestCase):
             p = Path(d) / "state.json"
             st = load_trading_state(p)
             st["processed_signal_ids"] = [str(i) for i in range(5100)]
+            st["pending_entries"] = [{"signal_id": "maker-1"}]
             save_trading_state(p, st)
             reread = load_trading_state(p)
             self.assertEqual(len(reread["processed_signal_ids"]), 5000)
             self.assertEqual(reread["processed_signal_ids"][-1], "5099")
+            self.assertEqual(reread["pending_entries"][0]["signal_id"], "maker-1")
 
 
 if __name__ == "__main__":
