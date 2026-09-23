@@ -7,6 +7,7 @@ from auto_trader import (
     position_exposure_usdt,
     symbol_has_position,
     spread_pct,
+    signal_shadow_stats,
     load_config,
 )
 
@@ -50,6 +51,22 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
             2.0,
             places=9,
         )
+
+    def test_signal_shadow_stats_tracks_cumulative(self):
+        state = {
+            "signal_shadow_closed": [
+                {"closed_at_ms": 1, "signal_id": "a", "shadow_return_pct": 10.0},
+                {"closed_at_ms": 2, "signal_id": "b", "shadow_return_pct": -5.0},
+            ]
+        }
+        stats = signal_shadow_stats(state, {"position_size_pct": 30.0})
+        self.assertEqual(stats["valid"], 2)
+        self.assertEqual(stats["wins"], 1)
+        self.assertEqual(stats["losses"], 1)
+        self.assertAlmostEqual(stats["win_rate_pct"], 50.0)
+        self.assertAlmostEqual(stats["pf"], 2.0)
+        self.assertAlmostEqual(stats["avg_return_pct"], 2.5)
+        self.assertAlmostEqual(stats["weighted_compounded_pct"], 1.455, places=6)
 
     def test_repository_is_demo_and_live_disabled(self):
         cfg = load_config()
