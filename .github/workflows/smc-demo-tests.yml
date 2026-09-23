@@ -1,0 +1,33 @@
+name: SMC Demo Tests
+
+on:
+  push:
+    branches:
+      - smc-demo-forward
+    paths:
+      - "smc_forward_engine.py"
+      - "smc_demo_forward.py"
+      - "config/smc_demo_config.json"
+      - "tests/test_smc_forward.py"
+      - ".github/workflows/smc-demo-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: smc-demo-forward
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt
+      - name: Unit tests
+        run: pytest -q tests/test_smc_forward.py
+      - name: Public-data scan only
+        run: python smc_demo_forward.py --scan-only
