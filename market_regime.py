@@ -63,10 +63,10 @@ HISTORY_FIELDS = [
     "median_24h_pct",
     "q25_4h_pct",
     "q75_4h_pct",
-    "total3_1h_pct",
     "total3_4h_pct",
-    "total3es_1h_pct",
+    "total3_24h_pct",
     "total3es_4h_pct",
+    "total3es_24h_pct",
 ]
 
 
@@ -229,10 +229,11 @@ def quantile(values: list[float], q: float) -> float | None:
 
 
 def external_index_returns(symbol: str) -> tuple[float | None, float | None]:
-    """Read optional normalized TradingView index history if present.
+    """Return 4h/24h changes from optional TradingView 2h index history.
 
-    Expected columns: timestamp_ms, close. This adapter is intentionally
-    optional because Bitget does not provide CRYPTOCAP:TOTAL3/TOTAL3ES.
+    Expected columns: timestamp_ms, close. TOTAL3/TOTAL3ES are imported from
+    2-hour TradingView exports, so 1-hour returns are intentionally not
+    derived. Stale manual exports are ignored in live snapshots.
     """
     path = EXTERNAL_ROOT / f"{symbol}.csv"
     if not path.exists():
@@ -253,11 +254,15 @@ def external_index_returns(symbol: str) -> tuple[float | None, float | None]:
     except OSError:
         return None, None
 
-    if len(points) < 2:
+    if len(points) < 13:
         return None, None
 
     points.sort(key=lambda item: item[0])
     latest_ts, latest_close = points[-1]
+
+    now_ms = int(time.time() * 1000)
+    if now_ms - latest_ts > 6 * 60 * 60 * 1000:
+        return None, None
 
     def value_at_or_before(target_ts: int) -> float | None:
         for ts, close in reversed(points):
@@ -265,21 +270,19 @@ def external_index_returns(symbol: str) -> tuple[float | None, float | None]:
                 return close
         return None
 
-    base_1h = value_at_or_before(latest_ts - 60 * 60 * 1000)
     base_4h = value_at_or_before(latest_ts - 4 * 60 * 60 * 1000)
-    ret_1h = (
-        (latest_close / base_1h - 1.0) * 100.0
-        if base_1h and base_1h > 0
-        else None
-    )
+    base_24h = value_at_or_before(latest_ts - 24 * 60 * 60 * 1000)
     ret_4h = (
         (latest_close / base_4h - 1.0) * 100.0
         if base_4h and base_4h > 0
         else None
     )
-    return ret_1h, ret_4h
-
-
+    ret_24h = (
+        (latest_close / base_24h - 1.0) * 100.0
+        if base_24h and base_24h > 0
+        else None
+    )
+    return ret_4h, ret_24h
 def classify_regime(metrics: dict) -> dict:
     """Transparent initial regime rule for data collection and research.
 
@@ -355,8 +358,8 @@ def build_snapshot() -> dict:
         if symbol in changes_24h and math.isfinite(changes_24h[symbol])
     ]
 
-    total3_1h, total3_4h = external_index_returns("TOTAL3")
-    total3es_1h, total3es_4h = external_index_returns("TOTAL3ES")
+    total3_4h, total3_24h = external_index_returns("TOTAL3")
+    total3es_4h, total3es_24h = external_index_returns("TOTAL3ES")
 
     metrics = {
         "universe_count": len(symbols),
@@ -370,10 +373,10 @@ def build_snapshot() -> dict:
         "median_24h_pct": median(values_24h),
         "q25_4h_pct": quantile(values_4h, 0.25),
         "q75_4h_pct": quantile(values_4h, 0.75),
-        "total3_1h_pct": total3_1h,
         "total3_4h_pct": total3_4h,
-        "total3es_1h_pct": total3es_1h,
+        "total3_24h_pct": total3_24h,
         "total3es_4h_pct": total3es_4h,
+        "total3es_24h_pct": total3es_24h,
     }
     metrics.update(classify_regime(metrics))
 
@@ -399,7 +402,10 @@ def upsert_history(snapshot: dict) -> None:
     rows: list[dict[str, str]] = []
     if HISTORY_PATH.exists():
         with HISTORY_PATH.open("r", newline="", encoding="utf-8") as fh:
-            rows = list(csv.DictReader(fh))
+            rows = [
+                {field: existing.get(field, "") for field in HISTORY_FIELDS}
+                for existing in csv.DictReader(fh)
+            ]
 
     row = {
         field: "" if snapshot.get(field) is None else snapshot.get(field)
@@ -447,13 +453,13 @@ def main() -> None:
         f"med4h={fmt(snapshot['median_4h_pct'])} "
         f"med24h={fmt(snapshot['median_24h_pct'])}"
     )
-    if snapshot.get("total3_1h_pct") is not None:
+    if snapshot.get("total3_4h_pct") is not None:
         print(
             "[TOTAL3] "
-            f"1h={fmt(snapshot['total3_1h_pct'])} "
             f"4h={fmt(snapshot['total3_4h_pct'])} "
-            f"TOTAL3ES_1h={fmt(snapshot['total3es_1h_pct'])} "
-            f"TOTAL3ES_4h={fmt(snapshot['total3es_4h_pct'])}"
+            f"24h={fmt(snapshot['total3_24h_pct'])} "
+            f"TOTAL3ES_4h={fmt(snapshot['total3es_4h_pct'])} "
+            f"TOTAL3ES_24h={fmt(snapshot['total3es_24h_pct'])}"
         )
 
 
