@@ -53,8 +53,8 @@ jobs:
         shell: bash
         run: |
           MODE="sync"
-          if [[ "\${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            MODE="\${{ inputs.mode }}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MODE="${{ inputs.mode }}"
           fi
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
           echo "Collector mode: $MODE"
@@ -63,7 +63,7 @@ jobs:
         run: python -m py_compile market_data/collector.py
 
       - name: Update BTC and ETH history
-        run: python market_data/collector.py --mode "\${{ steps.collector-mode.outputs.mode }}"
+        run: python market_data/collector.py --mode "${{ steps.collector-mode.outputs.mode }}"
 
       - name: Commit data changes
         shell: bash
