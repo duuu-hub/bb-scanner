@@ -6,7 +6,6 @@ on:
     branches:
       - research-lsob-ict
     paths:
-      - "research/**"
       - ".github/workflows/lsob-research.yml"
 
 jobs:
@@ -31,26 +30,22 @@ jobs:
           python -m py_compile research/vendor/lsob_reference.py
           python -m py_compile research/lsob_benchmark.py
 
-      - name: Run ETH LSOB confirmation sweep on 1h and 15m
+      - name: Run 1h temporal stability checks
         run: |
-          python research/lsob_benchmark.py \
-            --symbol ETHUSDT \
-            --timeframes 1h,15m \
-            --start 2024-08-24 \
-            --end 2026-08-24 \
-            --displacement-bars 2,3,4
+          python research/lsob_benchmark.py --symbol BTCUSDT --timeframes 1h --start 2024-08-24 --end 2025-08-23 --displacement-bars 3,4 --outdir research/results/btc_y1
+          python research/lsob_benchmark.py --symbol BTCUSDT --timeframes 1h --start 2025-08-24 --end 2026-08-24 --displacement-bars 3,4 --outdir research/results/btc_y2
+          python research/lsob_benchmark.py --symbol ETHUSDT --timeframes 1h --start 2024-08-24 --end 2025-08-23 --displacement-bars 3 --outdir research/results/eth_y1
+          python research/lsob_benchmark.py --symbol ETHUSDT --timeframes 1h --start 2025-08-24 --end 2026-08-24 --displacement-bars 3 --outdir research/results/eth_y2
 
-      - name: Show summary
+      - name: Show summaries
         if: always()
         run: |
-          if [ -f research/results/lsob_benchmark_summary.csv ]; then
-            cat research/results/lsob_benchmark_summary.csv
-          fi
+          find research/results -name 'lsob_benchmark_summary.csv' -print -exec cat {} \;
 
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lsob-eth-confirmation-sweep
+          name: lsob-temporal-stability
           path: research/results/
           if-no-files-found: warn
