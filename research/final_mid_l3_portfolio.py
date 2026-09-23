@@ -20,10 +20,10 @@ def main():
  f,a=find_file("context",{"symbol","signal_ts","delay_min","direction","net_pct"})
  pct=next(c for c in a.columns if "btc_rv7d_pctile" in c)
  strat=next((c for c in ("base_strategy","strategy") if c in a.columns),None)
- if strat:a=a[a[strat].astype(str).eq("L1")]
+ if strat:a=a[a[strat].astype(str).str.contains("L1",case=False,na=False)]
  mid=a[(a[pct]>=45)&(a[pct]<55)&a.direction.eq("SHORT")].copy(); mid["leg"]="MID45_55_SHORT"
  rf,r=find_file("regime",{"symbol","signal_ts","delay_min","direction","net_pct","base_strategy","regime_60_40"})
- l3=r[r.base_strategy.astype(str).eq("L3") & r.direction.eq("SHORT") & r.regime_60_40.astype(str).eq("BEAR")].copy(); l3["leg"]="L3_BEAR_SHORT"
+ l3=r[r.base_strategy.astype(str).str.contains("L3",case=False,na=False) & r.direction.eq("SHORT") & r.regime_60_40.astype(str).eq("BEAR")].copy(); l3["leg"]="L3_BEAR_SHORT"
  print("MID source",f,"L3 source",rf)
  rows=[]; ovs=[]
  for d in (1,2,3):
