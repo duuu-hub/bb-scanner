@@ -1,0 +1,21 @@
+name: LONG3 Survival Filter Replay
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'analysis_survival_filter.py'
+      - '.github/workflows/long3-survival-filter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - run: python analysis_survival_filter.py
