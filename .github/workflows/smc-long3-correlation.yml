@@ -1,0 +1,43 @@
+name: SMC vs LONG3 Correlation
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "research/smc_long3_correlation.py"
+      - ".github/workflows/smc-long3-correlation.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt
+      - name: Download LONG3 historical trade artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p candidate1_artifact
+          gh run download 35652776527 -n candidate1-exposure-results -D candidate1_artifact
+      - run: python -m research.smc_long3_correlation
+      - name: Persist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/smc_long3_correlation
+          git commit -m "research: persist SMC vs LONG3 correlation"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
