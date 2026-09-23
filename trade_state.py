@@ -7,6 +7,7 @@ from pathlib import Path
 DEFAULT_STATE = {
     "processed_signal_ids": [],
     "open_trades": [],
+    "pending_entries": [],
     "closed_trades": [],
     "spread_shadow_open": [],
     "spread_shadow_closed": [],
@@ -29,6 +30,7 @@ def load_trading_state(path: str | Path) -> dict:
     for key in (
         "processed_signal_ids",
         "open_trades",
+        "pending_entries",
         "closed_trades",
         "spread_shadow_open",
         "spread_shadow_closed",
