@@ -11,7 +11,11 @@ import numpy as np
 import pandas as pd
 import requests
 
-from market_data.contract_filters import active_symbols_from_contracts, deterministic_symbol_sample
+from market_data.contract_filters import (
+    RESEARCH_CORE_SYMBOLS,
+    active_symbols_from_contracts,
+    deterministic_symbol_sample,
+)
 
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
@@ -36,11 +40,7 @@ HORIZONS = {
 }
 NEAR_THRESHOLDS = [1.0, 3.0, 5.0, 7.0, 10.0]
 
-CORE_SYMBOLS = [
-    "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT",
-    "BNBUSDT", "SUIUSDT", "PEPEUSDT", "WIFUSDT",
-    "龙虾USDT", "NILUSDT", "INITUSDT", "METISUSDT",
-]
+CORE_SYMBOLS = list(RESEARCH_CORE_SYMBOLS)
 
 MAX_WORKERS = int(__import__("os").getenv("BACKTEST_WORKERS", "8"))
 API_STARTS_PER_SEC = float(__import__("os").getenv("BACKTEST_API_RPS", "8"))
