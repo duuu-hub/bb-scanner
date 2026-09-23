@@ -92,6 +92,7 @@ def fetch_rolling_4h(symbol, ts):
     start=int(ts)-17*BAR15_MS
     # history-candles end boundary excluded the last completed 15m candle in the old replay
     # request through signal_ts, then filter to close_ts <= signal_ts
+    end=int(ts)
     try:
         rows=fetch_range(symbol,"15m",15,start,end)
         df=rows_to_df(rows,15)
