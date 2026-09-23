@@ -59,7 +59,7 @@ def frozen_validate(x):
             for bucket,mask in [("KEEP",g[col] < cut),("HIGH_FILTERED",g[col] >= cut)]:
                 h=g[mask & g[col].notna()]
                 if h.empty: continue
-                rows.append({"feature":col,"strategy":strategy,"bucket":bucket,"threshold_from_train70":cut,"n":len(h),"pct_of_test":100*len(h)/len(g[g[col].notna()),"avg_net_pct":h.net_pct.mean(),"win_pct":100*(h.net_pct>0).mean(),"pf":calc_pf(h.net_pct)})
+                rows.append({"feature":col,"strategy":strategy,"bucket":bucket,"threshold_from_train70":cut,"n":len(h),"pct_of_test":100*len(h)/len(g[g[col].notna()]),"avg_net_pct":h.net_pct.mean(),"win_pct":100*(h.net_pct>0).mean(),"pf":calc_pf(h.net_pct)})
     return pd.DataFrame(rows),thresholds
 
 def main():
