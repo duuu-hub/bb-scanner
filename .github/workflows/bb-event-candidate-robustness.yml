@@ -1,0 +1,45 @@
+name: BB Event Candidate Robustness
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-bb-event-anatomy
+    paths:
+      - '.research/bb_event_candidate_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+      - name: Download event-anatomy artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          gh run download 35868042809             --repo duuu-hub/bb-scanner             --name bb-event-anatomy-results             --dir input/raw
+          (cd input/raw && zip -qr ../bb-event-anatomy-results.zip .)
+      - name: Run frozen discovery-candidate robustness
+        run: |
+          python research/bb_event_candidate_robustness.py             --artifact input/bb-event-anatomy-results.zip             --outdir bb_event_candidate_robustness_results
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-event-candidate-robustness-results
+          path: bb_event_candidate_robustness_results/
+          if-no-files-found: warn
+          retention-days: 14
