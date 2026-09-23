@@ -271,14 +271,94 @@ def close_tracked_trade(client: BitgetDemoClassic, trade: dict, reason: str) -> 
     return {"order_id": order_id, "avg_price": detail.get("priceAvg"), "return_pct": ret}
 
 
+def resolve_exchange_close(client: BitgetDemoClassic, trade: dict, ts_ms: int) -> dict:
+    """Best-effort reconstruction of an exchange-side TP/SL/other close."""
+    opened_ms = int(trade.get("opened_at_ms") or 0)
+    try:
+        data = client.private_get(
+            "/api/v2/mix/order/orders-history",
+            {
+                "productType": PRODUCT_TYPE,
+                "symbol": trade["symbol"],
+                "startTime": str(max(0, opened_ms - 5_000)),
+                "endTime": str(ts_ms),
+                "limit": "100",
+            },
+        ) or {}
+        rows = data.get("entrustedList", []) if isinstance(data, dict) else []
+        closes = []
+        for row in rows:
+            try:
+                event_ms = int(row.get("uTime") or row.get("cTime") or 0)
+            except (TypeError, ValueError):
+                event_ms = 0
+            if event_ms < opened_ms:
+                continue
+            if str(row.get("tradeSide") or "").lower() != "close":
+                continue
+            if str(row.get("status") or "").lower() not in {"filled", "full-fill", "full_fill"}:
+                continue
+            closes.append((event_ms, row))
+
+        if not closes:
+            return {"reason": "EXCHANGE_POSITION_GONE", "return_pct": None, "avg_price": None}
+
+        _, row = min(closes, key=lambda item: item[0])
+        source = str(row.get("orderSource") or "").lower()
+        if source in {"profit_market", "profit_limit", "pos_profit_market", "pos_profit_limit"}:
+            reason = "TAKE_PROFIT"
+        elif source in {"loss_market", "loss_limit", "pos_loss_market", "pos_loss_limit"}:
+            reason = "STOP_LOSS"
+        else:
+            reason = "EXCHANGE_CLOSE"
+
+        entry = decimal_or_zero(trade.get("entry_avg_price"))
+        exit_price = decimal_or_zero(row.get("priceAvg") or row.get("price"))
+        side = str(trade.get("side") or "").upper()
+        ret = None
+        if entry > 0 and exit_price > 0:
+            ret = (
+                float((exit_price / entry - Decimal("1")) * Decimal("100"))
+                if side == "LONG"
+                else float((entry / exit_price - Decimal("1")) * Decimal("100"))
+            )
+        return {
+            "reason": reason,
+            "return_pct": ret,
+            "avg_price": str(exit_price) if exit_price > 0 else None,
+            "order_id": row.get("orderId"),
+            "order_source": source or None,
+        }
+    except Exception as exc:
+        log_event(
+            {
+                "event": "CLOSE_RESOLUTION_WARN",
+                "signal_id": trade.get("signal_id"),
+                "strategy": trade.get("strategy"),
+                "symbol": trade.get("symbol"),
+                "error": str(exc),
+            }
+        )
+        return {"reason": "EXCHANGE_POSITION_GONE", "return_pct": None, "avg_price": None}
+
+
 def manage_open_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms: int) -> None:
     exchange_positions = all_positions(client)
     kept = []
     for trade in state.get("open_trades", []):
         pos = matching_position(exchange_positions, trade["symbol"], trade["side"])
         if not pos:
-            trade["closed_at_ms"] = ts_ms
-            trade["close_reason"] = "EXCHANGE_POSITION_GONE"
+            close_info = resolve_exchange_close(client, trade, ts_ms)
+            trade.update(
+                {
+                    "closed_at_ms": ts_ms,
+                    "close_reason": close_info.get("reason", "EXCHANGE_POSITION_GONE"),
+                    "return_pct": close_info.get("return_pct"),
+                    "exit_avg_price": close_info.get("avg_price"),
+                    "exit_order_id": close_info.get("order_id"),
+                    "exit_order_source": close_info.get("order_source"),
+                }
+            )
             state["closed_trades"].append(trade)
             log_event(
                 {
@@ -287,12 +367,16 @@ def manage_open_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms:
                     "strategy": trade.get("strategy"),
                     "symbol": trade["symbol"],
                     "side": trade["side"],
-                    "reason": "EXCHANGE_POSITION_GONE",
+                    "reason": trade["close_reason"],
+                    "avg_price": trade.get("exit_avg_price"),
+                    "return_pct": trade.get("return_pct"),
+                    "order_source": trade.get("exit_order_source"),
                 }
             )
             notify(
                 cfg,
-                f"✅ Demo 포지션 종료 감지\n{trade.get('strategy')} {trade['symbol']}\nreason=EXCHANGE_POSITION_GONE",
+                f"✅ Demo 포지션 종료 감지\n{trade.get('strategy')} {trade['symbol']}\n"
+                f"reason={trade['close_reason']} return={trade.get('return_pct')}",
             )
             continue
 
