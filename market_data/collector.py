@@ -252,7 +252,11 @@ def fetch_backward_until(
                 continue
             collected[candle.timestamp_ms] = candle
 
-        next_end = min_ts - INTERVAL_MS
+        # Deliberately overlap one boundary candle between pages. Bitget's
+        # history endpoint can treat endTime as exclusive, and stepping to
+        # min_ts - one interval creates a one-candle hole at every page edge.
+        # Overlap + timestamp de-duplication is safer and deterministic.
+        next_end = min_ts
         if next_end >= end_ms:
             raise RuntimeError(f"pagination did not move backward for {symbol}")
         end_ms = next_end
@@ -271,12 +275,15 @@ def fetch_exact_range(
     collected: dict[int, Candle] = {}
     cursor = start_ms
     while cursor <= end_ms:
-        chunk_end = min(end_ms, cursor + PAGE_SPAN_MS)
-        batch = client.fetch_window(symbol, cursor, chunk_end)
+        # Bitget rejects startTime == endTime. Request one extra interval so
+        # even a single missing candle can be queried, then filter the result.
+        logical_end = min(end_ms, cursor + PAGE_SPAN_MS)
+        request_end = logical_end + INTERVAL_MS
+        batch = client.fetch_window(symbol, cursor, request_end)
         for candle in batch:
             if start_ms <= candle.timestamp_ms <= end_ms:
                 collected[candle.timestamp_ms] = candle
-        cursor = chunk_end + INTERVAL_MS
+        cursor = logical_end + INTERVAL_MS
     return sorted(collected.values(), key=lambda c: c.timestamp_ms)
 
 
