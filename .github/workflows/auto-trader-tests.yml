@@ -1,0 +1,30 @@
+name: Auto Trader Unit Tests
+
+on:
+  push:
+    branches:
+      - demo-trading-env
+    paths:
+      - 'auto_trader.py'
+      - 'signal_io.py'
+      - 'trade_state.py'
+      - 'trade_guard.py'
+      - 'tests/test_runtime_plumbing.py'
+      - 'config/trading_config.json'
+      - '.github/workflows/auto-trader-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m unittest -v tests/test_trade_guard.py tests/test_runtime_plumbing.py
