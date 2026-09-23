@@ -24,6 +24,7 @@ def api(path,params):
 
 def ms(x): return int(datetime.fromisoformat(x.replace("Z","+00:00")).timestamp()*1000)
 def floor15(x): return (x//900000)*900000
+def ceil_minute(x): return ((x+59999)//60000)*60000
 
 def load():
     with PAPER.open("r",encoding="utf-8",newline="") as f: rows=list(csv.DictReader(f))
@@ -50,16 +51,19 @@ def candles(symbol,start,end):
 
 def evaluate(r,cs,wait_name,wait_min,now):
     signal=r["_ms"]; px=float(r["entry_price"]); tp=float(r["tp_price"]); sl=float(r["sl_price"])
+    # 1m OHLC cannot distinguish trades before vs after a signal emitted inside
+    # the same minute. Start at the next complete minute to avoid look-ahead.
+    order_active_from=ceil_minute(signal)
     if wait_min is None:
         expiry=((signal//900000)+1)*900000
     else:
-        expiry=signal+wait_min*60000
+        expiry=order_active_from+wait_min*60000
     deadline=signal+HOLD[r["strategy"]]*60000
     expiry=min(expiry,deadline,now)
 
     fill=None
     for c in cs:
-        if c["ts"]+60000 < signal: continue
+        if c["ts"] < order_active_from: continue
         if c["ts"] >= expiry: break
         # LONG maker buy at px fills if traded down to or through limit.
         if c["low"] <= px:
