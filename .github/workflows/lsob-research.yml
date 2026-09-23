@@ -1,0 +1,56 @@
+name: LSOB ICT Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-lsob-ict
+    paths:
+      - "research/**"
+      - ".github/workflows/lsob-research.yml"
+
+jobs:
+  btc-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Syntax check
+        run: |
+          python -m py_compile research/vendor/lsob_reference.py
+          python -m py_compile research/lsob_benchmark.py
+
+      - name: Run BTC LSOB baseline on 1h and 15m
+        run: |
+          python research/lsob_benchmark.py \
+            --symbol BTCUSDT \
+            --timeframes 1h,15m \
+            --start 2024-08-24 \
+            --end 2026-08-24 \
+            --displacement-bars 3
+
+      - name: Show summary
+        if: always()
+        run: |
+          if [ -f research/results/lsob_benchmark_summary.csv ]; then
+            cat research/results/lsob_benchmark_summary.csv
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lsob-btc-baseline
+          path: research/results/
+          if-no-files-found: warn
