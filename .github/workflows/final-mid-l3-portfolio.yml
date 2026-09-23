@@ -1,10 +1,8 @@
 name: Final MID L3 Portfolio
 'on':
   push:
-    branches:
-      - research-final-edge-diagnostics
-    paths:
-      - .research/final_mid_l3_once
+    branches: [research-final-edge-diagnostics]
+    paths: [.research/final_mid_l3_once]
   workflow_dispatch:
 permissions:
   actions: read
@@ -18,14 +16,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pandas numpy
-      - name: Download research artifacts
+      - name: Download source artifacts
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p holdout context l3
-          gh run download 35862728778 --repo duuu-hub/bb-scanner --name bb-auto100-switch-holdout-results --dir holdout
+          mkdir -p context regime
           gh run download 35845078138 --repo duuu-hub/bb-scanner --name exhaustive-context-results --dir context
-          gh run download 35857816376 --repo duuu-hub/bb-scanner --name l3-independent-event-analysis --dir l3
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir regime
       - run: python research/final_mid_l3_portfolio.py
       - uses: actions/upload-artifact@v4
         if: always()
