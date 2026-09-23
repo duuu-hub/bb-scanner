@@ -1,0 +1,45 @@
+name: Liquid Crypto Fast Causal
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "research/liquid_smc_long.py"
+      - ".github/workflows/liquid-crypto-fast.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt
+      - run: |
+          rm -rf research/results/liquid_smc_long_fast
+          python - <<'PY'
+          from pathlib import Path
+          import research.liquid_smc_long as m
+          m.OUT=Path("research/results/liquid_smc_long_fast")
+          import sys
+          sys.argv=["liquid_smc_long","--fast"]
+          m.main()
+          PY
+      - name: Persist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/liquid_smc_long_fast
+          git commit -m "research: persist fast causal liquid SMC results"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
