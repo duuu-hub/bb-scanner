@@ -59,7 +59,7 @@ def main():
         SIGNALS.parent.mkdir(parents=True, exist_ok=True)
 
         signal = {
-            "signal_id": f"LONG3:L1:BTCUSDT:{boundary}:E2E",
+            "signal_id": f"LONG3:L1:BTCUSDT:{boundary}:E2E:{ts}",
             "portfolio": "LONG3",
             "strategy": "L1",
             "symbol": "BTCUSDT",
