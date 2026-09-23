@@ -53,11 +53,14 @@ def main():
     p.add_argument("--trades",required=True)
     p.add_argument("--root",default="market_data_store/bitget/research_auto100_15m")
     p.add_argument("--out",default="research/results/long3_relative_strength")
+    p.add_argument("--split-only",default="",choices=["","train70","test30"])
     a=p.parse_args()
     sig=build_signals(pd.read_csv(a.source))
     sig=sig[sig.strategy.isin(LONG3)][["symbol","ts","strategy","split"]].drop_duplicates()
     tr=pd.read_csv(a.trades)
     tr=tr[(tr.strategy.isin(LONG3)) & (tr.delay_min==1)].copy()
+    if a.split_only:
+        tr=tr[tr.split==a.split_only].copy()
     # Prefer precomputed trade returns; join exact original signal timestamp.
     x=tr.merge(sig,left_on=["symbol","signal_ts","strategy"],right_on=["symbol","ts","strategy"],how="inner",suffixes=("","_sig"))
     px=load_prices(a.root); rs=rs_table(px)
@@ -69,7 +72,7 @@ def main():
     out=Path(a.out);out.mkdir(parents=True,exist_ok=True)
     pd.DataFrame(rows).to_csv(out/"summary.csv",index=False)
     x.to_csv(out/"trades_with_rs.csv.gz",index=False,compression="gzip")
-    meta={"matched_trades":len(x),"symbols":int(x.symbol.nunique()),"strategies":sorted(x.strategy.unique().tolist()),
+    meta={"matched_trades":len(x),"symbols":int(x.symbol.nunique()),"strategies":sorted(x.strategy.unique().tolist()),"split_only":a.split_only or "ALL",
       "rule":"Relative strength = asset trailing return - BTC trailing return. Feature uses only candles completed before signal. LOW/MID/HIGH are equal-count diagnostic buckets; no entry rule is changed.",
       "warning":"Diagnostic only. Bucket edges are sample-relative and must not be promoted to a trading filter without independent validation."}
     (out/"meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
