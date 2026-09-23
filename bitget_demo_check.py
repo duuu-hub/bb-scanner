@@ -33,24 +33,13 @@ def sign(secret, timestamp, method, request_path, query_string="", body=""):
     return base64.b64encode(digest).decode("utf-8")
 
 
-def main():
-    api_key = required_env("BITGET_DEMO_API_KEY")
-    secret_key = required_env("BITGET_DEMO_SECRET_KEY")
-    passphrase = required_env("BITGET_DEMO_PASSPHRASE")
-
-    params = {"category": "USDT-FUTURES", "limit": "1"}
+def private_get(api_key, secret_key, passphrase, path, params=None):
+    params = params or {}
     query_string = urlencode(params)
     timestamp = str(int(time.time() * 1000))
-
     headers = {
         "ACCESS-KEY": api_key,
-        "ACCESS-SIGN": sign(
-            secret_key,
-            timestamp,
-            "GET",
-            REQUEST_PATH,
-            query_string=query_string,
-        ),
+        "ACCESS-SIGN": sign(secret_key, timestamp, "GET", path, query_string=query_string),
         "ACCESS-TIMESTAMP": timestamp,
         "ACCESS-PASSPHRASE": passphrase,
         "Content-Type": "application/json",
@@ -58,41 +47,77 @@ def main():
         "paptrading": "1",
         "User-Agent": "bb-scanner-demo-check/1.0",
     }
+    response = requests.get(BASE_URL + path, params=params, headers=headers, timeout=15)
+    payload = response.json()
+    return response, payload
+
+
+def main():
+    api_key = required_env("BITGET_DEMO_API_KEY")
+    secret_key = required_env("BITGET_DEMO_SECRET_KEY")
+    passphrase = required_env("BITGET_DEMO_PASSPHRASE")
 
     print("[INFO] Testing Bitget Demo API authentication.")
-    print("[INFO] Read-only request only. No order will be created, modified, or cancelled.")
+    print("[INFO] Read-only diagnostics only. No order will be created, modified, or cancelled.")
 
-    try:
-        response = requests.get(
-            BASE_URL + REQUEST_PATH,
-            params=params,
-            headers=headers,
-            timeout=15,
-        )
-    except requests.RequestException as exc:
-        print(f"[FAIL] Network request failed: {exc}")
-        sys.exit(3)
-
-    try:
-        payload = response.json()
-    except ValueError:
-        print(f"[FAIL] Non-JSON response. HTTP {response.status_code}")
-        sys.exit(4)
-
+    response, payload = private_get(
+        api_key,
+        secret_key,
+        passphrase,
+        REQUEST_PATH,
+        {"category": "USDT-FUTURES", "limit": "1"},
+    )
     code = str(payload.get("code", ""))
     msg = str(payload.get("msg", ""))
+    if not (response.ok and code == "00000"):
+        print(f"[FAIL] Order-query auth failed. HTTP={response.status_code}, code={code}, msg={msg}")
+        sys.exit(5)
 
-    if response.ok and code == "00000":
-        data = payload.get("data") or {}
-        orders = data.get("list") or []
-        print("[OK] Bitget Demo API authentication succeeded.")
-        print(f"[OK] Demo USDT-FUTURES open-order query succeeded. Returned orders: {len(orders)}")
-        print("[OK] paptrading=1 is active. This test did NOT place an order.")
-        return
+    data = payload.get("data") or {}
+    orders = data.get("list") or []
+    print("[OK] Bitget Demo API authentication succeeded.")
+    print(f"[OK] Demo USDT-FUTURES open-order query succeeded. Returned orders: {len(orders)}")
 
-    print(f"[FAIL] Bitget API rejected the request. HTTP={response.status_code}, code={code}, msg={msg}")
-    print("[HINT] Check the demo API key, secret, passphrase, and Futures Orders permission.")
-    sys.exit(5)
+    # Account API permission check. Do not print UID or other identifying values.
+    try:
+        r_info, p_info = private_get(api_key, secret_key, passphrase, "/api/v3/account/info")
+        if r_info.ok and str(p_info.get("code")) == "00000":
+            info = p_info.get("data") or {}
+            print(f"[INFO] API permission type: {info.get('permType')}")
+            print(f"[INFO] API permissions: {info.get('permissions')}")
+        else:
+            print(f"[WARN] Account-info query failed: code={p_info.get('code')} msg={p_info.get('msg')}")
+    except Exception as exc:
+        print(f"[WARN] Account-info query error: {exc}")
+
+    try:
+        r_settings, p_settings = private_get(api_key, secret_key, passphrase, "/api/v3/account/settings")
+        if r_settings.ok and str(p_settings.get("code")) == "00000":
+            s = p_settings.get("data") or {}
+            print(f"[INFO] accountMode={s.get('accountMode')} accountLevel={s.get('accountLevel')} holdMode={s.get('holdMode')}")
+        else:
+            print(f"[WARN] Account-settings query failed: code={p_settings.get('code')} msg={p_settings.get('msg')}")
+    except Exception as exc:
+        print(f"[WARN] Account-settings query error: {exc}")
+
+    try:
+        r_assets, p_assets = private_get(api_key, secret_key, passphrase, "/api/v3/account/assets")
+        if r_assets.ok and str(p_assets.get("code")) == "00000":
+            data = p_assets.get("data") or {}
+            assets = data.get("assets") if isinstance(data, dict) else data
+            assets = assets or []
+            usdt = next((x for x in assets if str(x.get("coin", "")).upper() == "USDT"), None)
+            if usdt:
+                keep = {k: usdt.get(k) for k in ("coin", "available", "equity", "balance", "bonus", "positionValue", "leverage") if k in usdt}
+                print(f"[INFO] Demo USDT asset snapshot: {keep}")
+            else:
+                print("[WARN] Account-assets query succeeded but no USDT row was found.")
+        else:
+            print(f"[WARN] Account-assets query failed: code={p_assets.get('code')} msg={p_assets.get('msg')}")
+    except Exception as exc:
+        print(f"[WARN] Account-assets query error: {exc}")
+
+    print("[OK] Read-only diagnostic completed. paptrading=1 remained active.")
 
 
 if __name__ == "__main__":
