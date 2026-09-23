@@ -166,6 +166,65 @@ def ticker(client: BitgetDemoClassic, symbol: str) -> tuple[Decimal, Decimal, De
     return price, bid, ask
 
 
+def spread_pct(bid: Decimal, ask: Decimal) -> float:
+    if bid <= 0 or ask <= 0 or ask < bid:
+        return 999.0
+    mid = (bid + ask) / Decimal("2")
+    if mid <= 0:
+        return 999.0
+    return float((ask - bid) / mid * Decimal("100"))
+
+
+def shadow_candles_between(
+    client: BitgetDemoClassic,
+    symbol: str,
+    start_ms: int,
+    end_ms: int,
+) -> list[dict]:
+    """Fetch enough 1m candles to advance a spread-reject shadow safely."""
+    if end_ms < start_ms:
+        return []
+    cursor = max(0, int(start_ms))
+    end_ms = int(end_ms)
+    out: dict[int, dict] = {}
+    for _ in range(10):
+        rows = client.public_get(
+            "/api/v2/mix/market/candles",
+            {
+                "symbol": symbol,
+                "productType": "usdt-futures",
+                "granularity": "1m",
+                "startTime": str(cursor),
+                "endTime": str(end_ms),
+                "limit": "100",
+            },
+        ) or []
+        parsed = []
+        for row in rows:
+            try:
+                ts = int(row[0])
+                if ts < start_ms or ts > end_ms:
+                    continue
+                candle = {
+                    "open_time_ms": ts,
+                    "high": float(row[2]),
+                    "low": float(row[3]),
+                    "close": float(row[4]),
+                }
+                out[ts] = candle
+                parsed.append(candle)
+            except Exception:
+                continue
+        if not parsed:
+            break
+        last_ts = max(x["open_time_ms"] for x in parsed)
+        next_cursor = last_ts + 60_000
+        if next_cursor > end_ms or next_cursor <= cursor:
+            break
+        cursor = next_cursor
+    return [out[k] for k in sorted(out)]
+
+
 def contract_config(client: BitgetDemoClassic, symbol: str) -> dict:
     data = client.public_get(
         "/api/v2/mix/market/contracts",
@@ -426,6 +485,122 @@ def manage_open_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms:
     state["open_trades"] = kept
 
 
+def register_spread_shadow(
+    state: dict,
+    signal: Signal,
+    rejected_at_ms: int,
+    current_price: Decimal,
+    bid: Decimal,
+    ask: Decimal,
+    actual_spread_pct: float,
+    max_spread_pct: float,
+) -> None:
+    if any(x.get("signal_id") == signal.signal_id for x in state.get("spread_shadow_open", [])):
+        return
+    entry = float(ask)
+    shadow = {
+        "signal_id": signal.signal_id,
+        "portfolio": signal.portfolio,
+        "strategy": signal.strategy,
+        "symbol": signal.symbol,
+        "side": signal.side,
+        "reject_reason": "SPREAD_TOO_WIDE",
+        "signal_time_ms": signal.signal_time_ms,
+        "rejected_at_ms": rejected_at_ms,
+        "last_checked_ms": signal.signal_time_ms,
+        "deadline_ms": signal.signal_time_ms + int(signal.max_hold_minutes) * 60_000,
+        "max_hold_minutes": signal.max_hold_minutes,
+        "detected_price": signal.detected_price,
+        "current_price_at_reject": float(current_price),
+        "shadow_entry_price": entry,
+        "bid_at_reject": float(bid),
+        "ask_at_reject": float(ask),
+        "spread_pct_at_reject": actual_spread_pct,
+        "max_spread_pct": max_spread_pct,
+        "tp": signal.tp,
+        "sl": signal.sl,
+        "market_snapshot": signal.market_snapshot,
+        "matched_strategies": list(signal.matched_strategies),
+    }
+    state.setdefault("spread_shadow_open", []).append(shadow)
+    log_event({"event": "SPREAD_SHADOW_OPEN", **shadow})
+
+
+def manage_spread_shadows(client: BitgetDemoClassic, state: dict, ts_ms: int) -> None:
+    kept = []
+    for shadow in state.get("spread_shadow_open", []):
+        start_ms = int(shadow.get("last_checked_ms") or shadow.get("signal_time_ms") or ts_ms)
+        deadline_ms = int(shadow.get("deadline_ms") or ts_ms)
+        end_ms = min(ts_ms, deadline_ms)
+        candles = shadow_candles_between(client, str(shadow["symbol"]), start_ms, end_ms)
+
+        close_reason = None
+        exit_price = None
+        last_close = None
+        last_seen_ms = start_ms
+
+        for candle in candles:
+            last_seen_ms = max(last_seen_ms, int(candle["open_time_ms"]) + 60_000)
+            last_close = float(candle["close"])
+            tp_hit = float(candle["high"]) >= float(shadow["tp"])
+            sl_hit = float(candle["low"]) <= float(shadow["sl"])
+            if tp_hit and sl_hit:
+                close_reason = "AMBIGUOUS_TP_SL_SAME_CANDLE"
+                break
+            if tp_hit:
+                close_reason = "TAKE_PROFIT"
+                exit_price = float(shadow["tp"])
+                break
+            if sl_hit:
+                close_reason = "STOP_LOSS"
+                exit_price = float(shadow["sl"])
+                break
+
+        if close_reason is None and ts_ms >= deadline_ms:
+            if last_close is not None:
+                close_reason = "MAX_HOLD"
+                exit_price = last_close
+            else:
+                shadow["last_checked_ms"] = last_seen_ms
+                kept.append(shadow)
+                continue
+
+        if close_reason is None:
+            shadow["last_checked_ms"] = max(start_ms, last_seen_ms)
+            kept.append(shadow)
+            continue
+
+        entry = float(shadow.get("shadow_entry_price") or 0.0)
+        ret = None
+        if entry > 0 and exit_price is not None:
+            ret = (float(exit_price) / entry - 1.0) * 100.0
+
+        closed = {
+            **shadow,
+            "closed_at_ms": ts_ms,
+            "shadow_close_reason": close_reason,
+            "shadow_exit_price": exit_price,
+            "shadow_return_pct": ret,
+        }
+        state.setdefault("spread_shadow_closed", []).append(closed)
+        log_event(
+            {
+                "event": "SPREAD_SHADOW_CLOSE",
+                "signal_id": shadow.get("signal_id"),
+                "strategy": shadow.get("strategy"),
+                "symbol": shadow.get("symbol"),
+                "reason": close_reason,
+                "shadow_entry_price": entry,
+                "shadow_exit_price": exit_price,
+                "shadow_return_pct": ret,
+                "spread_pct_at_reject": shadow.get("spread_pct_at_reject"),
+                "max_spread_pct": shadow.get("max_spread_pct"),
+            }
+        )
+
+    state["spread_shadow_open"] = kept
+
+
 def reject(cfg: dict, state: dict, signal: Signal, reason: str, details: dict | None = None) -> None:
     if signal.signal_id not in state["processed_signal_ids"]:
         state["processed_signal_ids"].append(signal.signal_id)
@@ -441,9 +616,16 @@ def reject(cfg: dict, state: dict, signal: Signal, reason: str, details: dict | 
         **(details or {}),
     }
     log_event(payload)
+    spread_text = ""
+    if details and details.get("spread_pct") is not None:
+        spread_text = (
+            f"\nspread={float(details['spread_pct']):.4f}%"
+            f" / limit={float(details.get('max_spread_pct', 0.0)):.4f}%"
+        )
     notify(
         cfg,
-        f"⛔ Demo 진입 거부\n{signal.strategy} {signal.symbol}\nreason={reason}\nTP={signal.tp} SL={signal.sl} hold={signal.max_hold_minutes}m",
+        f"⛔ Demo 진입 거부\n{signal.strategy} {signal.symbol}\nreason={reason}{spread_text}\n"
+        f"TP={signal.tp} SL={signal.sl} hold={signal.max_hold_minutes}m",
     )
 
 
@@ -468,7 +650,33 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
         ts_ms,
     )
     if not decision.allowed:
-        reject(cfg, state, signal, decision.reason, {"current_price": float(price)})
+        actual_spread = spread_pct(bid, ask)
+        max_spread = float(cfg.get("max_spread_pct", 0.20))
+        detected = float(signal.detected_price or 0.0)
+        details = {
+            "current_price": float(price),
+            "bid": float(bid),
+            "ask": float(ask),
+            "spread_pct": actual_spread,
+            "max_spread_pct": max_spread,
+            "entry_min": float(signal.entry_min),
+            "entry_max": float(signal.entry_max),
+            "price_vs_detected_pct": (
+                (float(price) / detected - 1.0) * 100.0 if detected > 0 else None
+            ),
+        }
+        if decision.reason == "SPREAD_TOO_WIDE":
+            register_spread_shadow(
+                state,
+                signal,
+                ts_ms,
+                price,
+                bid,
+                ask,
+                actual_spread,
+                max_spread,
+            )
+        reject(cfg, state, signal, decision.reason, details)
         return False
 
     positions = all_positions(client)
@@ -644,6 +852,9 @@ def main() -> int:
 
     # Position management always runs, including when new entries are disabled.
     manage_open_trades(client, cfg, state, ts_ms)
+    # Spread-filter rejects are tracked separately as shadow-only counterfactuals.
+    # They never create exchange orders and never alter the frozen LONG3 core.
+    manage_spread_shadows(client, state, ts_ms)
 
     signals = load_signal_jsonl(SIGNALS_PATH)
     processed = set(state.get("processed_signal_ids", []))
@@ -675,7 +886,8 @@ def main() -> int:
     print(
         f"[DONE] LONG3 Demo active={cfg.get('active_portfolio')} "
         f"auto={cfg.get('demo_auto_execute')} signals_new={len(fresh)} "
-        f"entries={entries} tracked_open={len(state.get('open_trades', []))}"
+        f"entries={entries} tracked_open={len(state.get('open_trades', []))} "
+        f"spread_shadow_open={len(state.get('spread_shadow_open', []))}"
     )
     return 0
 
