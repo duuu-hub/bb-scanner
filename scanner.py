@@ -11,6 +11,8 @@ from pathlib import Path
 
 import requests
 
+from market_data.contract_filters import active_symbols_from_contracts
+
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
 BB_PERIOD = 20
@@ -190,20 +192,17 @@ def save_state(state):
 
 
 def get_symbols():
+    """Return active crypto USDT perpetuals only.
+
+    Bitget's USDT-futures catalog also contains RWA/stock/ETF/FX contracts.
+    Automatic scanning excludes contracts tagged isRwa=YES so the live
+    scanner matches the research/data-collection universe.
+    """
     data = api_get(
         "/api/v2/mix/market/contracts",
         {"productType": PRODUCT_TYPE},
     ) or []
-    symbols = []
-    for item in data:
-        if item.get("symbolType") != "perpetual":
-            continue
-        if item.get("symbolStatus") != "normal":
-            continue
-        symbol = item.get("symbol")
-        if symbol and str(item.get("quoteCoin", "")).upper() == "USDT":
-            symbols.append(symbol)
-    return sorted(set(symbols))
+    return active_symbols_from_contracts(data)
 
 
 
