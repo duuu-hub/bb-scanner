@@ -1,0 +1,67 @@
+name: Regime Breadth Research
+
+on:
+  workflow_dispatch:
+    inputs:
+      symbols:
+        description: 'Exploratory universe, e.g. AUTO50'
+        required: false
+        default: 'AUTO50'
+      days:
+        description: 'Exploratory history length'
+        required: false
+        default: '730'
+  push:
+    branches:
+      - regime-breadth-research
+    paths:
+      - '.research/regime_breadth_once'
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      BACKTEST_WORKERS: '8'
+      BACKTEST_API_RPS: '8'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install research dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Build historical BB snapshots
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            SYMBOLS='AUTO50'
+            DAYS='730'
+          else
+            SYMBOLS="${{ inputs.symbols || 'AUTO50' }}"
+            DAYS="${{ inputs.days || '730' }}"
+          fi
+          python backtest.py --symbols "$SYMBOLS" --days "$DAYS" --outdir regime_breadth_source
+
+      - name: Compare LONG vs mirrored SHORT by market breadth regime
+        run: |
+          python regime_breadth_research.py \
+            --source regime_breadth_source/snapshots.csv.gz \
+            --outdir regime_breadth_results \
+            --workers 6
+
+      - name: Upload research outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regime-breadth-research
+          path: |
+            regime_breadth_results/
+            regime_breadth_source/coverage.csv
+          if-no-files-found: warn
+          retention-days: 14
