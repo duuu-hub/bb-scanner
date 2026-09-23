@@ -1,0 +1,34 @@
+name: Final Edge Diagnostics
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-final-edge-diagnostics
+    paths:
+      - '.research/final_edge_diagnostics_once'
+permissions:
+  actions: read
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-backtest.txt
+      - name: Download AUTO100 switch holdout
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior_switch
+          gh run download 35862728778 --repo duuu-hub/bb-scanner --name bb-auto100-switch-holdout-results --dir prior_switch
+      - run: python research/final_edge_diagnostics.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: final-edge-diagnostics-results
+          path: final_edge_diagnostics_results/
+          retention-days: 14
