@@ -124,6 +124,11 @@ def main() -> int:
         if int(x.get("closed_at_ms") or 0) >= cutoff_ms
     ]
     spread_shadow_open = list(state.get("spread_shadow_open", []))
+    signal_shadow_closed = [
+        x for x in state.get("signal_shadow_closed", [])
+        if int(x.get("closed_at_ms") or 0) >= cutoff_ms
+    ]
+    signal_shadow_open = list(state.get("signal_shadow_open", []))
 
     signal_counts = Counter(str(x.get("strategy")) for x in signals)
     entries = [x for x in events if x.get("event") == "ENTRY"]
@@ -168,6 +173,19 @@ def main() -> int:
         snap = entry.get("market_snapshot") or trade.get("market_snapshot") or {}
         regime = str(snap.get("market_regime") or "UNKNOWN")
         regime_returns[regime].append(float(ret))
+
+    signal_shadow_returns = []
+    signal_shadow_exit_counts = Counter()
+    signal_shadow_by_strategy = defaultdict(list)
+    for item in signal_shadow_closed:
+        signal_shadow_exit_counts[str(item.get("shadow_close_reason") or "UNKNOWN")] += 1
+        if item.get("shadow_return_pct") is not None:
+            try:
+                value = float(item["shadow_return_pct"])
+                signal_shadow_returns.append(value)
+                signal_shadow_by_strategy[str(item.get("strategy"))].append(value)
+            except Exception:
+                pass
 
     spread_shadow_returns = []
     spread_shadow_exit_counts = Counter()
@@ -221,13 +239,32 @@ def main() -> int:
         ),
         "Exits: " + (", ".join(f"{k}={v}" for k, v in exit_counts.most_common()) or "none"),
         (
+            f"All-signal shadow: open={len(signal_shadow_open)} closed={len(signal_shadow_closed)} "
+            f"avg={fnum(statistics.mean(signal_shadow_returns) if signal_shadow_returns else None)}% "
+            f"PF={fnum(pf(signal_shadow_returns))} | 30%-weighted compounded≈"
+            f"{fnum((math.prod(1.0 + (r*weight)/100.0 for r in signal_shadow_returns)-1.0)*100.0 if signal_shadow_returns else 0.0)}% | outcomes="
+            + (", ".join(f"{k}={v}" for k, v in signal_shadow_exit_counts.most_common()) or "none")
+            + " (모든 LONG3 신호, detected_price 가상진입)"
+        ),
+        (
             f"Spread-filter shadow: open={len(spread_shadow_open)} closed={len(spread_shadow_closed)} "
             f"avg={fnum(statistics.mean(spread_shadow_returns) if spread_shadow_returns else None)}% "
             f"PF={fnum(pf(spread_shadow_returns))} | outcomes="
             + (", ".join(f"{k}={v}" for k, v in spread_shadow_exit_counts.most_common()) or "none")
-            + " (실주문 없음)"
+            + " (스프레드 거부건, 당시 ask 가상진입)"
         ),
     ]
+
+    if signal_shadow_by_strategy:
+        parts = []
+        for code in CORE:
+            vals = signal_shadow_by_strategy.get(code, [])
+            if vals:
+                parts.append(
+                    f"{code}: n={len(vals)} avg={fnum(statistics.mean(vals))}% PF={fnum(pf(vals))}"
+                )
+        if parts:
+            lines.append("All-signal shadow by strategy: " + " | ".join(parts))
 
     if regime_returns:
         parts = []
