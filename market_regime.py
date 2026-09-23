@@ -22,6 +22,7 @@ REQUEST_TIMEOUT_SEC = int(os.getenv("REGIME_REQUEST_TIMEOUT_SEC", "12"))
 
 STATE_PATH = Path("market_regime_state.json")
 HISTORY_PATH = Path("market_regime_history.csv")
+EXTERNAL_ROOT = Path("market_data_store/tradingview")
 
 # BTC/ETH are intentionally excluded because this layer is meant to describe
 # the altcoin market. Stablecoin-base perpetuals are also excluded if present.
@@ -62,6 +63,10 @@ HISTORY_FIELDS = [
     "median_24h_pct",
     "q25_4h_pct",
     "q75_4h_pct",
+    "total3_1h_pct",
+    "total3_4h_pct",
+    "total3es_1h_pct",
+    "total3es_4h_pct",
 ]
 
 
@@ -223,6 +228,58 @@ def quantile(values: list[float], q: float) -> float | None:
     return ordered[low] * (1.0 - weight) + ordered[high] * weight
 
 
+def external_index_returns(symbol: str) -> tuple[float | None, float | None]:
+    """Read optional normalized TradingView index history if present.
+
+    Expected columns: timestamp_ms, close. This adapter is intentionally
+    optional because Bitget does not provide CRYPTOCAP:TOTAL3/TOTAL3ES.
+    """
+    path = EXTERNAL_ROOT / f"{symbol}.csv"
+    if not path.exists():
+        return None, None
+
+    points: list[tuple[int, float]] = []
+    try:
+        with path.open("r", newline="", encoding="utf-8-sig") as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                try:
+                    ts = int(float(row["timestamp_ms"]))
+                    close = float(row["close"])
+                    if close > 0 and math.isfinite(close):
+                        points.append((ts, close))
+                except (KeyError, TypeError, ValueError):
+                    continue
+    except OSError:
+        return None, None
+
+    if len(points) < 2:
+        return None, None
+
+    points.sort(key=lambda item: item[0])
+    latest_ts, latest_close = points[-1]
+
+    def value_at_or_before(target_ts: int) -> float | None:
+        for ts, close in reversed(points):
+            if ts <= target_ts:
+                return close
+        return None
+
+    base_1h = value_at_or_before(latest_ts - 60 * 60 * 1000)
+    base_4h = value_at_or_before(latest_ts - 4 * 60 * 60 * 1000)
+    ret_1h = (
+        (latest_close / base_1h - 1.0) * 100.0
+        if base_1h and base_1h > 0
+        else None
+    )
+    ret_4h = (
+        (latest_close / base_4h - 1.0) * 100.0
+        if base_4h and base_4h > 0
+        else None
+    )
+    return ret_1h, ret_4h
+
+
 def classify_regime(metrics: dict) -> dict:
     """Transparent initial regime rule for data collection and research.
 
@@ -298,6 +355,9 @@ def build_snapshot() -> dict:
         if symbol in changes_24h and math.isfinite(changes_24h[symbol])
     ]
 
+    total3_1h, total3_4h = external_index_returns("TOTAL3")
+    total3es_1h, total3es_4h = external_index_returns("TOTAL3ES")
+
     metrics = {
         "universe_count": len(symbols),
         "sample_1h_4h_count": len(common),
@@ -310,6 +370,10 @@ def build_snapshot() -> dict:
         "median_24h_pct": median(values_24h),
         "q25_4h_pct": quantile(values_4h, 0.25),
         "q75_4h_pct": quantile(values_4h, 0.75),
+        "total3_1h_pct": total3_1h,
+        "total3_4h_pct": total3_4h,
+        "total3es_1h_pct": total3es_1h,
+        "total3es_4h_pct": total3es_4h,
     }
     metrics.update(classify_regime(metrics))
 
@@ -383,6 +447,14 @@ def main() -> None:
         f"med4h={fmt(snapshot['median_4h_pct'])} "
         f"med24h={fmt(snapshot['median_24h_pct'])}"
     )
+    if snapshot.get("total3_1h_pct") is not None:
+        print(
+            "[TOTAL3] "
+            f"1h={fmt(snapshot['total3_1h_pct'])} "
+            f"4h={fmt(snapshot['total3_4h_pct'])} "
+            f"TOTAL3ES_1h={fmt(snapshot['total3es_1h_pct'])} "
+            f"TOTAL3ES_4h={fmt(snapshot['total3es_4h_pct'])}"
+        )
 
 
 if __name__ == "__main__":
