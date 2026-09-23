@@ -1,0 +1,52 @@
+name: BB Frozen Prewindow Replay
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-bb-event-anatomy
+    paths:
+      - '.research/bb_event_prewindow_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download historical BB artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/context input/breadth
+          gh run download 35835708997             --repo duuu-hub/bb-scanner             --name context-direction-research             --dir input/context
+          gh run download 35816642180             --repo duuu-hub/bb-scanner             --name regime-breadth-research             --dir input/breadth
+          (cd input/context && zip -qr ../context-direction-research.zip .)
+          (cd input/breadth && zip -qr ../regime-breadth-research.zip .)
+
+      - name: Replay frozen rule on pre-2026-03-27 events
+        run: |
+          python research/bb_event_prewindow_replay.py             --context-artifact input/context-direction-research.zip             --breadth-artifact input/regime-breadth-research.zip             --selection market_data_store/bitget/research_auto100_15m/selection.json             --cutoff 2026-03-27T00:00:00Z             --workers 8             --outdir bb_event_prewindow_replay_results
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-event-prewindow-replay-results
+          path: bb_event_prewindow_replay_results/
+          if-no-files-found: warn
+          retention-days: 14
