@@ -1,0 +1,66 @@
+name: Bitget Demo Place-Cancel Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type exactly DEMO_PLACE_CANCEL'
+        required: true
+        type: string
+      symbol:
+        description: 'Demo futures symbol'
+        required: true
+        default: 'BTCUSDT'
+        type: string
+      side:
+        description: 'Order side'
+        required: true
+        default: 'buy'
+        type: choice
+        options:
+          - buy
+          - sell
+      position_mode:
+        description: 'Bitget futures position mode'
+        required: true
+        default: 'one_way'
+        type: choice
+        options:
+          - one_way
+          - hedge
+      notional_usdt:
+        description: 'Approximate demo notional in USDT'
+        required: true
+        default: '10'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  demo-place-cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Place and immediately cancel Bitget Demo order
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          DEMO_CONFIRM: ${{ inputs.confirm }}
+          DEMO_SYMBOL: ${{ inputs.symbol }}
+          DEMO_SIDE: ${{ inputs.side }}
+          DEMO_POSITION_MODE: ${{ inputs.position_mode }}
+          DEMO_NOTIONAL_USDT: ${{ inputs.notional_usdt }}
+        run: python bitget_demo_place_cancel.py
