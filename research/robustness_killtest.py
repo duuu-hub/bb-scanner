@@ -65,7 +65,7 @@ def threshold_sensitivity(en):
     rows=[]
     l1=en[en.base_strategy=="L1_MOMENTUM_1H10"].copy()
     for lo,hi in [(25,60),(30,63),(33.333,66.667),(37,70),(40,75)]:
-      mid=(l1.btc_rv7d_pctile365>=lo)&(l1.btc_rv7d_pctile365<hi)
+      mid=(l1.btc_rv7d_pctile_365d>=lo)&(l1.btc_rv7d_pctile_365d<hi)
       for split in ("train70","test30"):
        for d in (1,2,3):
         g=l1[mid&(l1.split==split)&(l1.delay_min==d)&(l1.direction=="SHORT")]
