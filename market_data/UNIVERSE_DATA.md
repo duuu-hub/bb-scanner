@@ -15,7 +15,9 @@ poorly to hundreds of markets because Git history grows from repeated rewrites.
 
 - Market: Bitget USDT perpetual futures
 - Base interval: 15 minutes only
-- Universe: all currently active, normal USDT perpetual contracts
+- Default universe: active, normal **crypto** USDT perpetual contracts
+- RWA/stock/ETF/FX perpetuals: excluded by default with Bitget's `isRwa` flag
+- Optional scope: `--scope all` or `--scope rwa`
 - Partition: one immutable gzip CSV per completed UTC day
 - Manifest: one JSON file per day with the exact symbol universe and row counts
 - Higher timeframes: derived from 15m with `market_data/universe_store.py`
@@ -79,3 +81,19 @@ btc_1h = resample_ohlcv(btc, "1h")
 
 The existing BTC/ETH monthly store remains untouched for long-history research.
 Universe v2 is the scalable forward/broad-market archive.
+
+
+## Verified scale (2026-09-23)
+
+A full smoke test against the live contract list found:
+
+- 802 active USDT perpetual contracts total
+- 466 crypto contracts (`isRwa != YES`)
+- 336 RWA / stock / ETF / FX style contracts (`isRwa == YES`)
+- Crypto-only daily partition: 44,736 rows = 466 × 96 completed 15m candles
+- Compressed daily file: about 0.94 MiB
+- 8-worker collection runtime: about 45 seconds for the complete crypto universe
+
+At that observed compression ratio, one year of crypto-only daily partitions is
+roughly 0.34 GiB before Git object overhead. Because each completed-day gzip file
+is immutable, normal daily collection does not repeatedly rewrite old market data.
