@@ -169,7 +169,6 @@ def main():
         "timeInForce": "gtc",
         "clientOid": client_oid,
         "reduceOnly": "no",
-        "marginMode": "crossed",
         "pxAmendType": "no",
     }
     if position_mode == "hedge":
