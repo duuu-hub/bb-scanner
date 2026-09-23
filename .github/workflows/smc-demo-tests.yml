@@ -30,6 +30,6 @@ jobs:
           pip install -r requirements-backtest.txt
           pip install pytest
       - name: Unit tests
-        run: pytest -q tests/test_smc_forward.py
+        run: PYTHONPATH=. python -m pytest -q tests/test_smc_forward.py
       - name: Public-data scan only
         run: python smc_demo_forward.py --scan-only
