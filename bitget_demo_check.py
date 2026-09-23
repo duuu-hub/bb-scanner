@@ -111,7 +111,10 @@ def main():
                 keep = {k: usdt.get(k) for k in ("coin", "available", "equity", "balance", "bonus", "positionValue", "leverage") if k in usdt}
                 print(f"[INFO] Demo USDT asset snapshot: {keep}")
             else:
-                print("[WARN] Account-assets query succeeded but no USDT row was found.")
+                summary = []
+                for item in assets:
+                    summary.append({k: item.get(k) for k in ("coin", "available", "equity", "balance", "bonus") if k in item})
+                print(f"[INFO] Demo asset rows (no USDT row): {summary}")
         else:
             print(f"[WARN] Account-assets query failed: code={p_assets.get('code')} msg={p_assets.get('msg')}")
     except Exception as exc:
