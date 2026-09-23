@@ -123,11 +123,10 @@ def matching_position(rows: list[dict], symbol: str, side: str) -> dict | None:
     return None
 
 
-def wait_for_protected_position(
+def wait_for_position(
     client: BitgetDemoClassic,
     symbol: str,
     side: str,
-    require_tp_sl: bool = True,
     attempts: int = 10,
 ) -> dict | None:
     last = None
@@ -141,10 +140,22 @@ def wait_for_protected_position(
             },
         ) or []
         last = matching_position(rows, symbol, side)
-        if last and (not require_tp_sl or (last.get("takeProfit") and last.get("stopLoss"))):
+        if last:
             return last
         time.sleep(0.5)
     return last
+
+
+def order_has_preset_protection(client: BitgetDemoClassic, symbol: str, order_id: str) -> bool:
+    detail = client.private_get(
+        "/api/v2/mix/order/detail",
+        {
+            "symbol": symbol,
+            "productType": PRODUCT_TYPE,
+            "orderId": order_id,
+        },
+    ) or {}
+    return bool(detail.get("presetStopSurplusPrice") and detail.get("presetStopLossPrice"))
 
 
 def symbol_has_position(rows: list[dict], symbol: str) -> bool:
@@ -270,7 +281,16 @@ def manage_open_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms:
             continue
 
         if bool(cfg.get("require_exchange_tp_sl", True)):
-            if not pos.get("takeProfit") or not pos.get("stopLoss"):
+            position_protected = bool(pos.get("takeProfit") and pos.get("stopLoss"))
+            order_protected = False
+            if not position_protected and trade.get("entry_order_id"):
+                try:
+                    order_protected = order_has_preset_protection(
+                        client, trade["symbol"], str(trade["entry_order_id"])
+                    )
+                except Exception:
+                    order_protected = False
+            if not position_protected and not order_protected:
                 close_tracked_trade(client, trade, "TP_SL_MISSING")
                 trade["closed_at_ms"] = ts_ms
                 trade["close_reason"] = "TP_SL_MISSING"
@@ -407,15 +427,14 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
     detail = wait_for_fill(client, signal.symbol, order_id)
     state["processed_signal_ids"].append(signal.signal_id)
 
-    # Verify exchange-side protection after the fill. If absent, close our exact size.
+    # Verify that the filled entry retained the exchange-side preset TP/SL,
+    # then separately verify that the position actually appeared.
     require_tp_sl = bool(cfg.get("require_exchange_tp_sl", True))
-    pos = wait_for_protected_position(
-        client,
-        signal.symbol,
-        signal.side,
-        require_tp_sl=require_tp_sl,
+    detail_protected = bool(
+        detail.get("presetStopSurplusPrice") and detail.get("presetStopLossPrice")
     )
-    if not pos or (require_tp_sl and (not pos.get("takeProfit") or not pos.get("stopLoss"))):
+    pos = wait_for_position(client, signal.symbol, signal.side)
+    if not pos or (require_tp_sl and not detail_protected):
         emergency_trade = {
             "signal_id": signal.signal_id,
             "symbol": signal.symbol,
