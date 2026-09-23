@@ -7,6 +7,7 @@ on:
       - demo-long3-integration
     paths:
       - 'auto_trader.py'
+      - 'scanner.py'
       - 'long3_signal_adapter.py'
       - 'signal_io.py'
       - 'trade_guard.py'
@@ -30,6 +31,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - name: Compile scanner and trader
+        run: python -m py_compile scanner.py auto_trader.py
       - name: Run LONG3 safety and plumbing tests
         run: |
           python -m unittest -v             tests/test_trade_guard.py             tests/test_runtime_plumbing.py             tests/test_long3_signal_adapter.py             tests/test_auto_trader_safety.py
