@@ -20,42 +20,50 @@ START = pd.Timestamp("2024-09-23T00:00:00Z")
 END = pd.Timestamp("2026-09-22T23:45:00Z")
 
 
-def bitget_15m(symbol: str) -> pd.DataFrame:
+def bitget_1h(symbol: str) -> pd.DataFrame:
+    """Fetch Bitget 1H directly to avoid unnecessary 15m backfill work."""
     client = BitgetClient()
-    rows = client.fetch_exact_range(
-        symbol,
-        int(START.timestamp() * 1000),
-        int(END.timestamp() * 1000),
-    )
-    if not rows:
+    start_ms = int(START.timestamp() * 1000)
+    end_ms = int(END.timestamp() * 1000)
+    interval_ms = 60 * 60 * 1000
+    page_span_ms = 199 * interval_ms
+    cursor = start_ms
+    records = {}
+
+    while cursor <= end_ms:
+        logical_end = min(end_ms, cursor + page_span_ms)
+        raw = client._get(
+            "/api/v2/mix/market/history-candles",
+            {
+                "symbol": symbol,
+                "productType": "usdt-futures",
+                "granularity": "1H",
+                "startTime": str(cursor),
+                "endTime": str(logical_end + interval_ms),
+                "limit": "200",
+            },
+        )
+        for item in raw:
+            if len(item) < 7:
+                continue
+            ts = int(item[0])
+            if start_ms <= ts <= end_ms:
+                records[ts] = item
+        cursor = logical_end + interval_ms
+
+    if not records:
         return pd.DataFrame()
+
+    rows = [records[ts] for ts in sorted(records)]
     return pd.DataFrame(
         {
-            "Timestamp": [pd.Timestamp(x.timestamp_ms, unit="ms", tz="UTC") for x in rows],
-            "Open": [float(x.open) for x in rows],
-            "High": [float(x.high) for x in rows],
-            "Low": [float(x.low) for x in rows],
-            "Close": [float(x.close) for x in rows],
-            "Volume": [float(x.base_volume) for x in rows],
+            "Timestamp": [pd.Timestamp(int(x[0]), unit="ms", tz="UTC") for x in rows],
+            "Open": [float(x[1]) for x in rows],
+            "High": [float(x[2]) for x in rows],
+            "Low": [float(x[3]) for x in rows],
+            "Close": [float(x[4]) for x in rows],
+            "Volume": [float(x[5]) for x in rows],
         }
-    )
-
-
-def to_1h(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
-        return df
-    return (
-        df.set_index("Timestamp")
-        .resample("1h", label="left", closed="left")
-        .agg(
-            Open=("Open", "first"),
-            High=("High", "max"),
-            Low=("Low", "min"),
-            Close=("Close", "last"),
-            Volume=("Volume", "sum"),
-        )
-        .dropna()
-        .reset_index()
     )
 
 
@@ -182,10 +190,9 @@ def main():
             raise RuntimeError(f"{bg_symbol} not active on Bitget")
         print(f"[PAIR] {bg_symbol} vs {yf_symbol}", flush=True)
 
-        bg15 = bitget_15m(bg_symbol)
-        if bg15.empty:
+        bg1 = bitget_1h(bg_symbol)
+        if bg1.empty:
             raise RuntimeError(f"No Bitget history for {bg_symbol}")
-        bg1 = to_1h(bg15)
         yf1 = yahoo_1h(yf_symbol)
         if yf1.empty:
             raise RuntimeError(f"No Yahoo history for {yf_symbol}")
@@ -208,7 +215,7 @@ def main():
                 "tradfi_symbol": yf_symbol,
                 "bitget_contract_isRwa": meta[bg_symbol].get("isRwa"),
                 "bitget_launchTime": meta[bg_symbol].get("launchTime"),
-                "bitget_raw_15m_rows": len(bg15),
+                "bitget_raw_1h_rows": len(bg1),
                 "bitget_1h_rows": len(bg1),
                 "tradfi_1h_rows": len(yf1),
                 "common_1h_rows": len(common),
