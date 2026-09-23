@@ -254,6 +254,10 @@ def manifest_path(root: Path, day: date) -> Path:
     return root / "manifests" / f"{day.year:04d}" / f"{day.month:02d}" / f"{day.isoformat()}.json"
 
 
+def universe_snapshot_path(root: Path, universe_id: str) -> Path:
+    return root / "universes" / f"{universe_id}.json"
+
+
 def write_partition_atomic(
     root: Path,
     day: date,
@@ -282,13 +286,19 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def write_manifest_atomic(root: Path, day: date, payload: dict) -> Path:
-    path = manifest_path(root, day)
+def write_json_atomic(path: Path, payload: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
     os.replace(tmp, path)
     return path
+
+
+def write_manifest_atomic(root: Path, day: date, payload: dict) -> Path:
+    return write_json_atomic(manifest_path(root, day), payload)
 
 
 def contract_meta(contract: dict) -> dict:
@@ -302,6 +312,32 @@ def contract_meta(contract: dict) -> dict:
         "symbolStatus": contract.get("symbolStatus"),
         "symbolType": contract.get("symbolType"),
     }
+
+
+def ensure_universe_snapshot(root: Path, contracts: list[dict], scope: str) -> tuple[str, Path]:
+    """Store contract metadata once per distinct universe instead of every day."""
+    payload = {
+        "schema_version": 1,
+        "scope": scope,
+        "basis": "active normal USDT perpetual contracts at collection run",
+        "symbol_count": len(contracts),
+        "rwa_count": sum(1 for x in contracts if is_rwa_contract(x)),
+        "crypto_count": sum(1 for x in contracts if not is_rwa_contract(x)),
+        "contracts": [contract_meta(x) for x in sorted(contracts, key=lambda x: str(x.get("symbol", "")))],
+    }
+    canonical = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    universe_id = hashlib.sha256(canonical).hexdigest()[:20]
+    path = universe_snapshot_path(root, universe_id)
+    if not path.exists():
+        payload["universe_id"] = universe_id
+        payload["created_at_utc"] = datetime.now(timezone.utc).isoformat()
+        write_json_atomic(path, payload)
+    return universe_id, path
 
 
 def select_contracts(
@@ -387,13 +423,14 @@ def collect_one_day(
             f"no partition written. First errors: {list(errors.items())[:5]}"
         )
 
+    universe_id, universe_path = ensure_universe_snapshot(root, contracts, scope)
     data_path = write_partition_atomic(root, day, rows_by_symbol)
     total_rows = sum(counts.values())
     full_day_symbols = sum(1 for n in counts.values() if n == 96)
     partial_symbols = {s: n for s, n in counts.items() if 0 < n < 96}
 
     manifest = {
-        "schema_version": 2,
+        "schema_version": 3,
         "day_utc": day.isoformat(),
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "source": {
@@ -408,7 +445,8 @@ def collect_one_day(
             "symbol_count_requested": len(contracts),
             "rwa_count": sum(1 for x in contracts if is_rwa_contract(x)),
             "crypto_count": sum(1 for x in contracts if not is_rwa_contract(x)),
-            "contracts": [contract_meta(x) for x in contracts],
+            "universe_id": universe_id,
+            "universe_path": str(universe_path),
         },
         "coverage": {
             "total_rows": total_rows,
