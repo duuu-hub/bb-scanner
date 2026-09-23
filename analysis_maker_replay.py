@@ -8,6 +8,7 @@ PAPER=Path("paper_signals.csv")
 BASE="https://api.bitget.com"
 PRIORITY={"L1":0,"L2":1,"L3":2}
 HOLD={"L1":720,"L2":60,"L3":720}
+TPSL={"L1":(10.0,5.0),"L2":(10.0,2.5),"L3":(10.0,4.0)}
 WAITS={"1m":1,"3m":3,"5m":5,"to_next_15m":None}
 
 s=requests.Session(); s.headers.update({"User-Agent":"maker-replay/1.0"})
@@ -49,11 +50,23 @@ def candles(symbol,start,end):
         except: pass
     return sorted(out,key=lambda x:x["ts"])
 
-def evaluate(r,cs,wait_name,wait_min,now):
-    signal=r["_ms"]; px=float(r["entry_price"]); tp=float(r["tp_price"]); sl=float(r["sl_price"])
+def evaluate(r,cs,wait_name,wait_min,now,boundary_mode=False):
+    emitted=r["_ms"]
+    boundary=floor15(emitted)
+    signal=boundary if boundary_mode else emitted
+    if boundary_mode:
+        bc=next((c for c in cs if c["ts"]==boundary),None)
+        if bc is None:
+            return {"status":"NO_BOUNDARY_DATA","fill":False,"ret":None}
+        px=float(bc["open"])
+        tp_pct,sl_pct=TPSL[r["strategy"]]
+        tp=px*(1.0+tp_pct/100.0)
+        sl=px*(1.0-sl_pct/100.0)
+    else:
+        px=float(r["entry_price"]); tp=float(r["tp_price"]); sl=float(r["sl_price"])
     # 1m OHLC cannot distinguish trades before vs after a signal emitted inside
     # the same minute. Start at the next complete minute to avoid look-ahead.
-    order_active_from=ceil_minute(signal)
+    order_active_from=ceil_minute(emitted)
     if wait_min is None:
         expiry=((signal//900000)+1)*900000
     else:
@@ -111,17 +124,20 @@ def summary(rows):
 def main():
     rows=load(); now=int(time.time()*1000)
     results={k:[] for k in WAITS}
+    boundary_results={k:[] for k in WAITS}
     details=[]
     for r in rows:
-        start=max(0,r["_ms"]-60000)
+        start=max(0,floor15(r["_ms"])-60000)
         end=min(now,r["_ms"]+HOLD[r["strategy"]]*60000+60000)
         cs=candles(r["symbol"],start,end)
         d={"time":r["timestamp_utc"],"symbol":r["symbol"],"strategy":r["strategy"],"limit":float(r["entry_price"])}
         for name,w in WAITS.items():
-            e=evaluate(r,cs,name,w,now); results[name].append(e); d[name]=e
+            e=evaluate(r,cs,name,w,now,False); results[name].append(e); d[name]=e
+            b=evaluate(r,cs,name,w,now,True); boundary_results[name].append(b); d["BND_"+name]=b
         details.append(d)
     print("[META]",json.dumps({"signals":len(rows)},ensure_ascii=False))
     for k in WAITS: print("[SUMMARY]",k,json.dumps(summary(results[k]),ensure_ascii=False,sort_keys=True))
+    for k in WAITS: print("[BOUNDARY_SUMMARY]",k,json.dumps(summary(boundary_results[k]),ensure_ascii=False,sort_keys=True))
     print("[DETAIL_BEGIN]")
     for d in details: print(json.dumps(d,ensure_ascii=False,sort_keys=True))
     print("[DETAIL_END]")
