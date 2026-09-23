@@ -1,0 +1,152 @@
+name: Market Data Universe v2
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sync = previous completed UTC day; backfill = N completed days"
+        required: true
+        default: "sync"
+        type: choice
+        options:
+          - sync
+          - backfill
+      days:
+        description: "Backfill days (ignored for sync)"
+        required: false
+        default: "30"
+      symbols:
+        description: "Optional comma-separated symbols; empty = all active USDT perpetuals"
+        required: false
+        default: ""
+      max_symbols:
+        description: "Optional deterministic cap; 0 = no cap"
+        required: false
+        default: "0"
+      commit_data:
+        description: "Commit collected data to the current branch"
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    # 00:27 UTC: previous UTC day is fully closed and immutable.
+    - cron: "27 0 * * *"
+  push:
+    branches:
+      - market-data-universe-v2
+    paths:
+      - "market_data/universe_collector.py"
+      - "market_data/universe_store.py"
+      - "market_data/UNIVERSE_DATA.md"
+      - ".github/workflows/market-data-universe.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-data-universe-v2-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Syntax check
+        run: |
+          python -m py_compile market_data/universe_collector.py
+          python -m py_compile market_data/universe_store.py
+
+      - name: Branch smoke test
+        if: github.event_name == 'push'
+        run: |
+          rm -rf universe_test_output
+          python market_data/universe_collector.py \
+            --mode sync \
+            --symbols BTCUSDT,ETHUSDT,SOLUSDT \
+            --out-root universe_test_output
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          files = sorted(Path("universe_test_output").glob("*/*/*.csv.gz"))
+          assert len(files) == 1, files
+          df = pd.read_csv(files[0], compression="gzip")
+          counts = df.groupby("symbol").size().to_dict()
+          print("counts=", counts)
+          assert set(counts) == {"BTCUSDT", "ETHUSDT", "SOLUSDT"}
+          assert all(1 <= n <= 96 for n in counts.values())
+          assert not df.duplicated(["symbol", "timestamp_ms"]).any()
+          assert (df["high"] >= df[["open", "close", "low"]].max(axis=1)).all()
+          assert (df["low"] <= df[["open", "close", "high"]].min(axis=1)).all()
+
+          manifests = sorted(Path("universe_test_output/manifests").glob("*/*/*.json"))
+          assert len(manifests) == 1, manifests
+          meta = json.loads(manifests[0].read_text())
+          assert meta["coverage"]["total_rows"] == len(df)
+          print(json.dumps(meta["coverage"], indent=2))
+          PY
+
+      - name: Collect production/manual data
+        if: github.event_name != 'push'
+        shell: bash
+        run: |
+          MODE="sync"
+          DAYS="30"
+          SYMBOLS=""
+          MAX_SYMBOLS="0"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MODE="${{ inputs.mode }}"
+            DAYS="${{ inputs.days }}"
+            SYMBOLS="${{ inputs.symbols }}"
+            MAX_SYMBOLS="${{ inputs.max_symbols }}"
+          fi
+
+          ARGS=(--mode "$MODE" --days "$DAYS" --max-symbols "$MAX_SYMBOLS")
+          if [[ -n "$SYMBOLS" ]]; then
+            ARGS+=(--symbols "$SYMBOLS")
+          fi
+
+          python market_data/universe_collector.py "${ARGS[@]}"
+
+      - name: Commit immutable partitions
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.commit_data)
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add market_data_store/bitget/universe_15m
+
+          if git diff --cached --quiet; then
+            echo "No universe-data changes."
+            exit 0
+          fi
+
+          git commit -m "data: add completed Bitget universe 15m partition"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Upload smoke-test data
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: universe-v2-smoke
+          path: universe_test_output/
+          if-no-files-found: error
