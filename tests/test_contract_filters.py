@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from market_data.contract_filters import (
     active_symbols_from_contracts,
@@ -58,6 +59,26 @@ class ContractFilterTests(unittest.TestCase):
             active_symbols_from_contracts(rows),
             ["BTCUSDT", "ETHUSDT"],
         )
+
+    def test_scanner_and_auto_backtest_use_same_crypto_only_filter(self):
+        import scanner
+        import backtest
+
+        rows = [
+            self.rwa,
+            self.crypto,
+            {**self.crypto, "symbol": "ETHUSDT"},
+        ]
+
+        with patch("scanner.api_get", return_value=rows):
+            self.assertEqual(scanner.get_symbols(), ["BTCUSDT", "ETHUSDT"])
+
+        with patch("backtest.api_get", return_value=rows):
+            self.assertEqual(backtest.get_active_symbols(), ["BTCUSDT", "ETHUSDT"])
+
+        with patch("backtest.get_active_symbols", return_value=["BTCUSDT", "ETHUSDT"]):
+            chosen = backtest.resolve_symbols("AUTO100")
+            self.assertEqual(chosen, ["BTCUSDT", "ETHUSDT"])
 
 
 if __name__ == "__main__":
