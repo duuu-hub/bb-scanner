@@ -24,7 +24,8 @@ jobs:
         run: |
           mkdir -p holdout context l3
           gh run download 35862728778 --repo duuu-hub/bb-scanner --name bb-auto100-switch-holdout-results --dir holdout
-          gh run download 35845078138 --repo duuu-hub/bb-scanner --name exhaustive-context-results --dir context\n          gh run download 35857816376 --repo duuu-hub/bb-scanner --name l3-independent-event-analysis --dir l3
+          gh run download 35845078138 --repo duuu-hub/bb-scanner --name exhaustive-context-results --dir context
+          gh run download 35857816376 --repo duuu-hub/bb-scanner --name l3-independent-event-analysis --dir l3
       - run: python research/final_mid_l3_portfolio.py
       - uses: actions/upload-artifact@v4
         if: always()
