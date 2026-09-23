@@ -1,0 +1,32 @@
+name: BB Frozen Exact Audit
+on:
+  push:
+    branches:
+      - research-bb-event-anatomy
+    paths:
+      - '.research/bb_frozen_exact_audit_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: Download exact frozen replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          gh run download 35931087202 --repo duuu-hub/bb-scanner --name bb-event-prewindow-replay-results --dir input
+      - run: python research/bb_frozen_exact_audit.py --input input/prewindow_events_enriched.csv --outdir bb_frozen_exact_audit_results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-frozen-exact-audit-results
+          path: bb_frozen_exact_audit_results/
+          retention-days: 14
