@@ -42,6 +42,7 @@ class GuardConfig:
     signal_ttl_seconds: int = 300
     max_spread_pct: float = 0.20
     sl_recovery_policy: Literal["reject", "allow"] = "reject"
+    entry_mode: Literal["MARKET", "MAKER_LIMIT"] = "MARKET"
 
 
 @dataclass(frozen=True)
@@ -84,17 +85,25 @@ def validate_signal(
 
     if signal.entry_min > signal.entry_max:
         return GuardDecision(False, "INVALID_ENTRY_RANGE")
-    if not (signal.entry_min <= current_price <= signal.entry_max):
-        return GuardDecision(False, "PRICE_OUTSIDE_ENTRY_RANGE")
-    if not (signal.sl < current_price < signal.tp):
-        return GuardDecision(False, "INVALID_TP_SL_FOR_LONG")
 
-    if bid <= 0 or ask <= 0 or ask < bid:
-        return GuardDecision(False, "INVALID_BID_ASK")
-    mid = (bid + ask) / 2.0
-    spread_pct = (ask - bid) / mid * 100.0 if mid > 0 else 999.0
-    if spread_pct > config.max_spread_pct:
-        return GuardDecision(False, "SPREAD_TOO_WIDE")
+    if config.entry_mode == "MAKER_LIMIT":
+        reference_price = signal.detected_price
+        if not (signal.entry_min <= reference_price <= signal.entry_max):
+            return GuardDecision(False, "INVALID_MAKER_REFERENCE_PRICE")
+        if not (signal.sl < reference_price < signal.tp):
+            return GuardDecision(False, "INVALID_TP_SL_FOR_LONG")
+    else:
+        if not (signal.entry_min <= current_price <= signal.entry_max):
+            return GuardDecision(False, "PRICE_OUTSIDE_ENTRY_RANGE")
+        if not (signal.sl < current_price < signal.tp):
+            return GuardDecision(False, "INVALID_TP_SL_FOR_LONG")
+
+        if bid <= 0 or ask <= 0 or ask < bid:
+            return GuardDecision(False, "INVALID_BID_ASK")
+        mid = (bid + ask) / 2.0
+        spread_pct = (ask - bid) / mid * 100.0 if mid > 0 else 999.0
+        if spread_pct > config.max_spread_pct:
+            return GuardDecision(False, "SPREAD_TOO_WIDE")
 
     for candle in candles_since_signal:
         tp_hit = candle.high >= signal.tp
