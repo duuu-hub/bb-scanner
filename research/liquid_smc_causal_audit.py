@@ -10,6 +10,7 @@ from market_data.universe_store import load_range, resample_ohlcv
 from research.lsob_causal import run_backtest_causal
 from research.vendor.lsob_reference import Config, compute_metrics, run_backtest
 
+# High-liquidity crypto causal sanity check before longer cross-asset work.
 ROOT = Path("market_data_store/bitget/research_auto100_15m")
 OUT = Path("research/results/liquid_smc")
 SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "BNBUSDT", "DOGEUSDT"]
