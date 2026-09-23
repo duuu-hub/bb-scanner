@@ -90,7 +90,8 @@ def load_events(a, overlap):
 def fetch_rolling_4h(symbol, ts):
     # 17 completed 15m closes = exact trailing 4h return at signal boundary.
     start=int(ts)-17*BAR15_MS
-    # history-candles end boundary excluded the last completed 15m candle in the old replay\n    # request through signal_ts, then filter to close_ts <= signal_ts\n    end=int(ts)
+    # history-candles end boundary excluded the last completed 15m candle in the old replay
+    # request through signal_ts, then filter to close_ts <= signal_ts
     try:
         rows=fetch_range(symbol,"15m",15,start,end)
         df=rows_to_df(rows,15)
@@ -241,7 +242,8 @@ def main():
         "auto100_breadth_selection":len(auto100),
         "frozen_rule":"L1 + BTC-vol MID; SHORT if >=2 of: ret1h>=15.0020102359, 1h BB width>=31.5636142807, AUTO100-available breadth positive4h<=49.1039426523, BTC4h<=0.3309109471.",
         "warning":"Chronologically earlier replay, but NOT pristine untouched OOS: this older period was inspected in prior BB/regime research. No thresholds are changed here.",
-        "breadth_note":"Breadth is reconstructed point-in-time from the frozen current-survivor AUTO100 selection; symbols without historical candles at an event are excluded from that event denominator.",\n        "breadth_bug_fix":"Fixed an off-by-one API end boundary that previously returned only 16 completed 15m candles and forced breadth_universe_n=0. Thresholds/rule unchanged.",
+        "breadth_note":"Breadth is reconstructed point-in-time from the frozen current-survivor AUTO100 selection; symbols without historical candles at an event are excluded from that event denominator.",
+        "breadth_bug_fix":"Fixed an off-by-one API end boundary that previously returned only 16 completed 15m candles and forced breadth_universe_n=0. Thresholds/rule unchanged.",
     }
     (out/"meta.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
