@@ -367,7 +367,7 @@ def correlation_table(x):
     for scope,z in [("ALL",x),("OLD34",x[x.universe_group=="OLD34"]),("NEW66",x[x.universe_group=="NEW66"])]:
         for f in FEATURES:
             q=z[[f,"direction_edge_avg"]].dropna()
-            rho=q[f].corr(q["direction_edge_avg"],method="spearman") if len(q)>=5 else float("nan")
+            rho=q[f].rank(method="average").corr(q["direction_edge_avg"].rank(method="average")) if len(q)>=5 else float("nan")
             rows.append({"scope":scope,"feature":f,"n":len(q),"spearman_vs_short_minus_long":rho})
     return pd.DataFrame(rows)
 
