@@ -120,6 +120,38 @@ def main():
     except Exception as exc:
         print(f"[WARN] Account-assets query error: {exc}")
 
+    try:
+        r_pos, p_pos = private_get(
+            api_key,
+            secret_key,
+            passphrase,
+            "/api/v2/mix/position/single-position",
+            {
+                "symbol": "BTCUSDT",
+                "productType": "USDT-FUTURES",
+                "marginCoin": "USDT",
+            },
+        )
+        if r_pos.ok and str(p_pos.get("code")) == "00000":
+            rows = p_pos.get("data") or []
+            active = [
+                {
+                    "symbol": x.get("symbol"),
+                    "holdSide": x.get("holdSide"),
+                    "total": x.get("total"),
+                }
+                for x in rows
+                if str(x.get("total") or "0") not in {"0", "0.0", ""}
+            ]
+            print(f"[OK] Classic futures position query succeeded. Active BTCUSDT rows: {active}")
+        else:
+            print(
+                f"[WARN] Classic futures position query failed: "
+                f"HTTP={r_pos.status_code} code={p_pos.get('code')} msg={p_pos.get('msg')}"
+            )
+    except Exception as exc:
+        print(f"[WARN] Classic futures position query error: {exc}")
+
     print("[OK] Read-only diagnostic completed. paptrading=1 remained active.")
 
 
