@@ -9,6 +9,7 @@ on:
       - "scanner.py"
       - "backtest.py"
       - "market_data/contract_filters.py"
+      - "market_data/universe_collector.py"
       - "tests/test_contract_filters.py"
       - ".github/workflows/crypto-universe-tests.yml"
   workflow_dispatch:
@@ -35,6 +36,7 @@ jobs:
           python -m py_compile market_data/contract_filters.py
           python -m py_compile scanner.py
           python -m py_compile backtest.py
+          python -m py_compile market_data/universe_collector.py
 
       - name: Verify crypto-only automatic universes
         run: python -m unittest -v tests/test_contract_filters.py
