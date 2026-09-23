@@ -1,8 +1,10 @@
 name: Cross Universe Matched Diagnostics
-on:
+'on':
   push:
-    branches: [research-final-edge-diagnostics]
-    paths: ['.research/cross_universe_matched_once']
+    branches:
+      - research-final-edge-diagnostics
+    paths:
+      - .research/cross_universe_matched_once
   workflow_dispatch:
 permissions:
   actions: read
@@ -13,9 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - run: pip install pandas numpy
-      - env: {GH_TOKEN: ${{ github.token }}}
+      - name: Download prior artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p holdout auto50
           gh run download 35862728778 --repo duuu-hub/bb-scanner --name bb-auto100-switch-holdout-results --dir holdout
