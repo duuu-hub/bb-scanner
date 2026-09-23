@@ -1,0 +1,72 @@
+name: Alt Market Regime
+
+on:
+  schedule:
+    - cron: "2,17,32,47 * * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "market_regime.py"
+      - ".github/workflows/market-regime.yml"
+      - "requirements.txt"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alt-market-regime
+  cancel-in-progress: true
+
+jobs:
+  measure-regime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Syntax check
+        run: python -m py_compile market_regime.py
+
+      - name: Measure alt-market regime
+        run: python market_regime.py
+
+      - name: Persist regime history
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add market_regime_state.json market_regime_history.csv
+
+          if git diff --cached --quiet; then
+            echo "No regime changes to commit."
+            exit 0
+          fi
+
+          git commit -m "data: update alt-market regime"
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push attempt $attempt failed; retrying."
+            sleep 4
+          done
+
+          exit 1
