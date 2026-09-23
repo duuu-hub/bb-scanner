@@ -47,6 +47,21 @@ def summarize(x,col):
           "win_pct":100*(g.net_pct>0).mean(),"pf":calc_pf(g.net_pct)})
     return rows
 
+def frozen_validate(x):
+    train=x[x["split"]=="train70"].copy(); test=x[x["split"]=="test30"].copy()
+    rows=[]; thresholds={}
+    for col in ["rs_1h","rs_4h","rs_24h"]:
+        a=train.dropna(subset=[col,"net_pct"]); b=test.dropna(subset=[col,"net_pct"])
+        if a.empty or b.empty: continue
+        cut=float(a[col].quantile(2/3)); thresholds[col]=cut
+        for strategy in sorted(LONG3)+["ALL_LONG3"]:
+            g=b if strategy=="ALL_LONG3" else b[b.strategy==strategy]
+            for bucket,mask in [("KEEP",g[col] < cut),("HIGH_FILTERED",g[col] >= cut)]:
+                h=g[mask & g[col].notna()]
+                if h.empty: continue
+                rows.append({"feature":col,"strategy":strategy,"bucket":bucket,"threshold_from_train70":cut,"n":len(h),"pct_of_test":100*len(h)/len(g[g[col].notna()),"avg_net_pct":h.net_pct.mean(),"win_pct":100*(h.net_pct>0).mean(),"pf":calc_pf(h.net_pct)})
+    return pd.DataFrame(rows),thresholds
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--source",required=True)
@@ -69,12 +84,15 @@ def main():
     x=x.merge(rs.drop(columns="ts"),on=["symbol","signal_ts"],how="left")
     rows=[]
     for c in ["rs_1h","rs_4h","rs_24h"]: rows += summarize(x,c)
+    frozen,thresholds=frozen_validate(x)
     out=Path(a.out);out.mkdir(parents=True,exist_ok=True)
     pd.DataFrame(rows).to_csv(out/"summary.csv",index=False)
+    frozen.to_csv(out/"frozen_test30.csv",index=False)
+    (out/"frozen_thresholds.json").write_text(json.dumps(thresholds,indent=2),encoding="utf-8")
     x.to_csv(out/"trades_with_rs.csv.gz",index=False,compression="gzip")
     meta={"matched_trades":len(x),"symbols":int(x.symbol.nunique()),"strategies":sorted(x.strategy.unique().tolist()),"split_only":a.split_only or "ALL",
       "rule":"Relative strength = asset trailing return - BTC trailing return. Feature uses only candles completed before signal. LOW/MID/HIGH are equal-count diagnostic buckets; no entry rule is changed.",
-      "warning":"Diagnostic only. Bucket edges are sample-relative and must not be promoted to a trading filter without independent validation."}
+      "warning":"Diagnostic buckets are descriptive. frozen_test30 uses only train70 2/3-quantile thresholds and applies them unchanged to test30."}
     (out/"meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
-    print(json.dumps(meta,indent=2));print(pd.DataFrame(rows).to_string(index=False))
+    print(json.dumps(meta,indent=2));print(pd.DataFrame(rows).to_string(index=False));print("\nFROZEN TEST30");print(json.dumps(thresholds,indent=2));print(frozen.to_string(index=False))
 if __name__=="__main__":main()
