@@ -1,0 +1,53 @@
+name: BB Event Anatomy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-bb-event-anatomy
+    paths:
+      - '.research/bb_event_anatomy_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download prior research artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p inputs
+          gh run download 35835708997             --repo duuu-hub/bb-scanner             --name context-direction-research             --dir inputs/old
+          gh run download 35853244924             --repo duuu-hub/bb-scanner             --name bb-auto100-holdout-results             --dir inputs/new
+          (cd inputs/old && zip -qr ../context-direction-research.zip .)
+          (cd inputs/new && zip -qr ../bb-auto100-holdout-results.zip .)
+          ls -lh inputs/*.zip
+
+      - name: Run event anatomy
+        run: |
+          python research/bb_event_anatomy.py             --old-artifact inputs/context-direction-research.zip             --new-artifact inputs/bb-auto100-holdout-results.zip             --root market_data_store/bitget/research_auto100_15m             --selection market_data_store/bitget/research_auto100_15m/selection.json             --total3 market_data_store/tradingview/TOTAL3.csv             --outdir bb_event_anatomy_results
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-event-anatomy-results
+          path: bb_event_anatomy_results/
+          if-no-files-found: warn
+          retention-days: 14
