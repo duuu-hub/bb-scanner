@@ -78,6 +78,27 @@ class TradeGuardTests(unittest.TestCase):
             "SPREAD_TOO_WIDE",
         )
 
+    def test_maker_allows_current_price_outside_range_and_wide_spread(self):
+        cfg = GuardConfig(
+            active_portfolio="LONG3",
+            enabled_strategies=("L1", "L2", "L3"),
+            signal_ttl_seconds=300,
+            max_spread_pct=0.20,
+            entry_mode="MAKER_LIMIT",
+        )
+        d = validate_signal(
+            self.sig,
+            105.0,
+            104.0,
+            106.0,
+            [],
+            cfg,
+            seen_signal_ids=set(),
+            now_ms=self.now,
+        )
+        self.assertTrue(d.allowed)
+        self.assertEqual(d.reason, "OK")
+
     def test_tp_touched(self):
         bars = [Candle(self.now - 30_000, high=111.0, low=99.0)]
         self.assertEqual(self.run_guard(candles=bars).reason, "TP_ALREADY_TOUCHED")
