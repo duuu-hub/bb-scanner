@@ -1,3 +1,5 @@
+import hashlib
+
 """Shared Bitget contract-universe filters.
 
 Automatic scanners/research universes default to crypto-only USDT perpetuals.
@@ -35,3 +37,33 @@ def active_symbols_from_contracts(
             if is_active_usdt_perpetual(item, include_rwa=include_rwa)
         }
     )
+
+
+def deterministic_symbol_sample(
+    active_symbols,
+    target: int,
+    *,
+    core_symbols=(),
+    seed: str = "bb-research-v1",
+) -> list[str]:
+    """Deterministic broad sample with optional fixed core symbols."""
+    target = max(1, int(target))
+    active = sorted(set(str(x) for x in active_symbols if x))
+    active_set = set(active)
+
+    chosen = []
+    seen = set()
+    for symbol in core_symbols:
+        symbol = str(symbol)
+        if symbol in active_set and symbol not in seen:
+            chosen.append(symbol)
+            seen.add(symbol)
+
+    others = [s for s in active if s not in seen]
+    others.sort(
+        key=lambda x: hashlib.sha256(
+            (seed + "|" + x).encode("utf-8")
+        ).hexdigest()
+    )
+    chosen.extend(others[:max(0, target - len(chosen))])
+    return chosen[:target]
