@@ -90,7 +90,7 @@ def load_events(a, overlap):
 def fetch_rolling_4h(symbol, ts):
     # 17 completed 15m closes = exact trailing 4h return at signal boundary.
     start=int(ts)-17*BAR15_MS
-    end=int(ts)-BAR15_MS
+    # history-candles end boundary excluded the last completed 15m candle in the old replay\n    # request through signal_ts, then filter to close_ts <= signal_ts\n    end=int(ts)
     try:
         rows=fetch_range(symbol,"15m",15,start,end)
         df=rows_to_df(rows,15)
