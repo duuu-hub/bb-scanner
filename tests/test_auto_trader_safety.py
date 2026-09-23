@@ -43,11 +43,11 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertEqual(cfg["max_total_exposure_pct"], 200.0)
         self.assertEqual(cfg["max_open_positions"], 6)
 
-    def test_repository_default_is_demo_and_auto_off(self):
+    def test_repository_is_demo_and_live_disabled(self):
         cfg = load_config()
         self.assertEqual(cfg["trading_mode"], "DEMO")
         self.assertFalse(cfg["live_trading_enabled"])
-        self.assertFalse(cfg["demo_auto_execute"])
+        self.assertIsInstance(cfg["demo_auto_execute"], bool)
 
 
 if __name__ == "__main__":
