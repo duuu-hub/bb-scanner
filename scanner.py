@@ -992,7 +992,30 @@ def main():
     wait_for_quarter_boundary()
     scan_started_dt = datetime.now(timezone.utc)
     scan_started_at = scan_started_dt.isoformat()
-    signal_boundary_ms = (int(scan_started_dt.timestamp() * 1000) // (15 * 60 * 1000)) * (15 * 60 * 1000)
+    scan_started_ms = int(scan_started_dt.timestamp() * 1000)
+    signal_boundary_ms = (scan_started_ms // (15 * 60 * 1000)) * (15 * 60 * 1000)
+    boundary_lag_ms = scan_started_ms - signal_boundary_ms
+
+    # Capture the full-market ticker immediately when the runner reaches the
+    # boundary. This is the lowest-latency path. Only delayed starts need the
+    # more expensive per-symbol historical 15m-open reconstruction.
+    ticker_map = get_all_tickers()
+    snapshot_source = "bulk_ticker_near_boundary"
+    symbols = get_symbols()
+    if boundary_lag_ms > 5_000:
+        boundary_prices = get_boundary_prices(symbols, signal_boundary_ms)
+        snapshot_source = "15m_candle_open_reconstructed"
+        for symbol in list(ticker_map):
+            boundary_price = boundary_prices.get(symbol)
+            if boundary_price is None:
+                ticker_map.pop(symbol, None)
+                continue
+            ticker_map[symbol]["live_last_price"] = ticker_map[symbol].get("last_price")
+            ticker_map[symbol]["last_price"] = boundary_price
+
+    for symbol in ticker_map:
+        ticker_map[symbol]["signal_boundary_ms"] = signal_boundary_ms
+
     SCAN_RUNTIME_PATH.write_text(
         json.dumps(
             {
@@ -1001,7 +1024,8 @@ def main():
                 "signal_boundary_utc": datetime.fromtimestamp(
                     signal_boundary_ms / 1000, tz=timezone.utc
                 ).isoformat(),
-                "price_snapshot_source": "15m_candle_open",
+                "boundary_lag_ms": boundary_lag_ms,
+                "price_snapshot_source": snapshot_source,
             },
             ensure_ascii=False,
             indent=2,
@@ -1012,23 +1036,11 @@ def main():
     previous_symbols = state.get("symbols", {})
     new_symbols_state = {}
 
-    symbols = get_symbols()
-    ticker_map = get_all_tickers()
-    boundary_prices = get_boundary_prices(symbols, signal_boundary_ms)
-    # Never silently fall back to a later live price: that would change the
-    # strategy state when a GitHub runner starts late.
-    for symbol in list(ticker_map):
-        boundary_price = boundary_prices.get(symbol)
-        if boundary_price is None:
-            ticker_map.pop(symbol, None)
-            continue
-        ticker_map[symbol]["live_last_price"] = ticker_map[symbol].get("last_price")
-        ticker_map[symbol]["last_price"] = boundary_price
-        ticker_map[symbol]["signal_boundary_ms"] = signal_boundary_ms
     print(
         f"[INFO] scanning {len(symbols)} active USDT perpetual symbols "
-        f"with {len(ticker_map)} exact-boundary snapshots "
-        f"at {datetime.fromtimestamp(signal_boundary_ms / 1000, tz=timezone.utc).isoformat()}"
+        f"with {len(ticker_map)} boundary snapshots "
+        f"at {datetime.fromtimestamp(signal_boundary_ms / 1000, tz=timezone.utc).isoformat()} "
+        f"source={snapshot_source} lag={boundary_lag_ms}ms"
     )
 
     for debug_symbol_name in DEBUG_SYMBOLS:
