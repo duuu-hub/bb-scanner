@@ -1,0 +1,115 @@
+name: Research LSOB AUTO100
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-env-optimize
+    paths:
+      - "market_data/contract_filters.py"
+      - "market_data/universe_collector.py"
+      - "market_data/universe_store.py"
+      - "market_data/research_backfill.py"
+      - "market_regime.py"
+      - "backtest.py"
+      - "research/lsob_universe.py"
+      - "research/vendor/**"
+      - "tests/test_contract_filters.py"
+      - ".github/workflows/research-lsob-auto100.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: research-lsob-auto100
+  cancel-in-progress: false
+
+jobs:
+  backfill-and-study:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          ref: research-env-optimize
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Syntax and universe tests
+        run: |
+          python -m py_compile market_data/contract_filters.py
+          python -m py_compile market_data/universe_collector.py
+          python -m py_compile market_data/universe_store.py
+          python -m py_compile market_data/research_backfill.py
+          python -m py_compile market_regime.py
+          python -m py_compile backtest.py
+          python -m py_compile research/vendor/lsob_reference.py
+          python -m py_compile research/lsob_universe.py
+          python -m unittest -v tests/test_contract_filters.py
+
+      - name: Backfill fixed crypto AUTO100 for 180 days
+        run: |
+          python market_data/research_backfill.py \
+            --days 180 \
+            --sample-size 100 \
+            --workers 8
+
+      - name: Run LSOB broad-universe study on latest 120 days
+        run: |
+          python research/lsob_universe.py \
+            --days 120
+
+      - name: Print compact results
+        if: always()
+        run: |
+          if [ -f research/results/lsob_auto100/summary.csv ]; then
+            echo "===== LSOB SUMMARY ====="
+            cat research/results/lsob_auto100/summary.csv
+            echo "===== TEMPORAL ====="
+            cat research/results/lsob_auto100/temporal_split.csv
+            echo "===== COVERAGE ====="
+            python - <<'PY'
+          import pandas as pd
+          p="research/results/lsob_auto100/coverage.csv"
+          df=pd.read_csv(p)
+          print(df["candles_15m"].describe().to_string())
+          print("symbols=",len(df),"full120d=",int((df["candles_15m"]>=120*96).sum()))
+          PY
+          fi
+
+      - name: Persist research data and results on research branch
+        if: success()
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add market_data_store/bitget/research_auto100_15m research/results/lsob_auto100
+
+          if git diff --cached --quiet; then
+            echo "No research data changes."
+            exit 0
+          fi
+
+          git commit -m "research: persist AUTO100 history and LSOB results"
+          git pull --rebase origin research-env-optimize
+          git push origin HEAD:research-env-optimize
+
+      - name: Upload study artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lsob-auto100-study
+          path: |
+            research/results/lsob_auto100/
+            market_data_store/bitget/research_auto100_15m/selection.json
+          if-no-files-found: warn
