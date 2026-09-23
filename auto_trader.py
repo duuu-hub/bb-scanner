@@ -895,10 +895,11 @@ def register_signal_shadow(state: dict, signal: Signal) -> None:
 
 
 def mark_signal_shadow_execution(state: dict, signal_id: str, status: str) -> None:
-    for item in state.get("signal_shadow_open", []):
-        if str(item.get("signal_id")) == signal_id:
-            item["actual_execution"] = status
-            return
+    for key in ("signal_shadow_open", "signal_shadow_closed"):
+        for item in state.get(key, []):
+            if str(item.get("signal_id")) == signal_id:
+                item["actual_execution"] = status
+                return
 
 
 def signal_shadow_stats(state: dict, cfg: dict) -> dict:
