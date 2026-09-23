@@ -78,7 +78,6 @@ jobs:
           rm -rf universe_test_output
           python market_data/universe_collector.py \
             --mode sync \
-            --symbols BTCUSDT,ETHUSDT,SOLUSDT \
             --out-root universe_test_output
           python - <<'PY'
           import json
@@ -90,7 +89,8 @@ jobs:
           df = pd.read_csv(files[0], compression="gzip")
           counts = df.groupby("symbol").size().to_dict()
           print("counts=", counts)
-          assert set(counts) == {"BTCUSDT", "ETHUSDT", "SOLUSDT"}
+          assert {"BTCUSDT", "ETHUSDT", "SOLUSDT"}.issubset(set(counts))
+          assert len(counts) >= 100
           assert all(1 <= n <= 96 for n in counts.values())
           assert not df.duplicated(["symbol", "timestamp_ms"]).any()
           assert (df["high"] >= df[["open", "close", "low"]].max(axis=1)).all()
@@ -101,6 +101,14 @@ jobs:
           meta = json.loads(manifests[0].read_text())
           assert meta["coverage"]["total_rows"] == len(df)
           print(json.dumps(meta["coverage"], indent=2))
+          
+          from market_data.universe_store import load_symbol, resample_ohlcv
+          day = meta["day_utc"]
+          btc = load_symbol("BTCUSDT", day, day + " 23:59:59", root="universe_test_output")
+          assert len(btc) == 96
+          btc_1h = resample_ohlcv(btc, "1h")
+          assert len(btc_1h) == 24
+          print("loader_btc_15m=", len(btc), "loader_btc_1h=", len(btc_1h))
           PY
 
       - name: Collect production/manual data
