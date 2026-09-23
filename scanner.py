@@ -17,6 +17,7 @@ BB_PERIOD = 20
 BB_STD = 2.0
 STATE_PATH = Path("state.json")
 PAPER_LOG_PATH = Path("paper_signals.csv")
+SCAN_RUNTIME_PATH = Path("scan_runtime.json")
 DEBUG_SYMBOLS = {
     x.strip() for x in os.getenv("DEBUG_SYMBOLS", "").split(",") if x.strip()
 }
@@ -943,6 +944,11 @@ def wait_for_quarter_boundary():
 
 def main():
     wait_for_quarter_boundary()
+    scan_started_at = datetime.now(timezone.utc).isoformat()
+    SCAN_RUNTIME_PATH.write_text(
+        json.dumps({"scan_started_at": scan_started_at}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     state = load_state()
     previous_symbols = state.get("symbols", {})
     new_symbols_state = {}

@@ -1,39 +1,44 @@
-name: Bitget BB Scanner
+name: Bitget BB Scanner + LONG3 Demo
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - demo-long3-integration
     paths:
       - 'scanner.py'
+      - 'long3_signal_adapter.py'
+      - 'auto_trader.py'
+      - 'trade_guard.py'
+      - 'signal_io.py'
+      - 'trade_state.py'
+      - 'config/trading_config.json'
       - '.github/workflows/scan.yml'
       - 'requirements.txt'
   schedule:
-    # Wake about 10 minutes before each 15-minute boundary.
-    # scanner.py waits inside the runner until :00/:15/:30/:45 exactly.
+    # Active only when this workflow is on the default branch.
+    # Wake about 10 minutes before each 15-minute boundary; scanner aligns itself.
     - cron: '5,20,35,50 * * * *'
 
 permissions:
   contents: write
 
 concurrency:
-  group: bitget-bb-scanner
-  cancel-in-progress: true
+  group: bitget-bb-scanner-long3
+  cancel-in-progress: false
 
 jobs:
-  scan:
+  scan-and-demo:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
       - name: Scan Bitget
         env:
@@ -42,17 +47,29 @@ jobs:
           RE_ALERT_PRICE_MOVE_PCT: '5.0'
         run: python scanner.py
 
-      - name: Persist scanner state
+      - name: Build deduplicated LONG3 order signals
+        run: python long3_signal_adapter.py
+
+      - name: Run Demo trader immediately after scan
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python auto_trader.py
+
+      - name: Persist scanner, signal, trading state and audit logs
         run: |
-          if git diff --quiet -- state.json paper_signals.csv; then
-            echo 'No state or paper-log change.'
+          paths="state.json paper_signals.csv scan_runtime.json signals/pending.jsonl state/trading_state.json logs/executions.jsonl"
+          if [ -z "$(git status --porcelain -- $paths)" ]; then
+            echo 'No forward-state changes.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add state.json
-          if [ -f paper_signals.csv ]; then
-            git add paper_signals.csv
-          fi
-          git commit -m 'chore: update scanner state'
+          for p in $paths; do
+            if [ -e "$p" ]; then git add "$p"; fi
+          done
+          git commit -m 'chore: persist LONG3 forward state'
           git push

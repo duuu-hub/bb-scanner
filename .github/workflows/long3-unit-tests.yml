@@ -1,0 +1,32 @@
+name: LONG3 Demo Unit Tests
+
+on:
+  push:
+    branches:
+      - demo-long3-integration
+    paths:
+      - 'auto_trader.py'
+      - 'long3_signal_adapter.py'
+      - 'signal_io.py'
+      - 'trade_guard.py'
+      - 'trade_state.py'
+      - 'config/trading_config.json'
+      - 'tests/**'
+      - '.github/workflows/long3-unit-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run LONG3 safety and plumbing tests
+        run: |
+          python -m unittest -v             tests/test_trade_guard.py             tests/test_runtime_plumbing.py             tests/test_long3_signal_adapter.py             tests/test_auto_trader_safety.py

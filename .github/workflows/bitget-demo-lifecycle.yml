@@ -1,0 +1,38 @@
+name: LONG3 Bitget Demo Lifecycle
+
+on:
+  push:
+    branches:
+      - demo-long3-integration
+    paths:
+      - '.demo/long3_lifecycle_once'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: long3-demo-lifecycle
+  cancel-in-progress: false
+
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run small Demo order lifecycle
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          DEMO_CONFIRM: 'DEMO_LIFECYCLE_TEST'
+          DEMO_SYMBOL: 'BTCUSDT'
+          DEMO_NOTIONAL_USDT: '20'
+          DEMO_TP_PCT: '5'
+          DEMO_SL_PCT: '5'
+        run: python bitget_demo_lifecycle_test.py

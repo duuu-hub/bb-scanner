@@ -1,0 +1,33 @@
+name: LONG3 Final Demo E2E
+
+on:
+  push:
+    branches:
+      - demo-long3-integration
+    paths:
+      - '.demo/long3_final_e2e_once'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: long3-final-demo-e2e
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run integrated LONG3 Demo E2E
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+        run: python long3_demo_e2e_test.py
