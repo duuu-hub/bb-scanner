@@ -1,0 +1,39 @@
+name: XRP Long OOS
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "research/xrp_long_oos.py"
+      - ".github/workflows/xrp-long-oos.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt
+      - name: Run long XRP OOS
+        env:
+          BACKTEST_API_RPS: "6"
+        run: python -m research.xrp_long_oos
+      - name: Persist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/xrp_long_oos
+          git commit -m "research: persist long XRP SMC OOS"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
