@@ -28,9 +28,10 @@ jobs:
           ls -lah precision_source
       - name: Run relative-strength diagnostic
         run: |
+          python precision_backtest.py --source precision_source/snapshots.csv.gz --outdir precision_replay --workers 6
           python research/long3_relative_strength.py \
             --source precision_source/snapshots.csv.gz \
-            --trades precision_source/trades.csv.gz
+            --trades precision_replay/precision_trades.csv
       - name: Print results
         if: always()
         run: |
