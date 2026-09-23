@@ -13,6 +13,8 @@ from pathlib import Path
 
 import requests
 
+from market_data.contract_filters import is_active_usdt_perpetual, is_rwa_contract
+
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
 INTERVAL_MS = 15 * 60 * 1000
@@ -47,6 +49,9 @@ _last_api_start = 0.0
 
 HISTORY_FIELDS = [
     "timestamp_utc",
+    "universe_scope",
+    "active_usdt_perpetual_count",
+    "rwa_excluded_count",
     "bucket_start_utc",
     "regime",
     "score",
@@ -105,30 +110,36 @@ def api_get(path: str, params: dict | None = None, retries: int = 4):
     raise RuntimeError(f"GET {path} failed: {last_error}")
 
 
-def contract_universe() -> list[str]:
+def contract_universe() -> tuple[list[str], dict]:
+    """Return crypto-only altcoin USDT perpetuals plus audit metadata."""
     rows = api_get(
         "/api/v2/mix/market/contracts",
         {"productType": PRODUCT_TYPE},
     ) or []
 
+    active_usdt = [
+        row
+        for row in rows
+        if is_active_usdt_perpetual(row, include_rwa=True)
+    ]
+    rwa_excluded = sum(1 for row in active_usdt if is_rwa_contract(row))
+
     symbols: list[str] = []
-    for row in rows:
-        if row.get("symbolType") != "perpetual":
-            continue
-        if row.get("symbolStatus") != "normal":
+    for row in active_usdt:
+        if is_rwa_contract(row):
             continue
 
         symbol = str(row.get("symbol") or "").upper()
-        quote = str(row.get("quoteCoin") or "").upper()
         base = str(row.get("baseCoin") or "").upper()
-
-        if not symbol or quote != "USDT":
-            continue
         if base in EXCLUDED_BASES:
             continue
         symbols.append(symbol)
 
-    return sorted(set(symbols))
+    return sorted(set(symbols)), {
+        "universe_scope": "crypto_alt_usdt_perpetual",
+        "active_usdt_perpetual_count": len(active_usdt),
+        "rwa_excluded_count": rwa_excluded,
+    }
 
 
 def bulk_24h_changes() -> dict[str, float]:
@@ -334,7 +345,7 @@ def classify_regime(metrics: dict) -> dict:
 
 
 def build_snapshot() -> dict:
-    symbols = contract_universe()
+    symbols, universe_meta = contract_universe()
     changes_24h = bulk_24h_changes()
 
     ret_1h_by_symbol: dict[str, float] = {}
@@ -387,6 +398,7 @@ def build_snapshot() -> dict:
     return {
         "timestamp_utc": now.isoformat(),
         "bucket_start_utc": bucket.isoformat(),
+        **universe_meta,
         **metrics,
     }
 
@@ -442,7 +454,9 @@ def main() -> None:
         "[REGIME] "
         f"{snapshot['regime']} score={snapshot['score']:+d} "
         f"bull_votes={snapshot['bull_votes']} bear_votes={snapshot['bear_votes']} "
-        f"universe={snapshot['universe_count']} sample={snapshot['sample_1h_4h_count']}"
+        f"scope={snapshot['universe_scope']} "
+        f"universe={snapshot['universe_count']} sample={snapshot['sample_1h_4h_count']} "
+        f"rwa_excluded={snapshot['rwa_excluded_count']}"
     )
     print(
         "[BREADTH] "
