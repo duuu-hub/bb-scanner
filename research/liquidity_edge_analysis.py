@@ -147,15 +147,17 @@ def main():
     for d in (3, 4):
         g = sdf.loc[(sdf["d"] == d) & sdf["expectancy_r"].notna()].copy()
         g["log_liquidity"] = np.log10(g["median_daily_quote_volume"].clip(lower=1))
+        exp_rank = g["expectancy_r"].rank(method="average")
+        liq_rank = g["log_liquidity"].rank(method="average")
+        pf_clean = g["pf_r"].replace([np.inf, -np.inf], np.nan)
+        pf_mask = pf_clean.notna()
+        pf_rank = pf_clean.loc[pf_mask].rank(method="average")
+        liq_pf_rank = g.loc[pf_mask, "log_liquidity"].rank(method="average")
         corr_rows.append({
             "d": d,
             "symbols": len(g),
-            "spearman_liquidity_vs_expectancy": float(
-                g["log_liquidity"].corr(g["expectancy_r"], method="spearman")
-            ),
-            "spearman_liquidity_vs_pf": float(
-                g["log_liquidity"].corr(g["pf_r"].replace([np.inf, -np.inf], np.nan), method="spearman")
-            ),
+            "spearman_liquidity_vs_expectancy": float(liq_rank.corr(exp_rank)),
+            "spearman_liquidity_vs_pf": float(liq_pf_rank.corr(pf_rank)),
         })
     cdf = pd.DataFrame(corr_rows)
 
