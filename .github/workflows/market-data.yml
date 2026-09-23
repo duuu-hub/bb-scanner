@@ -1,0 +1,94 @@
+name: Market Data - BTC ETH 15m
+
+on:
+  schedule:
+    - cron: "37 17 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sync = update/repair, backfill = rebuild history from Bitget"
+        required: true
+        default: "sync"
+        type: choice
+        options:
+          - sync
+          - backfill
+  push:
+    branches:
+      - main
+    paths:
+      - "market_data/collector.py"
+      - ".github/workflows/market-data.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-data-update
+  cancel-in-progress: false
+
+jobs:
+  update-market-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Select collector mode
+        id: collector-mode
+        shell: bash
+        run: |
+          MODE="sync"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            MODE="${{ inputs.mode }}"
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "Collector mode: $MODE"
+
+      - name: Syntax check
+        run: python -m py_compile market_data/collector.py
+
+      - name: Update BTC and ETH history
+        run: python market_data/collector.py --mode "${{ steps.collector-mode.outputs.mode }}"
+
+      - name: Commit data changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add market_data_store/bitget/15m
+
+          if git diff --cached --quiet; then
+            echo "No market-data changes to commit."
+            exit 0
+          fi
+
+          git commit -m "data: update Bitget BTC ETH 15m"
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              echo "Market data pushed successfully."
+              exit 0
+            fi
+            echo "Push attempt $attempt failed; retrying after refresh."
+            sleep 5
+          done
+
+          echo "Failed to push market data after retries."
+          exit 1
