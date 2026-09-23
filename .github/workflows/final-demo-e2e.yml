@@ -1,0 +1,32 @@
+name: Final Demo Auto-Trader E2E
+
+on:
+  push:
+    branches:
+      - demo-trading-env
+    paths:
+      - '.demo/final_e2e_once'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: final-demo-e2e
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run final Demo E2E
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+        run: python final_demo_system_test.py
