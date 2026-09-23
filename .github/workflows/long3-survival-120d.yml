@@ -1,0 +1,42 @@
+name: LONG3 Survival 120d Validation
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'analysis_survival_120d.py'
+      - '.github/workflows/long3-survival-120d.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-backtest.txt
+      - name: Download frozen 120d source artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p source_backtest
+          gh run download 35584621765 -n bb-backtest-results -D source_backtest
+      - name: Validate survival filter
+        env:
+          BACKTEST_WORKERS: '6'
+          BACKTEST_API_RPS: '6'
+        run: |
+          python analysis_survival_120d.py \
+            --source source_backtest/snapshots.csv.gz \
+            --workers 6 \
+            --outdir survival_120d_results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: long3-survival-120d-results
+          path: survival_120d_results/
+          if-no-files-found: warn
