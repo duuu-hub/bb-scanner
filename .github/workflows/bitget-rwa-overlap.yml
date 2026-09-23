@@ -1,0 +1,43 @@
+name: Bitget RWA vs CME Overlap
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "research/bitget_rwa_overlap.py"
+      - ".github/workflows/bitget-rwa-overlap.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bitget-rwa-overlap
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install -r requirements-backtest.txt
+          pip install yfinance
+      - name: Compare Bitget RWA with ES NQ on exact common hours
+        run: python -m research.bitget_rwa_overlap
+      - name: Persist results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/results/bitget_rwa_overlap
+          git commit -m "research: persist Bitget RWA vs CME overlap results"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
