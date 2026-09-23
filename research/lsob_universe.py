@@ -27,7 +27,7 @@ VARIANTS = {
 
 def lsob_frame(group: pd.DataFrame, timeframe: str) -> pd.DataFrame:
     x = group[
-        ["symbol", "timestamp_ms", "datetime_utc", "open", "high", "low", "close", "base_volume"]
+        ["symbol", "timestamp_ms", "datetime_utc", "open", "high", "low", "close", "base_volume", "quote_volume"]
     ].copy()
     if timeframe != "15m":
         x = resample_ohlcv(x, timeframe)
