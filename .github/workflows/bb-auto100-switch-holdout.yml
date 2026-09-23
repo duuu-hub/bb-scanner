@@ -1,0 +1,52 @@
+name: BB AUTO100 TOTAL3 Switch Holdout
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-bb-auto100-switch-holdout
+    paths:
+      - '.research/bb_auto100_switch_holdout_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  switch-holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download prior AUTO100 cross-sectional holdout artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior_holdout
+          gh run download 35853244924             --repo duuu-hub/bb-scanner             --name bb-auto100-holdout-results             --dir prior_holdout
+          find prior_holdout -maxdepth 3 -type f -print
+
+      - name: Run frozen BTC-vol plus TOTAL3 direction switch
+        run: |
+          INPUT=$(find prior_holdout -name all_l1_long_short_trades.csv.gz | head -1)
+          test -n "$INPUT"
+          python research/bb_auto100_switch_holdout.py             --input "$INPUT"             --outdir bb_auto100_switch_holdout_results
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bb-auto100-switch-holdout-results
+          path: bb_auto100_switch_holdout_results/
+          if-no-files-found: warn
+          retention-days: 14
