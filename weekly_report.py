@@ -119,12 +119,22 @@ def main() -> int:
         x for x in state.get("closed_trades", [])
         if int(x.get("closed_at_ms") or 0) >= cutoff_ms
     ]
+    spread_shadow_closed = [
+        x for x in state.get("spread_shadow_closed", [])
+        if int(x.get("closed_at_ms") or 0) >= cutoff_ms
+    ]
+    spread_shadow_open = list(state.get("spread_shadow_open", []))
 
     signal_counts = Counter(str(x.get("strategy")) for x in signals)
     entries = [x for x in events if x.get("event") == "ENTRY"]
     entry_counts = Counter(str(x.get("strategy")) for x in entries)
     skips = [x for x in events if x.get("event") == "SKIP"]
     reject_counts = Counter(str(x.get("reason")) for x in skips)
+    spread_reject_values = [
+        float(x["spread_pct"])
+        for x in skips
+        if x.get("reason") == "SPREAD_TOO_WIDE" and x.get("spread_pct") is not None
+    ]
 
     closed_by_strategy = defaultdict(list)
     for trade in closed:
@@ -158,6 +168,16 @@ def main() -> int:
         snap = entry.get("market_snapshot") or trade.get("market_snapshot") or {}
         regime = str(snap.get("market_regime") or "UNKNOWN")
         regime_returns[regime].append(float(ret))
+
+    spread_shadow_returns = []
+    spread_shadow_exit_counts = Counter()
+    for item in spread_shadow_closed:
+        spread_shadow_exit_counts[str(item.get("shadow_close_reason") or "UNKNOWN")] += 1
+        if item.get("shadow_return_pct") is not None:
+            try:
+                spread_shadow_returns.append(float(item["shadow_return_pct"]))
+            except Exception:
+                pass
 
     shadow_counts = Counter()
     if PAPER.exists():
@@ -194,7 +214,19 @@ def main() -> int:
         f"Slippage avg/max={fnum(statistics.mean(slips) if slips else None, 4)}/{fnum(max(slips) if slips else None, 4)}%",
         f"Max concurrent={max_open} | max actual exposure={fnum(max_exp)}%",
         "Rejects: " + (", ".join(f"{k}={v}" for k, v in reject_counts.most_common()) or "none"),
+        (
+            "Spread rejects actual spread avg/max="
+            f"{fnum(statistics.mean(spread_reject_values) if spread_reject_values else None, 4)}/"
+            f"{fnum(max(spread_reject_values) if spread_reject_values else None, 4)}%"
+        ),
         "Exits: " + (", ".join(f"{k}={v}" for k, v in exit_counts.most_common()) or "none"),
+        (
+            f"Spread-filter shadow: open={len(spread_shadow_open)} closed={len(spread_shadow_closed)} "
+            f"avg={fnum(statistics.mean(spread_shadow_returns) if spread_shadow_returns else None)}% "
+            f"PF={fnum(pf(spread_shadow_returns))} | outcomes="
+            + (", ".join(f"{k}={v}" for k, v in spread_shadow_exit_counts.most_common()) or "none")
+            + " (실주문 없음)"
+        ),
     ]
 
     if regime_returns:
