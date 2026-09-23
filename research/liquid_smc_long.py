@@ -87,6 +87,7 @@ def eval_period(symbol, df, label, start, end, d, engine, runner, cost_mult):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--causal-only", action="store_true")
+    p.add_argument("--fast", action="store_true")
     args=p.parse_args()
     OUT.mkdir(parents=True,exist_ok=True)
     rows=[]
@@ -96,13 +97,14 @@ def main():
         t1=df["Timestamp"].max()+pd.Timedelta(hours=1)
         mid=t0+(t1-t0)/2
         periods=[("full",t0,t1),("first_half",t0,mid),("second_half",mid,t1)]
-        engines=[("causal",run_backtest_causal)] if args.causal_only else [
+        engines=[("causal",run_backtest_causal)] if (args.causal_only or args.fast) else [
             ("reference",run_backtest),("causal",run_backtest_causal)
         ]
+        cost_mults=(1.0,) if args.fast else (1.0,2.0)
         for label,start,end in periods:
             for d in (3,4):
                 for engine,runner in engines:
-                    for cost_mult in (1.0,2.0):
+                    for cost_mult in cost_mults:
                         rows.append(eval_period(symbol,df,label,start,end,d,engine,runner,cost_mult))
         print(f"[DONE] {symbol}",flush=True)
     out=pd.DataFrame(rows)
