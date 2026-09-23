@@ -1,0 +1,88 @@
+name: Exhaustive BB Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-exhaustive-context
+    paths:
+      - '.research/exhaustive_bb_once'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  exhaustive-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Download prior regime artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior_regime
+          gh run download 35816642180             --repo duuu-hub/bb-scanner             --name regime-breadth-research             --dir prior_regime
+
+      - name: Download prior context artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prior_context
+          gh run download 35835708997             --repo duuu-hub/bb-scanner             --name context-direction-research             --dir prior_context
+
+      - name: Exhaust all existing two-year context
+        run: python research/exhaustive_context_study.py
+
+      - name: Upload exhaustive context outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exhaustive-context-results
+          path: exhaustive_context_results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  major-seven-year-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      BACKTEST_WORKERS: 2
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Build BTC ETH seven-year BB snapshots
+        run: |
+          python backtest.py             --symbols BTCUSDT,ETHUSDT             --days 2600             --outdir major_7y_source
+
+      - name: Run long-history directional control
+        run: python research/major_long_history_control.py
+
+      - name: Upload major history outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: major-seven-year-control
+          path: |
+            major_history_results/
+            major_7y_source/coverage.csv
+            major_7y_source/summary.csv
+          if-no-files-found: warn
+          retention-days: 14
