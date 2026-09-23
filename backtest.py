@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from market_data.contract_filters import active_symbols_from_contracts
+from market_data.contract_filters import active_symbols_from_contracts, deterministic_symbol_sample
 
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
@@ -145,23 +145,12 @@ def resolve_symbols(raw):
 
     target = max(1, int(m.group(1)))
     active = get_active_symbols()
-    active_set = set(active)
-
-    chosen = [s for s in CORE_SYMBOLS if s in active_set]
-    chosen_set = set(chosen)
-
-    # Deterministic broad sample across the currently active universe.
-    # The fixed hash seed makes AUTO50 reproducible while avoiding alphabetical
-    # or manually cherry-picked selection of only famous coins.
-    others = [s for s in active if s not in chosen_set]
-    others.sort(
-        key=lambda x: hashlib.sha256(
-            ("bb-research-v1|" + x).encode("utf-8")
-        ).hexdigest()
+    chosen = deterministic_symbol_sample(
+        active,
+        target,
+        core_symbols=CORE_SYMBOLS,
+        seed="bb-research-v1",
     )
-
-    chosen.extend(others[:max(0, target - len(chosen))])
-    chosen = chosen[:target]
 
     print(
         f"[AUTO] selected {len(chosen)} of {len(active)} active crypto USDT perpetuals"
