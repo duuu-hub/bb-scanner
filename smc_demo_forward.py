@@ -308,6 +308,40 @@ def symbol_busy(positions: list[dict], orders: list[dict], symbol: str) -> bool:
     )
 
 
+def current_hour_entry_touched(
+    client: BitgetDemoClassic,
+    symbol: str,
+    side: str,
+    entry: Decimal,
+) -> bool:
+    boundary = (now_ms() // HOUR_MS) * HOUR_MS
+    rows = client.public_get(
+        "/api/v2/mix/market/candles",
+        {
+            "symbol": symbol,
+            "productType": "usdt-futures",
+            "granularity": "1m",
+            "startTime": str(boundary),
+            "endTime": str(now_ms()),
+            "limit": "100",
+        },
+    ) or []
+    highs = []
+    lows = []
+    for row in rows:
+        try:
+            ts = int(row[0])
+            if ts < boundary:
+                continue
+            highs.append(Decimal(str(row[2])))
+            lows.append(Decimal(str(row[3])))
+        except Exception:
+            continue
+    if not highs or not lows:
+        return False
+    return min(lows) <= entry if side == "long" else max(highs) >= entry
+
+
 def order_size(
     contract: dict,
     entry: Decimal,
@@ -752,6 +786,15 @@ def place_setup(
     side = str(setup["side"]).lower()
 
     last, bid, ask = ticker(client, symbol)
+    if current_hour_entry_touched(client, symbol, side, entry):
+        skip_event(
+            state,
+            setup,
+            "MISSED_INTRAHOUR_TOUCH_BEFORE_ORDER",
+            False,
+            {"last": float(last), "entry": float(entry), "bid": float(bid), "ask": float(ask)},
+        )
+        return False
     if side == "long" and (last <= entry or entry >= ask):
         skip_event(
             state,
