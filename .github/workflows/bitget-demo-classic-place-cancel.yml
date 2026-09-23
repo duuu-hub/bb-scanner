@@ -1,0 +1,37 @@
+name: Bitget Demo Classic Place-Cancel Test
+
+on:
+  push:
+    branches:
+      - demo-trading-env
+    paths:
+      - '.demo/classic_place_cancel_once'
+
+permissions:
+  contents: read
+
+jobs:
+  demo-classic-place-cancel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Place and immediately cancel tiny Classic Demo order
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          DEMO_CONFIRM: 'DEMO_CLASSIC_PLACE_CANCEL'
+          DEMO_SYMBOL: 'BTCUSDT'
+          DEMO_NOTIONAL_USDT: '10'
+        run: python bitget_demo_place_cancel_v2.py
