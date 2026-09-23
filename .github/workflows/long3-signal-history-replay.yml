@@ -1,0 +1,26 @@
+name: LONG3 Signal History Replay
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'analysis_signal_history.py'
+      - '.github/workflows/long3-signal-history-replay.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Replay recorded LONG3 signals
+        run: python analysis_signal_history.py
