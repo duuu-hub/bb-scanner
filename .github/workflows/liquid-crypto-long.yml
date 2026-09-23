@@ -1,0 +1,50 @@
+name: Liquid Crypto Long History
+
+on:
+  push:
+    branches:
+      - research-liquid-smc
+    paths:
+      - "market_data/liquid_crypto_backfill.py"
+      - "research/liquid_smc_long.py"
+      - ".github/workflows/liquid-crypto-long.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: liquid-crypto-long
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-liquid-smc
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt
+      - name: Backfill 730 days
+        run: python -m market_data.liquid_crypto_backfill --days 730 --workers 6
+      - name: Persist liquid history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add market_data_store/bitget/liquid_crypto_15m
+          git commit -m "data: persist 730d liquid crypto history"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
+      - name: Run long-history causal study
+        run: python -m research.liquid_smc_long
+      - name: Persist results
+        run: |
+          git add research/results/liquid_smc_long
+          git commit -m "research: persist long-history liquid SMC results"
+          git pull --rebase origin research-liquid-smc
+          git push origin HEAD:research-liquid-smc
