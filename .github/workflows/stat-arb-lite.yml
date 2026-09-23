@@ -1,0 +1,29 @@
+name: Stat Arb Lite Research
+on:
+  push:
+    branches: [research-stat-arb-lite]
+    paths:
+      - 'research/stat_arb_lite.py'
+      - '.github/workflows/stat-arb-lite.yml'
+      - 'market_data_store/bitget/research_auto100_15m/**'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install numpy pandas
+      - name: Run frozen OOS pair test
+        run: python research/stat_arb_lite.py --cost-bps 10 --top 50
+      - name: Print results
+        run: |
+          cat research/results/stat_arb_lite/summary.json
+          head -21 research/results/stat_arb_lite/pair_oos.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stat-arb-lite-results
+          path: research/results/stat_arb_lite/
