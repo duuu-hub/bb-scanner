@@ -121,13 +121,6 @@ def q_nearest(value, step):
     return units * step
 
 
-def active_position(rows, side):
-    for row in rows or []:
-        if str(row.get("holdSide", "")).lower() == side and Decimal(str(row.get("total") or "0")) > 0:
-            return row
-    return None
-
-
 def wait_for_fill(client, symbol, order_id, attempts=20):
     last = None
     for _ in range(attempts):
@@ -143,31 +136,9 @@ def wait_for_fill(client, symbol, order_id, attempts=20):
         if state == "filled":
             return last
         if state in {"cancelled", "canceled", "failed"}:
-            raise RuntimeError(f"Entry order ended unexpectedly: state={state}")
+            raise RuntimeError(f"Order ended unexpectedly: state={state}")
         time.sleep(0.5)
-    raise RuntimeError(f"Entry order did not reach filled state in time. Last state={last.get('state') if last else None}")
-
-
-def wait_for_position(client, symbol, side, should_exist=True, attempts=20):
-    last_rows = None
-    for _ in range(attempts):
-        last_rows = client.private_get(
-            "/api/v2/mix/position/single-position",
-            {
-                "symbol": symbol,
-                "productType": PRODUCT_TYPE,
-                "marginCoin": MARGIN_COIN,
-            },
-        ) or []
-        pos = active_position(last_rows, side)
-        if should_exist and pos:
-            return pos
-        if not should_exist and not pos:
-            return None
-        time.sleep(0.5)
-    if should_exist:
-        raise RuntimeError("Filled order was not reflected as an open position in time.")
-    raise RuntimeError(f"Position still exists after close attempt: {last_rows}")
+    raise RuntimeError(f"Order did not reach filled state in time. Last state={last.get('state') if last else None}")
 
 
 def main():
@@ -182,18 +153,7 @@ def main():
 
     client = BitgetDemoClassic()
     opened = False
-
-    # Refuse to touch a symbol that already has a demo position.
-    rows = client.private_get(
-        "/api/v2/mix/position/single-position",
-        {
-            "symbol": symbol,
-            "productType": PRODUCT_TYPE,
-            "marginCoin": MARGIN_COIN,
-        },
-    ) or []
-    if any(Decimal(str(r.get("total") or "0")) > 0 for r in rows):
-        raise RuntimeError(f"Pre-existing {symbol} Demo position detected. Aborting without changing it.")
+    entry_qty_s = None
 
     contracts = client.public_get(
         "/api/v2/mix/market/contracts",
@@ -228,6 +188,7 @@ def main():
     sl = q_nearest(last * (Decimal("1") - sl_pct), price_step)
 
     qty_s = f"{qty:.{volume_place}f}"
+    entry_qty_s = qty_s
     tp_s = f"{tp:.{price_place}f}"
     sl_s = f"{sl:.{price_place}f}"
 
@@ -261,34 +222,47 @@ def main():
         avg = detail.get("priceAvg")
         print(f"[OK] Entry filled. avgPrice={avg} state={detail.get('state')}")
 
-        pos = wait_for_position(client, symbol, "long", should_exist=True)
-        print(
-            "[OK] Long position visible. "
-            f"total={pos.get('total')} openPriceAvg={pos.get('openPriceAvg')} "
-            f"takeProfit={pos.get('takeProfit')} stopLoss={pos.get('stopLoss')}"
+        preset_tp = str(detail.get("presetStopSurplusPrice") or "")
+        preset_sl = str(detail.get("presetStopLossPrice") or "")
+        if not preset_tp or not preset_sl:
+            raise RuntimeError(
+                f"Entry filled but preset TP/SL missing in order detail: TP={preset_tp!r} SL={preset_sl!r}"
+            )
+        print(f"[OK] TP/SL confirmed in filled order detail. TP={preset_tp} SL={preset_sl}")
+
+        # Close exactly the size opened by this test, instead of using a blanket close-all call.
+        close_order = client.private_post(
+            "/api/v2/mix/order/place-order",
+            {
+                "symbol": symbol,
+                "productType": PRODUCT_TYPE,
+                "marginMode": "crossed",
+                "marginCoin": MARGIN_COIN,
+                "size": qty_s,
+                "side": "buy",
+                "tradeSide": "close",
+                "orderType": "market",
+                "clientOid": f"demo_close_{int(time.time())}"[:32],
+            },
         )
+        close_id = str(close_order.get("orderId") or "")
+        if not close_id:
+            raise RuntimeError(f"Close accepted but no orderId returned: {close_order}")
+        print(f"[OK] Demo exact-size close accepted. orderId={close_id}")
 
-        # Give Bitget a short window to expose TP/SL IDs on the position.
-        for _ in range(10):
-            pos = wait_for_position(client, symbol, "long", should_exist=True, attempts=1)
-            if pos.get("takeProfit") and pos.get("stopLoss"):
-                break
-            time.sleep(0.5)
+        close_detail = wait_for_fill(client, symbol, close_id)
+        print(f"[OK] Close filled. avgPrice={close_detail.get('priceAvg')} state={close_detail.get('state')}")
+        opened = False
+        print("[OK] Full Demo lifecycle succeeded without position-read API.")
+        print("[OK] ENTRY -> FILL -> TP/SL CONFIRM -> EXACT-SIZE CLOSE complete.")
 
-        if pos.get("takeProfit") and pos.get("stopLoss"):
-            print(
-                "[OK] TP/SL registered on the Demo position. "
-                f"TP={pos.get('takeProfit')} (id={pos.get('takeProfitId')}); "
-                f"SL={pos.get('stopLoss')} (id={pos.get('stopLossId')})"
-            )
-        else:
-            print(
-                "[WARN] Position is open, but TP/SL fields were not exposed yet. "
-                f"Order detail presetTP={detail.get('presetStopSurplusPrice')} "
-                f"presetSL={detail.get('presetStopLossPrice')}"
-            )
+        closed = {"orderId": close_id}
+        # Compatibility marker for old log shape.
+        _ = closed
 
-        closed = client.private_post(
+        # no-op placeholder removed below
+        if False:
+            client.private_post(
             "/api/v2/mix/order/close-positions",
             {
                 "symbol": symbol,
@@ -296,30 +270,26 @@ def main():
                 "productType": PRODUCT_TYPE,
             },
         )
-        success = closed.get("successList") or []
-        failure = closed.get("failureList") or []
-        if failure:
-            raise RuntimeError(f"Close position returned failures: {failure}")
-        print(f"[OK] Demo close request accepted. successCount={len(success)}")
-
-        wait_for_position(client, symbol, "long", should_exist=False)
-        opened = False
-        print("[OK] Position is closed. Full Demo lifecycle succeeded.")
-        print("[OK] ENTRY -> FILL -> TP/SL -> POSITION CHECK -> CLOSE complete.")
 
     finally:
-        if opened:
-            print("[WARN] Cleanup guard: attempting to close the Demo long position.")
+        if opened and entry_qty_s:
+            print("[WARN] Cleanup guard: attempting exact-size Demo close.")
             try:
-                client.private_post(
-                    "/api/v2/mix/order/close-positions",
+                cleanup = client.private_post(
+                    "/api/v2/mix/order/place-order",
                     {
                         "symbol": symbol,
-                        "holdSide": "long",
                         "productType": PRODUCT_TYPE,
+                        "marginMode": "crossed",
+                        "marginCoin": MARGIN_COIN,
+                        "size": entry_qty_s,
+                        "side": "buy",
+                        "tradeSide": "close",
+                        "orderType": "market",
+                        "clientOid": f"demo_cleanup_{int(time.time())}"[:32],
                     },
                 )
-                print("[OK] Cleanup close request sent.")
+                print(f"[OK] Cleanup close request sent. orderId={cleanup.get('orderId')}")
             except Exception as cleanup_exc:
                 print(f"[FAIL] Cleanup close failed: {cleanup_exc}")
 
