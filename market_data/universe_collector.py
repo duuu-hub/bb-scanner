@@ -17,6 +17,12 @@ from typing import Iterable
 
 import requests
 
+try:
+    from market_data.contract_filters import is_rwa_contract
+except ModuleNotFoundError:
+    # Support direct execution: python market_data/universe_collector.py
+    from contract_filters import is_rwa_contract
+
 BASE_URL = "https://api.bitget.com"
 CONTRACTS_PATH = "/api/v2/mix/market/contracts"
 HISTORY_PATH = "/api/v2/mix/market/history-candles"
@@ -285,10 +291,6 @@ def write_manifest_atomic(root: Path, day: date, payload: dict) -> Path:
     return path
 
 
-def is_rwa(contract: dict) -> bool:
-    return str(contract.get("isRwa", "")).upper() == "YES"
-
-
 def contract_meta(contract: dict) -> dict:
     return {
         "symbol": str(contract.get("symbol", "")),
@@ -318,9 +320,9 @@ def select_contracts(
         selected = [by_symbol[s] for s in explicit_symbols]
     else:
         if scope == "crypto":
-            selected = [x for x in contracts if not is_rwa(x)]
+            selected = [x for x in contracts if not is_rwa_contract(x)]
         elif scope == "rwa":
-            selected = [x for x in contracts if is_rwa(x)]
+            selected = [x for x in contracts if is_rwa_contract(x)]
         else:
             selected = contracts
 
@@ -404,8 +406,8 @@ def collect_one_day(
             "scope": scope,
             "basis": "active normal USDT perpetual contracts at collection run",
             "symbol_count_requested": len(contracts),
-            "rwa_count": sum(1 for x in contracts if is_rwa(x)),
-            "crypto_count": sum(1 for x in contracts if not is_rwa(x)),
+            "rwa_count": sum(1 for x in contracts if is_rwa_contract(x)),
+            "crypto_count": sum(1 for x in contracts if not is_rwa_contract(x)),
             "contracts": [contract_meta(x) for x in contracts],
         },
         "coverage": {
@@ -506,7 +508,7 @@ def main() -> None:
         raise SystemExit("No symbols selected.")
 
     all_contracts = client.active_usdt_perpetuals()
-    total_rwa = sum(1 for x in all_contracts if is_rwa(x))
+    total_rwa = sum(1 for x in all_contracts if is_rwa_contract(x))
     print(
         f"[UNIVERSE] active_all={len(all_contracts)}, "
         f"active_crypto={len(all_contracts) - total_rwa}, active_rwa={total_rwa}, "
