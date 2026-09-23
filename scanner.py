@@ -359,6 +359,53 @@ def bollinger_live(symbol, granularity, live_price):
     }
 
 
+def fetch_boundary_price(symbol, boundary_ms):
+    """Return the exact 15m-boundary trade price from the current 15m candle open."""
+    try:
+        rows = api_get(
+            "/api/v2/mix/market/candles",
+            {
+                "symbol": symbol,
+                "productType": PRODUCT_TYPE,
+                "granularity": "15m",
+                "startTime": str(int(boundary_ms)),
+                "endTime": str(int(boundary_ms) + 15 * 60 * 1000 - 1),
+                "limit": 2,
+            },
+        ) or []
+        for row in rows:
+            try:
+                if int(row[0]) == int(boundary_ms):
+                    price = float(row[1])
+                    if math.isfinite(price) and price > 0:
+                        return symbol, price
+            except (ValueError, TypeError, IndexError):
+                continue
+    except Exception as exc:
+        print(f"[WARN] boundary snapshot {symbol}: {exc}")
+    return symbol, None
+
+
+def get_boundary_prices(symbols, boundary_ms):
+    """Fetch exact price snapshots for one common 15m boundary.
+
+    This deliberately costs one 15m-candle lookup per symbol so a delayed
+    GitHub runner evaluates the same boundary state instead of the later live
+    ticker state.
+    """
+    out = {}
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
+        futures = [
+            pool.submit(fetch_boundary_price, symbol, boundary_ms)
+            for symbol in symbols
+        ]
+        for future in as_completed(futures):
+            symbol, price = future.result()
+            if price is not None:
+                out[symbol] = price
+    return out
+
+
 def get_all_tickers():
     """Fetch all USDT-futures tickers in one request."""
     data = api_get(
@@ -690,7 +737,7 @@ def build_alert(candidate, reason, strategy_code=None):
         f"🪙 {symbol}" + (f"  🔁 {streak}회 연속" if streak >= 2 else ""),
         f"{rank_emoji} 추천 {cfg['priority']}순위 · {cfg['direction']} · {strategy_code} {cfg['name']}",
         f"상태 {reason}",
-        f"현재가 {fmt_price(price)}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
+        f"경계신호가 {fmt_price(price)}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
     ]
 
     if streak >= 2 and prev_scan_price and price:
@@ -943,9 +990,22 @@ def wait_for_quarter_boundary():
 
 def main():
     wait_for_quarter_boundary()
-    scan_started_at = datetime.now(timezone.utc).isoformat()
+    scan_started_dt = datetime.now(timezone.utc)
+    scan_started_at = scan_started_dt.isoformat()
+    signal_boundary_ms = (int(scan_started_dt.timestamp() * 1000) // (15 * 60 * 1000)) * (15 * 60 * 1000)
     SCAN_RUNTIME_PATH.write_text(
-        json.dumps({"scan_started_at": scan_started_at}, ensure_ascii=False, indent=2),
+        json.dumps(
+            {
+                "scan_started_at": scan_started_at,
+                "signal_boundary_ms": signal_boundary_ms,
+                "signal_boundary_utc": datetime.fromtimestamp(
+                    signal_boundary_ms / 1000, tz=timezone.utc
+                ).isoformat(),
+                "price_snapshot_source": "15m_candle_open",
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
     state = load_state()
@@ -954,9 +1014,21 @@ def main():
 
     symbols = get_symbols()
     ticker_map = get_all_tickers()
+    boundary_prices = get_boundary_prices(symbols, signal_boundary_ms)
+    # Never silently fall back to a later live price: that would change the
+    # strategy state when a GitHub runner starts late.
+    for symbol in list(ticker_map):
+        boundary_price = boundary_prices.get(symbol)
+        if boundary_price is None:
+            ticker_map.pop(symbol, None)
+            continue
+        ticker_map[symbol]["live_last_price"] = ticker_map[symbol].get("last_price")
+        ticker_map[symbol]["last_price"] = boundary_price
+        ticker_map[symbol]["signal_boundary_ms"] = signal_boundary_ms
     print(
         f"[INFO] scanning {len(symbols)} active USDT perpetual symbols "
-        f"with {len(ticker_map)} bulk tickers"
+        f"with {len(ticker_map)} exact-boundary snapshots "
+        f"at {datetime.fromtimestamp(signal_boundary_ms / 1000, tz=timezone.utc).isoformat()}"
     )
 
     for debug_symbol_name in DEBUG_SYMBOLS:
