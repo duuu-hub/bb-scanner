@@ -11,7 +11,7 @@ from pathlib import Path
 
 import requests
 
-from bitget_demo_lifecycle_test import BitgetDemoClassic, MARGIN_COIN, PRODUCT_TYPE, q_nearest, q_up, wait_for_fill
+from bitget_demo_lifecycle_test import BitgetDemoClassic, MARGIN_COIN, PRODUCT_TYPE, q_down, q_nearest, q_up, wait_for_fill
 from signal_io import load_signal_jsonl
 from trade_guard import Candle, GuardConfig, Signal, validate_signal
 from trade_state import load_trading_state, save_trading_state
@@ -86,6 +86,12 @@ def load_config() -> dict:
         raise RuntimeError("position_size_pct must remain 30%.")
     if float(cfg.get("max_total_exposure_pct", 0)) != 200.0:
         raise RuntimeError("max_total_exposure_pct must remain 200%.")
+    if str(cfg.get("entry_order_type", "")).upper() != "MAKER_LIMIT":
+        raise RuntimeError("entry_order_type must remain MAKER_LIMIT for this forward test.")
+    if not bool(cfg.get("maker_post_only", False)):
+        raise RuntimeError("maker_post_only must remain true.")
+    if int(cfg.get("maker_wait_seconds", 0)) != 180:
+        raise RuntimeError("maker_wait_seconds must remain 180 until a new research decision.")
     return cfg
 
 
@@ -124,6 +130,20 @@ def position_exposure_usdt(rows: list[dict]) -> Decimal:
 
 def symbol_has_position(rows: list[dict], symbol: str) -> bool:
     return any(str(r.get("symbol", "")).upper() == symbol.upper() for r in active_positions(rows))
+
+
+def pending_has_symbol(state: dict, symbol: str) -> bool:
+    return any(
+        str(x.get("symbol", "")).upper() == symbol.upper()
+        for x in state.get("pending_entries", [])
+    )
+
+
+def pending_exposure_usdt(state: dict) -> Decimal:
+    total = Decimal("0")
+    for item in state.get("pending_entries", []):
+        total += decimal_or_zero(item.get("planned_notional"))
+    return total
 
 
 def matching_position(rows: list[dict], symbol: str, side: str) -> dict | None:
@@ -280,6 +300,14 @@ def normalize_price(contract: dict, price: float | Decimal) -> str:
     return f"{q:.{place}f}"
 
 
+def normalize_price_down(contract: dict, price: float | Decimal) -> str:
+    place = int(contract.get("pricePlace") or 8)
+    end_step = decimal_or_zero(contract.get("priceEndStep") or "1")
+    step = Decimal(1).scaleb(-place) * end_step
+    q = q_down(Decimal(str(price)), step)
+    return f"{q:.{place}f}"
+
+
 def order_has_preset_protection(client: BitgetDemoClassic, symbol: str, order_id: str) -> bool:
     detail = client.private_get(
         "/api/v2/mix/order/detail",
@@ -400,6 +428,202 @@ def resolve_exchange_close(client: BitgetDemoClassic, trade: dict, ts_ms: int) -
             }
         )
         return {"reason": "EXCHANGE_POSITION_GONE", "return_pct": None, "avg_price": None}
+
+
+def finalize_maker_fill(
+    client: BitgetDemoClassic,
+    cfg: dict,
+    state: dict,
+    pending: dict,
+    detail: dict,
+    ts_ms: int,
+) -> bool:
+    filled_qty = decimal_or_zero(detail.get("baseVolume") or detail.get("size") or pending.get("qty"))
+    avg_fill = decimal_or_zero(detail.get("priceAvg"))
+    if filled_qty <= 0 or avg_fill <= 0:
+        return False
+
+    protected = bool(detail.get("presetStopSurplusPrice") and detail.get("presetStopLossPrice"))
+    pos = wait_for_position(client, str(pending["symbol"]), str(pending["side"]))
+    if not pos or (bool(cfg.get("require_exchange_tp_sl", True)) and not protected):
+        emergency = {
+            "signal_id": pending["signal_id"],
+            "strategy": pending.get("strategy"),
+            "symbol": pending["symbol"],
+            "side": pending["side"],
+            "qty": str(filled_qty),
+            "entry_avg_price": str(avg_fill),
+        }
+        close_tracked_trade(client, emergency, "MAKER_PROTECTION_VERIFY_FAILED")
+        log_event(
+            {
+                "event": "MAKER_ENTRY_ABORTED",
+                "signal_id": pending["signal_id"],
+                "strategy": pending.get("strategy"),
+                "symbol": pending["symbol"],
+                "reason": "MAKER_PROTECTION_VERIFY_FAILED",
+            }
+        )
+        mark_signal_shadow_execution(state, str(pending["signal_id"]), "MAKER_ENTRY_ABORTED")
+        notify(
+            cfg,
+            f"🚨 Demo Maker 체결 후 복구청산\n{pending.get('strategy')} {pending['symbol']}\nTP/SL 또는 포지션 확인 실패",
+        )
+        return True
+
+    filled_ms = int(detail.get("uTime") or detail.get("cTime") or ts_ms)
+    signal_deadline = int(pending["signal_time_ms"]) + int(pending["max_hold_minutes"]) * 60_000
+    trade = {
+        "signal_id": pending["signal_id"],
+        "portfolio": pending["portfolio"],
+        "strategy": pending["strategy"],
+        "symbol": pending["symbol"],
+        "side": pending["side"],
+        "qty": str(filled_qty),
+        "entry_order_id": pending["entry_order_id"],
+        "entry_avg_price": str(avg_fill),
+        "detected_price": pending["detected_price"],
+        "tp": pending["tp"],
+        "sl": pending["sl"],
+        "opened_at_ms": filled_ms,
+        "deadline_ms": signal_deadline,
+        "market_snapshot": pending.get("market_snapshot") or {},
+        "entry_order_type": "MAKER_LIMIT",
+        "maker_limit_price": pending.get("maker_limit_price"),
+    }
+    if not any(x.get("signal_id") == trade["signal_id"] for x in state.get("open_trades", [])):
+        state.setdefault("open_trades", []).append(trade)
+
+    slip = (
+        float((avg_fill / Decimal(str(pending["detected_price"])) - Decimal("1")) * Decimal("100"))
+        if decimal_or_zero(pending.get("detected_price")) > 0
+        else None
+    )
+    log_event(
+        {
+            "event": "MAKER_FILL",
+            **trade,
+            "filled_at_ms": filled_ms,
+            "fill_delay_ms": filled_ms - int(pending["signal_time_ms"]),
+            "entry_slippage_pct": slip,
+            "planned_notional": pending.get("planned_notional"),
+        }
+    )
+    mark_signal_shadow_execution(state, str(pending["signal_id"]), "DEMO_MAKER_FILL")
+    notify(
+        cfg,
+        f"✅ Demo Maker 체결\n{pending.get('strategy')} {pending['symbol']} LONG\n"
+        f"limit={pending.get('maker_limit_price')} fill={avg_fill}\n"
+        f"TP={pending.get('tp')} SL={pending.get('sl')} hold deadline=signal+{pending.get('max_hold_minutes')}m\n"
+        f"fill delay={(filled_ms-int(pending['signal_time_ms']))/1000:.1f}s",
+    )
+    return True
+
+
+def manage_pending_entries(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms: int) -> None:
+    kept = []
+    for pending in state.get("pending_entries", []):
+        try:
+            detail = client.private_get(
+                "/api/v2/mix/order/detail",
+                {
+                    "symbol": pending["symbol"],
+                    "productType": PRODUCT_TYPE,
+                    "orderId": pending["entry_order_id"],
+                },
+            ) or {}
+            order_state = str(detail.get("state") or "").lower()
+            filled_qty = decimal_or_zero(detail.get("baseVolume"))
+
+            if order_state == "filled":
+                finalize_maker_fill(client, cfg, state, pending, detail, ts_ms)
+                continue
+
+            if ts_ms >= int(pending["expires_at_ms"]):
+                if order_state not in {"cancelled", "canceled", "failed"}:
+                    try:
+                        client.private_post(
+                            "/api/v2/mix/order/cancel-order",
+                            {
+                                "symbol": pending["symbol"],
+                                "productType": PRODUCT_TYPE,
+                                "marginCoin": MARGIN_COIN,
+                                "orderId": pending["entry_order_id"],
+                            },
+                        )
+                    except Exception as exc:
+                        log_event(
+                            {
+                                "event": "MAKER_CANCEL_WARN",
+                                "signal_id": pending["signal_id"],
+                                "symbol": pending["symbol"],
+                                "error": str(exc),
+                            }
+                        )
+                    detail = client.private_get(
+                        "/api/v2/mix/order/detail",
+                        {
+                            "symbol": pending["symbol"],
+                            "productType": PRODUCT_TYPE,
+                            "orderId": pending["entry_order_id"],
+                        },
+                    ) or detail
+                    order_state = str(detail.get("state") or "").lower()
+                    filled_qty = decimal_or_zero(detail.get("baseVolume"))
+
+                if filled_qty > 0:
+                    finalize_maker_fill(client, cfg, state, pending, detail, ts_ms)
+                    continue
+
+                log_event(
+                    {
+                        "event": "MAKER_NO_FILL",
+                        "signal_id": pending["signal_id"],
+                        "strategy": pending.get("strategy"),
+                        "symbol": pending["symbol"],
+                        "maker_limit_price": pending.get("maker_limit_price"),
+                        "wait_seconds": pending.get("maker_wait_seconds"),
+                        "order_state": order_state,
+                    }
+                )
+                mark_signal_shadow_execution(state, str(pending["signal_id"]), "MAKER_NO_FILL")
+                notify(
+                    cfg,
+                    f"⌛ Demo Maker 미체결 취소\n{pending.get('strategy')} {pending['symbol']}\n"
+                    f"limit={pending.get('maker_limit_price')} wait={pending.get('maker_wait_seconds')}s",
+                )
+                continue
+
+            if order_state in {"cancelled", "canceled", "failed"}:
+                if filled_qty > 0:
+                    finalize_maker_fill(client, cfg, state, pending, detail, ts_ms)
+                else:
+                    log_event(
+                        {
+                            "event": "MAKER_CANCELLED",
+                            "signal_id": pending["signal_id"],
+                            "strategy": pending.get("strategy"),
+                            "symbol": pending["symbol"],
+                            "order_state": order_state,
+                        }
+                    )
+                    mark_signal_shadow_execution(state, str(pending["signal_id"]), "MAKER_CANCELLED")
+                continue
+
+            kept.append(pending)
+        except Exception as exc:
+            log_event(
+                {
+                    "event": "MAKER_PENDING_ERROR",
+                    "signal_id": pending.get("signal_id"),
+                    "strategy": pending.get("strategy"),
+                    "symbol": pending.get("symbol"),
+                    "error": str(exc),
+                }
+            )
+            kept.append(pending)
+
+    state["pending_entries"] = kept
 
 
 def manage_open_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms: int) -> None:
@@ -828,6 +1052,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
         signal_ttl_seconds=int(cfg.get("signal_ttl_seconds", 300)),
         max_spread_pct=float(cfg.get("max_spread_pct", 0.20)),
         sl_recovery_policy=str(cfg.get("sl_recovery_policy", "reject")),
+        entry_mode=str(cfg.get("entry_order_type", "MARKET")).upper(),
     )
     decision = validate_signal(
         signal,
@@ -872,12 +1097,21 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
     positions = all_positions(client)
     active = active_positions(positions)
 
-    if not bool(cfg.get("allow_hedge_same_symbol", False)) and symbol_has_position(active, signal.symbol):
-        reject(cfg, state, signal, "SYMBOL_POSITION_EXISTS")
+    if not bool(cfg.get("allow_hedge_same_symbol", False)) and (
+        symbol_has_position(active, signal.symbol) or pending_has_symbol(state, signal.symbol)
+    ):
+        reject(cfg, state, signal, "SYMBOL_POSITION_EXISTS_OR_PENDING")
         return False
 
-    if len(active) >= int(cfg["max_open_positions"]):
-        reject(cfg, state, signal, "MAX_OPEN_POSITIONS", {"open_positions": len(active)})
+    pending_count = len(state.get("pending_entries", []))
+    if len(active) + pending_count >= int(cfg["max_open_positions"]):
+        reject(
+            cfg,
+            state,
+            signal,
+            "MAX_OPEN_POSITIONS",
+            {"open_positions": len(active), "pending_entries": pending_count},
+        )
         return False
 
     equity = account_equity(client)
@@ -887,8 +1121,9 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
 
     planned_notional = equity * Decimal(str(cfg["position_size_pct"])) / Decimal("100")
     current_exposure = position_exposure_usdt(active)
+    pending_exposure = pending_exposure_usdt(state)
     max_exposure = equity * Decimal(str(cfg["max_total_exposure_pct"])) / Decimal("100")
-    if current_exposure + planned_notional > max_exposure + Decimal("0.00000001"):
+    if current_exposure + pending_exposure + planned_notional > max_exposure + Decimal("0.00000001"):
         reject(
             cfg,
             state,
@@ -897,6 +1132,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
             {
                 "equity": float(equity),
                 "current_exposure": float(current_exposure),
+                "pending_exposure": float(pending_exposure),
                 "planned_notional": float(planned_notional),
                 "max_exposure": float(max_exposure),
             },
@@ -914,9 +1150,100 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
         return False
 
     contract = contract_config(client, signal.symbol)
-    qty = order_size(contract, price, planned_notional)
     tp = normalize_price(contract, signal.tp)
     sl = normalize_price(contract, signal.sl)
+
+    if str(cfg.get("entry_order_type", "")).upper() == "MAKER_LIMIT":
+        # A long post-only order must not cross the ask. Use the frozen signal
+        # price when market is above it; if market is already slightly lower,
+        # rest at best bid for an equal-or-better maker entry.
+        raw_maker_price = min(Decimal(str(signal.detected_price)), bid)
+        maker_price_s = normalize_price_down(contract, raw_maker_price)
+        maker_price = Decimal(maker_price_s)
+        if maker_price < Decimal(str(signal.entry_min)):
+            reject(
+                cfg,
+                state,
+                signal,
+                "MAKER_PRICE_BELOW_ENTRY_RANGE",
+                {
+                    "maker_price": float(maker_price),
+                    "entry_min": float(signal.entry_min),
+                    "bid": float(bid),
+                    "ask": float(ask),
+                },
+            )
+            return False
+        if maker_price <= Decimal(str(signal.sl)) or maker_price >= Decimal(str(signal.tp)):
+            reject(cfg, state, signal, "INVALID_MAKER_PRICE")
+            return False
+
+        qty = order_size(contract, maker_price, planned_notional)
+        requested_ms = now_ms()
+        payload = {
+            "symbol": signal.symbol,
+            "productType": PRODUCT_TYPE,
+            "marginMode": "crossed",
+            "marginCoin": MARGIN_COIN,
+            "size": qty,
+            "price": maker_price_s,
+            "side": "buy",
+            "tradeSide": "open",
+            "orderType": "limit",
+            "force": "post_only",
+            "clientOid": ("mk_" + signal.signal_id.replace(":", "_"))[-32:],
+            "presetStopSurplusPrice": tp,
+            "presetStopLossPrice": sl,
+        }
+        placed = client.private_post("/api/v2/mix/order/place-order", payload)
+        order_id = str(placed.get("orderId") or "")
+        if not order_id:
+            raise RuntimeError(f"Maker entry missing orderId: {placed}")
+
+        wait_seconds = int(cfg.get("maker_wait_seconds", 180))
+        pending = {
+            "signal_id": signal.signal_id,
+            "portfolio": signal.portfolio,
+            "strategy": signal.strategy,
+            "symbol": signal.symbol,
+            "side": signal.side,
+            "qty": qty,
+            "entry_order_id": order_id,
+            "detected_price": signal.detected_price,
+            "maker_limit_price": maker_price_s,
+            "tp": tp,
+            "sl": sl,
+            "signal_time_ms": signal.signal_time_ms,
+            "max_hold_minutes": signal.max_hold_minutes,
+            "placed_at_ms": requested_ms,
+            "expires_at_ms": requested_ms + wait_seconds * 1000,
+            "maker_wait_seconds": wait_seconds,
+            "planned_notional": float(planned_notional),
+            "market_snapshot": signal.market_snapshot,
+        }
+        state.setdefault("pending_entries", []).append(pending)
+        if signal.signal_id not in state["processed_signal_ids"]:
+            state["processed_signal_ids"].append(signal.signal_id)
+        mark_signal_shadow_execution(state, signal.signal_id, "MAKER_PENDING")
+        log_event(
+            {
+                "event": "MAKER_ORDER_PLACED",
+                **pending,
+                "current_price": float(price),
+                "bid": float(bid),
+                "ask": float(ask),
+                "spread_pct": spread_pct(bid, ask),
+            }
+        )
+        notify(
+            cfg,
+            f"🧾 Demo Maker 지정가 대기\n{signal.strategy} {signal.symbol} LONG\n"
+            f"signal={signal.detected_price} limit={maker_price_s}\n"
+            f"TP={tp} SL={sl} wait={wait_seconds}s",
+        )
+        return False
+
+    qty = order_size(contract, price, planned_notional)
     requested_ms = now_ms()
 
     payload = {
@@ -1042,6 +1369,8 @@ def main() -> int:
     client = BitgetDemoClassic()
     ts_ms = now_ms()
 
+    # Pending maker orders are resolved before position management.
+    manage_pending_entries(client, cfg, state, ts_ms)
     # Position management always runs, including when new entries are disabled.
     manage_open_trades(client, cfg, state, ts_ms)
     # Spread-filter rejects are tracked separately as shadow-only counterfactuals.
@@ -1085,6 +1414,7 @@ def main() -> int:
         f"[DONE] LONG3 Demo active={cfg.get('active_portfolio')} "
         f"auto={cfg.get('demo_auto_execute')} signals_new={len(fresh)} "
         f"entries={entries} tracked_open={len(state.get('open_trades', []))} "
+        f"maker_pending={len(state.get('pending_entries', []))} "
         f"spread_shadow_open={len(state.get('spread_shadow_open', []))} "
         f"signal_shadow_open={len(state.get('signal_shadow_open', []))}"
     )
