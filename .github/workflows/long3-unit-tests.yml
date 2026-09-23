@@ -13,6 +13,8 @@ on:
       - 'config/trading_config.json'
       - 'tests/**'
       - '.github/workflows/long3-unit-tests.yml'
+      - 'weekly_report.py'
+      - '.github/workflows/long3-weekly-report.yml'
   workflow_dispatch:
 
 permissions:
@@ -30,3 +32,5 @@ jobs:
       - name: Run LONG3 safety and plumbing tests
         run: |
           python -m unittest -v             tests/test_trade_guard.py             tests/test_runtime_plumbing.py             tests/test_long3_signal_adapter.py             tests/test_auto_trader_safety.py
+      - name: Smoke-test weekly forward report
+        run: python weekly_report.py

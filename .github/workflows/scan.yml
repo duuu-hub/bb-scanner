@@ -72,4 +72,5 @@ jobs:
             if [ -e "$p" ]; then git add "$p"; fi
           done
           git commit -m 'chore: persist LONG3 forward state'
+          git pull --rebase origin "$GITHUB_REF_NAME"
           git push
