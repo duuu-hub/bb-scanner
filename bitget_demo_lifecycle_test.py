@@ -208,7 +208,7 @@ def main():
 
     print("[INFO] DEMO ONLY. Starting one complete futures lifecycle test.")
     print(f"[INFO] Entry plan: {symbol} LONG market qty={qty_s}; preset TP={tp_s}; preset SL={sl_s}")
-    print("[INFO] Safety: pre-existing position check passed. paptrading=1 is forced.")
+    print("[INFO] paptrading=1 is forced. This test closes exactly the size it opens.")
 
     try:
         placed = client.private_post("/api/v2/mix/order/place-order", entry)
@@ -256,20 +256,6 @@ def main():
         print("[OK] Full Demo lifecycle succeeded without position-read API.")
         print("[OK] ENTRY -> FILL -> TP/SL CONFIRM -> EXACT-SIZE CLOSE complete.")
 
-        closed = {"orderId": close_id}
-        # Compatibility marker for old log shape.
-        _ = closed
-
-        # no-op placeholder removed below
-        if False:
-            client.private_post(
-            "/api/v2/mix/order/close-positions",
-            {
-                "symbol": symbol,
-                "holdSide": "long",
-                "productType": PRODUCT_TYPE,
-            },
-        )
 
     finally:
         if opened and entry_qty_s:
