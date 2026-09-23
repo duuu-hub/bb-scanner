@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import sys
 import time
@@ -601,7 +602,196 @@ def manage_spread_shadows(client: BitgetDemoClassic, state: dict, ts_ms: int) ->
     state["spread_shadow_open"] = kept
 
 
+def register_signal_shadow(state: dict, signal: Signal) -> None:
+    """Track every frozen LONG3 signal from its detected price, independent of execution."""
+    existing = {
+        str(x.get("signal_id"))
+        for key in ("signal_shadow_open", "signal_shadow_closed")
+        for x in state.get(key, [])
+    }
+    if signal.signal_id in existing:
+        return
+    shadow = {
+        "signal_id": signal.signal_id,
+        "portfolio": signal.portfolio,
+        "strategy": signal.strategy,
+        "symbol": signal.symbol,
+        "side": signal.side,
+        "signal_time_ms": signal.signal_time_ms,
+        "last_checked_ms": signal.signal_time_ms,
+        "deadline_ms": signal.signal_time_ms + int(signal.max_hold_minutes) * 60_000,
+        "max_hold_minutes": signal.max_hold_minutes,
+        "shadow_entry_price": float(signal.detected_price),
+        "detected_price": float(signal.detected_price),
+        "tp": float(signal.tp),
+        "sl": float(signal.sl),
+        "market_snapshot": signal.market_snapshot,
+        "matched_strategies": list(signal.matched_strategies),
+        "actual_execution": "PENDING",
+    }
+    state.setdefault("signal_shadow_open", []).append(shadow)
+    log_event({"event": "SIGNAL_SHADOW_OPEN", **shadow})
+
+
+def mark_signal_shadow_execution(state: dict, signal_id: str, status: str) -> None:
+    for item in state.get("signal_shadow_open", []):
+        if str(item.get("signal_id")) == signal_id:
+            item["actual_execution"] = status
+            return
+
+
+def signal_shadow_stats(state: dict, cfg: dict) -> dict:
+    rows = list(state.get("signal_shadow_closed", []))
+    valid = []
+    for row in rows:
+        value = row.get("shadow_return_pct")
+        if value is None:
+            continue
+        try:
+            valid.append((int(row.get("closed_at_ms") or 0), str(row.get("signal_id") or ""), float(value)))
+        except Exception:
+            continue
+    valid.sort(key=lambda x: (x[0], x[1]))
+    values = [x[2] for x in valid]
+    wins = [x for x in values if x > 0]
+    losses = [x for x in values if x < 0]
+    gross_win = sum(wins)
+    gross_loss = abs(sum(losses))
+    pf = (gross_win / gross_loss) if gross_loss > 0 else (math.inf if gross_win > 0 else None)
+    weight = float(cfg.get("position_size_pct", 30.0)) / 100.0
+    compounded = 0.0
+    if values:
+        equity = 1.0
+        for ret in values:
+            equity *= 1.0 + (ret * weight) / 100.0
+        compounded = (equity - 1.0) * 100.0
+    return {
+        "closed": len(rows),
+        "valid": len(values),
+        "wins": len(wins),
+        "losses": len(losses),
+        "win_rate_pct": (len(wins) / len(values) * 100.0) if values else None,
+        "avg_return_pct": (sum(values) / len(values)) if values else None,
+        "pf": pf,
+        "weighted_compounded_pct": compounded,
+    }
+
+
+def manage_signal_shadows(
+    client: BitgetDemoClassic,
+    cfg: dict,
+    state: dict,
+    ts_ms: int,
+) -> None:
+    kept = []
+    for shadow in state.get("signal_shadow_open", []):
+        start_ms = int(shadow.get("last_checked_ms") or shadow.get("signal_time_ms") or ts_ms)
+        deadline_ms = int(shadow.get("deadline_ms") or ts_ms)
+        effective_end = min(ts_ms, deadline_ms)
+        candles = shadow_candles_between(
+            client,
+            str(shadow["symbol"]),
+            start_ms,
+            effective_end,
+        )
+
+        close_reason = None
+        exit_price = None
+        last_close = None
+        last_seen_ms = start_ms
+
+        for candle in candles:
+            candle_open = int(candle["open_time_ms"])
+            # A candle opening at the deadline is outside the holding window.
+            if candle_open >= deadline_ms:
+                continue
+            candle_end = candle_open + 60_000
+            last_close = float(candle["close"])
+            tp_hit = float(candle["high"]) >= float(shadow["tp"])
+            sl_hit = float(candle["low"]) <= float(shadow["sl"])
+            if tp_hit and sl_hit:
+                close_reason = "AMBIGUOUS_TP_SL_SAME_CANDLE"
+                break
+            if tp_hit:
+                close_reason = "TAKE_PROFIT"
+                exit_price = float(shadow["tp"])
+                break
+            if sl_hit:
+                close_reason = "STOP_LOSS"
+                exit_price = float(shadow["sl"])
+                break
+            # Only advance beyond a candle once its minute has fully elapsed.
+            if candle_end <= effective_end:
+                last_seen_ms = max(last_seen_ms, candle_end)
+            else:
+                last_seen_ms = max(last_seen_ms, candle_open)
+
+        if close_reason is None and ts_ms >= deadline_ms:
+            if last_close is not None:
+                close_reason = "MAX_HOLD"
+                exit_price = last_close
+            else:
+                shadow["last_checked_ms"] = last_seen_ms
+                kept.append(shadow)
+                continue
+
+        if close_reason is None:
+            shadow["last_checked_ms"] = max(start_ms, last_seen_ms)
+            kept.append(shadow)
+            continue
+
+        entry = float(shadow.get("shadow_entry_price") or 0.0)
+        ret = None
+        if entry > 0 and exit_price is not None:
+            ret = (float(exit_price) / entry - 1.0) * 100.0
+
+        closed = {
+            **shadow,
+            "closed_at_ms": ts_ms,
+            "shadow_close_reason": close_reason,
+            "shadow_exit_price": exit_price,
+            "shadow_return_pct": ret,
+        }
+        state.setdefault("signal_shadow_closed", []).append(closed)
+        log_event(
+            {
+                "event": "SIGNAL_SHADOW_CLOSE",
+                "signal_id": shadow.get("signal_id"),
+                "strategy": shadow.get("strategy"),
+                "symbol": shadow.get("symbol"),
+                "reason": close_reason,
+                "shadow_entry_price": entry,
+                "shadow_exit_price": exit_price,
+                "shadow_return_pct": ret,
+                "actual_execution": shadow.get("actual_execution"),
+            }
+        )
+
+        stats = signal_shadow_stats(state, cfg)
+        pf_text = (
+            "∞" if stats["pf"] == math.inf
+            else ("N/A" if stats["pf"] is None else f"{stats['pf']:.2f}")
+        )
+        ret_text = "N/A" if ret is None else f"{ret:+.2f}%"
+        exit_text = "N/A" if exit_price is None else str(exit_price)
+        wr_text = "N/A" if stats["win_rate_pct"] is None else f"{stats['win_rate_pct']:.1f}%"
+        avg_text = "N/A" if stats["avg_return_pct"] is None else f"{stats['avg_return_pct']:+.2f}%"
+        notify(
+            cfg,
+            "📊 LONG3 신호 가상포지션 종료\n"
+            f"{shadow.get('strategy')} {shadow.get('symbol')} LONG | {close_reason}\n"
+            f"entry={entry} exit={exit_text} return={ret_text}\n"
+            f"실제 Demo={shadow.get('actual_execution')}\n"
+            f"누적: closed={stats['closed']} W/L={stats['wins']}/{stats['losses']} "
+            f"win={wr_text} avg={avg_text} PF={pf_text}\n"
+            f"30% 단순복리≈{stats['weighted_compounded_pct']:+.2f}%",
+        )
+
+    state["signal_shadow_open"] = kept
+
+
 def reject(cfg: dict, state: dict, signal: Signal, reason: str, details: dict | None = None) -> None:
+    mark_signal_shadow_execution(state, signal.signal_id, f"REJECT:{reason}")
     if signal.signal_id not in state["processed_signal_ids"]:
         state["processed_signal_ids"].append(signal.signal_id)
     payload = {
@@ -777,6 +967,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
                 "reason": "ENTRY_PROTECTION_VERIFY_FAILED",
             }
         )
+        mark_signal_shadow_execution(state, signal.signal_id, "ENTRY_ABORTED")
         notify(
             cfg,
             f"🚨 Demo 진입 즉시 복구청산\n{signal.strategy} {signal.symbol}\nTP/SL 또는 포지션 확인 실패",
@@ -837,6 +1028,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
             "matched_strategies": list(signal.matched_strategies),
         }
     )
+    mark_signal_shadow_execution(state, signal.signal_id, "DEMO_ENTRY")
     notify(
         cfg,
         f"✅ Demo 진입\n{signal.strategy} {signal.symbol} LONG\nfill={avg_fill} TP={tp} SL={sl} hold={signal.max_hold_minutes}m\nsize≈{float(planned_notional):.2f} USDT\nopen={len(after_active)} exposure={float(exposure_after/equity*Decimal('100')):.1f}%\ndelay={(filled_ms-signal.signal_time_ms)/1000:.1f}s slip={slippage}",
@@ -855,6 +1047,7 @@ def main() -> int:
     # Spread-filter rejects are tracked separately as shadow-only counterfactuals.
     # They never create exchange orders and never alter the frozen LONG3 core.
     manage_spread_shadows(client, state, ts_ms)
+    manage_signal_shadows(client, cfg, state, ts_ms)
 
     signals = load_signal_jsonl(SIGNALS_PATH)
     processed = set(state.get("processed_signal_ids", []))
@@ -862,10 +1055,12 @@ def main() -> int:
 
     entries = 0
     for signal in fresh:
+        register_signal_shadow(state, signal)
         try:
             if execute_signal(client, cfg, state, signal, now_ms()):
                 entries += 1
         except Exception as exc:
+            mark_signal_shadow_execution(state, signal.signal_id, "ERROR")
             # Fail closed: API/infrastructure failures never become orders.
             # The signal is not marked processed so a later run can retry only if it is still within TTL.
             log_event(
@@ -880,6 +1075,9 @@ def main() -> int:
             )
             notify(cfg, f"🚨 Demo 실행 오류\n{signal.strategy} {signal.symbol}\n{exc}")
 
+    # New signals may already have touched TP/SL during scan/execution latency.
+    manage_signal_shadows(client, cfg, state, now_ms())
+
     state["last_run_ms"] = now_ms()
     save_trading_state(STATE_PATH, state)
 
@@ -887,7 +1085,8 @@ def main() -> int:
         f"[DONE] LONG3 Demo active={cfg.get('active_portfolio')} "
         f"auto={cfg.get('demo_auto_execute')} signals_new={len(fresh)} "
         f"entries={entries} tracked_open={len(state.get('open_trades', []))} "
-        f"spread_shadow_open={len(state.get('spread_shadow_open', []))}"
+        f"spread_shadow_open={len(state.get('spread_shadow_open', []))} "
+        f"signal_shadow_open={len(state.get('signal_shadow_open', []))}"
     )
     return 0
 
