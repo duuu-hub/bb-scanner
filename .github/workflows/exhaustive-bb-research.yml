@@ -7,6 +7,7 @@ on:
       - research-exhaustive-context
     paths:
       - '.research/exhaustive_bb_once'
+      - '.github/workflows/exhaustive-bb-research.yml'
 
 permissions:
   actions: read
@@ -31,14 +32,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p prior_regime
-          gh run download 35816642180             --repo duuu-hub/bb-scanner             --name regime-breadth-research             --dir prior_regime
+          gh run download 35816642180 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir prior_regime
 
       - name: Download prior context artifact
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p prior_context
-          gh run download 35835708997             --repo duuu-hub/bb-scanner             --name context-direction-research             --dir prior_context
+          gh run download 35835708997 --repo duuu-hub/bb-scanner --name context-direction-research --dir prior_context
 
       - name: Exhaust all existing two-year context
         run: python research/exhaustive_context_study.py
@@ -58,6 +59,7 @@ jobs:
     env:
       BACKTEST_WORKERS: 2
       BACKTEST_API_RPS: 8
+      PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
 
@@ -70,7 +72,7 @@ jobs:
 
       - name: Build BTC ETH seven-year BB snapshots
         run: |
-          python backtest.py             --symbols BTCUSDT,ETHUSDT             --days 2600             --outdir major_7y_source
+          python backtest.py --symbols BTCUSDT,ETHUSDT --days 2600 --outdir major_7y_source
 
       - name: Run long-history directional control
         run: python research/major_long_history_control.py
