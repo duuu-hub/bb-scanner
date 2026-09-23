@@ -31,7 +31,8 @@ jobs:
           python precision_backtest.py --source precision_source/snapshots.csv.gz --outdir precision_replay --workers 6
           python research/long3_relative_strength.py \
             --source precision_source/snapshots.csv.gz \
-            --trades precision_replay/precision_trades.csv
+            --trades precision_replay/precision_trades.csv \
+            --split-only test30
       - name: Print results
         if: always()
         run: |
