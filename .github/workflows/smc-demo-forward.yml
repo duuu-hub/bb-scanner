@@ -1,0 +1,61 @@
+name: SMC Demo Forward
+
+on:
+  workflow_dispatch:
+  schedule:
+    # LONG3 works around the 00/15/30/45 boundaries. Run SMC after the
+    # previous maker window has settled and before the next LONG3 boundary.
+    - cron: '8 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: smc-demo-forward
+  cancel-in-progress: false
+
+jobs:
+  forward:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install -r requirements-backtest.txt
+
+      - name: Run isolated SMC Demo forward
+        env:
+          SMC_DEMO_CONFIRM: SMC_DEMO_FORWARD
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python smc_demo_forward.py
+
+      - name: Persist isolated SMC state and audit log
+        run: |
+          paths="state/smc_demo_state.json logs/smc_demo_executions.jsonl"
+          if [ -z "$(git status --porcelain -- $paths)" ]; then
+            echo 'No SMC forward-state changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for p in $paths; do
+            if [ -e "$p" ]; then git add "$p"; fi
+          done
+          git commit -m 'chore: persist SMC Demo forward state'
+          for attempt in 1 2 3; do
+            if git pull --rebase origin "$GITHUB_REF_NAME" && git push; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep 2
+          done
+          echo 'Failed to persist SMC state after retries.'
+          exit 1
