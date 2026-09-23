@@ -1,0 +1,61 @@
+name: L3 Cross Universe Holdout
+on:
+  push:
+    branches:
+      - research-l3-cross-universe
+    paths:
+      - '.research/l3_cross_universe_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-backtest.txt
+      - name: Resolve NEW66 universe
+        run: |
+          HOLDOUT=$(python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text(encoding="utf-8"))
+          print(",".join(s for s in x["symbols"] if s not in ORIGINAL_AUTO50))
+          PY
+          )
+          echo "HOLDOUT_SYMBOLS=$HOLDOUT" >> "$GITHUB_ENV"
+      - name: Rebuild frozen multi-timeframe snapshots for NEW66
+        run: python backtest.py --symbols "$HOLDOUT_SYMBOLS" --days 180 --outdir l3_new66_source
+      - name: Download original Regime artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/regime
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir input/regime
+      - name: Run frozen L3 cross-universe test
+        run: |
+          python research/l3_cross_universe.py \
+            --source l3_new66_source/snapshots.csv.gz \
+            --regime-dir input/regime \
+            --selection market_data_store/bitget/research_auto100_15m/selection.json \
+            --outdir l3_cross_universe_results \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: l3-cross-universe-results
+          path: |
+            l3_cross_universe_results/
+            l3_new66_source/coverage.csv
+          if-no-files-found: warn
+          retention-days: 14
