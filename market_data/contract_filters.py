@@ -6,6 +6,12 @@ Automatic scanners/research universes default to crypto-only USDT perpetuals.
 Explicit user-supplied symbols may still be tested separately by callers.
 """
 
+RESEARCH_CORE_SYMBOLS = (
+    "BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT",
+    "BNBUSDT", "SUIUSDT", "PEPEUSDT", "WIFUSDT",
+    "龙虾USDT", "NILUSDT", "INITUSDT", "METISUSDT",
+)
+
 
 def is_rwa_contract(item: dict) -> bool:
     return str(item.get("isRwa", "")).strip().upper() == "YES"
