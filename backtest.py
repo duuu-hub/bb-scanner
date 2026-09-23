@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 import requests
 
+from market_data.contract_filters import active_symbols_from_contracts
+
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
 BB_PERIOD = 20
@@ -123,22 +125,16 @@ def api_get(path, params, retries=8):
 
 
 def get_active_symbols():
+    """Return active crypto USDT perpetuals for AUTOxx research.
+
+    Explicit --symbols values are left untouched so deliberate RWA tests
+    remain possible, but automatic universes exclude isRwa=YES contracts.
+    """
     data = api_get(
         "/api/v2/mix/market/contracts",
         {"productType": PRODUCT_TYPE},
     )
-    symbols = []
-    for item in data:
-        if item.get("symbolType") != "perpetual":
-            continue
-        if item.get("symbolStatus") != "normal":
-            continue
-        if str(item.get("quoteCoin", "")).upper() != "USDT":
-            continue
-        symbol = item.get("symbol")
-        if symbol:
-            symbols.append(symbol)
-    return sorted(set(symbols))
+    return active_symbols_from_contracts(data)
 
 
 def resolve_symbols(raw):
@@ -168,7 +164,7 @@ def resolve_symbols(raw):
     chosen = chosen[:target]
 
     print(
-        f"[AUTO] selected {len(chosen)} of {len(active)} active USDT perpetuals"
+        f"[AUTO] selected {len(chosen)} of {len(active)} active crypto USDT perpetuals"
     )
     print("[AUTO] symbols=" + ",".join(chosen))
     return chosen
