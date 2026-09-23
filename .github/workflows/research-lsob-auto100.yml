@@ -59,14 +59,14 @@ jobs:
 
       - name: Backfill fixed crypto AUTO100 for 180 days
         run: |
-          python market_data/research_backfill.py \
+          python -m market_data.research_backfill \
             --days 180 \
             --sample-size 100 \
             --workers 8
 
       - name: Run LSOB broad-universe study on latest 120 days
         run: |
-          python research/lsob_universe.py \
+          python -m research.lsob_universe \
             --days 120
 
       - name: Print compact results
