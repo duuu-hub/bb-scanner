@@ -106,6 +106,16 @@ def mirrored_short_signals(long_signals: pd.DataFrame) -> pd.DataFrame:
     return short
 
 
+def max_drawdown_pct(returns: pd.Series) -> float:
+    """Compounded equity max drawdown from per-trade net percentage returns."""
+    if returns.empty:
+        return np.nan
+    equity = (1.0 + returns.astype(float) / 100.0).cumprod()
+    peak = equity.cummax()
+    dd = equity / peak - 1.0
+    return float(dd.min() * 100.0)
+
+
 def summarize(trades: pd.DataFrame, regime_col: str) -> pd.DataFrame:
     rows = []
     if trades.empty:
@@ -127,6 +137,8 @@ def summarize(trades: pd.DataFrame, regime_col: str) -> pd.DataFrame:
             "median_net_pct": float(g["net_pct"].median()),
             "profit_factor": float(calc_pf(g["net_pct"])),
             "sum_net_pct": float(g["net_pct"].sum()),
+            "compounded_return_pct": float(((1.0 + g["net_pct"] / 100.0).prod() - 1.0) * 100.0),
+            "max_drawdown_pct": max_drawdown_pct(g["net_pct"]),
             "worst_trade_pct": float(g["net_pct"].min()),
             "best_trade_pct": float(g["net_pct"].max()),
             "tp_rate_pct": float((g["outcome"] == "TP").mean() * 100.0),
@@ -142,7 +154,8 @@ def comparison(summary: pd.DataFrame) -> pd.DataFrame:
     id_cols = ["regime_rule", "strategy", "delay_min", "regime"]
     metric_cols = [
         "n", "win_rate_pct", "avg_net_pct", "profit_factor",
-        "sum_net_pct", "worst_trade_pct", "best_trade_pct",
+        "sum_net_pct", "compounded_return_pct", "max_drawdown_pct",
+        "worst_trade_pct", "best_trade_pct",
     ]
     parts = []
     for direction in ("LONG", "SHORT"):
@@ -246,7 +259,44 @@ def main():
                 trade_rows.append(row)
 
     trades = pd.DataFrame(trade_rows)
+    trades["trade_time_utc"] = pd.to_datetime(trades["signal_ts"], unit="ms", utc=True, errors="coerce") if "signal_ts" in trades.columns else pd.to_datetime(trades.get("time_utc"), utc=True, errors="coerce")
     trades.to_csv(outdir / "long_vs_short_trades.csv.gz", index=False, compression="gzip")
+
+    # Stability diagnostics: fixed calendar half-years and symbol concentration.
+    # These are descriptive only; no threshold is selected from their outcomes.
+    if not trades.empty and trades["trade_time_utc"].notna().any():
+        trades["period_6m"] = trades["trade_time_utc"].dt.year.astype("Int64").astype(str) + "-H" + (((trades["trade_time_utc"].dt.month - 1) // 6) + 1).astype("Int64").astype(str)
+        period_rows = []
+        for rule in REGIME_RULES:
+            col = f"regime_{rule}"
+            for period, pg in trades.groupby("period_6m", dropna=False):
+                s = summarize(pg, col)
+                if not s.empty:
+                    s.insert(0, "period_6m", period)
+                    period_rows.append(s)
+        period_summary = pd.concat(period_rows, ignore_index=True) if period_rows else pd.DataFrame()
+        period_summary.to_csv(outdir / "long_vs_short_by_regime_6m.csv", index=False)
+
+    concentration_rows = []
+    for rule in REGIME_RULES:
+        col = f"regime_{rule}"
+        for keys, g in trades.groupby(["base_strategy", "direction", "delay_min", col], dropna=False):
+            base_strategy, direction, delay, regime = keys
+            by_symbol = g.groupby("symbol")["net_pct"].agg(["count", "sum"]).reset_index()
+            total_abs = float(by_symbol["sum"].abs().sum())
+            top = by_symbol.reindex(by_symbol["sum"].abs().sort_values(ascending=False).index).head(5)
+            concentration_rows.append({
+                "regime_rule": col,
+                "strategy": base_strategy,
+                "direction": direction,
+                "delay_min": int(delay),
+                "regime": regime,
+                "symbols": int(by_symbol["symbol"].nunique()),
+                "top1_abs_pnl_share_pct": float(abs(top.iloc[0]["sum"]) / total_abs * 100.0) if total_abs and not top.empty else np.nan,
+                "top5_abs_pnl_share_pct": float(top["sum"].abs().sum() / total_abs * 100.0) if total_abs else np.nan,
+                "top5_symbols": ",".join(top["symbol"].astype(str).tolist()),
+            })
+    pd.DataFrame(concentration_rows).to_csv(outdir / "symbol_concentration.csv", index=False)
 
     summaries = []
     for rule in REGIME_RULES:
