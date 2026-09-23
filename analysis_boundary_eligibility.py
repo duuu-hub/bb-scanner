@@ -102,6 +102,25 @@ def one_min(symbol,start,end):
         except: pass
     return sorted(out,key=lambda x:x["ts"])
 
+def ideal_boundary(r,snap,now):
+    st=snap["selected"]; boundary=r["_b"]; entry=snap["price"]
+    tp_pct,sl_pct=TPSL[st]; tp=entry*(1+tp_pct/100); sl=entry*(1-sl_pct/100)
+    deadline=boundary+HOLD[st]*60000
+    cs=one_min(r["symbol"],boundary,min(now,deadline)+60000)
+    for c in cs:
+        if c["ts"]<boundary or c["ts"]>=min(deadline,now): continue
+        th=c["high"]>=tp; sh=c["low"]<=sl
+        if th and sh: return {"status":"AMBIGUOUS","ret":None}
+        if th: return {"status":"TP","ret":(tp/entry-1)*100}
+        if sh: return {"status":"SL","ret":(sl/entry-1)*100}
+    if now>=deadline:
+        prev=[c for c in cs if boundary<=c["ts"]<deadline]
+        if not prev: return {"status":"NO_EXIT_DATA","ret":None}
+        return {"status":"TIME","ret":(prev[-1]["close"]/entry-1)*100}
+    prev=[c for c in cs if c["ts"]>=boundary and c["ts"]<=now]
+    return {"status":"OPEN","ret":((prev[-1]["close"]/entry-1)*100 if prev else None)}
+
+
 def maker3(r,snap,now):
     st=snap["selected"]; boundary=r["_b"]; emitted=r["_ms"]; entry=snap["price"]
     tp_pct,sl_pct=TPSL[st]; tp=entry*(1+tp_pct/100); sl=entry*(1-sl_pct/100)
@@ -142,19 +161,27 @@ def main():
             print("[WARN]",r["symbol"],e); snap=None
         d={"n":i,"symbol":r["symbol"],"time":r["timestamp_utc"],"old_strategy":r["strategy"],"boundary":r["_b"],"snapshot":snap}
         if snap and snap["selected"]:
-            res=maker3(r,snap,now); d["maker3"]=res; valid.append((r,snap,res))
+            ideal=ideal_boundary(r,snap,now)
+            res=maker3(r,snap,now); d["ideal"]=ideal; d["maker3"]=res; valid.append((r,snap,res,ideal))
         all_detail.append(d)
-    same=sum(1 for r,s,_ in valid if s["selected"]==r["strategy"])
-    changed=sum(1 for r,s,_ in valid if s["selected"]!=r["strategy"])
+    same=sum(1 for r,s,_,_ in valid if s["selected"]==r["strategy"])
+    changed=sum(1 for r,s,_,_ in valid if s["selected"]!=r["strategy"])
     invalid=len(rows)-len(valid)
     results=[x[2] for x in valid]; fills=[x for x in results if x["fill"]]
+    ideals=[x[3] for x in valid]
     closed=[x["ret"] for x in results if x["status"] in {"TP","SL","TIME"} and x["ret"] is not None]
     eq=1.0
     for v in closed: eq*=1+(0.30*v)/100
+    ideal_closed=[x["ret"] for x in ideals if x["status"] in {"TP","SL","TIME"} and x["ret"] is not None]
+    ideal_eq=1.0
+    for v in ideal_closed: ideal_eq*=1+(0.30*v)/100
     summary={"old_signals":len(rows),"boundary_valid":len(valid),"same_selected":same,"changed_selected":changed,"boundary_invalid":invalid,
       "fills":len(fills),"fill_rate_of_valid_pct":len(fills)/len(valid)*100 if valid else None,
       "outcomes":dict(Counter(x["status"] for x in results)),"closed":len(closed),
-      "avg_closed_pct":sum(closed)/len(closed) if closed else None,"pf":pf(closed),"weighted30_compounded_pct":(eq-1)*100}
+      "avg_closed_pct":sum(closed)/len(closed) if closed else None,"pf":pf(closed),"weighted30_compounded_pct":(eq-1)*100,
+      "ideal_outcomes":dict(Counter(x["status"] for x in ideals)),"ideal_closed":len(ideal_closed),
+      "ideal_avg_closed_pct":sum(ideal_closed)/len(ideal_closed) if ideal_closed else None,
+      "ideal_pf":pf(ideal_closed),"ideal_weighted30_compounded_pct":(ideal_eq-1)*100}
     print("[SUMMARY]",json.dumps(summary,ensure_ascii=False,sort_keys=True))
     for d in all_detail: print("[DETAIL]",json.dumps(d,ensure_ascii=False,sort_keys=True))
 
