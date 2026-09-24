@@ -407,5 +407,56 @@ def main():
     print(json.dumps(fresh_meta,indent=2))
     print(sdf.to_string(index=False))
 
+
+    # SHORT exit-parameter grid on the exact same fresh signal set.
+    # Diagnostic only: identify whether the signal has edge under different exits.
+    GRID_TPS=[0.02,0.04,0.06,0.08,0.10,0.12]
+    GRID_SLS=[0.02,0.03,0.04,0.05,0.06,0.08]
+    GRID_HOURS=[3,6,12,24,48]
+
+    def simulate_short_grid(x, sig_idx, tp_pct, sl_pct, hold_hours):
+        out=[]
+        hold_bars=int(hold_hours*4)
+        for i in sig_idx:
+            entry_i=i+1
+            if entry_i>=len(x): continue
+            entry=float(x.iloc[entry_i]["open"])
+            last=min(entry_i+hold_bars-1,len(x)-1)
+            exit_px=float(x.iloc[last]["close"]); reason="TIME"
+            tp=entry*(1-tp_pct); sl=entry*(1+sl_pct)
+            for j in range(entry_i,last+1):
+                hi=float(x.iloc[j]["high"]); lo=float(x.iloc[j]["low"])
+                hit_tp=lo<=tp; hit_sl=hi>=sl
+                if hit_tp and hit_sl: exit_px=sl; reason="SL"; break
+                if hit_sl: exit_px=sl; reason="SL"; break
+                if hit_tp: exit_px=tp; reason="TP"; break
+            out.append((1.0-exit_px/entry)-ROUND_TRIP_COST)
+        return out
+
+    grid_rows=[]
+    for tpv in GRID_TPS:
+        for slv in GRID_SLS:
+            for hh in GRID_HOURS:
+                rr=[]
+                for s,x in frames.items():
+                    v=vol_masks(x)[FRESH_VOL].fillna(False)
+                    base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) &
+                          x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
+                    trig=first_cross(x["below_lower15"]) & base
+                    btc_flat=x["ts"].map(flat_map).fillna(False).astype(bool)
+                    trig &= btc_flat & (x["dt"]>=START) & (x["dt"]<=END)
+                    idx=np.flatnonzero(trig.to_numpy())
+                    rr.extend(simulate_short_grid(x,idx,tpv,slv,hh))
+                r=pd.Series(rr,dtype=float)
+                gp=float(r[r>0].sum()); gl=float(-r[r<0].sum())
+                grid_rows.append({"tp_pct":tpv*100,"sl_pct":slv*100,"hold_h":hh,"trades":len(r),
+                                  "win_rate_pct":float((r>0).mean()*100),"avg_net_pct":float(r.mean()*100),
+                                  "profit_factor":float(gp/gl) if gl>0 else np.inf,
+                                  "sum_net_pct":float(r.sum()*100)})
+    gdf=pd.DataFrame(grid_rows).sort_values(["profit_factor","avg_net_pct"],ascending=False)
+    gdf.to_csv(OUT/"fresh_short_exit_grid.csv",index=False)
+    print("\n=== SHORT EXIT GRID TOP 25 ===")
+    print(gdf.head(25).to_string(index=False))
+
 if __name__ == "__main__":
     main()
