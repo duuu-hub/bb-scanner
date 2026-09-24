@@ -332,6 +332,37 @@ def main():
     gdf=pd.DataFrame(grid)
     gdf.to_csv(OUT/"early_exit_robustness_grid.csv",index=False)
 
+    # Full-year table across all available years, plus BTC-only and ETH-only legs
+    # under the exact same joint BTC+ETH regime and early-exit decisions.
+    fy=[]
+    variants=[("BASE",None,None),("D2_0",2,0.0),("D2_M1",2,-1.0),("D2_M2",2,-2.0),("D2_M3",2,-3.0)]
+    for vname,chk,thr in variants:
+        if chk is None:
+            pos=base_arr.copy()
+        else:
+            pos=np.zeros(len(x),dtype=float); ent=None; forced=False
+            for i in range(len(x)):
+                if base_arr[i]==1 and (i==0 or base_arr[i-1]==0): ent=i; forced=False
+                if base_arr[i]==0: ent=None; forced=False
+                if base_arr[i]==1 and not forced:
+                    pos[i]=1.0
+                    if ent is not None and i-ent==chk:
+                        rr0=fwd_underlying(x,ent,chk)
+                        if np.isfinite(rr0) and rr0<=thr: forced=True
+        ps=pd.Series(pos,index=x.index)
+        trn=ps.diff().abs().fillna(ps.abs())
+        legs={
+          "BASKET":ps*intr-trn*(RT/2),
+          "BTC":ps*(x["BTCUSDT_close"]/x["BTCUSDT_open"]-1)-trn*(RT/2),
+          "ETH":ps*(x["ETHUSDT_close"]/x["ETHUSDT_open"]-1)-trn*(RT/2)}
+        for leg,rrs in legs.items():
+            for yr,gidx in x.groupby(x["datetime_utc"].dt.year).groups.items():
+                if int(yr)<2018: continue
+                pp=perf(rrs.loc[gidx].to_numpy(float))
+                fy.append({"variant":vname,"leg":leg,"year":int(yr),**pp})
+    fydf=pd.DataFrame(fy)
+    fydf.to_csv(OUT/"early_exit_full_years_btc_eth.csv",index=False)
+
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
         if year<2018: continue
@@ -411,6 +442,8 @@ def main():
     print(d3cdf.to_string(index=False))
     print("\\n=== EARLY EXIT ROBUSTNESS GRID ===")
     print(gdf.sort_values(["checkpoint_days","threshold_pct"],ascending=[True,False]).to_string(index=False))
+    print("\\n=== FULL YEARS: BASE + D2 ROBUSTNESS, BASKET/BTC/ETH ===")
+    print(fydf.to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
