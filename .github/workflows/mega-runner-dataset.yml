@@ -20,17 +20,22 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - name: Download crypto-only long-history OHLCV
-        run: |\n          python scripts/mega_runner_collect.py --market spot --years "$YEARS" --interval "$INTERVAL"\n          python scripts/mega_runner_collect.py --market um --years "$YEARS" --interval "$INTERVAL"
+        run: |
+          python scripts/mega_runner_collect.py --market spot --years "$YEARS" --interval "$INTERVAL"
+          python scripts/mega_runner_collect.py --market um --years "$YEARS" --interval "$INTERVAL"
       - name: Label 365d mega-runners
-        run: |\n          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_spot_1d --out research/mega_runner/labels_spot.csv\n          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_um_1d --out research/mega_runner/labels_um.csv
+        run: |
+          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_spot_1d --out research/mega_runner/labels_spot.csv
+          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_um_1d --out research/mega_runner/labels_um.csv
       - name: Summarize labels
         run: |
-          head -20 research/mega_runner/labels_spot.csv || true\n          head -20 research/mega_runner/labels_um.csv || true
+          head -20 research/mega_runner/labels_spot.csv || true
+          head -20 research/mega_runner/labels_um.csv || true
           du -sh research/mega_runner/data || true
       - name: Upload raw research dataset
         uses: actions/upload-artifact@v4
         with:
-          name: mega-runner-binance-spot-${{ github.run_id }}
+          name: mega-runner-binance-spot-um-${{ github.run_id }}
           path: research/mega_runner/data/
           retention-days: 30
           compression-level: 6
