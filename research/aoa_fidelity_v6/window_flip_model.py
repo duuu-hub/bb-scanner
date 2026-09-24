@@ -18,7 +18,7 @@ import research.aoa_fidelity_v5.leg_state_flip_model as v5
 import research.aoa_3way_oos.backtest_3way as b3
 
 OUT=ROOT/"research"/"aoa_fidelity_v6"/"output"
-HORIZONS=[1,4,8,16]  # 15m,1h,2h,4h
+HORIZONS=[1,4,8,16]  # 15m,1h,2h,4h; rerun after inherited simulator fix
 THRESHOLDS=[.60,.70,.75,.80,.85,.90,.94,.97]
 MINHOLDS=[4,8,16,24,32,48]
 
