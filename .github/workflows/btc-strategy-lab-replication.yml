@@ -27,6 +27,12 @@ jobs:
         run: python -m pip install --disable-pip-version-check pandas numpy
       - name: Run baseline replication
         run: python research/btc_strategy_lab_replication/run_baseline.py
+      - name: Download source funding data
+        run: |
+          mkdir -p research/btc_strategy_lab_replication/source_data
+          curl -L --fail https://raw.githubusercontent.com/wiktorj137/btc-strategy-lab/main/research/webdata/funding.feather -o research/btc_strategy_lab_replication/source_data/funding.feather
+      - name: Run funding replication
+        run: python research/btc_strategy_lab_replication/run_funding.py
       - name: Commit results
         run: |
           git config user.name github-actions
