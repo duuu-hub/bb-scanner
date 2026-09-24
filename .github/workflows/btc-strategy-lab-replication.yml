@@ -35,6 +35,8 @@ jobs:
         run: python research/btc_strategy_lab_replication/run_funding.py
       - name: Run robustness sweep and walk-forward
         run: python research/btc_strategy_lab_replication/run_robustness.py
+      - name: Run source walk-forward logic
+        run: python research/btc_strategy_lab_replication/run_source_walkforward.py
       - name: Commit results
         run: |
           git config user.name github-actions
