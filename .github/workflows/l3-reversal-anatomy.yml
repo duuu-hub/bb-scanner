@@ -48,7 +48,7 @@ jobs:
       - name: Analyze reversal anatomy
         run: |
           python research/l3_reversal_anatomy.py \
-            --cross-dir input/cross \
+            --cross-dir input/cross/l3_cross_universe_results \
             --target-source l3_reversal_source/snapshots.csv.gz \
             --regime-dir input/regime \
             --outdir l3_reversal_anatomy_results
@@ -58,6 +58,6 @@ jobs:
           name: l3-reversal-anatomy-results
           path: |
             l3_reversal_anatomy_results/
-            l3_reversal_source/coverage.csv
+            l3_reversal_source/coverage.csv\n            l3_reversal_source/snapshots.csv.gz
           if-no-files-found: warn
           retention-days: 14
