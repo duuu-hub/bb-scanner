@@ -508,7 +508,7 @@ def main() -> None:
     ydiag = pd.DataFrame(yrows).sort_values(["strategy", "year", "direction"])
     ydiag.to_csv(OUT_ROOT / "yearly_direction_cost025.csv", index=False)
     print(ydiag.to_string(index=False))
-\n    print("\n=== DONCHIAN VOLUME INCREMENTAL CHECK @ 0.25% ===")
+    print("\n=== DONCHIAN VOLUME INCREMENTAL CHECK @ 0.25% ===")
     print(paired[["strategy", "split", "n", "avg_pct", "pf", "mdd_pct"]].to_string(index=False))
 
 
