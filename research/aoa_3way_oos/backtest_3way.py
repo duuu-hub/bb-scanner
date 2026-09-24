@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import json, math, hashlib
+import json, math, hashlib, sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import numpy as np
 import pandas as pd
@@ -16,7 +20,6 @@ from research.aoa_market_context.analyze_market_context import (
     load_candles, attach, MARKET_FEATURES
 )
 
-ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "research" / "aoa_3way_oos"
 OUT = BASE / "output"
 POLICY = ROOT / "research" / "aoa_market_context" / "aoa_policy_2019h2_2021_compact.csv"
