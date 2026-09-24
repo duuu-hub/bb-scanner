@@ -30,16 +30,13 @@ def signals(sym,df):
         buckets=idx.floor(rule) if name!="1W" else idx.floor("7D")
         sm=pd.Series(s.reindex(buckets).to_numpy(),index=idx)
         sqm=pd.Series(ss.reindex(buckets).to_numpy(),index=idx)
-        p=base["close"]
-        mean=(sm+p)/20.0
+        # Match the frozen scanner: evaluate every 15m boundary at the\n        # new candle OPEN, using 19 fully completed TF closes + live price.\n        p=base["open"]\n        mean=(sm+p)/20.0
         var=((sqm+p*p)/20.0)-mean*mean
         upper=mean+2*np.sqrt(var.clip(lower=0))
         above[name]=p>upper
     A=pd.DataFrame(above,index=idx)
     exact=A.sum(axis=1)
-    p=base["close"]
-    ret1=p.pct_change(4)*100; ret4=p.pct_change(16)*100
-    raw={
+    # Frozen momentum bases are 15m boundary opens 1h/4h earlier.\n    p=base["open"]\n    ret1=p.pct_change(4)*100; ret4=p.pct_change(16)*100\n    raw={
       "L1":(exact>=6)&(ret1>=10),
       "L2":(exact>=6)&(ret4>=30),
       "L3":(exact==6)&(~A["4H"])
