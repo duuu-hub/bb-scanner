@@ -29,6 +29,9 @@ def fit_behavior_calibration(full_candles):
     p=p[p["t"] < int(pd.Timestamp("2021-01-01",tz="UTC").timestamp())].copy()
     p["year"]=pd.to_datetime(p["t"],unit="s",utc=True).dt.year
     p=p[p["year"].isin([2019,2020])].copy()
+    p["dir_sign"]=p["d"].map({"L":1.0,"S":-1.0})
+    for h in ["ret1h","ret4h","ret24h"]:
+        p["signed_"+h]=p["dir_sign"]*p[h]
     p["atr"]=pd.to_numeric(p["atr14_pct"],errors="coerce")
     p["fav_atr"]=p["fav"]/p["atr"]
     for h in ["signed_ret1h","signed_ret4h","signed_ret24h"]:
