@@ -1,0 +1,34 @@
+name: LONG3 5Y Regime Backtest
+on:
+  push:
+    branches: [research-long3-5y-regime]
+  workflow_dispatch:
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements-backtest.txt
+      - name: Run existing LONG3 5Y research
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifacts
+          python analysis_survival_120d.py --help > artifacts/help.txt 2>&1 || true
+          if [ -f research/long3_5y_regime.py ]; then
+            python research/long3_5y_regime.py 2>&1 | tee artifacts/run.log
+          elif [ -f precision_backtest.py ]; then
+            python precision_backtest.py 2>&1 | tee artifacts/run.log
+          else
+            echo "No backtest entrypoint found" | tee artifacts/run.log
+            exit 2
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: long3-5y-regime
+          path: artifacts/
