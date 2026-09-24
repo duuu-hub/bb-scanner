@@ -54,7 +54,7 @@ def main():
     xi,ret,why=ex
     alltr.append(dict(side=side,tp=tp,sl=sl,horizon_h=h,delay_bars=delay,symbol=rr.symbol,
       signal_ts=int(rr.timestamp_ms),entry_ts=int(g.iloc[ei].timestamp_ms),exit_ts=int(g.iloc[xi].timestamp_ms),
-      gross_ret_pct=ret,exit_reason=why))
+      gross_ret_pct=ret,exit_reason=why,ret_24h=getattr(rr,"ret_24h",np.nan),rv_4h=getattr(rr,"rv_4h",np.nan),rv_24h=getattr(rr,"rv_24h",np.nan)))
  d=pd.DataFrame(alltr)
  d["wall_hold_h"]=(d.exit_ts-d.entry_ts)/3_600_000
  d.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
@@ -179,4 +179,56 @@ def slot_study(d):
  out=pd.DataFrame(rows); out.to_csv(OUT/"slot_study.csv",index=False)
  print("\n=== SLOT STUDY ==="); print(out.to_string(index=False))
 
-if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz"))
+
+MC_REPS=1000
+MC_SEED=20260925
+def monte_carlo_slot_study(d):
+ base=d[(d.delay_bars==0)&(d.side=="SHORT")&(d.tp==5.)&(d.sl==3.)&(d.horizon_h==6)].copy()
+ # same-symbol one-position-at-a-time, matching slot_study
+ accepted=[]; open_until={}
+ for r in base.sort_values(["signal_ts","symbol"]).itertuples():
+  if open_until.get(r.symbol,-1)>=r.entry_ts: continue
+  accepted.append(r); open_until[r.symbol]=r.exit_ts
+ a=pd.DataFrame([r._asdict() for r in accepted])
+ if a.empty: return
+ a["exit_ts"]=np.maximum(a.exit_ts,a.entry_ts+1)
+ def run(slots,mode,rng=None):
+  alloc=1.0/slots; cash=1.0; active={}; peak=1.0; mdd=0.; taken=missed=0
+  events=sorted(set(a.entry_ts.tolist()+a.exit_ts.tolist()))
+  be={t:g.copy() for t,g in a.groupby("entry_ts")}; bx={t:g for t,g in a.groupby("exit_ts")}
+  for t in events:
+   if t in bx:
+    for r in bx[t].itertuples():
+     k=(r.symbol,r.entry_ts)
+     if k in active:
+      stake=active.pop(k); cash += stake*(1+(r.gross_ret_pct-0.20)/100)
+   if t in be:
+    g=be[t].copy()
+    if mode=="random":
+     order=rng.permutation(len(g)); g=g.iloc[order]
+    else:
+     # continuation-strength ranking using only pre-entry features.
+     # High realized volatility + more-negative 24h return ranks first.
+     score=g.rv_24h.rank(pct=True)+g.rv_4h.rank(pct=True)+(-g.ret_24h).rank(pct=True)
+     g=g.assign(_score=score).sort_values(["_score","symbol"],ascending=[False,True])
+    for r in g.itertuples():
+     if len(active)>=slots or cash+1e-12<alloc: missed+=1; continue
+     cash-=alloc; active[(r.symbol,r.entry_ts)]=alloc; taken+=1
+   eq=cash+sum(active.values()); peak=max(peak,eq); mdd=min(mdd,(eq/peak-1)*100)
+  return taken,missed,(cash+sum(active.values())-1)*100,mdd
+ rows=[]
+ rng=np.random.default_rng(MC_SEED)
+ for slots in SLOTS:
+  vals=[run(slots,"random",rng) for _ in range(MC_REPS)]
+  v=pd.DataFrame(vals,columns=["taken","missed","ret","mdd"])
+  rows.append(dict(mode="random_mc",slots=slots,reps=MC_REPS,
+   taken_mean=v.taken.mean(),capture_mean_pct=100*v.taken.mean()/len(a),
+   return_p05=v.ret.quantile(.05),return_median=v.ret.median(),return_p95=v.ret.quantile(.95),
+   mdd_p05=v.mdd.quantile(.05),mdd_median=v.mdd.median(),mdd_p95=v.mdd.quantile(.95)))
+  taken,missed,ret,mdd=run(slots,"alpha")
+  rows.append(dict(mode="alpha_rank",slots=slots,reps=1,taken_mean=taken,capture_mean_pct=100*taken/len(a),
+   return_p05=ret,return_median=ret,return_p95=ret,mdd_p05=mdd,mdd_median=mdd,mdd_p95=mdd))
+ out=pd.DataFrame(rows); out.to_csv(OUT/"slot_monte_carlo.csv",index=False)
+ print("\n=== SLOT MONTE CARLO / ALPHA RANK (SHORT 5/3/6h) ==="); print(out.to_string(index=False))
+
+if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz")); monte_carlo_slot_study(pd.read_csv(OUT/"trades.csv.gz"))
