@@ -182,10 +182,15 @@ def main():
             if ht: found=("TP",tp,int(bar.ts)+3600000);break
         if found:
             o,px,xt=found
-            results.append(dict(**r.to_dict(),done=True,outcome=o,px=px,xt=xt,last_close=px,censored=False,
-                                net=gp(r.entry,px),mtm=gp(r.entry,px),hold_h=(xt-r.entry_ts)/3600000))
+            dct=r.to_dict()
+            dct.update({"done":True,"outcome":o,"px":px,"xt":xt,"last_close":px,"censored":False,
+                        "net":gp(r.entry,px),"mtm":gp(r.entry,px),"hold_h":(xt-r.entry_ts)/3600000})
+            results.append(dct)
         else:
-            results.append(dict(**r.to_dict(),censored=True,net=np.nan,mtm=gp(r.entry,last) if math.isfinite(last) else np.nan,hold_h=np.nan))
+            dct=r.to_dict()
+            dct.update({"censored":True,"net":np.nan,
+                        "mtm":gp(r.entry,last) if math.isfinite(last) else np.nan,"hold_h":np.nan})
+            results.append(dct)
     UR=pd.DataFrame(results)
 
     F=pd.DataFrame(fin)
