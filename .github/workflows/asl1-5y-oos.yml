@@ -1,0 +1,47 @@
+name: ASL1 5Y OOS
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-asl1-5y-oos]
+    paths:
+      - 'research/asl1_5y_oos.py'
+      - '.github/workflows/asl1-5y-oos.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-asl1-5y-oos
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: pip install pandas numpy
+      - name: Download 8 completed USD-M 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data5y
+          for id in 10802591931 10802262704 10802712263 10802169065 10802272415 10802218941 10802032895 10802213299; do
+            echo "artifact $id"
+            gh api -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/actions/artifacts/$id/zip > /tmp/$id.zip
+            unzip -q /tmp/$id.zip -d data5y
+            rm /tmp/$id.zip
+          done
+          echo "files=$(find data5y -name '*.csv.gz' | wc -l)"
+          test "$(find data5y -name '*.csv.gz' | wc -l)" -ge 100
+      - name: Syntax
+        run: python -m py_compile research/asl1_5y_oos.py
+      - name: Run frozen 5Y OOS
+        run: python research/asl1_5y_oos.py
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: asl1-5y-oos-results
+          path: research_output/asl1_5y_oos/
+          if-no-files-found: error
