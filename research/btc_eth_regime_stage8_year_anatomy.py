@@ -199,6 +199,48 @@ def main():
     jdf=pd.DataFrame(joint)
     jdf.to_csv(OUT/"signal_day_er_gap_joint.csv",index=False)
 
+    # Early persistence anatomy: descriptive path after actual entry, no optimized exit rule.
+    prows=[]
+    for _,r in full.iterrows():
+        entry_i=x.index[x["datetime_utc"].eq(r["entry"])]
+        if len(entry_i)==0: continue
+        i=int(entry_i[0])
+        row={"year":int(r["year"]),"entry":r["entry"],"episode_ret_pct":float(r["ret_pct"]),
+             "episode_group":"WIN_EP" if r["ret_pct"]>0 else "LOSS_EP","episode_days":int(r["days"])}
+        for n in [1,2,3,5,7]:
+            j=min(i+n,len(x)-1)
+            h=x.iloc[i:j+1]
+            row[f"path_{n}d_close_pct"]=fwd_underlying(x,i,n)
+            row[f"path_{n}d_min_pct"]=float(min(
+                ((h["BTCUSDT_close"]/x.iloc[i]["BTCUSDT_close"]-1)+(h["ETHUSDT_close"]/x.iloc[i]["ETHUSDT_close"]-1))*50))
+            row[f"active_survives_{n}d"]=bool(r["days"]>n)
+        prows.append(row)
+    pdf=pd.DataFrame(prows)
+    pdf.to_csv(OUT/"early_persistence_paths.csv",index=False)
+    pcomp=[]
+    for name,h in pdf.groupby("episode_group"):
+        row={"group":name,"n":len(h)}
+        for n in [1,2,3,5,7]:
+            row[f"path_{n}d_close_median"]=float(h[f"path_{n}d_close_pct"].median())
+            row[f"path_{n}d_min_median"]=float(h[f"path_{n}d_min_pct"].median())
+            row[f"survive_{n}d_pct"]=float(h[f"active_survives_{n}d"].mean()*100)
+        pcomp.append(row)
+    pcdf=pd.DataFrame(pcomp)
+    pcdf.to_csv(OUT/"early_persistence_compare.csv",index=False)
+
+    # Fixed zero-return checkpoints only (not threshold search): how informative is early sign?
+    erows=[]
+    for n in [1,2,3,5]:
+        z=pdf.dropna(subset=[f"path_{n}d_close_pct"]).copy()
+        z["early_sign"]=np.where(z[f"path_{n}d_close_pct"]>0,"POSITIVE","NONPOSITIVE")
+        for sign,h in z.groupby("early_sign"):
+            erows.append({"checkpoint_days":n,"early_sign":sign,"n":len(h),
+                "final_episode_win_pct":float((h["episode_ret_pct"]>0).mean()*100),
+                "final_episode_return_median":float(h["episode_ret_pct"].median()),
+                "final_episode_days_median":float(h["episode_days"].median())})
+    esdf=pd.DataFrame(erows)
+    esdf.to_csv(OUT/"early_sign_outcomes.csv",index=False)
+
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
         if year<2018: continue
@@ -268,6 +310,10 @@ def main():
     print(ycorr.to_string(index=False))
     print("\\n=== SIGNAL-DAY ER X GAP ===")
     print(jdf.to_string(index=False))
+    print("\\n=== EARLY PERSISTENCE WIN VS LOSS ===")
+    print(pcdf.to_string(index=False))
+    print("\\n=== EARLY SIGN OUTCOMES ===")
+    print(esdf.to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
