@@ -407,3 +407,5 @@ def main():
     print(json.dumps(fresh_meta,indent=2))
     print(sdf.to_string(index=False))
 
+if __name__ == "__main__":
+    main()
