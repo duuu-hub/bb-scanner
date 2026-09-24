@@ -1,0 +1,38 @@
+name: L3 Reversal Stress Audit
+on:
+  push:
+    branches:
+      - research-l3-cross-universe
+    paths:
+      - '.research/l3_reversal_stress_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: Download reversal anatomy artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          gh run download 35939753339 --repo duuu-hub/bb-scanner --name l3-reversal-anatomy-results --dir input
+          find input -maxdepth 3 -type f -print
+      - name: Locate signal anatomy and run stress audit
+        run: |
+          SIGNALS=$(find input -name l3_bear_signal_anatomy.csv | head -1)
+          test -n "$SIGNALS"
+          python research/l3_reversal_stress.py --signals "$SIGNALS" --outdir l3_reversal_stress_results
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l3-reversal-stress-results
+          path: l3_reversal_stress_results/
+          retention-days: 14
