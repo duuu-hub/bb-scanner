@@ -1,0 +1,38 @@
+name: Rank5 Repeat Reversal Diagnostic
+on:
+  push:
+    branches:
+      - research-rank5-repeat-reversal
+    paths:
+      - '.research/rank5_repeat_reversal_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: Download prior 365d trades
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          gh run download 35944354692 --repo duuu-hub/bb-scanner --name l3-lite-frequency-fast-results --dir input
+          echo "TRADES=$(find input -name all_trades.csv.gz | head -1)" >> "$GITHUB_ENV"
+          test -n "$(find input -name all_trades.csv.gz | head -1)"
+      - name: Analyze repeat-signal reversal
+        run: |
+          python research/rank5_repeat_reversal.py --trades "$TRADES" --outdir repeat_reversal_results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rank5-repeat-reversal-results
+          path: repeat_reversal_results/
+          retention-days: 14
