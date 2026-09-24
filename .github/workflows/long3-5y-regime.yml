@@ -25,7 +25,10 @@ jobs:
           mv unpack/um/*.parquet canonical_um/
           echo "parquet files: $(find canonical_um -name '*.parquet' | wc -l)"
       - name: Run LONG3 exact-rule 5Y regime replay
-        run: python research/long3_5y_regime.py 2>&1 | tee artifacts/run.log
+        run: |
+          mkdir -p artifacts
+          set -o pipefail
+          python research/long3_5y_regime.py 2>&1 | tee artifacts/run.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
