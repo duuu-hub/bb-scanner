@@ -20,10 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:\n          python-version: '3.12'
+        with:
+          python-version: '3.12'
       - run: pip install -r requirements-backtest.txt
       - name: Download inputs
-        env:\n          GH_TOKEN: ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p input/l3 input/regime
           gh run download 35944354692 --repo duuu-hub/bb-scanner --name l3-lite-frequency-fast-results --dir input/l3
@@ -31,9 +33,17 @@ jobs:
           OLD=$(find input/l3 -name auto50_overlap_signals.csv | head -1)
           NEW=$(find input/l3 -name new66_holdout_signals.csv | head -1)
           REG=$(find input/regime -name breadth_timeseries.csv.gz | head -1)
-          echo "OLD=$OLD" >> "$GITHUB_ENV"; echo "NEW=$NEW" >> "$GITHUB_ENV"; echo "REG=$REG" >> "$GITHUB_ENV"
+          echo "OLD=$OLD" >> "$GITHUB_ENV"
+          echo "NEW=$NEW" >> "$GITHUB_ENV"
+          echo "REG=$REG" >> "$GITHUB_ENV"
       - name: Run fast time-limit audit
-        run: python research/l3_time_limit_fast.py --signals-old "$OLD" --signals-new "$NEW" --regime "$REG" --outdir l3_time_limit_fast_results --workers 8
+        run: |
+          python research/l3_time_limit_fast.py \
+            --signals-old "$OLD" \
+            --signals-new "$NEW" \
+            --regime "$REG" \
+            --outdir l3_time_limit_fast_results \
+            --workers 8
       - uses: actions/upload-artifact@v4
         if: always()
         with:
