@@ -52,8 +52,8 @@ def sim(x,idx,hh,sym,side):
             hi=float(x.high.iloc[j]); lo=float(x.low.iloc[j])
             if hi>=sl: px=sl; reason="SL"; ex=j; break
             if lo<=tp: px=tp; reason="TP"; ex=j; break
-        r=1-px/e-COST
-        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,r,reason))
+        r=(1-px/e-COST) if side=="SHORT" else (px/e-1-COST)
+        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason))
     return out
 
 files=list(DATA.rglob("*.csv.gz")); print("FILES",len(files),flush=True)
