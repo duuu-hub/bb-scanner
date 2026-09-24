@@ -1,8 +1,17 @@
 from __future__ import annotations
 
 import pandas as pd
+import pytest
+from unittest.mock import patch
 
-from smc_demo_forward import order_size
+from smc_demo_forward import (
+    HOUR_MS,
+    fetch_closed_1h,
+    manage_pending_orders,
+    order_size,
+    setup_age_hours,
+    setup_expired_by_clock,
+)
 from smc_forward_engine import (
     SMCConfig,
     detect_setup_at,
@@ -112,3 +121,78 @@ def test_order_size_respects_notional_cap():
     assert qty == "1.000"
     assert float(notional) == 100.0
     assert float(risk) == 5.0
+
+def test_wall_clock_expiry_blocks_old_setup():
+    now = 100 * HOUR_MS
+    cfg = {"expiry_bars": 24}
+    fresh = {"created_time_ms": now - 23 * HOUR_MS}
+    expired = {"created_time_ms": now - 25 * HOUR_MS}
+    assert not setup_expired_by_clock(fresh, cfg, now)
+    assert setup_expired_by_clock(expired, cfg, now)
+    assert setup_age_hours(expired, now) == 25.0
+
+
+def test_fetch_closed_1h_requires_latest_completed_hour():
+    boundary = 100 * HOUR_MS
+
+    class FakeClient:
+        def __init__(self, rows):
+            self.rows = rows
+            self.calls = []
+
+        def public_get(self, path, params):
+            self.calls.append((path, params))
+            return self.rows
+
+    fresh_rows = [
+        [str(boundary - 2 * HOUR_MS), "100", "102", "99", "101", "1"],
+        [str(boundary - HOUR_MS), "101", "103", "100", "102", "1"],
+        [str(boundary), "102", "104", "101", "103", "1"],
+    ]
+    client = FakeClient(fresh_rows)
+    with patch("smc_demo_forward.now_ms", return_value=boundary + 20 * 60 * 1000):
+        frame = fetch_closed_1h(client, "ETHUSDT", 180)
+    assert frame["Timestamp"].iloc[-1] == pd.Timestamp(
+        boundary - HOUR_MS, unit="ms", tz="UTC"
+    )
+    assert client.calls[0][0] == "/api/v2/mix/market/candles"
+
+    stale_rows = [
+        [str(boundary - 3 * HOUR_MS), "100", "102", "99", "101", "1"],
+        [str(boundary - 2 * HOUR_MS), "101", "103", "100", "102", "1"],
+    ]
+    stale_client = FakeClient(stale_rows)
+    with patch("smc_demo_forward.now_ms", return_value=boundary + 20 * 60 * 1000):
+        with pytest.raises(RuntimeError, match="STALE_1H_DATA"):
+            fetch_closed_1h(stale_client, "ETHUSDT", 180)
+
+
+def test_pending_order_is_cancelled_by_wall_clock_expiry():
+    now = 100 * HOUR_MS
+    pending = {
+        "setup_id": "old",
+        "strategy": "ETH_D3",
+        "symbol": "ETHUSDT",
+        "side": "short",
+        "created_time_ms": now - 25 * HOUR_MS,
+        "order_id": "123",
+    }
+    state = {
+        "pending_orders": [pending],
+        "open_trades": [],
+        "closed_trades": [],
+        "processed_setup_ids": ["old"],
+        "skipped_events": [],
+    }
+    cfg = {"expiry_bars": 24, "telegram_trade_notifications": False}
+
+    class FakeClient:
+        pass
+
+    with patch("smc_demo_forward.order_detail", return_value={"state": "live", "baseVolume": "0"}), \
+         patch("smc_demo_forward.cancel_pending") as cancel:
+        manage_pending_orders(FakeClient(), cfg, state, {"old"}, now)
+
+    cancel.assert_called_once()
+    assert state["pending_orders"] == []
+
