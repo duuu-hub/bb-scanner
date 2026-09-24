@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations\n# Research-only continuation mining; never imported by live trading.
 import argparse, json, math
 from pathlib import Path
 from itertools import combinations
