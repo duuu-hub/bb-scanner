@@ -1,0 +1,108 @@
+name: L3 Strict vs Lite Frequency Fast
+on:
+  push:
+    branches:
+      - research-l3-lite-frequency
+    paths:
+      - '.research/l3_lite_frequency_fast_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [old0, old1, new0, new1, new2, new3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Resolve chunk
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text())
+          group=os.environ["GROUP"]
+          kind="old" if group.startswith("old") else "new"
+          idx=int(group[-1])
+          syms=[s for s in x["symbols"] if (s in ORIGINAL_AUTO50)==(kind=="old")]
+          parts=2 if kind=="old" else 4
+          chunks=[syms[i::parts] for i in range(parts)]
+          pick=chunks[idx]
+          print(group,"count",len(pick)); print(",".join(pick))
+          Path("/tmp/syms").write_text(",".join(pick))
+          PY
+          echo "SYMS=$(cat /tmp/syms)" >> "$GITHUB_ENV"
+      - run: python backtest.py --symbols "$SYMS" --days 365 --outdir source_${{ matrix.group }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l3-lite-source-${{ matrix.group }}
+          path: |
+            source_${{ matrix.group }}/snapshots.csv.gz
+            source_${{ matrix.group }}/coverage.csv
+          retention-days: 14
+
+  analyze:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Download all chunks and regime
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p chunks input/regime combined
+          for g in old0 old1 new0 new1 new2 new3; do
+            mkdir -p chunks/$g
+            gh run download ${{ github.run_id }} --repo duuu-hub/bb-scanner --name l3-lite-source-$g --dir chunks/$g
+          done
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir input/regime
+          python - <<'PY'
+          import pandas as pd
+          from pathlib import Path
+          for kind,groups in [("old",["old0","old1"]),("new",["new0","new1","new2","new3"])]:
+              files=[]
+              for g in groups:
+                  files += list(Path("chunks",g).rglob("snapshots.csv.gz"))
+              if not files: raise RuntimeError(f"no snapshots for {kind}")
+              x=pd.concat([pd.read_csv(f) for f in files],ignore_index=True)
+              x=x.drop_duplicates(["symbol","ts"]).sort_values(["symbol","ts"])
+              x.to_csv(f"combined/{kind}_snapshots.csv.gz",index=False,compression="gzip")
+              print(kind,"rows",len(x),"symbols",x.symbol.nunique())
+          PY
+      - name: Compare strict and Lite-A
+        run: |
+          python research/l3_lite_frequency.py \
+            --source-old combined/old_snapshots.csv.gz \
+            --source-new combined/new_snapshots.csv.gz \
+            --regime-dir input/regime \
+            --outdir l3_lite_frequency_results \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: l3-lite-frequency-fast-results
+          path: l3_lite_frequency_results/
+          retention-days: 14
