@@ -72,33 +72,38 @@ def regime(btc):
     rg[(d>ma)&(slope>0)]="BULL"; rg[(d<ma)&(slope<0)]="BEAR"
     return rg
 
-files=sorted(ROOT.glob("*.parquet"))
-print("symbols",len(files),flush=True)
-btc=None; alltr=[]
-for i,p in enumerate(files,1):
-    df=pd.read_parquet(p)
-    if p.stem=="BTCUSDT":
-        z=df.copy();z["dt"]=pd.to_datetime(z.open_time,unit="ms",utc=True);btc=z.set_index("dt")[["open","high","low","close"]].astype(float)
-    try:
-        sig,base=signals(p.stem,df)
-        for s in sig:
-            tr=trade(s,base)
-            if tr: alltr.append(tr)
-        if i%10==0: print(i,p.stem,"trades",len(alltr),flush=True)
-    except Exception as e: print("ERR",p.stem,e,flush=True)
-tr=pd.DataFrame(alltr,columns=["symbol","signal_time","strategy","entry","exit_time","outcome","net_pct"])
-if btc is None: raise SystemExit("BTCUSDT missing")
-rg=regime(btc)
-days=tr.signal_time.dt.floor("D")
-tr["regime"]=rg.reindex(days).to_numpy()
-tr["year"]=tr.signal_time.dt.year
-tr.to_csv(OUT/"long3_5y_trades.csv",index=False)
-def summary(g):
-    gp=g.net_pct[g.net_pct>0].sum();gl=-g.net_pct[g.net_pct<0].sum()
-    return pd.Series({"n":len(g),"win_rate":(g.net_pct>0).mean()*100,"avg_net_pct":g.net_pct.mean(),"sum_net_pct":g.net_pct.sum(),"PF":gp/gl if gl else math.inf})
-res=pd.concat({"overall":summary(tr)},axis=1).T
-byreg=tr.groupby("regime",dropna=False).apply(summary,include_groups=False)
-byyr=tr.groupby("year").apply(summary,include_groups=False)
-byrs=tr.groupby(["regime","strategy"],dropna=False).apply(summary,include_groups=False)
-res.to_csv(OUT/"overall.csv");byreg.to_csv(OUT/"by_regime.csv");byyr.to_csv(OUT/"by_year.csv");byrs.to_csv(OUT/"by_regime_strategy.csv")
-print("OVERALL\n",res.to_string());print("BY_REGIME\n",byreg.to_string());print("BY_YEAR\n",byyr.to_string());print("BY_REGIME_STRATEGY\n",byrs.to_string())
+def main():
+    files=sorted(ROOT.glob("*.parquet"))
+    print("symbols",len(files),flush=True)
+    btc=None; alltr=[]
+    for i,p in enumerate(files,1):
+        df=pd.read_parquet(p)
+        if p.stem=="BTCUSDT":
+            z=df.copy();z["dt"]=pd.to_datetime(z.open_time,unit="ms",utc=True);btc=z.set_index("dt")[["open","high","low","close"]].astype(float)
+        try:
+            sig,base=signals(p.stem,df)
+            for s in sig:
+                tr=trade(s,base)
+                if tr: alltr.append(tr)
+            if i%10==0: print(i,p.stem,"trades",len(alltr),flush=True)
+        except Exception as e: print("ERR",p.stem,e,flush=True)
+    tr=pd.DataFrame(alltr,columns=["symbol","signal_time","strategy","entry","exit_time","outcome","net_pct"])
+    if btc is None: raise SystemExit("BTCUSDT missing")
+    rg=regime(btc)
+    days=tr.signal_time.dt.floor("D")
+    tr["regime"]=rg.reindex(days).to_numpy()
+    tr["year"]=tr.signal_time.dt.year
+    tr.to_csv(OUT/"long3_5y_trades.csv",index=False)
+    def summary(g):
+        gp=g.net_pct[g.net_pct>0].sum();gl=-g.net_pct[g.net_pct<0].sum()
+        return pd.Series({"n":len(g),"win_rate":(g.net_pct>0).mean()*100,"avg_net_pct":g.net_pct.mean(),"sum_net_pct":g.net_pct.sum(),"PF":gp/gl if gl else math.inf})
+    res=pd.concat({"overall":summary(tr)},axis=1).T
+    byreg=tr.groupby("regime",dropna=False).apply(summary,include_groups=False)
+    byyr=tr.groupby("year").apply(summary,include_groups=False)
+    byrs=tr.groupby(["regime","strategy"],dropna=False).apply(summary,include_groups=False)
+    res.to_csv(OUT/"overall.csv");byreg.to_csv(OUT/"by_regime.csv");byyr.to_csv(OUT/"by_year.csv");byrs.to_csv(OUT/"by_regime_strategy.csv")
+    print("OVERALL\n",res.to_string());print("BY_REGIME\n",byreg.to_string());print("BY_YEAR\n",byyr.to_string());print("BY_REGIME_STRATEGY\n",byrs.to_string())
+
+
+if __name__ == "__main__":
+    main()
