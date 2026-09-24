@@ -1,0 +1,53 @@
+name: LONG3 Engine Parity 120d
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-long3-5y-regime]
+    paths: ['.research/long3_parity_120d_once']
+permissions:
+  actions: read
+  contents: read
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Download frozen original 120d source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source_backtest
+          gh run download 35584621765 -n bb-backtest-results -D source_backtest
+          ls -lh source_backtest
+      - name: Original LONG3 signal counts
+        run: |
+          python - <<'PY' | tee original_signals.txt
+          import pandas as pd
+          from precision_backtest import build_signals
+          from analysis_survival_120d import dedupe_long3
+          s=dedupe_long3(build_signals("source_backtest/snapshots.csv.gz"))
+          print("n",len(s)); print("symbols",s.symbol.nunique()); print(s.strategy.value_counts().to_string())
+          print("start",pd.to_datetime(s.ts.min(),unit="ms",utc=True),"end",pd.to_datetime(s.ts.max(),unit="ms",utc=True))
+          s[["symbol","ts","strategy","price"]].to_csv("original_signals.csv",index=False)
+          PY
+      - name: Download canonical UM 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p downloads canonical_um unpack
+          gh release download binance-15m-5y-canonical-v1 --repo duuu-hub/bb-scanner --pattern 'binance-um-15m-5y-parquet-shard-*.zip' --dir downloads
+          for f in downloads/*.zip; do unzip -q "$f" -d unpack; done
+          mv unpack/um/*.parquet canonical_um/
+      - name: Compare reconstructed signals on identical window
+        run: python research/long3_parity_120d.py | tee parity.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: long3-engine-parity-120d
+          path: |
+            original_signals.txt
+            original_signals.csv
+            parity.txt
+            parity_results/
