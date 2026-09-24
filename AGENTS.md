@@ -115,3 +115,19 @@ execution capability filter, not a signal-generation filter.
 
 This separation keeps the forward-research environment aligned with eventual
 real trading while respecting the smaller Demo orderable universe.
+
+## 9. SMC Demo freshness
+
+SMC Demo uses closed 1H candles and must fail closed if the latest completed
+hour is missing or stale.
+
+- The newest retained 1H candle must be exactly the immediately preceding hour.
+- Do not place or keep SMC pending orders from stale market history.
+- `expiry_bars` is enforced by wall-clock age as well as replay-bar count, so
+  an old setup cannot be resurrected after being blocked by another position.
+- Re-check freshness before retrying a setup that was previously skipped as
+  `SYMBOL_BUSY_LONG3_OR_OTHER`.
+- Pending orders that cross the wall-clock expiry must be cancelled.
+- SMC Telegram order messages should show current market price, limit entry,
+  setup creation time, and setup age so a retracement order is not mistaken
+  for a current-price signal.

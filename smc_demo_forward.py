@@ -149,18 +149,47 @@ def engine_config(cfg: dict, displacement_bars: int) -> SMCConfig:
     )
 
 
+def current_hour_boundary(ts_ms: int | None = None) -> int:
+    ts_ms = now_ms() if ts_ms is None else int(ts_ms)
+    return (ts_ms // HOUR_MS) * HOUR_MS
+
+
+def setup_age_hours(setup: dict, ts_ms: int) -> float:
+    created_ms = int(setup.get("created_time_ms") or 0)
+    if created_ms <= 0:
+        return float("inf")
+    return max(0.0, (int(ts_ms) - created_ms) / HOUR_MS)
+
+
+def setup_expired_by_clock(setup: dict, cfg: dict, ts_ms: int) -> bool:
+    """Hard wall-clock expiry matching the configured bar horizon.
+
+    This is independent of the replay frame so an API returning stale candles
+    cannot resurrect an old setup after it was blocked by another position.
+    """
+    expiry_bars = int(cfg.get("expiry_bars", 0))
+    created_ms = int(setup.get("created_time_ms") or 0)
+    if expiry_bars <= 0 or created_ms <= 0:
+        return False
+    return int(ts_ms) - created_ms >= expiry_bars * HOUR_MS
+
+
 def fetch_closed_1h(client: BitgetDemoClassic, symbol: str, bars: int) -> pd.DataFrame:
-    boundary = (now_ms() // HOUR_MS) * HOUR_MS
-    end_ms = boundary - 1
-    start_ms = end_ms - (max(150, bars) + 5) * HOUR_MS
+    """Fetch fresh closed 1H candles and fail closed if the feed is stale.
+
+    The previous history-candles query could lag the latest completed hour.
+    Use the regular recent-candle endpoint, drop the in-progress hour, and
+    require the newest retained candle to be exactly the immediately preceding
+    hour before allowing any SMC order action.
+    """
+    boundary = current_hour_boundary()
+    expected_last_open = boundary - HOUR_MS
     rows = client.public_get(
-        "/api/v2/mix/market/history-candles",
+        "/api/v2/mix/market/candles",
         {
             "symbol": symbol,
             "productType": "usdt-futures",
             "granularity": "1H",
-            "startTime": str(start_ms),
-            "endTime": str(end_ms),
             "limit": "200",
         },
     ) or []
@@ -182,15 +211,24 @@ def fetch_closed_1h(client: BitgetDemoClassic, symbol: str, bars: int) -> pd.Dat
             )
         except Exception:
             continue
+
     df = pd.DataFrame(parsed)
     if df.empty:
         raise RuntimeError(f"No closed 1H history for {symbol}")
-    return (
+
+    df = (
         df.drop_duplicates("Timestamp")
         .sort_values("Timestamp")
         .tail(int(bars))
         .reset_index(drop=True)
     )
+    latest_open_ms = int(pd.Timestamp(df["Timestamp"].iloc[-1]).timestamp() * 1000)
+    if latest_open_ms != expected_last_open:
+        raise RuntimeError(
+            f"STALE_1H_DATA {symbol}: expected_latest_open={expected_last_open} "
+            f"actual_latest_open={latest_open_ms} boundary={boundary}"
+        )
+    return df
 
 
 def contract_config(client: BitgetDemoClassic, symbol: str) -> dict:
@@ -623,6 +661,27 @@ def manage_pending_orders(
                 finalize_fill(client, cfg, state, pending, detail, ts_ms)
                 continue
 
+            if setup_expired_by_clock(pending, cfg, ts_ms):
+                cancel_pending(client, pending)
+                age_hours = setup_age_hours(pending, ts_ms)
+                log_event(
+                    {
+                        "event": "SETUP_EXPIRED_CANCEL",
+                        "setup_id": pending["setup_id"],
+                        "strategy": pending["strategy"],
+                        "symbol": pending["symbol"],
+                        "order_id": pending["order_id"],
+                        "setup_age_hours": age_hours,
+                    }
+                )
+                notify(
+                    cfg,
+                    f"🧹 SMC Demo 오래된 지정가 취소\n"
+                    f"{pending['strategy']} {pending['symbol']}\n"
+                    f"setup_age={age_hours:.1f}h expiry={int(cfg.get('expiry_bars', 0))}h",
+                )
+                continue
+
             if order_state in {"cancelled", "canceled", "failed"}:
                 log_event(
                     {
@@ -762,9 +821,23 @@ def place_setup(
     if any(x.get("setup_id") == sid for x in state.get("open_trades", [])):
         return False
 
+    symbol = setup["symbol"]
+    ts_ms = now_ms()
+    if setup_expired_by_clock(setup, cfg, ts_ms):
+        skip_event(
+            state,
+            setup,
+            "SETUP_EXPIRED_WALL_CLOCK",
+            False,
+            {
+                "setup_age_hours": setup_age_hours(setup, ts_ms),
+                "expiry_hours": int(cfg.get("expiry_bars", 0)),
+            },
+        )
+        return False
+
     positions = all_positions(client)
     orders = pending_exchange_orders(client)
-    symbol = setup["symbol"]
 
     if bool(cfg.get("skip_if_symbol_busy", True)) and symbol_busy(positions, orders, symbol):
         skip_event(state, setup, "SYMBOL_BUSY_LONG3_OR_OTHER", True)
@@ -871,6 +944,8 @@ def place_setup(
         "planned_notional": float(planned_notional),
         "planned_risk_usdt": float(actual_risk),
         "account_equity": float(equity),
+        "setup_age_hours_at_order": setup_age_hours(setup, now_ms()),
+        "market_price_at_order": float(last),
     }
     state["pending_orders"].append(pending)
     state["processed_setup_ids"].append(sid)
@@ -883,10 +958,16 @@ def place_setup(
             "ask": float(ask),
         }
     )
+    created_text = datetime.fromtimestamp(
+        int(setup["created_time_ms"]) / 1000, tz=timezone.utc
+    ).strftime("%Y-%m-%d %H:%M UTC")
     notify(
         cfg,
-        f"🧾 SMC Demo 지정가\n{setup['strategy']} {symbol} {side.upper()}\n"
-        f"entry={pending['entry']} TP={pending['tp']} SL={pending['sl']}\n"
+        f"🧾 SMC Demo 지정가 (되돌림 대기)\n"
+        f"{setup['strategy']} {symbol} {side.upper()}\n"
+        f"현재가={float(last):g} / 지정가={pending['entry']}\n"
+        f"TP={pending['tp']} SL={pending['sl']}\n"
+        f"셋업생성={created_text} / age={pending['setup_age_hours_at_order']:.1f}h\n"
         f"risk≈{actual_risk:.2f} USDT notional≈{planned_notional:.2f}",
     )
     return True
@@ -900,7 +981,14 @@ def build_active_setup_map(client: BitgetDemoClassic, cfg: dict) -> dict[str, li
         frame = fetch_closed_1h(client, symbol, int(cfg.get("history_bars", 180)))
         ecfg = engine_config(cfg, int(spec["displacement_bars"]))
         setups = replay_active_setups(frame, ecfg)
-        rows = [setup_dict(strategy, symbol, s) for s in setups]
+        scan_ts_ms = now_ms()
+        rows = [
+            setup_dict(strategy, symbol, s)
+            for s in setups
+            if not setup_expired_by_clock(
+                setup_dict(strategy, symbol, s), cfg, scan_ts_ms
+            )
+        ]
         rows.sort(key=lambda x: (int(x["created_time_ms"]), x["setup_id"]))
         result[strategy] = rows
         print(
