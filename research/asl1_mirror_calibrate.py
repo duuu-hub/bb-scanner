@@ -254,22 +254,59 @@ def main():
     print("\n=== TOP FINGERPRINT MATCHES ===")
     print(close.head(40).to_string(index=False))
 
-    # Fresh run marker: apply the known ASL1-like rule family to newly fetched data.
-    fresh=[]
-    for vol_name in vol_masks(next(iter(frames.values()))).keys():
-        total=0
-        for s,x in frames.items():
-            v=vol_masks(x)[vol_name].fillna(False)
-            base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) & x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
-            trig=first_cross(x["below_lower15"]) & base
-            trig &= (x["dt"]>=START) & (x["dt"]<=END)
-            total += int(trig.sum())
-        fresh.append({"vol_def":vol_name,"raw_signals":total})
-    fresh_df=pd.DataFrame(fresh)
-    fresh_df.to_csv(OUT/"fresh_rule_counts.csv",index=False)
-    print("\\n=== FRESH RULE COUNTS ===")
-    print(fresh_df.to_string(index=False))
+    # Fresh ASL1-like directional backtest. No PnL-based rule selection.
+    # Predeclared reconstruction candidate from the prior fingerprint scan.
+    VOL_DEF="RV4_PRE_GT_MED96"
+    FLAT_DEF="ABS4H_LE_0.5"
+    TP=0.08
+    SL=0.04
+    HOLD_BARS=48
+    COST_RT=0.0025
 
+    flat_map=pd.Series(flat_defs[FLAT_DEF].to_numpy(bool),index=btc["ts"].to_numpy(np.int64))
+    trades=[]
+    for s,x in frames.items():
+        v=vol_masks(x)[VOL_DEF].fillna(False)
+        base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) & x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
+        trig=first_cross(x["below_lower15"]) & base
+        trig &= x["ts"].map(flat_map).fillna(False).astype(bool)
+        trig &= (x["dt"]>=START) & (x["dt"]<=END)
+        for i in np.flatnonzero(trig.to_numpy()):
+            if i+1>=len(x):
+                continue
+            entry_i=i+1
+            entry=float(x.iloc[entry_i]["open"])
+            last=min(entry_i+HOLD_BARS-1,len(x)-1)
+            for side in ("LONG","SHORT"):
+                exit_px=float(x.iloc[last]["close"])
+                reason="TIME"
+                exit_i=last
+                for j in range(entry_i,last+1):
+                    hi=float(x.iloc[j]["high"]); lo=float(x.iloc[j]["low"])
+                    if side=="LONG":
+                        hit_tp=hi>=entry*(1+TP); hit_sl=lo<=entry*(1-SL)
+                        if hit_tp and hit_sl: exit_px=entry*(1-SL); reason="SL_BOTH"; exit_i=j; break
+                        if hit_sl: exit_px=entry*(1-SL); reason="SL"; exit_i=j; break
+                        if hit_tp: exit_px=entry*(1+TP); reason="TP"; exit_i=j; break
+                    else:
+                        hit_tp=lo<=entry*(1-TP); hit_sl=hi>=entry*(1+SL)
+                        if hit_tp and hit_sl: exit_px=entry*(1+SL); reason="SL_BOTH"; exit_i=j; break
+                        if hit_sl: exit_px=entry*(1+SL); reason="SL"; exit_i=j; break
+                        if hit_tp: exit_px=entry*(1-TP); reason="TP"; exit_i=j; break
+                gross=(exit_px/entry-1) if side=="LONG" else (entry/exit_px-1)
+                net=gross-COST_RT
+                trades.append({"symbol":s,"signal_dt":x.iloc[i]["dt"],"entry_dt":x.iloc[entry_i]["dt"],"exit_dt":x.iloc[exit_i]["dt"],"side":side,"entry":entry,"exit":exit_px,"reason":reason,"gross_ret":gross,"net_ret":net})
+    td=pd.DataFrame(trades)
+    td.to_csv(OUT/"fresh_directional_trades.csv",index=False)
+    summary=[]
+    for side,g in td.groupby("side"):
+        wins=g["net_ret"]>0
+        gp=g.loc[g.net_ret>0,"net_ret"].sum()
+        gl=-g.loc[g.net_ret<0,"net_ret"].sum()
+        summary.append({"side":side,"signals":len(g),"win_rate":wins.mean(),"avg_net_ret":g.net_ret.mean(),"profit_factor":gp/gl if gl>0 else np.inf,"tp":int((g.reason=="TP").sum()),"sl":int(g.reason.str.startswith("SL").sum()),"time":int((g.reason=="TIME").sum())})
+    sd=pd.DataFrame(summary)
+    sd.to_csv(OUT/"fresh_directional_summary.csv",index=False)
+    print("\\n=== FRESH DIRECTIONAL BACKTEST ===")
+    print(f"rule={VOL_DEF} + {FLAT_DEF}, TP=8%, SL=4%, hold=12h, next-bar-open, RT cost=0.25%")
+    print(sd.to_string(index=False))
 
-if __name__=="__main__":
-    main()
