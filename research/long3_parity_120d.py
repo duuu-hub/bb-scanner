@@ -4,7 +4,16 @@ from long3_5y_regime import signals
 Path("parity_results").mkdir(exist_ok=True)
 orig=pd.read_csv("original_signals.csv")
 lo,hi=int(orig.ts.min()),int(orig.ts.max())
-parquets=sorted(Path("canonical_um").glob("*.parquet"))\navailable={p.stem for p in parquets}\n# Compare like-for-like: only symbols actually present in the frozen source\n# snapshot universe, not all 856 symbols in the 5Y release.\nsource_symbols=set(pd.read_csv("source_backtest/snapshots.csv.gz",usecols=["symbol"]).symbol.unique())\ncomparison_universe=available & source_symbols\nparquets=[p for p in parquets if p.stem in comparison_universe]\nrows=[]\nfor p in parquets:\n d=pd.read_parquet(p)
+parquets=sorted(Path("canonical_um").glob("*.parquet"))
+available={p.stem for p in parquets}
+# Compare like-for-like: only symbols actually present in the frozen source
+# snapshot universe, not all 856 symbols in the 5Y release.
+source_symbols=set(pd.read_csv("source_backtest/snapshots.csv.gz",usecols=["symbol"]).symbol.unique())
+comparison_universe=available & source_symbols
+parquets=[p for p in parquets if p.stem in comparison_universe]
+rows=[]
+for p in parquets:
+ d=pd.read_parquet(p)
  # Weekly BB needs 19 completed weeks before the comparison window.
  d=d[(d.open_time>=lo-180*24*3600*1000)&(d.open_time<=hi+24*3600*1000)]
  if len(d)<100: continue
@@ -20,7 +29,10 @@ priority={"L1":0,"L2":1,"L3":2}
 new["pri"]=new.strategy.map(priority)
 nd=new.sort_values(["ts","symbol","pri"]).drop_duplicates(["ts","symbol"],keep="first").drop(columns="pri")
 omap={"L1_MOMENTUM_1H10":"L1","L2_EXPLOSIVE_4H30":"L2","L3_4H_LAG":"L3"}
-o=orig[orig.symbol.isin(comparison_universe)].copy();o["strategy"]=o.strategy.map(omap)\nprint("CANONICAL_UNIVERSE",len(available),"SOURCE_UNIVERSE",len(source_symbols),"COMMON_UNIVERSE",len(comparison_universe))\nprint("ORIGINAL_COMMON",len(o),"ORIGINAL_ALL",len(orig))\nkeys=["symbol","ts","strategy"]
+o=orig[orig.symbol.isin(comparison_universe)].copy();o["strategy"]=o.strategy.map(omap)
+print("CANONICAL_UNIVERSE",len(available),"SOURCE_UNIVERSE",len(source_symbols),"COMMON_UNIVERSE",len(comparison_universe))
+print("ORIGINAL_COMMON",len(o),"ORIGINAL_ALL",len(orig))
+keys=["symbol","ts","strategy"]
 a=set(map(tuple,o[keys].values.tolist()));b=set(map(tuple,nd[keys].values.tolist()))
 print("ORIGINAL",len(o),o.strategy.value_counts().to_dict())
 print("RECON",len(nd),nd.strategy.value_counts().to_dict())
