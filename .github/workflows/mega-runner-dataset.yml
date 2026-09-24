@@ -1,0 +1,34 @@
+name: Mega Runner Dataset
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "History years"
+        required: true
+        default: "5"
+      interval:
+        description: "Kline interval"
+        required: true
+        default: "1h"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download long-history OHLCV
+        run: python scripts/mega_runner_collect.py --years "${{ inputs.years }}" --interval "${{ inputs.interval }}"
+      - name: Label 365d mega-runners
+        run: python scripts/mega_runner_label.py
+      - name: Commit dataset
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/mega_runner
+          git commit -m "data: build mega-runner long-history dataset" || exit 0
+          git push
