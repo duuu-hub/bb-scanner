@@ -1,0 +1,28 @@
+name: BTC Strategy Lab Replication
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-btc-strategy-lab-replication
+          fetch-depth: 0
+      - name: Bring BTC history from existing research branch
+        run: |
+          git checkout origin/research-btc-eth-core -- market_data_store/bitget/15m/BTCUSDT
+      - name: Run baseline replication
+        run: python research/btc_strategy_lab_replication/run_baseline.py
+      - name: Commit results
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/btc_strategy_lab_replication
+          git commit -m "research: run BTC EMA600 replication" || exit 0
+          git push origin HEAD:research-btc-strategy-lab-replication
