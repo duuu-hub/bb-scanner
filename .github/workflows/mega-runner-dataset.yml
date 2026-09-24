@@ -2,33 +2,42 @@ name: Mega Runner Dataset
 on:
   workflow_dispatch:
     inputs:
-      years:
-        description: "History years"
-        required: true
-        default: "5"
-      interval:
-        description: "Kline interval"
-        required: true
-        default: "1h"
+      years: {description: "History years", required: true, default: "5"}
+      interval: {description: "Kline interval", required: true, default: "4h"}
+  push:
+    branches: [main]
+    paths: [".github/workflows/mega-runner-dataset.yml"]
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 350
-    permissions:
-      contents: write
+    permissions: {contents: write}
+    env:
+      YEARS: ${{ inputs.years || '5' }}
+      INTERVAL: ${{ inputs.interval || '4h' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Download long-history OHLCV
-        run: python scripts/mega_runner_collect.py --years "${{ inputs.years }}" --interval "${{ inputs.interval }}"
+        with: {python-version: "3.12"}
+      - name: Download crypto-only long-history OHLCV
+        run: python scripts/mega_runner_collect.py --years "$YEARS" --interval "$INTERVAL"
       - name: Label 365d mega-runners
         run: python scripts/mega_runner_label.py
-      - name: Commit dataset
+      - name: Summarize labels
+        run: |
+          head -20 research/mega_runner/labels.csv || true
+          du -sh research/mega_runner/data || true
+      - name: Upload raw research dataset
+        uses: actions/upload-artifact@v4
+        with:
+          name: mega-runner-binance-spot-${{ github.run_id }}
+          path: research/mega_runner/data/
+          retention-days: 30
+          compression-level: 6
+      - name: Persist compact labels only
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add research/mega_runner
-          git commit -m "data: build mega-runner long-history dataset" || exit 0
+          git add research/mega_runner/labels.csv
+          git commit -m "data: update mega-runner labels" || exit 0
           git push
