@@ -10,7 +10,12 @@ COSTS=[("base",0.12,0.08),("stress1.5x",0.18,0.12),("stress2x",0.24,0.16)] # rou
 DELAY_BARS=[0,1] # 0=next bar open; 1=extra 15m delay (conservative proxy for +1m)
 
 def exit_trade(g,entry_i,side,tp,sl,bars,entry_px):
- end=min(len(g)-1,entry_i+bars-1)
+ # Enforce the frozen horizon in wall-clock time. Row-count horizons can
+ # accidentally extend trades across gaps in the stored 15m series.
+ entry_ts=int(g.iloc[entry_i].timestamp_ms)
+ deadline=entry_ts+bars*15*60_000
+ end=int(np.searchsorted(g.timestamp_ms.to_numpy(),deadline,side="left"))-1
+ end=max(entry_i,min(len(g)-1,end))
  for j in range(entry_i,end+1):
   hi,lo=float(g.iloc[j].high),float(g.iloc[j].low)
   if side=="LONG": hit_tp=hi>=entry_px*(1+tp/100); hit_sl=lo<=entry_px*(1-sl/100)
@@ -50,7 +55,15 @@ def main():
     alltr.append(dict(side=side,tp=tp,sl=sl,horizon_h=h,delay_bars=delay,symbol=rr.symbol,
       signal_ts=int(rr.timestamp_ms),entry_ts=int(g.iloc[ei].timestamp_ms),exit_ts=int(g.iloc[xi].timestamp_ms),
       gross_ret_pct=ret,exit_reason=why))
- d=pd.DataFrame(alltr); d.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
+ d=pd.DataFrame(alltr)
+ d["wall_hold_h"]=(d.exit_ts-d.entry_ts)/3_600_000
+ d.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
+ audit=[]
+ for keys,z in d.groupby(["side","tp","sl","horizon_h","delay_bars"]):
+  audit.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],delay_bars=keys[4],
+   n=len(z),same_timestamp_exits=int((z.exit_ts==z.entry_ts).sum()),
+   over_horizon=int((z.wall_hold_h>z.horizon_h).sum()),max_wall_hold_h=float(z.wall_hold_h.max())))
+ pd.DataFrame(audit).to_csv(OUT/"timing_audit.csv",index=False)
  rows=[]
  for keys,z in d.groupby(["side","tp","sl","horizon_h","delay_bars"]):
   for name,fee,slip in COSTS:
@@ -86,6 +99,9 @@ def portfolio_study(d):
    accepted.append(r)
    open_until[r.symbol]=r.exit_ts
   a=pd.DataFrame([r._asdict() for r in accepted])
+  # A TP/SL may be hit inside the entry candle, producing exit_ts==entry_ts.
+  # Order that exit immediately after entry so the slot is released.
+  if not a.empty: a["exit_ts"]=np.maximum(a.exit_ts,a.entry_ts+1)
   overlap.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],
    raw_signals=total,accepted_signals=len(a),same_symbol_while_open=same_open,
    same_symbol_while_open_pct=100*same_open/total if total else 0))
@@ -131,6 +147,9 @@ def slot_study(d):
    if open_until.get(r.symbol,-1)>=r.entry_ts: continue
    accepted.append(r); open_until[r.symbol]=r.exit_ts
   a=pd.DataFrame([r._asdict() for r in accepted])
+  # A TP/SL may be hit inside the entry candle, producing exit_ts==entry_ts.
+  # Order that exit immediately after entry so the slot is released.
+  if not a.empty: a["exit_ts"]=np.maximum(a.exit_ts,a.entry_ts+1)
   if a.empty: continue
   for slots in SLOTS:
    # equal fixed slot allocation = 1/slots of initial equity per open trade
