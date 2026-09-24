@@ -39,9 +39,13 @@ jobs:
         run: python -m py_compile research/asl1_5y_oos.py
       - name: Run frozen 5Y OOS
         run: python research/asl1_5y_oos.py
+      - name: Crypto-only filter
+        run: python research/asl1_5y_crypto_filter.py
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: asl1-5y-oos-results
-          path: |\n            research_output/asl1_5y_oos/\n            research_output/asl1_5y_crypto/
+          path: |
+            research_output/asl1_5y_oos/
+            research_output/asl1_5y_crypto/
           if-no-files-found: error
