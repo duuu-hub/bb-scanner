@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       years: {description: "History years", required: true, default: "5"}
-      interval: {description: "Kline interval", required: true, default: "4h"}
+      interval: {description: "Kline interval", required: true, default: "1d"}
   push:
     branches: [main]
     paths: [".github/workflows/mega-runner-dataset.yml"]
@@ -14,7 +14,7 @@ jobs:
     permissions: {contents: write}
     env:
       YEARS: ${{ inputs.years || '5' }}
-      INTERVAL: ${{ inputs.interval || '4h' }}
+      INTERVAL: ${{ inputs.interval || '1d' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
