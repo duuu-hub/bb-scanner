@@ -309,4 +309,101 @@ def main():
     print("\\n=== FRESH DIRECTIONAL BACKTEST ===")
     print(f"rule={VOL_DEF} + {FLAT_DEF}, TP=8%, SL=4%, hold=12h, next-bar-open, RT cost=0.25%")
     print(sd.to_string(index=False))
+    # Fresh ASL1-like LONG vs mirrored SHORT backtest.
+    # Fixed ex-ante candidate from reconstruction family; no PnL-based selection.
+    FRESH_VOL="RV4_PRE_GT_MED96"
+    FRESH_FLAT="ABS4H_LE_0.5"
+    TP=0.08
+    SL=0.04
+    HOLD_BARS=48
+    ROUND_TRIP_COST=0.0025
+
+    flat_map=pd.Series(flat_defs[FRESH_FLAT].to_numpy(bool),index=btc["ts"].to_numpy(np.int64))
+
+    def simulate(x, sig_idx, side):
+        out=[]
+        for i in sig_idx:
+            entry_i=i+1
+            if entry_i>=len(x):
+                continue
+            entry=float(x.iloc[entry_i]["open"])
+            last=min(entry_i+HOLD_BARS-1,len(x)-1)
+            exit_px=float(x.iloc[last]["close"])
+            reason="TIME"
+            for j in range(entry_i,last+1):
+                hi=float(x.iloc[j]["high"]); lo=float(x.iloc[j]["low"])
+                if side=="LONG":
+                    tp=entry*(1+TP); sl=entry*(1-SL)
+                    hit_tp=hi>=tp; hit_sl=lo<=sl
+                    if hit_tp and hit_sl:
+                        exit_px=sl; reason="SL"; break
+                    if hit_sl:
+                        exit_px=sl; reason="SL"; break
+                    if hit_tp:
+                        exit_px=tp; reason="TP"; break
+                else:
+                    tp=entry*(1-TP); sl=entry*(1+SL)
+                    hit_tp=lo<=tp; hit_sl=hi>=sl
+                    if hit_tp and hit_sl:
+                        exit_px=sl; reason="SL"; break
+                    if hit_sl:
+                        exit_px=sl; reason="SL"; break
+                    if hit_tp:
+                        exit_px=tp; reason="TP"; break
+            gross=(exit_px/entry-1.0) if side=="LONG" else (entry/exit_px-1.0)
+            net=gross-ROUND_TRIP_COST
+            out.append({"side":side,"entry_ts":int(x.iloc[entry_i]["ts"]),"entry_dt":str(x.iloc[entry_i]["dt"]),
+                        "symbol":str(x.iloc[entry_i]["symbol"]),"entry":entry,"exit":exit_px,
+                        "reason":reason,"gross_ret":gross,"net_ret":net})
+        return out
+
+    trades=[]
+    raw_signals=0
+    for s,x in frames.items():
+        v=vol_masks(x)[FRESH_VOL].fillna(False)
+        base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) &
+              x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
+        trig=first_cross(x["below_lower15"]) & base
+        btc_flat=x["ts"].map(flat_map).fillna(False).astype(bool)
+        trig &= btc_flat & (x["dt"]>=START) & (x["dt"]<=END)
+        idx=np.flatnonzero(trig.to_numpy())
+        raw_signals += len(idx)
+        trades += simulate(x,idx,"LONG")
+        trades += simulate(x,idx,"SHORT")
+
+    tdf=pd.DataFrame(trades)
+    tdf.to_csv(OUT/"fresh_long_short_trades.csv",index=False)
+
+    def stats(g):
+        r=g["net_ret"].astype(float)
+        wins=r>0
+        gp=float(r[r>0].sum()); gl=float(-r[r<0].sum())
+        return {
+            "trades":int(len(g)),
+            "win_rate_pct":float(wins.mean()*100) if len(g) else np.nan,
+            "avg_net_pct":float(r.mean()*100) if len(g) else np.nan,
+            "profit_factor":float(gp/gl) if gl>0 else np.inf,
+            "tp":int((g["reason"]=="TP").sum()),
+            "sl":int((g["reason"]=="SL").sum()),
+            "time":int((g["reason"]=="TIME").sum()),
+            "sum_net_pct":float(r.sum()*100),
+        }
+
+    summary=[]
+    for side,g in tdf.groupby("side"):
+        rec={"side":side,**stats(g)}
+        summary.append(rec)
+    sdf=pd.DataFrame(summary)
+    sdf.to_csv(OUT/"fresh_long_short_summary.csv",index=False)
+    fresh_meta={
+        "rule":"15m lower new break + below 1H basis + below 4H basis + 4H return <= -2% + volatility rising + BTC flat",
+        "vol_def":FRESH_VOL,"btc_flat_def":FRESH_FLAT,
+        "entry":"next 15m bar open","tp_pct":8.0,"sl_pct":4.0,"max_hold_hours":12,
+        "same_bar_collision":"SL first (conservative)","round_trip_cost_pct":0.25,
+        "raw_signals":raw_signals,"period_start":START.isoformat(),"period_end":END.isoformat()
+    }
+    (OUT/"fresh_backtest_meta.json").write_text(json.dumps(fresh_meta,indent=2),encoding="utf-8")
+    print("\\n=== FRESH LONG VS SHORT BACKTEST ===")
+    print(json.dumps(fresh_meta,indent=2))
+    print(sdf.to_string(index=False))
 
