@@ -87,7 +87,10 @@ def collect_symbol(market,sym,interval,start_ym,outdir):
                 continue
             for r in rows:
                 if len(r)<11 or not str(r[0]).isdigit():continue
-                ts=int(r[0])
+                raw_ts=int(r[0])
+                # Binance Spot archive uses microsecond timestamps in newer files;
+                # normalize mixed historical units to milliseconds.
+                ts=raw_ts//1000 if raw_ts>100_000_000_000_000 else raw_ts
                 if ts in seen:
                     dupes+=1;continue
                 seen.add(ts)
@@ -97,7 +100,7 @@ def collect_symbol(market,sym,interval,start_ym,outdir):
                 if prev is not None and ts<prev:
                     errors.append(f"out_of_order:{prev}->{ts}")
                 prev=ts
-                w.writerow([r[0],r[1],r[2],r[3],r[4],r[5],r[7],r[8],r[9],r[10]])
+                w.writerow([str(ts),r[1],r[2],r[3],r[4],r[5],r[7],r[8],r[9],r[10]])
                 n+=1;first=first or ts;last=ts
     if n==0:
         p.unlink(missing_ok=True)
