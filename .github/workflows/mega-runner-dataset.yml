@@ -20,12 +20,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - name: Download crypto-only long-history OHLCV
-        run: python scripts/mega_runner_collect.py --years "$YEARS" --interval "$INTERVAL"
+        run: |\n          python scripts/mega_runner_collect.py --market spot --years "$YEARS" --interval "$INTERVAL"\n          python scripts/mega_runner_collect.py --market um --years "$YEARS" --interval "$INTERVAL"
       - name: Label 365d mega-runners
-        run: python scripts/mega_runner_label.py
+        run: |\n          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_spot_1d --out research/mega_runner/labels_spot.csv\n          python scripts/mega_runner_label.py --data research/mega_runner/data/binance_um_1d --out research/mega_runner/labels_um.csv
       - name: Summarize labels
         run: |
-          head -20 research/mega_runner/labels.csv || true
+          head -20 research/mega_runner/labels_spot.csv || true\n          head -20 research/mega_runner/labels_um.csv || true
           du -sh research/mega_runner/data || true
       - name: Upload raw research dataset
         uses: actions/upload-artifact@v4
@@ -38,6 +38,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add research/mega_runner/labels.csv
+          git add research/mega_runner/labels_spot.csv research/mega_runner/labels_um.csv
           git commit -m "data: update mega-runner labels" || exit 0
           git push
