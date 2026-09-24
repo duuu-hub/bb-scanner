@@ -1,6 +1,6 @@
 from __future__ import annotations
 # Research-only continuation mining; never imported by live trading.
-# trigger after feature-build fix
+# trigger after newline repair
 import argparse, json, math
 from pathlib import Path
 from itertools import combinations
