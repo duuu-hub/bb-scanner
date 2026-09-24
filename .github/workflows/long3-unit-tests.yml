@@ -8,12 +8,31 @@ on:
     paths:
       - 'auto_trader.py'
       - 'scanner.py'
+      - 'long3_watcher.py'
       - 'long3_signal_adapter.py'
       - 'signal_io.py'
       - 'trade_guard.py'
       - 'trade_state.py'
       - 'config/trading_config.json'
       - 'tests/**'
+      - '.github/workflows/scan.yml'
+      - '.github/workflows/long3-unit-tests.yml'
+      - 'weekly_report.py'
+      - '.github/workflows/long3-weekly-report.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'auto_trader.py'
+      - 'scanner.py'
+      - 'long3_watcher.py'
+      - 'long3_signal_adapter.py'
+      - 'signal_io.py'
+      - 'trade_guard.py'
+      - 'trade_state.py'
+      - 'config/trading_config.json'
+      - 'tests/**'
+      - '.github/workflows/scan.yml'
       - '.github/workflows/long3-unit-tests.yml'
       - 'weekly_report.py'
       - '.github/workflows/long3-weekly-report.yml'
@@ -31,10 +50,15 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Compile scanner and trader
-        run: python -m py_compile scanner.py auto_trader.py
+      - name: Compile scanner, watcher and trader
+        run: python -m py_compile scanner.py long3_watcher.py auto_trader.py
       - name: Run LONG3 safety and plumbing tests
         run: |
-          python -m unittest -v             tests/test_trade_guard.py             tests/test_runtime_plumbing.py             tests/test_long3_signal_adapter.py             tests/test_auto_trader_safety.py
+          python -m unittest -v \
+            tests/test_trade_guard.py \
+            tests/test_runtime_plumbing.py \
+            tests/test_long3_signal_adapter.py \
+            tests/test_auto_trader_safety.py \
+            tests/test_long3_watcher.py
       - name: Smoke-test weekly forward report
         run: python weekly_report.py
