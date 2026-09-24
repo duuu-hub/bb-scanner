@@ -2,6 +2,8 @@ import unittest
 from decimal import Decimal
 
 from auto_trader import (
+    DemoSymbolUnsupported,
+    contract_config,
     active_positions,
     order_size,
     position_exposure_usdt,
@@ -76,6 +78,45 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertEqual(cfg["trading_mode"], "DEMO")
         self.assertFalse(cfg["live_trading_enabled"])
         self.assertIsInstance(cfg["demo_auto_execute"], bool)
+
+    def test_contract_config_uses_authenticated_demo_catalog(self):
+        class FakeClient:
+            def __init__(self):
+                self.calls = []
+
+            def private_get(self, path, params):
+                self.calls.append((path, params))
+                return [{
+                    "symbol": "BTCUSDT",
+                    "minTradeNum": "0.001",
+                    "sizeMultiplier": "0.001",
+                    "minTradeUSDT": "5",
+                    "volumePlace": "3",
+                    "pricePlace": "1",
+                    "priceEndStep": "1",
+                }]
+
+        client = FakeClient()
+        row = contract_config(client, "BTCUSDT")
+        self.assertEqual(row["symbol"], "BTCUSDT")
+        self.assertEqual(
+            client.calls,
+            [(
+                "/api/v2/mix/market/contracts",
+                {"productType": "usdt-futures", "symbol": "BTCUSDT"},
+            )],
+        )
+
+    def test_contract_config_marks_demo_unsupported_symbol(self):
+        class FakeClient:
+            def private_get(self, path, params):
+                raise RuntimeError(
+                    "/api/v2/mix/market/contracts failed: "
+                    "HTTP=400 code=40034 msg=Parameter PLUMEUSDT does not exist"
+                )
+
+        with self.assertRaises(DemoSymbolUnsupported):
+            contract_config(FakeClient(), "PLUMEUSDT")
 
 
 if __name__ == "__main__":
