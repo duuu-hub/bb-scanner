@@ -1,0 +1,70 @@
+name: Rank5 Demo Readiness
+on:
+  push:
+    branches:
+      - research-rank5-demo-readiness
+    paths:
+      - '.research/rank5_demo_readiness_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-backtest.txt
+
+      - name: Download 365d source chunks and breadth
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p chunks input/regime combined
+          for g in old0 old1 new0 new1 new2 new3; do
+            mkdir -p chunks/$g
+            gh run download 35944354692 --repo duuu-hub/bb-scanner --name l3-lite-source-$g --dir chunks/$g
+          done
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir input/regime
+          python - <<'PY'
+          import pandas as pd
+          from pathlib import Path
+          for kind,groups in [("old",["old0","old1"]),("new",["new0","new1","new2","new3"])]:
+              files=[]
+              for g in groups:
+                  files += list(Path("chunks",g).rglob("snapshots.csv.gz"))
+              if not files:
+                  raise RuntimeError(f"no snapshots for {kind}")
+              x=pd.concat([pd.read_csv(f) for f in files],ignore_index=True)
+              x=x.drop_duplicates(["symbol","ts"]).sort_values(["symbol","ts"])
+              x.to_csv(f"combined/{kind}_snapshots.csv.gz",index=False,compression="gzip")
+              print(kind,"rows",len(x),"symbols",x.symbol.nunique(),"range",x.ts.min(),x.ts.max())
+          PY
+          echo "OLD=combined/old_snapshots.csv.gz" >> "$GITHUB_ENV"
+          echo "NEW=combined/new_snapshots.csv.gz" >> "$GITHUB_ENV"
+          echo "REG=$(find input/regime -name breadth_timeseries.csv.gz | head -1)" >> "$GITHUB_ENV"
+
+      - name: Run frozen demo-readiness audit
+        run: |
+          python research/rank5_demo_readiness.py \
+            --source-old "$OLD" \
+            --source-new "$NEW" \
+            --regime "$REG" \
+            --outdir rank5_demo_readiness_results \
+            --workers 8
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rank5-demo-readiness-results
+          path: rank5_demo_readiness_results/
+          retention-days: 14
