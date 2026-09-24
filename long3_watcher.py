@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -89,75 +91,174 @@ def pending_expiry_ms() -> int | None:
     return max(values) if values else None
 
 
-def git_run(args: list[str], *, capture: bool = False) -> subprocess.CompletedProcess:
+def git_run(
+    args: list[str],
+    *,
+    cwd: str | Path | None = None,
+    capture: bool = False,
+) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["git", *args],
+        cwd=str(cwd) if cwd is not None else None,
         check=False,
         text=True,
         capture_output=capture,
     )
 
 
-def persist_forward_state(max_attempts: int = 5) -> bool:
-    """Commit/push forward state with bounded retry.
+def current_code_sha(workspace: str | Path = ".") -> str:
+    result = git_run(["rev-parse", "HEAD"], cwd=workspace, capture=True)
+    if result.returncode != 0:
+        return "UNKNOWN"
+    return result.stdout.strip() or "UNKNOWN"
 
-    LONG3's concurrency group guarantees only one active watcher. Other
-    research should use separate branches, but this retry also tolerates
-    unrelated main-branch commits and transient GitHub push failures.
+
+def copy_forward_snapshot(
+    workspace: str | Path,
+    state_worktree: str | Path,
+    forward_paths: tuple[str, ...] = FORWARD_PATHS,
+) -> list[str]:
+    """Copy only mutable forward-state files into an isolated worktree."""
+    workspace = Path(workspace)
+    state_worktree = Path(state_worktree)
+    copied = []
+    for relative in forward_paths:
+        source = workspace / relative
+        if not source.exists() or not source.is_file():
+            continue
+        destination = state_worktree / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        copied.append(relative)
+    return copied
+
+
+def _persist_snapshot_to_branch(
+    workspace: str | Path,
+    branch: str,
+    forward_paths: tuple[str, ...] = FORWARD_PATHS,
+    *,
+    remote: str = "origin",
+    max_attempts: int = 5,
+) -> bool:
+    """Persist state without ever updating the active watcher's checkout.
+
+    Every attempt creates a disposable worktree from the latest remote branch,
+    overlays only the mutable forward-state files, commits them there, and
+    pushes that temporary commit. If research/code was merged meanwhile, a
+    non-fast-forward push simply retries from the newer remote branch.
+
+    The running watcher's own HEAD and source files therefore remain pinned to
+    the commit checked out when this 4-hour session started.
     """
-    if os.getenv("GITHUB_ACTIONS", "").lower() != "true":
-        print("[WATCHER] local run: git persistence skipped", flush=True)
-        return True
-
-    branch = os.getenv("LONG3_STATE_BRANCH", "main")
-    git_run(["config", "user.name", "github-actions[bot]"])
-    git_run([
-        "config",
-        "user.email",
-        "41898282+github-actions[bot]@users.noreply.github.com",
-    ])
-
-    existing = [path for path in FORWARD_PATHS if Path(path).exists()]
-    status = git_run(["status", "--porcelain", "--", *FORWARD_PATHS], capture=True)
-    if status.returncode != 0:
-        print(f"[WATCHER][WARN] git status failed: {status.stderr}", flush=True)
-        return False
-
-    if status.stdout.strip() and existing:
-        add = git_run(["add", "--", *existing])
-        if add.returncode != 0:
-            print("[WATCHER][WARN] git add failed", flush=True)
-            return False
-        staged = git_run(["diff", "--cached", "--quiet"])
-        if staged.returncode == 1:
-            stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-            commit = git_run(
-                ["commit", "-m", f"chore: persist LONG3 forward state {stamp}"]
-            )
-            if commit.returncode != 0:
-                print("[WATCHER][WARN] git commit failed", flush=True)
-                return False
-        elif staged.returncode not in (0, 1):
-            print("[WATCHER][WARN] git diff --cached failed", flush=True)
-            return False
+    workspace = Path(workspace).resolve()
 
     for attempt in range(1, max_attempts + 1):
-        pull = git_run(["pull", "--rebase", "origin", branch])
-        if pull.returncode != 0:
-            git_run(["rebase", "--abort"])
+        fetch = git_run(["fetch", remote, branch], cwd=workspace, capture=True)
+        if fetch.returncode != 0:
             print(
-                f"[WATCHER][WARN] persist pull failed attempt {attempt}/{max_attempts}",
+                f"[WATCHER][WARN] state fetch failed attempt {attempt}/{max_attempts}: "
+                f"{fetch.stderr.strip()}",
                 flush=True,
             )
-        else:
-            push = git_run(["push", "origin", f"HEAD:{branch}"])
-            if push.returncode == 0:
-                print("[WATCHER] forward state persisted", flush=True)
+            if attempt < max_attempts:
+                time.sleep(min(2 ** attempt, 30))
+            continue
+
+        temp_path = Path(tempfile.mkdtemp(prefix="long3-state-"))
+        # git worktree add expects to create the target path itself.
+        temp_path.rmdir()
+        worktree_added = False
+        try:
+            add_worktree = git_run(
+                ["worktree", "add", "--detach", str(temp_path), f"{remote}/{branch}"],
+                cwd=workspace,
+                capture=True,
+            )
+            if add_worktree.returncode != 0:
+                print(
+                    f"[WATCHER][WARN] state worktree failed attempt "
+                    f"{attempt}/{max_attempts}: {add_worktree.stderr.strip()}",
+                    flush=True,
+                )
+                continue
+            worktree_added = True
+
+            copied = copy_forward_snapshot(workspace, temp_path, forward_paths)
+            if not copied:
+                print("[WATCHER] no forward-state files to persist", flush=True)
                 return True
+
+            git_run(
+                ["config", "user.name", "github-actions[bot]"],
+                cwd=temp_path,
+            )
+            git_run(
+                [
+                    "config",
+                    "user.email",
+                    "41898282+github-actions[bot]@users.noreply.github.com",
+                ],
+                cwd=temp_path,
+            )
+
+            add = git_run(["add", "--", *copied], cwd=temp_path, capture=True)
+            if add.returncode != 0:
+                print(
+                    f"[WATCHER][WARN] state git add failed: {add.stderr.strip()}",
+                    flush=True,
+                )
+                continue
+
+            staged = git_run(["diff", "--cached", "--quiet"], cwd=temp_path)
+            if staged.returncode == 0:
+                print("[WATCHER] forward state already current on main", flush=True)
+                return True
+            if staged.returncode != 1:
+                print("[WATCHER][WARN] state staged diff check failed", flush=True)
+                continue
+
+            stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+            commit = git_run(
+                ["commit", "-m", f"chore: persist LONG3 forward state {stamp}"],
+                cwd=temp_path,
+                capture=True,
+            )
+            if commit.returncode != 0:
+                print(
+                    f"[WATCHER][WARN] state commit failed: {commit.stderr.strip()}",
+                    flush=True,
+                )
+                continue
+
+            push = git_run(
+                ["push", remote, f"HEAD:{branch}"],
+                cwd=temp_path,
+                capture=True,
+            )
+            if push.returncode == 0:
+                print(
+                    "[WATCHER] forward state persisted via isolated worktree; "
+                    "active code remains pinned",
+                    flush=True,
+                )
+                return True
+
             print(
-                f"[WATCHER][WARN] persist push failed attempt {attempt}/{max_attempts}",
+                f"[WATCHER][WARN] state push failed attempt {attempt}/{max_attempts}: "
+                f"{push.stderr.strip()}",
                 flush=True,
             )
+        finally:
+            if worktree_added:
+                git_run(
+                    ["worktree", "remove", "--force", str(temp_path)],
+                    cwd=workspace,
+                    capture=True,
+                )
+            if temp_path.exists():
+                shutil.rmtree(temp_path, ignore_errors=True)
+            git_run(["worktree", "prune"], cwd=workspace, capture=True)
 
         if attempt < max_attempts:
             time.sleep(min(2 ** attempt, 30))
@@ -165,6 +266,19 @@ def persist_forward_state(max_attempts: int = 5) -> bool:
     print("[WATCHER][ERROR] forward state persistence exhausted retries", flush=True)
     return False
 
+
+def persist_forward_state(max_attempts: int = 5) -> bool:
+    """Persist only state/log files while keeping this session's code frozen."""
+    if os.getenv("GITHUB_ACTIONS", "").lower() != "true":
+        print("[WATCHER] local run: git persistence skipped", flush=True)
+        return True
+
+    return _persist_snapshot_to_branch(
+        Path.cwd(),
+        os.getenv("LONG3_STATE_BRANCH", "main"),
+        FORWARD_PATHS,
+        max_attempts=max_attempts,
+    )
 
 def run_boundary_cycle(target_epoch: int) -> bool:
     """Run one exact-boundary scan -> immediate order -> maker finalizer cycle."""
@@ -244,6 +358,13 @@ def main() -> int:
 
     if args.manual_immediate:
         return manual_cycle()
+
+    session_sha = current_code_sha()
+    print(
+        f"[WATCHER] session code pinned at {session_sha}; "
+        "main updates apply only to the next watcher",
+        flush=True,
+    )
 
     boundaries = scheduled_boundaries(time.time(), args.cycles)
     print(
