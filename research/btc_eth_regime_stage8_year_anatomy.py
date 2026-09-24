@@ -353,8 +353,8 @@ def main():
         trn=ps.diff().abs().fillna(ps.abs())
         legs={
           "BASKET":ps*intr-trn*(RT/2),
-          "BTC":ps*(x["BTCUSDT_close"]/x["BTCUSDT_open"]-1)-trn*(RT/2),
-          "ETH":ps*(x["ETHUSDT_close"]/x["ETHUSDT_open"]-1)-trn*(RT/2)}
+          "BTC":ps*(x["BTCUSDT_close"]/x["BTCUSDT_open"]-1)*100-trn*(RT/2),
+          "ETH":ps*(x["ETHUSDT_close"]/x["ETHUSDT_open"]-1)*100-trn*(RT/2)}
         for leg,rrs in legs.items():
             for yr,gidx in x.groupby(x["datetime_utc"].dt.year).groups.items():
                 if int(yr)<2018: continue
