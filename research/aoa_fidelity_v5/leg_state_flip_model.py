@@ -207,7 +207,7 @@ def simulate(model,df,initial_side,threshold,min_hold_bars):
         if hold>=min_hold_bars and prob>=threshold:
             side=-side
             hold=0
-            entry=float(r.open)
+            entry=op[i]
             mfe=0.0; mae=0.0
 
         pred[i]=side
