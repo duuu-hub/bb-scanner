@@ -42,7 +42,7 @@ def fetch_15m(symbol: str) -> pd.DataFrame:
     s = int((START - pd.Timedelta(days=WARMUP_DAYS)).timestamp() * 1000)
     e = int((END + pd.Timedelta(hours=13)).timestamp() * 1000)
     rows = fetch_range(symbol, "15m", 15, s, e)
-    x = rows_to_df(rows, 15)[["ts","open","high","low","close"]].copy()
+    x = rows_to_df(rows, 15)[["ts","open","high","low","close","close_ts"]].copy()
     x["dt"] = pd.to_datetime(x["ts"], unit="ms", utc=True)
     return x.sort_values("ts").drop_duplicates("ts").reset_index(drop=True)
 
