@@ -1,0 +1,42 @@
+name: ASL1 Mirror Calibration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-asl1-mirror
+    paths:
+      - "research/asl1_mirror_calibrate.py"
+      - ".github/workflows/asl1-mirror-calibrate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      BACKTEST_API_RPS: "16"
+      BACKTEST_WORKERS: "8"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements-backtest.txt
+      - name: Syntax
+        run: python -m py_compile research/asl1_mirror_calibrate.py
+      - name: Run
+        run: python research/asl1_mirror_calibrate.py
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: asl1-mirror-calibration
+          path: research_output/asl1_mirror_calibration/
+          if-no-files-found: error
