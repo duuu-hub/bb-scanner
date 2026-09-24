@@ -1,0 +1,121 @@
+name: Binance 15m Canonical Dataset
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-binance-15m-canonical
+    paths:
+      - '.research/binance_15m_canonical_once'
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install conversion dependencies
+        run: pip install pandas pyarrow
+
+      - name: Read source run IDs
+        run: |
+          python - <<'PY'
+          import json, os
+          x=json.load(open("research/binance_15m_canonical_source_runs.json"))
+          with open(os.environ["GITHUB_ENV"],"a") as f:
+              f.write(f"UM_RUN={x['um_run']}\n")
+              f.write(f"SPOT_RUN={x['spot_run']}\n")
+          print(x)
+          PY
+
+      - name: Verify source runs succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for RUN in "$UM_RUN" "$SPOT_RUN"; do
+            C=$(gh api "repos/duuu-hub/bb-scanner/actions/runs/$RUN" --jq .conclusion)
+            S=$(gh api "repos/duuu-hub/bb-scanner/actions/runs/$RUN" --jq .status)
+            echo "$RUN status=$S conclusion=$C"
+            test "$S" = "completed"
+            test "$C" = "success"
+          done
+
+      - name: Download existing Futures shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/um
+          gh run download "$UM_RUN" --repo duuu-hub/bb-scanner \
+            --pattern 'rank5-binance-um-15m-5y-data-shard-*' --dir input/um
+          find input/um -name '*.csv.gz' | wc -l
+
+      - name: Download existing Spot shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/spot
+          gh run download "$SPOT_RUN" --repo duuu-hub/bb-scanner \
+            --pattern 'rank5-binance-spot-15m-5y-data-shard-*' --dir input/spot
+          find input/spot -name '*.csv.gz' | wc -l
+
+      - name: Build canonical Parquet + latest tail
+        run: |
+          python scripts/build_binance_15m_canonical.py \
+            --spot-root input/spot \
+            --um-root input/um \
+            --out canonical_parquet \
+            --dist canonical_dist \
+            --workers 8
+
+      - name: Verify bundle sizes
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          x=json.load(open("canonical_dist/dataset_index.json"))
+          assert x["fatal_errors"]==0,x
+          for market in ("spot","um"):
+              s=x["summary"][market]
+              assert s["symbols"]>=100,s
+              assert s["rows"]>1000000,s
+              assert s["unaligned"]==0,s
+              assert s["bad_ohlc"]==0,s
+          assets=list(pathlib.Path("canonical_dist").glob("*.zip"))
+          assert assets
+          huge=[(p.name,p.stat().st_size) for p in assets if p.stat().st_size>=1900*1024*1024]
+          assert not huge,huge
+          print(json.dumps(x["summary"],indent=2))
+          print("bundle_bytes",sum(p.stat().st_size for p in assets))
+          PY
+
+      - name: Upload canonical dataset artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance-15m-5y-canonical-parquet
+          path: canonical_dist/
+          retention-days: 90
+          compression-level: 0
+
+      - name: Publish persistent release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="binance-15m-5y-canonical-v1"
+          if ! gh release view "$TAG" --repo duuu-hub/bb-scanner >/dev/null 2>&1; then
+            gh release create "$TAG" --repo duuu-hub/bb-scanner \
+              --target "${{ github.sha }}" \
+              --title "Binance 15m 5Y Canonical Dataset v1" \
+              --notes "Reusable Binance Spot + USD-M Futures 15m research dataset. Historical data from data.binance.vision; stored as ZSTD Parquet bundles. Large raw data is not committed to git."
+          fi
+          gh release upload "$TAG" --repo duuu-hub/bb-scanner canonical_dist/* --clobber
+
+      - name: Report release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view binance-15m-5y-canonical-v1 --repo duuu-hub/bb-scanner
+          du -sh canonical_dist canonical_parquet
