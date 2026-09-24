@@ -118,7 +118,7 @@ def main():
     for f in FEATURES:
         z=pd.to_numeric(n[f],errors="coerce")
         ok=z.notna()&edge.notna()
-        rho=z[ok].corr(edge[ok],method="spearman") if ok.sum()>=4 else np.nan
+        rho=z[ok].rank().corr(edge[ok].rank()) if ok.sum()>=4 else np.nan
         assoc.append({"feature":f,"n":int(ok.sum()),"spearman_vs_short_minus_long_d1":rho})
     assoc=pd.DataFrame(assoc).sort_values("spearman_vs_short_minus_long_d1",key=lambda s:s.abs(),ascending=False)
     assoc.to_csv(out/"new66_feature_edge_association_hypothesis_only.csv",index=False)
