@@ -26,7 +26,7 @@ POLICY = ROOT / "research" / "aoa_market_context" / "aoa_policy_2019h2_2021_comp
 BTC_DIR = ROOT / "market_data_store" / "bitget" / "15m" / "BTCUSDT"
 ETH_DIR = ROOT / "market_data_store" / "bitget" / "15m" / "ETHUSDT"
 OOS_START = pd.Timestamp("2022-01-01", tz="UTC")
-COSTS = {"BASE_RT_012": 0.0012/2, "STRESS_RT_025": 0.0025/2}
+COSTS = {"ZERO_DIAGNOSTIC": 0.0, "BASE_RT_012": 0.0012/2, "STRESS_RT_025": 0.0025/2}
 ER_T = 0.193654
 MAX_EXPOSURE = 1.0
 
