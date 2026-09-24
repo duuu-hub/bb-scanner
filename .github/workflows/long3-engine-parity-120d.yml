@@ -41,7 +41,9 @@ jobs:
           for f in downloads/*.zip; do unzip -q "$f" -d unpack; done
           mv unpack/um/*.parquet canonical_um/
       - name: Compare reconstructed signals on identical window
-        run: python research/long3_parity_120d.py | tee parity.txt
+        run: |
+          set -o pipefail
+          python research/long3_parity_120d.py | tee parity.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
