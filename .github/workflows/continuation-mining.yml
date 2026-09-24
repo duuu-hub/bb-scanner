@@ -1,0 +1,32 @@
+name: Continuation Mining
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-continuation-mining
+    paths:
+      - "research/continuation_mining.py"
+      - ".github/workflows/continuation-mining.yml"
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-continuation-mining
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install pandas numpy
+      - name: Run continuation mining
+        run: python research/continuation_mining.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuation-mining-results
+          path: continuation_mining_results/
+          retention-days: 14
