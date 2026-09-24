@@ -50,8 +50,12 @@ def sim(x,idx,hh,sym,side):
         tp=e*(1-TP) if side=="SHORT" else e*(1+TP); sl=e*(1+SL) if side=="SHORT" else e*(1-SL)
         for j in range(ei,last+1):
             hi=float(x.high.iloc[j]); lo=float(x.low.iloc[j])
-            if hi>=sl: px=sl; reason="SL"; ex=j; break
-            if lo<=tp: px=tp; reason="TP"; ex=j; break
+            if side=="SHORT":
+                if hi>=sl: px=sl; reason="SL"; ex=j; break
+                if lo<=tp: px=tp; reason="TP"; ex=j; break
+            else:
+                if lo<=sl: px=sl; reason="SL"; ex=j; break
+                if hi>=tp: px=tp; reason="TP"; ex=j; break
         r=(1-px/e-COST) if side=="SHORT" else (px/e-1-COST)
         out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason))
     return out
