@@ -22,6 +22,10 @@ STATE_PATH = Path("state/trading_state.json")
 EXECUTION_LOG = Path("logs/executions.jsonl")
 
 
+class DemoSymbolUnsupported(RuntimeError):
+    """Signal symbol is not available in the authenticated Bitget Demo catalog."""
+
+
 def utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -247,14 +251,29 @@ def shadow_candles_between(
 
 
 def contract_config(client: BitgetDemoClassic, symbol: str) -> dict:
-    data = client.public_get(
-        "/api/v2/mix/market/contracts",
-        {"productType": "usdt-futures", "symbol": symbol},
-    ) or []
-    if not data:
-        raise RuntimeError(f"No contract config for {symbol}")
-    return data[0]
+    """Return contract metadata from the authenticated Demo catalog.
 
+    Public/live Bitget may list hundreds of symbols that the Demo environment
+    does not accept for orders. Querying through the Demo-authenticated REST
+    path prevents a live-only symbol from reaching place-order.
+    """
+    try:
+        data = client.private_get(
+            "/api/v2/mix/market/contracts",
+            {"productType": "usdt-futures", "symbol": symbol},
+        ) or []
+    except RuntimeError as exc:
+        message = str(exc)
+        if "code=40034" in message:
+            raise DemoSymbolUnsupported(
+                f"{symbol} is not available in Bitget Demo: {message}"
+            ) from exc
+        raise
+    if not data:
+        raise DemoSymbolUnsupported(
+            f"{symbol} is not available in the Bitget Demo contract catalog"
+        )
+    return data[0]
 
 def candles_since_signal(client: BitgetDemoClassic, signal: Signal, until_ms: int) -> list[Candle]:
     rows = client.public_get(
@@ -1082,6 +1101,8 @@ def reject(cfg: dict, state: dict, signal: Signal, reason: str, details: dict | 
 
 
 def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Signal, ts_ms: int) -> bool:
+    # Fail fast against the authenticated Demo catalog before doing market work.
+    contract = contract_config(client, signal.symbol)
     price, bid, ask = ticker(client, signal.symbol)
     candles = candles_since_signal(client, signal, ts_ms)
     guard_cfg = GuardConfig(
@@ -1114,6 +1135,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
             "max_spread_pct": max_spread,
             "entry_min": float(signal.entry_min),
             "entry_max": float(signal.entry_max),
+            "signal_age_ms": int(ts_ms - signal.signal_time_ms),
             "price_vs_detected_pct": (
                 (float(price) / detected - 1.0) * 100.0 if detected > 0 else None
             ),
@@ -1187,7 +1209,6 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
         )
         return False
 
-    contract = contract_config(client, signal.symbol)
     tp = normalize_price(contract, signal.tp)
     sl = normalize_price(contract, signal.sl)
 
@@ -1234,6 +1255,7 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
             "presetStopLossPrice": sl,
         }
         placed = client.private_post("/api/v2/mix/order/place-order", payload)
+        accepted_ms = now_ms()
         order_id = str(placed.get("orderId") or "")
         if not order_id:
             raise RuntimeError(f"Maker entry missing orderId: {placed}")
@@ -1254,6 +1276,9 @@ def execute_signal(client: BitgetDemoClassic, cfg: dict, state: dict, signal: Si
             "signal_time_ms": signal.signal_time_ms,
             "max_hold_minutes": signal.max_hold_minutes,
             "placed_at_ms": requested_ms,
+            "order_accepted_at_ms": accepted_ms,
+            "boundary_to_order_request_ms": requested_ms - int(signal.signal_time_ms),
+            "order_api_latency_ms": accepted_ms - requested_ms,
             "expires_at_ms": requested_ms + wait_seconds * 1000,
             "maker_wait_seconds": wait_seconds,
             "planned_notional": float(planned_notional),
@@ -1426,6 +1451,17 @@ def main() -> int:
         try:
             if execute_signal(client, cfg, state, signal, now_ms()):
                 entries += 1
+        except DemoSymbolUnsupported as exc:
+            reject(
+                cfg,
+                state,
+                signal,
+                "DEMO_SYMBOL_UNSUPPORTED",
+                {
+                    "error": str(exc),
+                    "signal_age_ms": now_ms() - int(signal.signal_time_ms),
+                },
+            )
         except Exception as exc:
             mark_signal_shadow_execution(state, signal.signal_id, "ERROR")
             # Fail closed: API/infrastructure failures never become orders.
