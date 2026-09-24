@@ -1,9 +1,17 @@
 name: SMC Demo Tests
 
 on:
+  pull_request:
+    paths:
+      - "smc_forward_engine.py"
+      - "smc_demo_forward.py"
+      - "config/smc_demo_config.json"
+      - "tests/test_smc_forward.py"
+      - ".github/workflows/smc-demo-tests.yml"
+      - ".github/workflows/smc-demo-forward.yml"
   push:
     branches:
-      - smc-demo-forward
+      - main
     paths:
       - "smc_forward_engine.py"
       - "smc_demo_forward.py"
@@ -22,8 +30,6 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: smc-demo-forward
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
