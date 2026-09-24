@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np, pandas as pd
 import continuation_validation as cv
 import continuation_mining as cm
-OUT=Path("continuation_tpsl_results"); OUT.mkdir(exist_ok=True)
+ # trigger workflow\nOUT=Path("continuation_tpsl_results"); OUT.mkdir(exist_ok=True)
 TPS=(1.0,1.5,2.0,3.0,4.0,5.0); SLS=(0.5,0.75,1.0,1.5,2.0,3.0); HS={1:4,2:8,3:12,6:24,12:48}
 def main():
  x=cv.prep().sort_values("timestamp_ms").reset_index(drop=True)
