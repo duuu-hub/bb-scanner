@@ -30,13 +30,19 @@ def signals(sym,df):
         buckets=idx.floor(rule) if name!="1W" else idx.floor("7D")
         sm=pd.Series(s.reindex(buckets).to_numpy(),index=idx)
         sqm=pd.Series(ss.reindex(buckets).to_numpy(),index=idx)
-        # Match the frozen scanner: evaluate every 15m boundary at the\n        # new candle OPEN, using 19 fully completed TF closes + live price.\n        p=base["open"]\n        mean=(sm+p)/20.0
+        # Match the frozen scanner: evaluate every 15m boundary at the
+        # new candle OPEN, using 19 fully completed TF closes + live price.
+        p=base["open"]
+        mean=(sm+p)/20.0
         var=((sqm+p*p)/20.0)-mean*mean
         upper=mean+2*np.sqrt(var.clip(lower=0))
         above[name]=p>upper
     A=pd.DataFrame(above,index=idx)
     exact=A.sum(axis=1)
-    # Frozen momentum bases are 15m boundary opens 1h/4h earlier.\n    p=base["open"]\n    ret1=p.pct_change(4)*100; ret4=p.pct_change(16)*100\n    raw={
+    # Frozen momentum bases are 15m boundary opens 1h/4h earlier.
+    p=base["open"]
+    ret1=p.pct_change(4)*100; ret4=p.pct_change(16)*100
+    raw={
       "L1":(exact>=6)&(ret1>=10),
       "L2":(exact>=6)&(ret4>=30),
       "L3":(exact==6)&(~A["4H"])
@@ -99,7 +105,11 @@ def main():
     byyr=tr.groupby("year").apply(summary,include_groups=False)
     byrs=tr.groupby(["regime","strategy"],dropna=False).apply(summary,include_groups=False)
     res.to_csv(OUT/"overall.csv");byreg.to_csv(OUT/"by_regime.csv");byyr.to_csv(OUT/"by_year.csv");byrs.to_csv(OUT/"by_regime_strategy.csv")
-    print("OVERALL\n",res.to_string());print("BY_REGIME\n",byreg.to_string());print("BY_YEAR\n",byyr.to_string());print("BY_REGIME_STRATEGY\n",byrs.to_string())
+    print("OVERALL
+",res.to_string());print("BY_REGIME
+",byreg.to_string());print("BY_YEAR
+",byyr.to_string());print("BY_REGIME_STRATEGY
+",byrs.to_string())
 
 
 if __name__ == "__main__":
