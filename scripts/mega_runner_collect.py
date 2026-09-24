@@ -8,7 +8,7 @@ includes historical/delisted spot symbols, reducing survivorship bias.
 import argparse,csv,io,json,time,urllib.parse,urllib.request,zipfile,xml.etree.ElementTree as ET
 from datetime import datetime,timezone
 from pathlib import Path
-BASE="https://data.binance.vision/"
+BASE="https://data.binance.vision/"\nLIST_BASE="https://s3-ap-northeast-1.amazonaws.com/data.binance.vision"
 def urlopen(url,timeout=60):
     req=urllib.request.Request(url,headers={"User-Agent":"mega-runner-research/1.0"})
     return urllib.request.urlopen(req,timeout=timeout)
@@ -18,7 +18,7 @@ def list_prefix(prefix, delimiter=None):
         q={"list-type":"2","prefix":prefix}
         if delimiter:q["delimiter"]=delimiter
         if token:q["continuation-token"]=token
-        with urlopen(BASE+"?"+urllib.parse.urlencode(q)) as r: root=ET.fromstring(r.read())
+        with urlopen(LIST_BASE+"?"+urllib.parse.urlencode(q)) as r: root=ET.fromstring(r.read())
         ns={"s3":"http://s3.amazonaws.com/doc/2006-03-01/"}
         for x in root.findall("s3:CommonPrefixes/s3:Prefix",ns): yield ("prefix",x.text)
         for x in root.findall("s3:Contents/s3:Key",ns): yield ("key",x.text)
