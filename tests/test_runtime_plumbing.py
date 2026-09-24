@@ -63,6 +63,33 @@ class RuntimePlumbingTests(unittest.TestCase):
             self.assertEqual(reread["processed_signal_ids"][-1], "5099")
             self.assertEqual(reread["pending_entries"][0]["signal_id"], "maker-1")
 
+
+    def test_forward_scanner_default_uses_live_public_universe(self):
+        live_contracts = [
+            {
+                "symbol": "BTCUSDT",
+                "symbolType": "perpetual",
+                "symbolStatus": "normal",
+                "quoteCoin": "USDT",
+                "isRwa": "NO",
+            },
+            {
+                "symbol": "PLUMEUSDT",
+                "symbolType": "perpetual",
+                "symbolStatus": "normal",
+                "quoteCoin": "USDT",
+                "isRwa": "NO",
+            },
+        ]
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("LONG3_DEMO_UNIVERSE_ONLY", None)
+            with patch("scanner.api_get", return_value=live_contracts) as api_get:
+                self.assertEqual(scanner.get_symbols(), ["BTCUSDT", "PLUMEUSDT"])
+                api_get.assert_called_once_with(
+                    "/api/v2/mix/market/contracts",
+                    {"productType": "usdt-futures"},
+                )
+
     def test_demo_scanner_universe_uses_authenticated_demo_catalog(self):
         demo_contracts = [
             {
