@@ -447,6 +447,28 @@ def main():
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
-if __name__=="__main__":
+
+def flat_periods_current_rule():
+    """Consecutive zero-position periods for BASE and D2_0."""
+    x=build()
+    intr=(x["BTCUSDT_intraday"]+x["ETHUSDT_intraday"])/2
+    sig=(x["BTCUSDT_ret30"].gt(0)&x["ETHUSDT_ret30"].gt(0)&x["er_avg"].ge(ER_T)).fillna(False).to_numpy()
+    base=causal_pos(sig,None,None)
+    d20=causal_pos(sig,2,0.0)
+    rows=[]; summary=[]
+    for name,pos in [("BASE",base),("D2_0",d20)]:
+        flat=np.asarray(pos)==0
+        starts=np.where(flat & np.r_[True,~flat[:-1]])[0]
+        ends=np.where(flat & np.r_[~flat[1:],True])[0]
+        lens=ends-starts+1
+        for s,e,n in zip(starts,ends,lens):
+            rows.append({"variant":name,"start":x.index[s],"end":x.index[e],"days":int(n)})
+        summary.append({"variant":name,"total_days":len(pos),"flat_days":int(flat.sum()),"flat_pct":100*flat.mean(),"periods":len(lens),"avg_days":float(np.mean(lens)),"median_days":float(np.median(lens)),"max_days":int(np.max(lens))})
+    p=pd.DataFrame(rows); sm=pd.DataFrame(summary)
+    p.to_csv(OUT/"flat_periods.csv",index=False); sm.to_csv(OUT/"flat_summary.csv",index=False)
+    print("\n=== FLAT SUMMARY ==="); print(sm.to_string(index=False))
+    print("\n=== FLAT PERIODS >=30D ==="); print(p[p["days"]>=30].sort_values(["variant","start"]).to_string(index=False))
+    print("\n=== TOP 15 LONGEST FLAT PERIODS ==="); print(p.sort_values("days",ascending=False).head(15).to_string(index=False))
+\nif __name__=="__main__":
     main()
 
