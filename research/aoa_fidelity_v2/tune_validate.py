@@ -13,6 +13,7 @@ from sklearn.linear_model import HuberRegressor
 
 import research.aoa_3way_oos.backtest_3way as b3
 import research.aoa_era_validation.validate_era as era
+from research.aoa_market_context.analyze_market_context import attach
 
 OUT=ROOT/"research"/"aoa_fidelity_v2"/"output"
 POLICY=ROOT/"research"/"aoa_market_context"/"aoa_policy_2019h2_2021_compact.csv"
@@ -22,8 +23,9 @@ END=pd.Timestamp("2022-01-01",tz="UTC")
 COSTS={"ZERO":0.0,"LOW_RT_004":0.0004/2}
 
 
-def fit_behavior_calibration():
+def fit_behavior_calibration(full_candles):
     p=pd.read_csv(POLICY)
+    p=attach(p,full_candles,"t")
     p=p[p["t"] < int(pd.Timestamp("2021-01-01",tz="UTC").timestamp())].copy()
     p["year"]=pd.to_datetime(p["t"],unit="s",utc=True).dt.year
     p=p[p["year"].isin([2019,2020])].copy()
@@ -189,8 +191,10 @@ def model_years(st):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
+    btc_full=b3.load_raw(b3.BTC_DIR)
+    full_candles=b3.build_market_candles(btc_full)
     btc,eth,candles,model_meta=era.prep()
-    cal=fit_behavior_calibration()
+    cal=fit_behavior_calibration(full_candles)
 
     # Remove non-serializable model from metadata.
     meta_cal={k:v for k,v in cal.items() if k!="_flip_model"}
