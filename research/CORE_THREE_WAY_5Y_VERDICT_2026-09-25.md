@@ -31,6 +31,28 @@ The D2_0 early exit remains a post-hoc parallel shadow, not a replacement.
   cross-venue complement at the tested sizing; they do not disprove its
   original 53-day Bitget result.
 
+### Why the prior SHORT result differs
+
+The completed Bitget execution study was **53 days**, not five years. Its
+AUTO100 OOS selected 792 non-overlapping trades in 24 symbols at PF 1.691.
+The present five-year Binance archive is a different instrument and universe;
+it has 696 selected symbols over the longer window. To check whether the
+five-year losses are *only* due to years outside the original study, compare
+2026-07-31 through 2026-08-31: Binance all selected symbols have 2,222
+trades, PF .822. Restricting Binance to the 10 symbols also selected by
+Bitget improves it to 431 trades, PF 1.038.
+
+More strictly, pair on identical **symbol and entry timestamp** and require
+Bitget's original one-position-per-symbol acceptance: 307 trades in 10
+symbols overlap. At the same 0.20% round-trip cost, Bitget PF is 1.792,
+average +0.851% per trade; Binance PF is 1.159, average +0.208%.
+Among those matched entries, 35 Bitget TP trades are Binance SL trades and
+3 go the other way. Thus the mismatch is also in the bars/execution outcomes
+at the same entry time, not just calendar coverage or extra Binance symbols.
+Different exchange perpetual OHLC paths and intrabar TP/SL ambiguity can
+contribute; a matched-candle price audit would be needed to isolate their
+shares. Do not treat this transfer as a strict replication of Bitget fills.
+
 ## Three-module comparison (frozen costs)
 
 All returns compound daily. MDD is **daily-close, booked-exit MDD**, and does
