@@ -1,0 +1,24 @@
+name: Continuation TP SL Sweep
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-continuation-mining]
+    paths:
+      - "research/continuation_tpsl_sweep.py"
+      - ".github/workflows/continuation-tpsl-sweep.yml"
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - run: python research/continuation_tpsl_sweep.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuation-tpsl-results
+          path: continuation_tpsl_results/
+          retention-days: 14
