@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Efficient sharded Binance USD-M 15m archive collector for frozen Rank5 research."""
+"""Efficient sharded Binance 15m archive collector for frozen Rank5 research.
+
+Supports Spot and USD-M Futures through data.binance.vision monthly archives.
+Stores one gzip CSV per symbol and a manifest with coverage/integrity diagnostics.
+"""
 from __future__ import annotations
 import argparse, csv, gzip, io, json, urllib.parse, urllib.request, zipfile
 import xml.etree.ElementTree as ET
@@ -32,8 +36,11 @@ def list_prefix(prefix,delimiter=None):
             break
         token=root.findtext("s3:NextContinuationToken",namespaces=ns)
 
-def all_um_usdt_symbols():
-    pref="data/futures/um/monthly/klines/"
+def market_prefix(market):
+    return "data/spot/monthly/klines/" if market=="spot" else "data/futures/um/monthly/klines/"
+
+def all_usdt_symbols(market):
+    pref=market_prefix(market)
     out=[]
     for typ,val in list_prefix(pref,"/"):
         if typ!="prefix":continue
@@ -42,8 +49,8 @@ def all_um_usdt_symbols():
             out.append(sym)
     return sorted(set(out))
 
-def month_keys(sym,interval,start_ym):
-    pref=f"data/futures/um/monthly/klines/{sym}/{interval}/"
+def month_keys(market,sym,interval,start_ym):
+    pref=f"{market_prefix(market)}{sym}/{interval}/"
     keys=[]
     for typ,key in list_prefix(pref):
         if typ!="key" or not key.endswith(".zip") or key.endswith(".CHECKSUM"):continue
@@ -65,8 +72,8 @@ def ym_years_ago(years):
     now=datetime.now(timezone.utc)
     return f"{now.year-years:04d}-{now.month:02d}"
 
-def collect_symbol(sym,interval,start_ym,outdir):
-    keys=month_keys(sym,interval,start_ym)
+def collect_symbol(market,sym,interval,start_ym,outdir):
+    keys=month_keys(market,sym,interval,start_ym)
     p=outdir/f"{sym}.csv.gz"
     n=0; first=None; last=None; prev=None
     gaps=0; dupes=0; unaligned=0; errors=[]; seen=set()
@@ -102,6 +109,7 @@ def collect_symbol(sym,interval,start_ym,outdir):
 
 def main():
     ap=argparse.ArgumentParser()
+    ap.add_argument("--market",choices=["spot","um"],required=True)
     ap.add_argument("--years",type=int,default=5)
     ap.add_argument("--interval",choices=["15m"],default="15m")
     ap.add_argument("--out",required=True)
@@ -112,26 +120,27 @@ def main():
     if not (0<=args.shard_index<args.shard_count):raise SystemExit("invalid shard")
     out=Path(args.out);out.mkdir(parents=True,exist_ok=True)
     start_ym=ym_years_ago(args.years)
-    syms=all_um_usdt_symbols()
+    syms=all_usdt_symbols(args.market)
     if args.only_symbol:
         want=set(args.only_symbol);syms=[s for s in syms if s in want]
     else:
         syms=[s for i,s in enumerate(syms) if i%args.shard_count==args.shard_index]
     manifest=[]
-    print(json.dumps({"market":"binance_um","interval":args.interval,"years":args.years,
+    print(json.dumps({"market":f"binance_{args.market}","interval":args.interval,"years":args.years,
                       "start_ym":start_ym,"shard_index":args.shard_index,"shard_count":args.shard_count,
                       "selected_symbols":len(syms)}),flush=True)
     for i,s in enumerate(syms,1):
-        try:r=collect_symbol(s,args.interval,start_ym,out)
+        try:r=collect_symbol(args.market,s,args.interval,start_ym,out)
         except Exception as e:r={"symbol":s,"rows":0,"first":None,"last":None,"months":0,"gaps":0,"duplicates_skipped":0,"unaligned":0,"errors":[str(e)],"file":None}
         manifest.append(r)
         print(f"[{i}/{len(syms)}] {s} rows={r['rows']} months={r['months']} gaps={r['gaps']} errors={len(r['errors'])}",flush=True)
     summary={
-        "market":"binance_um","interval":args.interval,"years":args.years,"start_ym":start_ym,
+        "market":f"binance_{args.market}","interval":args.interval,"years":args.years,"start_ym":start_ym,
         "shard_index":args.shard_index,"shard_count":args.shard_count,
         "symbols_selected":len(syms),"symbols_with_data":sum(x["rows"]>0 for x in manifest),
         "rows":sum(x["rows"] for x in manifest),"symbols_with_errors":sum(bool(x["errors"]) for x in manifest),
-        "symbols_with_gaps":sum(x["gaps"]>0 for x in manifest)
+        "symbols_with_gaps":sum(x["gaps"]>0 for x in manifest),
+        "unaligned_total":sum(x["unaligned"] for x in manifest)
     }
     (out/f"manifest_shard_{args.shard_index:02d}.json").write_text(json.dumps({"summary":summary,"symbols":manifest},indent=2),encoding="utf-8")
     print("SUMMARY "+json.dumps(summary),flush=True)
