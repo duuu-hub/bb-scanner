@@ -3,6 +3,8 @@ on:
   push:
     branches: [research-long3-5y-regime]
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   backtest:
     runs-on: ubuntu-latest
@@ -12,23 +14,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements-backtest.txt
-      - name: Run existing LONG3 5Y research
-        shell: bash
+      - run: pip install pandas numpy pyarrow
+      - name: Download canonical USD-M 5Y dataset
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euxo pipefail
-          mkdir -p artifacts
-          python analysis_survival_120d.py --help > artifacts/help.txt 2>&1 || true
-          if [ -f research/long3_5y_regime.py ]; then
-            python research/long3_5y_regime.py 2>&1 | tee artifacts/run.log
-          elif [ -f precision_backtest.py ]; then
-            python precision_backtest.py 2>&1 | tee artifacts/run.log
-          else
-            echo "No backtest entrypoint found" | tee artifacts/run.log
-            exit 2
-          fi
+          mkdir -p canonical_um
+          gh release download binance-15m-5y-canonical-v1 --repo duuu-hub/bb-scanner --pattern 'binance-um-15m-5y-parquet-shard-*.zip' --dir downloads
+          for f in downloads/*.zip; do unzip -q "$f" -d unpack; done
+          mv unpack/um/*.parquet canonical_um/
+          echo "parquet files: $(find canonical_um -name '*.parquet' | wc -l)"
+      - name: Run LONG3 exact-rule 5Y regime replay
+        run: python research/long3_5y_regime.py 2>&1 | tee artifacts/run.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: long3-5y-regime
           path: artifacts/
+          retention-days: 30
