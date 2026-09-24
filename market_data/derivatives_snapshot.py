@@ -12,11 +12,18 @@ from pathlib import Path
 
 import requests
 
-from market_data.contract_filters import (
-    RESEARCH_CORE_SYMBOLS,
-    active_symbols_from_contracts,
-    deterministic_symbol_sample,
-)
+try:
+    from market_data.contract_filters import (
+        RESEARCH_CORE_SYMBOLS,
+        active_symbols_from_contracts,
+        deterministic_symbol_sample,
+    )
+except ModuleNotFoundError:
+    from contract_filters import (
+        RESEARCH_CORE_SYMBOLS,
+        active_symbols_from_contracts,
+        deterministic_symbol_sample,
+    )
 
 BASE_URL = "https://api.bitget.com"
 PRODUCT_TYPE = "usdt-futures"
