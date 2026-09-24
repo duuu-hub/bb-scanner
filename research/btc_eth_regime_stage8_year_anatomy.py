@@ -10,7 +10,7 @@ OUT=Path("research_output/btc_eth_regime_stage8_year_anatomy")
 SYMS=("BTCUSDT","ETHUSDT")
 BASE="https://data.binance.vision/data/spot/monthly/klines"
 START=pd.Timestamp("2017-08-01",tz="UTC")
-END=pd.Timestamp("2026-08-01",tz="UTC")
+# Include all completed monthly Binance archives available through the current month.\nEND=pd.Timestamp("2026-09-01",tz="UTC")
 WIN=30
 ER_T=0.193654
 RT=0.25
