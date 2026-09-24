@@ -159,4 +159,5 @@ def slot_study(d):
     capture_rate_pct=100*taken/len(a),max_open=max_open,total_return_pct=(final-1)*100,mdd_pct=mdd))
  out=pd.DataFrame(rows); out.to_csv(OUT/"slot_study.csv",index=False)
  print("\n=== SLOT STUDY ==="); print(out.to_string(index=False))
-\nif __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz"))
+
+if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz"))
