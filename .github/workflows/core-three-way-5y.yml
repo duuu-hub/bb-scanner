@@ -1,0 +1,42 @@
+name: Frozen Core L2 Continuation 5Y Portfolio
+on:
+  push:
+    branches: [research-core-portfolio-5y]
+    paths:
+      - 'research/core_three_way_5y.py'
+      - '.github/workflows/core-three-way-5y.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy pyarrow requests
+      - name: Reuse completed L2 trades and existing five-year futures release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input_l2 canonical_um downloads unpack
+          gh run download 36019652969 --repo duuu-hub/bb-scanner --name long3-5y-regime --dir input_l2
+          gh release download binance-15m-5y-canonical-v1 --repo duuu-hub/bb-scanner --pattern 'binance-um-15m-5y-parquet-shard-*.zip' --dir downloads
+          for shard in downloads/*.zip; do unzip -q "$shard" -d unpack; done
+          mv unpack/um/*.parquet canonical_um/
+          test -s input_l2/long3_5y_trades.csv
+          test -f canonical_um/BTCUSDT.parquet
+      - name: Compare frozen core versions and capital allocation
+        run: |
+          set -o pipefail
+          python research/core_three_way_5y.py 2>&1 | tee artifacts/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: core-three-way-5y-portfolio
+          path: artifacts/
+          retention-days: 30
