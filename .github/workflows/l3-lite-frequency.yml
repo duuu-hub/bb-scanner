@@ -1,0 +1,115 @@
+name: L3 Strict vs Lite Frequency
+on:
+  push:
+    branches:
+      - research-l3-lite-frequency
+    paths:
+      - '.research/l3_lite_frequency_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  build-old:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Resolve AUTO50-overlap symbols
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text())
+          syms=[s for s in x["symbols"] if s in ORIGINAL_AUTO50]
+          print("count",len(syms)); print(",".join(syms))
+          Path("/tmp/syms").write_text(",".join(syms))
+          PY
+          echo "SYMS=$(cat /tmp/syms)" >> "$GITHUB_ENV"
+      - run: python backtest.py --symbols "$SYMS" --days 365 --outdir source_old
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l3-lite-source-old
+          path: |
+            source_old/snapshots.csv.gz
+            source_old/coverage.csv
+          retention-days: 14
+
+  build-new:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Resolve NEW66 symbols
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.bb_auto100_holdout import ORIGINAL_AUTO50
+          x=json.loads(Path("market_data_store/bitget/research_auto100_15m/selection.json").read_text())
+          syms=[s for s in x["symbols"] if s not in ORIGINAL_AUTO50]
+          print("count",len(syms)); print(",".join(syms))
+          Path("/tmp/syms").write_text(",".join(syms))
+          PY
+          echo "SYMS=$(cat /tmp/syms)" >> "$GITHUB_ENV"
+      - run: python backtest.py --symbols "$SYMS" --days 365 --outdir source_new
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l3-lite-source-new
+          path: |
+            source_new/snapshots.csv.gz
+            source_new/coverage.csv
+          retention-days: 14
+
+  analyze:
+    needs: [build-old,build-new]
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt
+      - name: Download source artifacts and frozen regime artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/old input/new input/regime
+          gh run download ${{ github.run_id }} --repo duuu-hub/bb-scanner --name l3-lite-source-old --dir input/old
+          gh run download ${{ github.run_id }} --repo duuu-hub/bb-scanner --name l3-lite-source-new --dir input/new
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir input/regime
+          find input -maxdepth 4 -type f -print
+      - name: Compare strict and Lite-A
+        run: |
+          python research/l3_lite_frequency.py \
+            --source-old input/old/source_old/snapshots.csv.gz \
+            --source-new input/new/source_new/snapshots.csv.gz \
+            --regime-dir input/regime \
+            --outdir l3_lite_frequency_results \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: l3-lite-frequency-results
+          path: l3_lite_frequency_results/
+          retention-days: 14
