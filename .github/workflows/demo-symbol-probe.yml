@@ -1,0 +1,59 @@
+name: Demo Symbol Probe
+
+on:
+  push:
+    branches:
+      - long3-fast-exec-demo-universe
+    paths:
+      - '.github/workflows/demo-symbol-probe.yml'
+      - 'bitget_demo_lifecycle_test.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Probe Demo contract visibility
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+        run: |
+          python - <<'PY'
+          from urllib.parse import urlencode
+          from bitget_demo_lifecycle_test import BitgetDemoClassic, BASE_URL
+
+          client = BitgetDemoClassic()
+          path = "/api/v2/mix/market/contracts"
+          for symbol in ("BTCUSDT", "PLUMEUSDT", "CHRUSDT"):
+              params = {"productType": "usdt-futures", "symbol": symbol}
+              query = urlencode(params)
+              r = client.session.get(
+                  BASE_URL + path,
+                  params=params,
+                  headers=client._headers("GET", path, query=query),
+                  timeout=15,
+              )
+              try:
+                  p = r.json()
+              except Exception:
+                  p = {"raw": r.text[:500]}
+              data = p.get("data") if isinstance(p, dict) else None
+              print({
+                  "symbol": symbol,
+                  "http": r.status_code,
+                  "code": p.get("code") if isinstance(p, dict) else None,
+                  "msg": p.get("msg") if isinstance(p, dict) else None,
+                  "count": len(data) if isinstance(data, list) else None,
+                  "returned": [x.get("symbol") for x in data[:3]] if isinstance(data, list) else None,
+              })
+          PY
