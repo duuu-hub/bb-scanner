@@ -17,7 +17,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from research.aoa_market_context.analyze_market_context import (
-    load_candles, attach, MARKET_FEATURES
+    attach, MARKET_FEATURES
 )
 
 BASE = ROOT / "research" / "aoa_3way_oos"
@@ -41,6 +41,43 @@ def load_raw(symbol_dir: Path) -> pd.DataFrame:
     for c in ["open","high","low","close","base_volume","quote_volume"]:
         z[c]=pd.to_numeric(z[c],errors="coerce")
     return z.dropna(subset=["open","high","low","close"]).drop_duplicates("timestamp_ms").sort_values("datetime_utc").reset_index(drop=True)
+
+
+def build_market_candles(raw: pd.DataFrame) -> pd.DataFrame:
+    df=raw.copy().sort_values("timestamp_ms").reset_index(drop=True)
+    df["bar_start"]=df["datetime_utc"]
+    df["bar_end_s"]=(df["timestamp_ms"]//1000+900).astype("int64")
+    close=df["close"]; logret=np.log(close).diff()
+    for n,name in [(1,"ret15m"),(4,"ret1h"),(16,"ret4h"),(96,"ret24h"),(288,"ret3d"),(672,"ret7d")]:
+        df[name]=(close/close.shift(n)-1.0)*10000.0
+    df["rv4h"]=logret.rolling(16,min_periods=12).std()*np.sqrt(16)*10000.0
+    df["rv24h"]=logret.rolling(96,min_periods=72).std()*np.sqrt(96)*10000.0
+    pc=close.shift(1)
+    tr=pd.concat([df["high"]-df["low"],(df["high"]-pc).abs(),(df["low"]-pc).abs()],axis=1).max(axis=1)
+    df["atr14_pct"]=tr.rolling(14,min_periods=10).mean()/close*10000.0
+    df["atr96_pct"]=tr.rolling(96,min_periods=72).mean()/close*10000.0
+    ma20=close.rolling(20,min_periods=15).mean(); sd20=close.rolling(20,min_periods=15).std()
+    df["bb_z20"]=(close-ma20)/sd20.replace(0,np.nan)
+    df["bb_width20"]=4.0*sd20/ma20*10000.0
+    delta=close.diff()
+    gain=delta.clip(lower=0).ewm(alpha=1/14,adjust=False).mean()
+    loss=(-delta.clip(upper=0)).ewm(alpha=1/14,adjust=False).mean()
+    rs=gain/loss.replace(0,np.nan)
+    df["rsi14"]=100.0-100.0/(1.0+rs)
+    lv=np.log1p(df["quote_volume"]); vmu=lv.rolling(96,min_periods=72).mean(); vsd=lv.rolling(96,min_periods=72).std()
+    df["vol_z96"]=(lv-vmu)/vsd.replace(0,np.nan)
+    hi96=df["high"].rolling(96,min_periods=72).max(); lo96=df["low"].rolling(96,min_periods=72).min()
+    df["range_pos24h"]=(close-lo96)/(hi96-lo96).replace(0,np.nan)
+    hi7=df["high"].rolling(672,min_periods=384).max()
+    df["dd7d"]=(close/hi7-1.0)*10000.0
+    net=(close-close.shift(96)).abs(); path=close.diff().abs().rolling(96,min_periods=72).sum()
+    df["er24h"]=net/path.replace(0,np.nan)
+    ema20=close.ewm(span=20,adjust=False).mean(); ema80=close.ewm(span=80,adjust=False).mean()
+    df["ema20_80"]=(ema20/ema80-1.0)*10000.0
+    df["trend_z24h"]=df["ret24h"]/df["rv24h"].replace(0,np.nan)
+    vol_med=df["rv24h"].rolling(2880,min_periods=672).median()
+    df["high_vol"]=(df["rv24h"]>vol_med).astype(float)
+    return df
 
 
 def fit_aoa_direction(candles: pd.DataFrame):
@@ -322,8 +359,8 @@ def yearly(st: St,name,cost_name):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    candles=load_candles()
     btc=load_raw(BTC_DIR); eth=load_raw(ETH_DIR)
+    candles=build_market_candles(btc)
     model,train,coef=fit_aoa_direction(candles)
     X=candles[MARKET_FEATURES]
     candles["aoa_p_long"]=model.predict_proba(X)[:,1]
