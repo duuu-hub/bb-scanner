@@ -1,0 +1,132 @@
+name: Rank5 Binance Spot 15m 5Y
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-rank5-binance-spot-15m-5y
+    paths:
+      - '.research/rank5_binance_spot_15m_5y_once'
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile scripts/rank5_binance_collect.py
+      - name: Real archive smoke test
+        run: |
+          rm -rf preflight_spot
+          python scripts/rank5_binance_collect.py \
+            --market spot --years 1 --interval 15m \
+            --out preflight_spot --only-symbol BTCUSDT
+      - name: Validate smoke output
+        run: |
+          python - <<'PY'
+          import gzip,json,csv
+          from pathlib import Path
+          m=json.loads(Path("preflight_spot/manifest_shard_00.json").read_text())
+          s=m["summary"]; rows=s["rows"]
+          assert s["symbols_with_data"]==1, s
+          assert rows>30000, s
+          assert s["symbols_with_errors"]==0, s
+          assert s["unaligned_total"]==0, s
+          p=Path("preflight_spot/BTCUSDT.csv.gz")
+          assert p.exists() and p.stat().st_size>100000, p
+          with gzip.open(p,"rt") as f:
+              r=csv.DictReader(f); first=next(r); second=next(r)
+          assert int(second["open_time"])-int(first["open_time"])==900000,(first,second)
+          print("PREFLIGHT_SPOT_OK",json.dumps(s))
+          PY
+
+  collect:
+    needs: preflight
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect spot shard ${{ matrix.shard }}
+        run: |
+          rm -rf rank5_binance_spot_15m_5y
+          python scripts/rank5_binance_collect.py \
+            --market spot --years 5 --interval 15m \
+            --shard-count 12 --shard-index ${{ matrix.shard }} \
+            --out rank5_binance_spot_15m_5y
+      - name: Verify spot shard ${{ matrix.shard }}
+        run: |
+          python - <<'PY'
+          import json,glob
+          p=glob.glob("rank5_binance_spot_15m_5y/manifest_shard_*.json")[0]
+          m=json.load(open(p));s=m["summary"]
+          assert s["symbols_selected"]>0,s
+          assert s["symbols_with_data"]>0,s
+          assert s["rows"]>10000,s
+          assert s["unaligned_total"]==0,s
+          assert s["symbols_with_errors"] <= max(3,int(s["symbols_selected"]*.03)),s
+          print("SPOT_SHARD_OK",json.dumps(s))
+          PY
+      - name: Upload compressed shard data
+        uses: actions/upload-artifact@v4
+        with:
+          name: rank5-binance-spot-15m-5y-data-shard-${{ matrix.shard }}
+          path: rank5_binance_spot_15m_5y/*.csv.gz
+          retention-days: 30
+          compression-level: 0
+      - name: Upload shard manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: rank5-binance-spot-15m-5y-manifest-shard-${{ matrix.shard }}
+          path: rank5_binance_spot_15m_5y/manifest_shard_*.json
+          retention-days: 30
+          compression-level: 6
+
+  verify-all:
+    needs: collect
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check matrix result
+        env:
+          COLLECT_RESULT: ${{ needs.collect.result }}
+        run: |
+          echo "collect matrix result=$COLLECT_RESULT"
+          test "$COLLECT_RESULT" = "success"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: rank5-binance-spot-15m-5y-manifest-shard-*
+          path: manifests
+          merge-multiple: true
+      - name: Validate all manifests
+        run: |
+          python - <<'PY'
+          import json,glob
+          fs=glob.glob("manifests/manifest_shard_*.json")
+          assert len(fs)==12,fs
+          ms=[json.load(open(f))["summary"] for f in fs]
+          selected=sum(x["symbols_selected"] for x in ms)
+          withdata=sum(x["symbols_with_data"] for x in ms)
+          rows=sum(x["rows"] for x in ms)
+          errs=sum(x["symbols_with_errors"] for x in ms)
+          unaligned=sum(x["unaligned_total"] for x in ms)
+          assert selected>=100,(selected,withdata,rows,errs,unaligned)
+          assert withdata>=100,(selected,withdata,rows,errs,unaligned)
+          assert rows>1000000,(selected,withdata,rows,errs,unaligned)
+          assert unaligned==0,(selected,withdata,rows,errs,unaligned)
+          print("ALL_SPOT_SHARDS_OK",json.dumps({"selected":selected,"with_data":withdata,"rows":rows,"symbols_with_errors":errs,"unaligned":unaligned}))
+          PY
