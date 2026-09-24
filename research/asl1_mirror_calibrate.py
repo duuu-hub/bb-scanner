@@ -252,7 +252,23 @@ def main():
     print("=== META ===")
     print(json.dumps(meta,indent=2,ensure_ascii=False))
     print("\n=== TOP FINGERPRINT MATCHES ===")
-    print(close.head(40).to_string(index=False))\n\n    # Fresh directional diagnostic on the best-known fixed rule family.\n    # This is NOT claimed to reproduce historical ASL1.\n    fresh=[]\n    for vol_name in vol_masks(next(iter(frames.values()))).keys():\n        total=0\n        for s,x in frames.items():\n            v=vol_masks(x)[vol_name].fillna(False)\n            base=(x["below_lower15"].fillna(False)&x["below_mid1h"].fillna(False)&x["below_mid4h"].fillna(False)&(x["ret4h"]<=-2.0).fillna(False)&v)\n            trig=first_cross(x["below_lower15"]) & base\n            trig &= (x["dt"]>=START)&(x["dt"]<=END)\n            total += int(trig.sum())\n        fresh.append({"vol_def":vol_name,"raw_signals":total})\n    pd.DataFrame(fresh).to_csv(OUT/"fresh_rule_counts.csv",index=False)\n    print("\\n=== FRESH RULE COUNTS ===")\n    print(pd.DataFrame(fresh).to_string(index=False))
+    print(close.head(40).to_string(index=False))
+
+    # Fresh run marker: apply the known ASL1-like rule family to newly fetched data.
+    fresh=[]
+    for vol_name in vol_masks(next(iter(frames.values()))).keys():
+        total=0
+        for s,x in frames.items():
+            v=vol_masks(x)[vol_name].fillna(False)
+            base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) & x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
+            trig=first_cross(x["below_lower15"]) & base
+            trig &= (x["dt"]>=START) & (x["dt"]<=END)
+            total += int(trig.sum())
+        fresh.append({"vol_def":vol_name,"raw_signals":total})
+    fresh_df=pd.DataFrame(fresh)
+    fresh_df.to_csv(OUT/"fresh_rule_counts.csv",index=False)
+    print("\\n=== FRESH RULE COUNTS ===")
+    print(fresh_df.to_string(index=False))
 
 
 if __name__=="__main__":
