@@ -455,7 +455,60 @@ def main() -> None:
     ]
     print(val[["strategy", "n", "avg_pct", "pf", "mdd_pct", "mean_bootstrap_95_lo", "mean_bootstrap_95_hi"]].to_string(index=False))
 
-    print("\n=== DONCHIAN VOLUME INCREMENTAL CHECK @ 0.25% ===")
+
+    print("\n=== DIRECTION DIAGNOSTIC @ 0.25% ===")
+    direction_rows = []
+    tx = trades.copy()
+    tx["entry_dt"] = pd.to_datetime(tx["entry_ts"], utc=True)
+    for strategy in [x.name for x in CANDIDATES]:
+        for split_name, start, end in SPLITS:
+            base = tx.loc[tx["strategy"] == strategy].copy()
+            if start is not None:
+                base = base.loc[base["entry_dt"] >= start]
+            if end is not None:
+                base = base.loc[base["entry_dt"] < end]
+            for symbol_scope in (*SYMBOLS, "COMBINED"):
+                scope_df = base if symbol_scope == "COMBINED" else base.loc[base["symbol"] == symbol_scope]
+                for direction in ("LONG", "SHORT"):
+                    g = scope_df.loc[scope_df["direction"] == direction]
+                    vals = g["gross_pct"].to_numpy(dtype=float) - 0.25
+                    direction_rows.append({
+                        "strategy": strategy,
+                        "split": split_name,
+                        "scope": symbol_scope,
+                        "direction": direction,
+                        "n": len(vals),
+                        "avg_pct": vals.mean() if len(vals) else math.nan,
+                        "pf": pf(vals) if len(vals) else math.nan,
+                        "mdd_pct": max_drawdown(vals),
+                    })
+    direction_df = pd.DataFrame(direction_rows)
+    direction_df.to_csv(OUT_ROOT / "direction_cost025.csv", index=False)
+    diag = direction_df[
+        (direction_df["scope"] == "COMBINED")
+        & (direction_df["split"].isin(["VALIDATION", "HOLDOUT"]))
+    ]
+    print(diag.to_string(index=False))
+
+    print("\n=== YEARLY COMBINED DIRECTION @ 0.25% FOR NEAR-NEUTRAL FAMILIES ===")
+    yd = tx.loc[tx["strategy"].isin(["MOMENTUM_RVOL_1H", "DONCHIAN_TREND_4H"])].copy()
+    yd["year"] = yd["entry_dt"].dt.year
+    yrows = []
+    for (strategy, year, direction), g in yd.groupby(["strategy", "year", "direction"]):
+        vals = g["gross_pct"].to_numpy(dtype=float) - 0.25
+        yrows.append({
+            "strategy": strategy,
+            "year": int(year),
+            "direction": direction,
+            "n": len(vals),
+            "avg_pct": vals.mean(),
+            "pf": pf(vals),
+            "sum_pct": vals.sum(),
+        })
+    ydiag = pd.DataFrame(yrows).sort_values(["strategy", "year", "direction"])
+    ydiag.to_csv(OUT_ROOT / "yearly_direction_cost025.csv", index=False)
+    print(ydiag.to_string(index=False))
+\n    print("\n=== DONCHIAN VOLUME INCREMENTAL CHECK @ 0.25% ===")
     print(paired[["strategy", "split", "n", "avg_pct", "pf", "mdd_pct"]].to_string(index=False))
 
 
