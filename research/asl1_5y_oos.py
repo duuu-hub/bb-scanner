@@ -41,13 +41,13 @@ def signals(x,btcflat):
     m=cross & (x.open<x.basis1h) & (x.open<x.basis4h) & (x.ret4h<=-2) & (x.rvpre>x.rvmed)
     return np.flatnonzero((m & x.ts.map(btcflat).fillna(False).astype(bool)).to_numpy())
 
-def sim(x,idx,hh,sym):
+def sim(x,idx,hh,sym,side):
     out=[]; hb=hh*4
     for i in idx:
         ei=i+1
         if ei>=len(x): continue
         e=float(x.open.iloc[ei]); last=min(ei+hb-1,len(x)-1); px=float(x.close.iloc[last]); reason="TIME"; ex=last
-        tp=e*(1-TP); sl=e*(1+SL)
+        tp=e*(1-TP) if side=="SHORT" else e*(1+TP); sl=e*(1+SL) if side=="SHORT" else e*(1-SL)
         for j in range(ei,last+1):
             hi=float(x.high.iloc[j]); lo=float(x.low.iloc[j])
             if hi>=sl: px=sl; reason="SL"; ex=j; break
@@ -64,17 +64,17 @@ rows=[]
 for k,p in enumerate(files,1):
     try:
         x=feat(load(p)); idx=signals(x,btcflat)
-        for hh in HOLDS: rows.extend(sim(x,idx,hh,p.name[:-7]))
+        for hh in HOLDS:\n            for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side))
         print(f"[{k}/{len(files)}] {p.name} sig={len(idx)}",flush=True)
     except Exception as e: print("ERR",p,e,flush=True)
-t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","net_ret","reason"]); t.to_csv(OUT/"trades.csv",index=False)
+t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason"]); t.to_csv(OUT/"trades.csv",index=False)
 def stat(g):
     r=g.net_ret.astype(float); gp=r[r>0].sum(); gl=-r[r<0].sum(); eq=(1+r).cumprod(); dd=eq/eq.cummax()-1
     return pd.Series({"trades":len(g),"win_rate_pct":(r>0).mean()*100,"avg_net_pct":r.mean()*100,"PF":gp/gl if gl>0 else np.inf,"sum_net_pct":r.sum()*100,"trade_seq_MDD_pct":dd.min()*100})
-allstats=t.groupby("hold_h").apply(stat,include_groups=False).reset_index(); allstats.to_csv(OUT/"overall.csv",index=False)
+allstats=t.groupby(["side","hold_h"]).apply(stat,include_groups=False).reset_index(); allstats.to_csv(OUT/"overall.csv",index=False)
 t["year"]=pd.to_datetime(t.entry_dt,utc=True).dt.year
-yr=t.groupby(["hold_h","year"]).apply(stat,include_groups=False).reset_index(); yr.to_csv(OUT/"yearly.csv",index=False)
-ss=t.groupby(["hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["hold_h","sum_net_pct"],ascending=[True,False]); ss.to_csv(OUT/"symbols.csv",index=False)
+yr=t.groupby(["side","hold_h","year"]).apply(stat,include_groups=False).reset_index(); yr.to_csv(OUT/"yearly.csv",index=False)
+ss=t.groupby(["side","hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["side","hold_h","sum_net_pct"],ascending=[True,True,False]); ss.to_csv(OUT/"symbols.csv",index=False)
 print("\n=== OVERALL ===\n"+allstats.to_string(index=False)); print("\n=== YEARLY ===\n"+yr.to_string(index=False))
 print("\n=== TOP/BOTTOM SYMBOLS ===")
 for h in HOLDS:
