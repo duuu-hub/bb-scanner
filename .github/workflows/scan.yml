@@ -3,8 +3,9 @@ name: Bitget BB Scanner + LONG3 Demo
 on:
   workflow_dispatch:
   schedule:
-    # Active only when this workflow is on the default branch.
-    # Wake about 10 minutes before each 15-minute boundary; scanner aligns itself.
+    # Heartbeat only. The active job stays alive for 16 quarter-hour boundaries
+    # (~4 hours). While it runs, newer scheduled events remain pending under
+    # the same concurrency group and provide a ready handoff job.
     - cron: '5,20,35,50 * * * *'
 
 permissions:
@@ -15,11 +16,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  scan-and-demo:
+  four-hour-watcher:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A queued heartbeat may have been created hours earlier. Always
+          # start the watcher from the latest default-branch state.
+          ref: main
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -27,59 +33,18 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Scan Bitget
+      - name: Run LONG3 four-hour watcher
         env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           RE_ALERT_PRICE_MOVE_PCT: '5.0'
-        run: python scanner.py
-
-      - name: Build deduplicated LONG3 order signals
-        run: python long3_signal_adapter.py
-
-      - name: Run Demo trader immediately after scan
-        env:
-          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
-          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
-          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python auto_trader.py
-
-      - name: Finalize three-minute Maker window
-        env:
-          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
-          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
-          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          LONG3_STATE_BRANCH: main
         run: |
-          if python - <<'PY'
-          import json, pathlib, sys
-          p = pathlib.Path("state/trading_state.json")
-          data = json.loads(p.read_text()) if p.exists() else {}
-          sys.exit(0 if data.get("pending_entries") else 1)
-          PY
-          then
-            echo "Maker order pending; waiting 185 seconds for the 3-minute fill window."
-            sleep 185
-            python auto_trader.py
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            python long3_watcher.py --cycles 1 --manual-immediate
           else
-            echo "No Maker order pending; no wait needed."
+            python long3_watcher.py --cycles 16
           fi
-
-      - name: Persist scanner, signal, trading state and audit logs
-        run: |
-          paths="state.json paper_signals.csv scan_runtime.json signals/pending.jsonl state/trading_state.json logs/executions.jsonl"
-          if [ -z "$(git status --porcelain -- $paths)" ]; then
-            echo 'No forward-state changes.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for p in $paths; do
-            if [ -e "$p" ]; then git add "$p"; fi
-          done
-          git commit -m 'chore: persist LONG3 forward state'
-          git pull --rebase origin "$GITHUB_REF_NAME"
-          git push
