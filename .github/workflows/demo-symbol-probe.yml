@@ -34,8 +34,10 @@ jobs:
 
           client = BitgetDemoClassic()
           path = "/api/v2/mix/market/contracts"
-          for symbol in ("BTCUSDT", "PLUMEUSDT", "CHRUSDT"):
-              params = {"productType": "usdt-futures", "symbol": symbol}
+          for symbol in (None, "BTCUSDT", "PLUMEUSDT", "CHRUSDT"):
+              params = {"productType": "usdt-futures"}
+              if symbol:
+                  params["symbol"] = symbol
               query = urlencode(params)
               r = client.session.get(
                   BASE_URL + path,
@@ -49,7 +51,7 @@ jobs:
                   p = {"raw": r.text[:500]}
               data = p.get("data") if isinstance(p, dict) else None
               print({
-                  "symbol": symbol,
+                  "symbol": symbol or "ALL",
                   "http": r.status_code,
                   "code": p.get("code") if isinstance(p, dict) else None,
                   "msg": p.get("msg") if isinstance(p, dict) else None,
