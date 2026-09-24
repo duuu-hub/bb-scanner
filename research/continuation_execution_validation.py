@@ -117,4 +117,46 @@ def portfolio_study(d):
  print("\n=== POSITION SIZING ==="); print(pd.DataFrame(rows).to_string(index=False))
 
 
-if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz"))
+
+
+SLOTS=[5,10,15,20]
+def slot_study(d):
+ base=d[d.delay_bars==0].copy()
+ rows=[]
+ for keys,z in base.groupby(["side","tp","sl","horizon_h"]):
+  z=z.sort_values(["signal_ts","symbol"]).copy()
+  # same-symbol one-position-at-a-time first; preserve chronological opportunities
+  accepted=[]; open_until={}
+  for r in z.itertuples():
+   if open_until.get(r.symbol,-1)>=r.entry_ts: continue
+   accepted.append(r); open_until[r.symbol]=r.exit_ts
+  a=pd.DataFrame([r._asdict() for r in accepted])
+  if a.empty: continue
+  for slots in SLOTS:
+   # equal fixed slot allocation = 1/slots of initial equity per open trade
+   alloc=1.0/slots; cash=1.0; active={}; peak=1.0; mdd=0.; taken=0; missed=0; max_open=0
+   # rank simultaneous candidates by frozen-rule continuation strength proxies:
+   # SHORT: larger rv24, rv4 and more-negative ret24; LONG: larger rv24/accel and deeper pullback.
+   events=sorted(set(a.entry_ts.tolist()+a.exit_ts.tolist()))
+   by_entry={t:g.copy() for t,g in a.groupby("entry_ts")}; by_exit={t:g for t,g in a.groupby("exit_ts")}
+   for t in events:
+    if t in by_exit:
+     for r in by_exit[t].itertuples():
+      k=(r.symbol,r.entry_ts)
+      if k in active:
+       stake=active.pop(k); cash += stake*(1+(r.gross_ret_pct-0.20)/100)
+    if t in by_entry:
+     g=by_entry[t]
+     # deterministic ranking; strongest absolute realized pre-entry signal cannot be reconstructed
+     # from trade rows, so use stable ordering here. Slot-count impact is the target of this pass.
+     for r in g.sort_values("symbol").itertuples():
+      if len(active)>=slots or cash+1e-12<alloc: missed+=1; continue
+      cash-=alloc; active[(r.symbol,r.entry_ts)]=alloc; taken+=1
+    eq=cash+sum(active.values()); peak=max(peak,eq); mdd=min(mdd,(eq/peak-1)*100); max_open=max(max_open,len(active))
+   final=cash+sum(active.values())
+   rows.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],slots=slots,
+    position_size_pct=100/slots,available_signals=len(a),taken= taken,missed=missed,
+    capture_rate_pct=100*taken/len(a),max_open=max_open,total_return_pct=(final-1)*100,mdd_pct=mdd))
+ out=pd.DataFrame(rows); out.to_csv(OUT/"slot_study.csv",index=False)
+ print("\n=== SLOT STUDY ==="); print(out.to_string(index=False))
+\nif __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz"))
