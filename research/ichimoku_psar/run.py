@@ -12,7 +12,12 @@ for p in pd.period_range("2021-09","2026-08",freq="M"):
     frames.append(d)
 df=pd.concat(frames,ignore_index=True)
 for c in ["open","high","low","close"]: df[c]=pd.to_numeric(df[c])
-df["time"]=pd.to_datetime(df.ts,unit="ms")
+# Binance archive timestamps may be milliseconds or microseconds depending on archive vintage.
+ts=pd.to_numeric(df.ts)
+df["time"]=pd.NaT
+ms=ts < 10**14
+df.loc[ms,"time"]=pd.to_datetime(ts[ms],unit="ms")
+df.loc[~ms,"time"]=pd.to_datetime(ts[~ms],unit="us")
 hi,lo,cl=df.high,df.low,df.close
 ten=(hi.rolling(9).max()+lo.rolling(9).min())/2
 kij=(hi.rolling(26).max()+lo.rolling(26).min())/2
