@@ -92,20 +92,26 @@ Expected behavior is automatic generation handoff:
 
 If this behavior is not true, treat it as an operational bug and fix it before further runtime changes.
 
-## 8. Demo execution universe
+## 8. Signal universe vs Demo execution universe
 
-The LONG3 Demo execution path must use the authenticated Bitget Demo contract
-catalog, not the much larger live/public futures catalog.
+The canonical LONG3 signal scanner must use the normal live/public crypto
+USDT-perpetual universe so forward signals remain comparable with research and
+with the future real-account deployment environment.
 
-- Keep `LONG3_DEMO_UNIVERSE_ONLY=1` in the live LONG3 watcher workflow.
-- Do not feed live-only symbols into Demo order placement.
-- If the Demo contract catalog cannot be resolved, fail closed instead of
-  falling back to the live universe.
-- Keep broad-universe research/backtests separate from the executable Demo
-  scanner so research breadth does not add order latency.
+Bitget Demo supports only a subset of that universe, so Demo availability is an
+execution capability filter, not a signal-generation filter.
+
+- Do not restrict the canonical LONG3 scanner to the Demo-only symbol catalog.
+- Generate and shadow-track LONG3 signals from the full live/public crypto
+  USDT-perpetual universe.
+- Before sending an order, the Demo executor must validate the symbol against
+  the authenticated Bitget Demo contract catalog.
+- A live-only signal that Demo cannot trade must be recorded as
+  `DEMO_SYMBOL_UNSUPPORTED` (shadow/counterfactual only), not hidden from the
+  signal sample and not retried later as STALE.
+- If the Demo contract catalog cannot be resolved, fail closed for orders.
 - Do not loosen LONG3 entry ranges or TTL to compensate for scanner latency;
-  fix execution latency first.
+  solve latency separately without shrinking the canonical signal universe.
 
-This rule exists because Bitget Demo exposes a materially smaller orderable
-symbol set than the live/public futures catalog. Scanning live-only symbols in
-the execution path both wastes time and produces orders that Demo rejects.
+This separation keeps the forward-research environment aligned with eventual
+real trading while respecting the smaller Demo orderable universe.
