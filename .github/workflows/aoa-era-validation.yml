@@ -1,0 +1,33 @@
+name: AOA Era Validation
+
+on:
+  push:
+    branches: [research-aoa-era-validation]
+    paths:
+      - "research/aoa_era_validation/**"
+      - ".github/workflows/aoa-era-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt scikit-learn
+      - run: python -m py_compile research/aoa_era_validation/validate_era.py
+      - run: python research/aoa_era_validation/validate_era.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aoa-era-validation-results
+          path: research/aoa_era_validation/output/
+          if-no-files-found: error
+          retention-days: 30
