@@ -1,0 +1,186 @@
+from __future__ import annotations
+
+import io, math, time, zipfile
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import requests
+
+OUT=Path("research_output/btc_eth_regime_stage8_year_anatomy")
+SYMS=("BTCUSDT","ETHUSDT")
+BASE="https://data.binance.vision/data/spot/monthly/klines"
+START=pd.Timestamp("2017-08-01",tz="UTC")
+END=pd.Timestamp("2026-08-01",tz="UTC")
+WIN=30
+ER_T=0.193654
+RT=0.25
+
+def months(a,b):
+    x=a
+    while x<=b:
+        yield x
+        x=x+pd.offsets.MonthBegin(1)
+
+def todt(v):
+    z=pd.to_numeric(v,errors="coerce")
+    ms=np.where(z>1e14,z/1000,z)
+    return pd.to_datetime(ms,unit="ms",utc=True,errors="coerce")
+
+def load(sym):
+    cols=["open_time","open","high","low","close","volume","close_time","quote_volume","trades","taker_buy_base","taker_buy_quote","ignore"]
+    s=requests.Session(); s.headers.update({"User-Agent":"bb-stage8/1"})
+    fs=[]
+    for m in months(START,END):
+        ym=m.strftime("%Y-%m"); name=f"{sym}-1d-{ym}.zip"
+        r=s.get(f"{BASE}/{sym}/1d/{name}",timeout=30)
+        if r.status_code==404: continue
+        r.raise_for_status()
+        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+            mem=[q for q in z.namelist() if q.endswith(".csv")]
+            if mem:
+                with z.open(mem[0]) as fh:
+                    fs.append(pd.read_csv(fh,header=None,names=cols))
+        time.sleep(.003)
+    x=pd.concat(fs,ignore_index=True)
+    x["datetime_utc"]=todt(x["open_time"])
+    for c in ("open","high","low","close","volume","quote_volume"):
+        x[c]=pd.to_numeric(x[c],errors="coerce")
+    return x.dropna(subset=["datetime_utc","open","close"]).drop_duplicates("datetime_utc").sort_values("datetime_utc").reset_index(drop=True)
+
+def panel(data):
+    ps={}
+    for s in SYMS:
+        d=data[s][["datetime_utc","open","high","low","close","quote_volume"]].copy()
+        c=d["close"]
+        d[f"{s}_ret1d"]=c.pct_change()*100
+        d[f"{s}_fwd1d"]=c.pct_change().shift(-1)*100
+        d[f"{s}_ret30"]=c/c.shift(WIN)-1
+        path=c.diff().abs().rolling(WIN,min_periods=15).sum()
+        d[f"{s}_er30"]=(c-c.shift(WIN)).abs()/path.replace(0,np.nan)
+        d[f"{s}_rv30"]=d[f"{s}_ret1d"].rolling(WIN,min_periods=15).std(ddof=0)*math.sqrt(365)
+        d[f"{s}_dd90"]=c/c.shift(1).rolling(90,min_periods=30).max()-1
+        d=d.rename(columns={"open":f"{s}_open","close":f"{s}_close"})
+        ps[s]=d.drop(columns=["high","low","quote_volume"])
+    x=ps["BTCUSDT"].merge(ps["ETHUSDT"],on="datetime_utc",how="inner")
+    x["agree_up"]=(x["BTCUSDT_ret30"]>0)&(x["ETHUSDT_ret30"]>0)
+    x["market_er"]=(x["BTCUSDT_er30"]+x["ETHUSDT_er30"])/2
+    x["active"]=(x["agree_up"]&(x["market_er"]>=ER_T)).astype(int)
+    x["trend30_avg"]=(x["BTCUSDT_ret30"]+x["ETHUSDT_ret30"])/2
+    x["trend30_min"]=np.minimum(x["BTCUSDT_ret30"],x["ETHUSDT_ret30"])
+    x["trend30_gap"]=(x["BTCUSDT_ret30"]-x["ETHUSDT_ret30"]).abs()
+    x["rv30_avg"]=(x["BTCUSDT_rv30"]+x["ETHUSDT_rv30"])/2
+    x["dd90_avg"]=(x["BTCUSDT_dd90"]+x["ETHUSDT_dd90"])/2
+    x["btc_eth_corr30"]=x["BTCUSDT_ret1d"].rolling(30,min_periods=15).corr(x["ETHUSDT_ret1d"])
+    x["both_up_next"]=((x["BTCUSDT_fwd1d"]>0)&(x["ETHUSDT_fwd1d"]>0)).astype(int)
+    x["both_down_next"]=((x["BTCUSDT_fwd1d"]<0)&(x["ETHUSDT_fwd1d"]<0)).astype(int)
+    x["split_next"]=1-x["both_up_next"]-x["both_down_next"]
+
+    # next-day open->close execution for the long-only candidate
+    p=x["active"].shift(1).fillna(0.0)
+    intr=((x["BTCUSDT_close"]/x["BTCUSDT_open"]-1)+(x["ETHUSDT_close"]/x["ETHUSDT_open"]-1))*50
+    turn=p.diff().abs().fillna(p.abs())
+    x["strategy_ret"]=p*intr-turn*(RT/2)
+    x["position"]=p
+    return x
+
+def perf(a):
+    a=np.asarray(a,float); a=a[np.isfinite(a)]
+    if len(a)==0:return {}
+    w=np.prod(1+a/100); yrs=len(a)/365.25
+    curve=np.cumprod(1+a/100); full=np.r_[1.,curve]; dd=(full/np.maximum.accumulate(full)-1)*100
+    sd=np.std(a)
+    return {"return_pct":(w-1)*100,"sharpe":np.mean(a)/sd*math.sqrt(365.25) if sd>0 else math.nan,"mdd_pct":float(dd.min())}
+
+def episodes(x):
+    rows=[]; p=x["position"].to_numpy(); start=None
+    for i in range(len(p)):
+        if p[i]==1 and (i==0 or p[i-1]==0): start=i
+        if start is not None and (p[i]==0 or i==len(p)-1):
+            end=i-1 if p[i]==0 else i
+            g=x.iloc[start:end+1]
+            vals=g["strategy_ret"].to_numpy(float)
+            wealth=np.prod(1+vals/100)
+            rows.append({
+                "entry":g["datetime_utc"].iloc[0],"exit":g["datetime_utc"].iloc[-1],
+                "year":int(g["datetime_utc"].iloc[0].year),
+                "days":len(g),"ret_pct":(wealth-1)*100,
+                "start_trend30":float(g["trend30_avg"].iloc[0]),
+                "start_er":float(g["market_er"].iloc[0]),
+                "start_gap":float(g["trend30_gap"].iloc[0]),
+            })
+            start=None
+    return pd.DataFrame(rows)
+
+def main():
+    OUT.mkdir(parents=True,exist_ok=True)
+    data={s:load(s) for s in SYMS}
+    x=panel(data)
+    e=episodes(x)
+    e.to_csv(OUT/"episodes.csv",index=False)
+
+    rows=[]
+    for year,g in x.groupby(x["datetime_utc"].dt.year):
+        if year<2018: continue
+        pg=perf(g["strategy_ret"].to_numpy(float))
+        ag=g[g["position"]==1]
+        eg=e[e["year"]==year]
+        btc_y=(g["BTCUSDT_close"].iloc[-1]/g["BTCUSDT_close"].iloc[0]-1)*100
+        eth_y=(g["ETHUSDT_close"].iloc[-1]/g["ETHUSDT_close"].iloc[0]-1)*100
+        rows.append({
+            "year":int(year),
+            **pg,
+            "btc_year_pct":btc_y,
+            "eth_year_pct":eth_y,
+            "active_day_pct":float((g["position"]==1).mean()*100),
+            "episodes":len(eg),
+            "episode_win_pct":float((eg["ret_pct"]>0).mean()*100) if len(eg) else math.nan,
+            "episode_mean_pct":float(eg["ret_pct"].mean()) if len(eg) else math.nan,
+            "episode_median_pct":float(eg["ret_pct"].median()) if len(eg) else math.nan,
+            "episode_median_days":float(eg["days"].median()) if len(eg) else math.nan,
+            "best_episode_pct":float(eg["ret_pct"].max()) if len(eg) else math.nan,
+            "worst_episode_pct":float(eg["ret_pct"].min()) if len(eg) else math.nan,
+            "active_trend30_avg":float(ag["trend30_avg"].mean()) if len(ag) else math.nan,
+            "active_trend30_min_avg":float(ag["trend30_min"].mean()) if len(ag) else math.nan,
+            "active_er_avg":float(ag["market_er"].mean()) if len(ag) else math.nan,
+            "active_gap_avg":float(ag["trend30_gap"].mean()) if len(ag) else math.nan,
+            "active_rv30_avg":float(ag["rv30_avg"].mean()) if len(ag) else math.nan,
+            "active_corr30_avg":float(ag["btc_eth_corr30"].mean()) if len(ag) else math.nan,
+            "active_dd90_avg":float(ag["dd90_avg"].mean()) if len(ag) else math.nan,
+            "next_both_up_pct":float(ag["both_up_next"].mean()*100) if len(ag) else math.nan,
+            "next_both_down_pct":float(ag["both_down_next"].mean()*100) if len(ag) else math.nan,
+            "next_split_pct":float(ag["split_next"].mean()*100) if len(ag) else math.nan,
+            "churn_per_100_active_days":float(len(eg)/max(len(ag),1)*100),
+        })
+    y=pd.DataFrame(rows)
+    y["outcome"]="WIN" 
+    y.loc[y["return_pct"]<0,"outcome"]="LOSS"
+    y.to_csv(OUT/"yearly_anatomy.csv",index=False)
+
+    compare=[]
+    feats=[
+        "btc_year_pct","eth_year_pct","active_day_pct","episodes","episode_win_pct",
+        "episode_mean_pct","episode_median_days","active_trend30_avg","active_er_avg",
+        "active_gap_avg","active_rv30_avg","active_corr30_avg","active_dd90_avg",
+        "next_both_up_pct","next_both_down_pct","next_split_pct","churn_per_100_active_days"
+    ]
+    for f in feats:
+        w=y[y["outcome"]=="WIN"][f].dropna()
+        l=y[y["outcome"]=="LOSS"][f].dropna()
+        compare.append({
+            "feature":f,
+            "win_mean":float(w.mean()) if len(w) else math.nan,
+            "loss_mean":float(l.mean()) if len(l) else math.nan,
+            "difference_win_minus_loss":float(w.mean()-l.mean()) if len(w) and len(l) else math.nan,
+        })
+    c=pd.DataFrame(compare)
+    c.to_csv(OUT/"win_loss_compare.csv",index=False)
+
+    print("=== YEARLY ANATOMY ===")
+    print(y.to_string(index=False))
+    print("\n=== WIN VS LOSS ===")
+    print(c.to_string(index=False))
+    print("\n=== LOSING YEAR EPISODES ===")
+    print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
+
+if __name__=="__main__":
+    main()
