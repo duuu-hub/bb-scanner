@@ -4,7 +4,6 @@ on:
     branches: [research-core-portfolio-5y]
     paths:
       - 'research/core_three_way_5y.py'
-      - '.github/workflows/core-three-way-5y.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,6 +31,7 @@ jobs:
           test -f canonical_um/BTCUSDT.parquet
       - name: Compare frozen core versions and capital allocation
         run: |
+          mkdir -p artifacts
           set -o pipefail
           python research/core_three_way_5y.py 2>&1 | tee artifacts/run.log
       - uses: actions/upload-artifact@v4
