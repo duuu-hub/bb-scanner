@@ -27,7 +27,7 @@ def list_prefix(prefix, delimiter=None):
         if not trunc:break
         token=root.findtext("s3:NextContinuationToken",namespaces=ns)
 def symbols():
-    pref="data/spot/monthly/klines/"
+    pref=f"data/{'spot' if MARKET=='spot' else 'futures/um'}/monthly/klines/"
     out=[]
     for typ,val in list_prefix(pref,"/"):
         if typ!="prefix":continue
@@ -35,7 +35,7 @@ def symbols():
         if sym.endswith("USDT") and not any(x in sym for x in ("UPUSDT","DOWNUSDT","BULLUSDT","BEARUSDT")): out.append(sym)
     return sorted(set(out))
 def month_files(sym,interval,start_ym):
-    pref=f"data/spot/monthly/klines/{sym}/{interval}/"
+    pref=f"data/{'spot' if MARKET=='spot' else 'futures/um'}/monthly/klines/{sym}/{interval}/"
     for typ,key in list_prefix(pref):
         if typ!="key" or not key.endswith(".zip") or key.endswith(".CHECKSUM"):continue
         name=key.rsplit("/",1)[-1]
@@ -48,9 +48,9 @@ def read_zip(key):
         names=[n for n in z.namelist() if n.endswith(".csv")]
         if not names:return []
         return list(csv.reader(io.TextIOWrapper(z.open(names[0]),encoding="utf-8")))
-def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--years",type=int,default=5); ap.add_argument("--interval",default="1d"); ap.add_argument("--out",default="research/mega_runner/data/binance_spot_1d"); ap.add_argument("--max-symbols",type=int,default=0); a=ap.parse_args()
-    out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
+def main():\n    global MARKET
+    ap=argparse.ArgumentParser(); ap.add_argument("--years",type=int,default=5); ap.add_argument("--interval",default="1d"); ap.add_argument("--market",choices=["spot","um"],default="spot"); ap.add_argument("--out",default=None); ap.add_argument("--max-symbols",type=int,default=0); a=ap.parse_args()
+    a.out=a.out or f"research/mega_runner/data/binance_{a.market}_{a.interval}"; out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
     now=datetime.now(timezone.utc); y=now.year-a.years; start_ym=f"{y:04d}-{now.month:02d}"
     syms=symbols(); syms=syms[:a.max_symbols] if a.max_symbols else syms
     manifest=[]
