@@ -1,6 +1,6 @@
 from pathlib import Path
 import pandas as pd, numpy as np
-from research.long3_5y_regime import signals
+from long3_5y_regime import signals
 Path("parity_results").mkdir(exist_ok=True)
 orig=pd.read_csv("original_signals.csv")
 lo,hi=int(orig.ts.min()),int(orig.ts.max())
