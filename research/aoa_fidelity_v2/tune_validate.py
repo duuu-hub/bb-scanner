@@ -25,7 +25,8 @@ COSTS={"ZERO":0.0,"LOW_RT_004":0.0004/2}
 def fit_behavior_calibration():
     p=pd.read_csv(POLICY)
     p=p[p["t"] < int(pd.Timestamp("2021-01-01",tz="UTC").timestamp())].copy()
-    p["year"]=pd.to_datetime(p["t"],unit="s",utc=True).dt.year\n    p=p[p["year"].isin([2019,2020])].copy()
+    p["year"]=pd.to_datetime(p["t"],unit="s",utc=True).dt.year
+    p=p[p["year"].isin([2019,2020])].copy()
     p["atr"]=pd.to_numeric(p["atr14_pct"],errors="coerce")
     p["fav_atr"]=p["fav"]/p["atr"]
     for h in ["signed_ret1h","signed_ret4h","signed_ret24h"]:
