@@ -1,8 +1,11 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+import scanner
 from signal_io import load_signal_jsonl, signal_from_dict
 from trade_state import load_trading_state, save_trading_state
 
@@ -59,6 +62,39 @@ class RuntimePlumbingTests(unittest.TestCase):
             self.assertEqual(len(reread["processed_signal_ids"]), 5000)
             self.assertEqual(reread["processed_signal_ids"][-1], "5099")
             self.assertEqual(reread["pending_entries"][0]["signal_id"], "maker-1")
+
+    def test_demo_scanner_universe_uses_authenticated_demo_catalog(self):
+        demo_contracts = [
+            {
+                "symbol": "BTCUSDT",
+                "symbolType": "perpetual",
+                "symbolStatus": "normal",
+                "quoteCoin": "USDT",
+                "isRwa": "NO",
+            },
+            {
+                "symbol": "rAAPLUSDT",
+                "symbolType": "perpetual",
+                "symbolStatus": "normal",
+                "quoteCoin": "USDT",
+                "isRwa": "YES",
+            },
+        ]
+        with patch.dict(os.environ, {"LONG3_DEMO_UNIVERSE_ONLY": "1"}, clear=False):
+            with patch("bitget_demo_lifecycle_test.BitgetDemoClassic") as client_cls:
+                client_cls.return_value.private_get.return_value = demo_contracts
+                self.assertEqual(scanner.get_symbols(), ["BTCUSDT"])
+                client_cls.return_value.private_get.assert_called_once_with(
+                    "/api/v2/mix/market/contracts",
+                    {"productType": "usdt-futures"},
+                )
+
+    def test_demo_scanner_universe_fails_closed_when_empty(self):
+        with patch.dict(os.environ, {"LONG3_DEMO_UNIVERSE_ONLY": "1"}, clear=False):
+            with patch("bitget_demo_lifecycle_test.BitgetDemoClassic") as client_cls:
+                client_cls.return_value.private_get.return_value = []
+                with self.assertRaises(RuntimeError):
+                    scanner.get_symbols()
 
 
 if __name__ == "__main__":
