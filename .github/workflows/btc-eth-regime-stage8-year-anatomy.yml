@@ -1,0 +1,37 @@
+name: BTC ETH Regime Stage8 Year Anatomy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-btc-eth-core
+    paths:
+      - "research/btc_eth_regime_stage8_year_anatomy.py"
+      - ".github/workflows/btc-eth-regime-stage8-year-anatomy.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements-backtest.txt
+      - name: Syntax
+        run: python -m py_compile research/btc_eth_regime_stage8_year_anatomy.py
+      - name: Run
+        run: python research/btc_eth_regime_stage8_year_anatomy.py
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-eth-regime-stage8-year-anatomy
+          path: research_output/btc_eth_regime_stage8_year_anatomy/
+          if-no-files-found: error
