@@ -108,10 +108,7 @@ def combo_table(df,label,singles):
 def main():
  a=args(); out=Path(a.outdir); out.mkdir(parents=True,exist_ok=True)
  d=load(a.root)
- d=d.groupby("symbol",group_keys=False).apply(add_features,include_groups=False).reset_index()
- # restore symbol if pandas dropped grouping key
- if "symbol" not in d.columns:
-  raise SystemExit("symbol lost during feature build")
+ d=pd.concat([add_features(g) for _,g in d.groupby("symbol",sort=False)],ignore_index=True)
  # point-in-time market context
  ctx=d[["timestamp_ms","symbol","ret_1h","ret_4h"]].copy()
  agg=ctx.groupby("timestamp_ms").agg(
