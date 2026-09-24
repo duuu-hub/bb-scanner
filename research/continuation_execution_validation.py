@@ -68,4 +68,52 @@ def main():
    rob.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],excluded=exsym,**stats(zz,0.20)))
  pd.DataFrame(rob).to_csv(OUT/"symbol_robustness.csv",index=False)
  print("\n=== SYMBOL ROBUSTNESS ==="); print(pd.DataFrame(rob).to_string(index=False))
-if __name__=="__main__": main()
+
+
+# Portfolio sizing / overlap study: preserve every cross-symbol opportunity while
+# suppressing duplicate same-symbol entries during an already-open position.
+SIZES=[0.02,0.03,0.04,0.05,0.075,0.10,0.125,0.15,0.20,0.25]
+def portfolio_study(d):
+ rows=[]; overlap=[]
+ base=d[d.delay_bars==0].copy()
+ for keys,z in base.groupby(["side","tp","sl","horizon_h"]):
+  z=z.sort_values(["signal_ts","symbol"]).copy()
+  accepted=[]; open_until={}; same_open=0; total=0
+  for r in z.itertuples():
+   total+=1
+   if open_until.get(r.symbol,-1)>=r.entry_ts:
+    same_open+=1; continue
+   accepted.append(r)
+   open_until[r.symbol]=r.exit_ts
+  a=pd.DataFrame([r._asdict() for r in accepted])
+  overlap.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],
+   raw_signals=total,accepted_signals=len(a),same_symbol_while_open=same_open,
+   same_symbol_while_open_pct=100*same_open/total if total else 0))
+  if a.empty: continue
+  for size in SIZES:
+   cash=1.0; positions=[]; peak=1.0; mdd=0.; rejected=0; max_open=0
+   events=sorted(set(a.entry_ts.tolist()+a.exit_ts.tolist()))
+   by_entry={t:g for t,g in a.groupby("entry_ts")}; by_exit={t:g for t,g in a.groupby("exit_ts")}
+   active={}
+   for t in events:
+    if t in by_exit:
+     for r in by_exit[t].itertuples():
+      k=(r.symbol,r.entry_ts)
+      if k in active:
+       alloc=active.pop(k); cash += alloc*(1+(r.gross_ret_pct-0.20)/100)
+    if t in by_entry:
+     for r in by_entry[t].itertuples():
+      alloc=size
+      if cash+1e-12 < alloc: rejected+=1; continue
+      cash-=alloc; active[(r.symbol,r.entry_ts)]=alloc
+    eq=cash+sum(active.values()); peak=max(peak,eq); mdd=min(mdd,(eq/peak-1)*100); max_open=max(max_open,len(active))
+   final=cash+sum(active.values())
+   rows.append(dict(side=keys[0],tp=keys[1],sl=keys[2],horizon_h=keys[3],
+    position_size_pct=size*100,accepted_signals=len(a),rejected_for_capital=rejected,
+    max_simultaneous_positions=max_open,total_return_pct=(final-1)*100,mdd_pct=mdd))
+ pd.DataFrame(overlap).to_csv(OUT/"overlap_summary.csv",index=False)
+ pd.DataFrame(rows).to_csv(OUT/"position_sizing.csv",index=False)
+ print("\n=== OVERLAP SUMMARY ==="); print(pd.DataFrame(overlap).to_string(index=False))
+ print("\n=== POSITION SIZING ==="); print(pd.DataFrame(rows).to_string(index=False))
+
+\nif __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz"))
