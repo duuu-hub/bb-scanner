@@ -263,7 +263,7 @@ def bitget_15m_exec_test(raw15: dict[str,pd.DataFrame], delay_minutes: int, rt_c
     return out
 
 
-def 15m_period_summary(ret: pd.Series, name: str) -> list[dict]:
+def fifteen_min_period_summary(ret: pd.Series, name: str) -> list[dict]:
     rows=[]
     for period,start,end in PERIODS:
         if period=="BACKWARD_2017_2019":
@@ -353,10 +353,10 @@ def main() -> None:
     intraday_rows=[]
     for delay in (0,15,60,240):
         ret=bitget_15m_exec_test(raw15,delay,BASE_RT_COST_PCT,0.0)
-        intraday_rows.extend(15m_period_summary(ret,f"BITGET_DELAY_{delay}M"))
+        intraday_rows.extend(fifteen_min_period_summary(ret,f"BITGET_DELAY_{delay}M"))
     for carry in (0.01,0.03):
         ret=bitget_15m_exec_test(raw15,15,BASE_RT_COST_PCT,carry)
-        intraday_rows.extend(15m_period_summary(ret,f"BITGET_DELAY15M_CARRY_{carry:.2f}D"))
+        intraday_rows.extend(fifteen_min_period_summary(ret,f"BITGET_DELAY15M_CARRY_{carry:.2f}D"))
     intraday=pd.DataFrame(intraday_rows)
     intraday.to_csv(OUT_ROOT/"bitget_15m_execution_stress.csv",index=False)
 
