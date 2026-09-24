@@ -76,13 +76,12 @@ allstats=t.groupby(["side","hold_h"]).apply(stat,include_groups=False).reset_ind
 t["year"]=pd.to_datetime(t.entry_dt,utc=True).dt.year
 yr=t.groupby(["side","hold_h","year"]).apply(stat,include_groups=False).reset_index(); yr.to_csv(OUT/"yearly.csv",index=False)
 ss=t.groupby(["side","hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["side","hold_h","sum_net_pct"],ascending=[True,True,False]); ss.to_csv(OUT/"symbols.csv",index=False)
-print("
-=== OVERALL ===
-"+allstats.to_string(index=False)); print("
-=== YEARLY ===
-"+yr.to_string(index=False))
-print("
-=== TOP/BOTTOM SYMBOLS ===")
+print("=== OVERALL ===")
+print(allstats.to_string(index=False))
+print("=== YEARLY ===")
+print(yr.to_string(index=False))
+print("=== TOP/BOTTOM SYMBOLS ===")
 for h in HOLDS:
- q=ss[ss.hold_h==h]; print("
-HOLD",h); print(pd.concat([q.head(10),q.tail(10)]).to_string(index=False))
+    q=ss[ss.hold_h==h]
+    print("HOLD",h)
+    print(pd.concat([q.head(10),q.tail(10)]).to_string(index=False))
