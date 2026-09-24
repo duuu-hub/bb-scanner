@@ -105,11 +105,7 @@ def main():
     byyr=tr.groupby("year").apply(summary,include_groups=False)
     byrs=tr.groupby(["regime","strategy"],dropna=False).apply(summary,include_groups=False)
     res.to_csv(OUT/"overall.csv");byreg.to_csv(OUT/"by_regime.csv");byyr.to_csv(OUT/"by_year.csv");byrs.to_csv(OUT/"by_regime_strategy.csv")
-    print("OVERALL
-",res.to_string());print("BY_REGIME
-",byreg.to_string());print("BY_YEAR
-",byyr.to_string());print("BY_REGIME_STRATEGY
-",byrs.to_string())
+    print("OVERALL\n",res.to_string());print("BY_REGIME\n",byreg.to_string());print("BY_YEAR\n",byyr.to_string());print("BY_REGIME_STRATEGY\n",byrs.to_string())
 
 
 if __name__ == "__main__":
