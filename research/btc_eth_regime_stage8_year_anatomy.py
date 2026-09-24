@@ -297,6 +297,41 @@ def main():
     d3.to_csv(OUT/"day3_nonpositive_episode_detail.csv",index=False)
     d3cdf.to_csv(OUT/"day3_nonpositive_recovery_compare.csv",index=False)
 
+    # Coarse robustness grid, predeclared checkpoints/thresholds only.
+    # Goal is plateau detection, not selecting the single best cell.
+    grid=[]
+    base_arr=x["position"].to_numpy(float)
+    for chk in [2,3,4,5]:
+        for thr in [0.0,-1.0,-2.0,-3.0]:
+            pos=np.zeros(len(x),dtype=float); ent=None; forced=False
+            for i in range(len(x)):
+                if base_arr[i]==1 and (i==0 or base_arr[i-1]==0):
+                    ent=i; forced=False
+                if base_arr[i]==0:
+                    ent=None; forced=False
+                if base_arr[i]==1 and not forced:
+                    pos[i]=1.0
+                    if ent is not None and i-ent==chk:
+                        rr=fwd_underlying(x,ent,chk)
+                        if np.isfinite(rr) and rr<=thr: forced=True
+            turn=pd.Series(pos,index=x.index).diff().abs().fillna(pd.Series(pos,index=x.index).abs())
+            rr=pd.Series(pos,index=x.index)*intr-turn*(RT/2)
+            mask=(x["datetime_utc"].dt.year>=2018)&(x["datetime_utc"].dt.year<=2025)
+            pp=perf(rr[mask].to_numpy(float))
+            row={"checkpoint_days":chk,"threshold_pct":thr,**pp,
+                 "active_day_pct":float((pd.Series(pos,index=x.index)[mask]==1).mean()*100)}
+            # independent yearly outcomes for robustness, not only pooled total
+            yrrets=[]
+            for yr in range(2018,2026):
+                ym=x["datetime_utc"].dt.year==yr
+                yrrets.append(perf(rr[ym].to_numpy(float))["return_pct"])
+            row["positive_years"]=int(sum(v>0 for v in yrrets))
+            row["losing_years"]=int(sum(v<=0 for v in yrrets))
+            row["worst_year_pct"]=float(min(yrrets))
+            grid.append(row)
+    gdf=pd.DataFrame(grid)
+    gdf.to_csv(OUT/"early_exit_robustness_grid.csv",index=False)
+
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
         if year<2018: continue
@@ -374,6 +409,8 @@ def main():
     print(bdf.to_string(index=False))
     print("\\n=== DAY3 NONPOSITIVE: RECOVERED VS STAYED LOSS ===")
     print(d3cdf.to_string(index=False))
+    print("\\n=== EARLY EXIT ROBUSTNESS GRID ===")
+    print(gdf.sort_values(["checkpoint_days","threshold_pct"],ascending=[True,False]).to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
