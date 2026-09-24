@@ -110,20 +110,22 @@ def episodes(x):
             g=x.iloc[start:end+1]
             vals=g["strategy_ret"].to_numpy(float)
             wealth=np.prod(1+vals/100)
+            sig=x.iloc[start-1] if start>0 else x.iloc[start]
             rows.append({
+                "signal_date":sig["datetime_utc"],
                 "entry":g["datetime_utc"].iloc[0],"exit":g["datetime_utc"].iloc[-1],
                 "year":int(g["datetime_utc"].iloc[0].year),
                 "days":len(g),"ret_pct":(wealth-1)*100,
-                "start_btc30":float(g["BTCUSDT_ret30"].iloc[0]),
-                "start_eth30":float(g["ETHUSDT_ret30"].iloc[0]),
-                "start_trend7":float(g["trend7_avg"].iloc[0]),
-                "start_trend30":float(g["trend30_avg"].iloc[0]),
-                "start_trend90":float(g["trend90_avg"].iloc[0]),
-                "start_er":float(g["market_er"].iloc[0]),
-                "start_gap":float(g["trend30_gap"].iloc[0]),
-                "start_rv30":float(g["rv30_avg"].iloc[0]),
-                "start_dd90":float(g["dd90_avg"].iloc[0]),
-                "start_corr30":float(g["btc_eth_corr30"].iloc[0]),
+                "start_btc30":float(sig["BTCUSDT_ret30"]),
+                "start_eth30":float(sig["ETHUSDT_ret30"]),
+                "start_trend7":float(sig["trend7_avg"]),
+                "start_trend30":float(sig["trend30_avg"]),
+                "start_trend90":float(sig["trend90_avg"]),
+                "start_er":float(sig["market_er"]),
+                "start_gap":float(sig["trend30_gap"]),
+                "start_rv30":float(sig["rv30_avg"]),
+                "start_dd90":float(sig["dd90_avg"]),
+                "start_corr30":float(sig["btc_eth_corr30"]),
                 "fwd1_pct":fwd_underlying(x,start,1),
                 "fwd3_pct":fwd_underlying(x,start,3),
                 "fwd7_pct":fwd_underlying(x,start,7),
@@ -155,6 +157,47 @@ def main():
                 else: row[q+"_median"]=float(z[q].median())
             comp.append(row)
     pd.DataFrame(comp).to_csv(OUT/"episode_structure_compare.csv",index=False)
+
+    # Untuned quartile diagnostics using signal-day features only.
+    qrows=[]
+    for feat in ["start_er","start_gap","start_trend90","start_dd90","start_rv30"]:
+        z=full.dropna(subset=[feat]).copy()
+        z["quartile"]=pd.qcut(z[feat],4,labels=["Q1","Q2","Q3","Q4"],duplicates="drop")
+        for q,h in z.groupby("quartile",observed=True):
+            qrows.append({"feature":feat,"quartile":str(q),"n":len(h),
+                "feature_median":float(h[feat].median()),
+                "episode_win_pct":float((h["ret_pct"]>0).mean()*100),
+                "episode_return_median":float(h["ret_pct"].median()),
+                "episode_days_median":float(h["days"].median()),
+                "fwd7_median":float(h["fwd7_pct"].median()),
+                "fwd14_median":float(h["fwd14_pct"].median())})
+    qdf=pd.DataFrame(qrows)
+    qdf.to_csv(OUT/"signal_day_quartiles.csv",index=False)
+
+    # Year-by-year rank correlation: consistency check, not threshold optimization.
+    yrows=[]
+    for year,h in full.groupby("year"):
+        for feat in ["start_er","start_gap"]:
+            z=h[[feat,"ret_pct"]].dropna()
+            yrows.append({"year":int(year),"feature":feat,"n":len(z),
+                "spearman":float(z[feat].corr(z["ret_pct"],method="spearman")) if len(z)>=3 else math.nan})
+    ycorr=pd.DataFrame(yrows)
+    ycorr.to_csv(OUT/"signal_day_yearly_rankcorr.csv",index=False)
+
+    # ER x gap 2x2 using medians fixed from the full 2018-2025 sample; descriptive only.
+    er_med=float(full["start_er"].median()); gap_med=float(full["start_gap"].median())
+    full["er_half"]=np.where(full["start_er"]>=er_med,"HIGH_ER","LOW_ER")
+    full["gap_half"]=np.where(full["start_gap"]<=gap_med,"LOW_GAP","HIGH_GAP")
+    joint=[]
+    for (a,b),h in full.groupby(["er_half","gap_half"]):
+        joint.append({"er_half":a,"gap_half":b,"n":len(h),
+            "episode_win_pct":float((h["ret_pct"]>0).mean()*100),
+            "episode_return_median":float(h["ret_pct"].median()),
+            "episode_days_median":float(h["days"].median()),
+            "fwd7_median":float(h["fwd7_pct"].median()),
+            "fwd14_median":float(h["fwd14_pct"].median())})
+    jdf=pd.DataFrame(joint)
+    jdf.to_csv(OUT/"signal_day_er_gap_joint.csv",index=False)
 
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
@@ -219,6 +262,12 @@ def main():
     print(c.to_string(index=False))
     print("\\n=== EPISODE STRUCTURE COMPARE ===")
     print(pd.DataFrame(comp).to_string(index=False))
+    print("\\n=== SIGNAL-DAY QUARTILES ===")
+    print(qdf.to_string(index=False))
+    print("\\n=== SIGNAL-DAY YEARLY RANK CORR ===")
+    print(ycorr.to_string(index=False))
+    print("\\n=== SIGNAL-DAY ER X GAP ===")
+    print(jdf.to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
