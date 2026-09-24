@@ -1,0 +1,63 @@
+name: L3 Universe Reversal Anatomy
+on:
+  push:
+    branches:
+      - research-l3-cross-universe
+    paths:
+      - '.research/l3_reversal_anatomy_once'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  anatomy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      BACKTEST_WORKERS: 8
+      BACKTEST_API_RPS: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-backtest.txt
+      - name: Download cross-universe and regime artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/cross input/regime
+          gh run download 35932941270 --repo duuu-hub/bb-scanner --name l3-cross-universe-results --dir input/cross
+          gh run download 35841732224 --repo duuu-hub/bb-scanner --name regime-breadth-research --dir input/regime
+      - name: Resolve only symbols involved in L3 BEAR signals
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          a=pd.read_csv("input/cross/auto50_l3_same_window_trades.csv.gz")
+          b=pd.read_csv("input/cross/new66_l3_long_short_trades.csv.gz")
+          a=a[a["regime_60_40"]=="BEAR"]
+          b=b[b["regime_60_40"]=="BEAR"]
+          syms=sorted(set(a.symbol)|set(b.symbol)|{"BTCUSDT"})
+          print("TARGET="+",".join(syms))
+          with open("/tmp/target_symbols.txt","w") as f:f.write(",".join(syms))
+          PY
+          echo "TARGET_SYMBOLS=$(cat /tmp/target_symbols.txt)" >> "$GITHUB_ENV"
+      - name: Rebuild exact snapshots only for involved symbols
+        run: python backtest.py --symbols "$TARGET_SYMBOLS" --days 180 --outdir l3_reversal_source
+      - name: Analyze reversal anatomy
+        run: |
+          python research/l3_reversal_anatomy.py \
+            --cross-dir input/cross \
+            --target-source l3_reversal_source/snapshots.csv.gz \
+            --regime-dir input/regime \
+            --outdir l3_reversal_anatomy_results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: l3-reversal-anatomy-results
+          path: |
+            l3_reversal_anatomy_results/
+            l3_reversal_source/coverage.csv
+          if-no-files-found: warn
+          retention-days: 14
