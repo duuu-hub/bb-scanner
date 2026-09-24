@@ -63,3 +63,14 @@ def bt(use_psar):
 print("DATA",df.time.iloc[0],df.time.iloc[-1],len(df))
 print("NO_PSAR",bt(False))
 print("WITH_PSAR",bt(True))
+
+
+# Diagnostic: reproduce repository Chikou implementation literally.
+# Their chikou_span at row i = close[i+26], then compared with close[i-26].
+future_chikou=cl.shift(-26)
+repo_chikou=(future_chikou > cl.shift(26))
+base_repo=(cl>pd.concat([spa,spb],axis=1).max(axis=1))&(ten>kij)&(spa>spb)&repo_chikou
+base_saved=base
+base=base_repo
+print("REPO_LOOKAHEAD_NO_PSAR",bt(False))
+print("REPO_LOOKAHEAD_WITH_PSAR",bt(True))
