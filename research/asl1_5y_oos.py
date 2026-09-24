@@ -64,7 +64,8 @@ rows=[]
 for k,p in enumerate(files,1):
     try:
         x=feat(load(p)); idx=signals(x,btcflat)
-        for hh in HOLDS:\n            for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side))
+        for hh in HOLDS:
+            for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side))
         print(f"[{k}/{len(files)}] {p.name} sig={len(idx)}",flush=True)
     except Exception as e: print("ERR",p,e,flush=True)
 t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason"]); t.to_csv(OUT/"trades.csv",index=False)
@@ -75,7 +76,13 @@ allstats=t.groupby(["side","hold_h"]).apply(stat,include_groups=False).reset_ind
 t["year"]=pd.to_datetime(t.entry_dt,utc=True).dt.year
 yr=t.groupby(["side","hold_h","year"]).apply(stat,include_groups=False).reset_index(); yr.to_csv(OUT/"yearly.csv",index=False)
 ss=t.groupby(["side","hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["side","hold_h","sum_net_pct"],ascending=[True,True,False]); ss.to_csv(OUT/"symbols.csv",index=False)
-print("\n=== OVERALL ===\n"+allstats.to_string(index=False)); print("\n=== YEARLY ===\n"+yr.to_string(index=False))
-print("\n=== TOP/BOTTOM SYMBOLS ===")
+print("
+=== OVERALL ===
+"+allstats.to_string(index=False)); print("
+=== YEARLY ===
+"+yr.to_string(index=False))
+print("
+=== TOP/BOTTOM SYMBOLS ===")
 for h in HOLDS:
- q=ss[ss.hold_h==h]; print("\nHOLD",h); print(pd.concat([q.head(10),q.tail(10)]).to_string(index=False))
+ q=ss[ss.hold_h==h]; print("
+HOLD",h); print(pd.concat([q.head(10),q.tail(10)]).to_string(index=False))
