@@ -54,7 +54,7 @@ def panel(data):
         c=d["close"]
         d[f"{s}_ret1d"]=c.pct_change()*100
         d[f"{s}_fwd1d"]=c.pct_change().shift(-1)*100
-        d[f"{s}_ret30"]=c/c.shift(WIN)-1
+        d[f"{s}_ret7"]=c/c.shift(7)-1\n        d[f"{s}_ret30"]=c/c.shift(WIN)-1\n        d[f"{s}_ret90"]=c/c.shift(90)-1
         path=c.diff().abs().rolling(WIN,min_periods=15).sum()
         d[f"{s}_er30"]=(c-c.shift(WIN)).abs()/path.replace(0,np.nan)
         d[f"{s}_rv30"]=d[f"{s}_ret1d"].rolling(WIN,min_periods=15).std(ddof=0)*math.sqrt(365)
@@ -65,7 +65,7 @@ def panel(data):
     x["agree_up"]=(x["BTCUSDT_ret30"]>0)&(x["ETHUSDT_ret30"]>0)
     x["market_er"]=(x["BTCUSDT_er30"]+x["ETHUSDT_er30"])/2
     x["active"]=(x["agree_up"]&(x["market_er"]>=ER_T)).astype(int)
-    x["trend30_avg"]=(x["BTCUSDT_ret30"]+x["ETHUSDT_ret30"])/2
+    x["trend7_avg"]=(x["BTCUSDT_ret7"]+x["ETHUSDT_ret7"])/2\n    x["trend30_avg"]=(x["BTCUSDT_ret30"]+x["ETHUSDT_ret30"])/2\n    x["trend90_avg"]=(x["BTCUSDT_ret90"]+x["ETHUSDT_ret90"])/2
     x["trend30_min"]=np.minimum(x["BTCUSDT_ret30"],x["ETHUSDT_ret30"])
     x["trend30_gap"]=(x["BTCUSDT_ret30"]-x["ETHUSDT_ret30"]).abs()
     x["rv30_avg"]=(x["BTCUSDT_rv30"]+x["ETHUSDT_rv30"])/2
@@ -91,6 +91,12 @@ def perf(a):
     sd=np.std(a)
     return {"return_pct":(w-1)*100,"sharpe":np.mean(a)/sd*math.sqrt(365.25) if sd>0 else math.nan,"mdd_pct":float(dd.min())}
 
+def fwd_underlying(x,i,n):
+    j=min(i+n,len(x)-1)
+    if j<=i:return math.nan
+    a=x.iloc[i]; b=x.iloc[j]
+    return float(((b["BTCUSDT_close"]/a["BTCUSDT_close"]-1)+(b["ETHUSDT_close"]/a["ETHUSDT_close"]-1))*50)
+
 def episodes(x):
     rows=[]; p=x["position"].to_numpy(); start=None
     for i in range(len(p)):
@@ -104,9 +110,22 @@ def episodes(x):
                 "entry":g["datetime_utc"].iloc[0],"exit":g["datetime_utc"].iloc[-1],
                 "year":int(g["datetime_utc"].iloc[0].year),
                 "days":len(g),"ret_pct":(wealth-1)*100,
+                "start_btc30":float(g["BTCUSDT_ret30"].iloc[0]),
+                "start_eth30":float(g["ETHUSDT_ret30"].iloc[0]),
+                "start_trend7":float(g["trend7_avg"].iloc[0]),
                 "start_trend30":float(g["trend30_avg"].iloc[0]),
+                "start_trend90":float(g["trend90_avg"].iloc[0]),
                 "start_er":float(g["market_er"].iloc[0]),
                 "start_gap":float(g["trend30_gap"].iloc[0]),
+                "start_rv30":float(g["rv30_avg"].iloc[0]),
+                "start_dd90":float(g["dd90_avg"].iloc[0]),
+                "start_corr30":float(g["btc_eth_corr30"].iloc[0]),
+                "fwd1_pct":fwd_underlying(x,start,1),
+                "fwd3_pct":fwd_underlying(x,start,3),
+                "fwd7_pct":fwd_underlying(x,start,7),
+                "fwd14_pct":fwd_underlying(x,start,14),
+                "bear_rally_like":bool(g["trend90_avg"].iloc[0]<0),
+                "false_break_3d":bool(len(g)<=3 and (wealth-1)*100<=0),
             })
             start=None
     return pd.DataFrame(rows)
@@ -116,7 +135,22 @@ def main():
     data={s:load(s) for s in SYMS}
     x=panel(data)
     e=episodes(x)
+    # Full-year labels only: 2018-2025. 2017/2026 are partial and excluded from core comparison.
+    full=e[(e["year"]>=2018)&(e["year"]<=2025)].copy()
+    loss_years={2018,2019,2022}
+    full["year_group"]=np.where(full["year"].isin(loss_years),"LOSS_YEAR","WIN_YEAR")
+    full["episode_group"]=np.where(full["ret_pct"]>0,"WIN_EP","LOSS_EP")
     e.to_csv(OUT/"episodes.csv",index=False)
+    epcols=["days","ret_pct","start_btc30","start_eth30","start_trend7","start_trend30","start_trend90","start_er","start_gap","start_rv30","start_dd90","start_corr30","fwd1_pct","fwd3_pct","fwd7_pct","fwd14_pct","bear_rally_like","false_break_3d"]
+    comp=[]
+    for group_col in ["year_group","episode_group"]:
+        for name,z in full.groupby(group_col):
+            row={"comparison":group_col,"group":name,"n":len(z)}
+            for q in epcols:
+                if z[q].dtype==bool: row[q+"_pct"]=float(z[q].mean()*100)
+                else: row[q+"_median"]=float(z[q].median())
+            comp.append(row)
+    pd.DataFrame(comp).to_csv(OUT/"episode_structure_compare.csv",index=False)
 
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
@@ -179,6 +213,8 @@ def main():
     print(y.to_string(index=False))
     print("\n=== WIN VS LOSS ===")
     print(c.to_string(index=False))
+    print("\n=== EPISODE STRUCTURE COMPARE ===")
+    print(pd.DataFrame(comp).to_string(index=False))
     print("\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
