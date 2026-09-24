@@ -469,6 +469,7 @@ def flat_periods_current_rule():
     print("\n=== FLAT SUMMARY ==="); print(sm.to_string(index=False))
     print("\n=== FLAT PERIODS >=30D ==="); print(p[p["days"]>=30].sort_values(["variant","start"]).to_string(index=False))
     print("\n=== TOP 15 LONGEST FLAT PERIODS ==="); print(p.sort_values("days",ascending=False).head(15).to_string(index=False))
-\nif __name__=="__main__":
+
+if __name__=="__main__":
     main()
 
