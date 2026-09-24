@@ -1,4 +1,6 @@
-from __future__ import annotations\n# Research-only continuation mining; never imported by live trading.\n# trigger after feature-build fix
+from __future__ import annotations
+# Research-only continuation mining; never imported by live trading.
+# trigger after feature-build fix
 import argparse, json, math
 from pathlib import Path
 from itertools import combinations
@@ -184,14 +186,17 @@ def main():
        "anti_overfit":"thresholds are descriptive quantiles; no live rule is promoted by this run; validate any candidate on chronological OOS next"}
  (out/"meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
  print("=== META ==="); print(json.dumps(meta,indent=2))
- print("\n=== PRIMARY ==="); print(pd.DataFrame(summaries).to_string(index=False))
+ print("
+=== PRIMARY ==="); print(pd.DataFrame(summaries).to_string(index=False))
  if all_single:
   s=pd.concat(all_single,ignore_index=True)
-  print("\n=== TOP SINGLE FEATURE LIFTS (n>=100) ===")
+  print("
+=== TOP SINGLE FEATURE LIFTS (n>=100) ===")
   print(s[s.n>=100].sort_values(["lift","n"],ascending=[False,False]).head(30).to_string(index=False))
  if all_combo:
   c=pd.concat(all_combo,ignore_index=True)
-  print("\n=== TOP INTERSECTIONS (n>=80) ===")
+  print("
+=== TOP INTERSECTIONS (n>=80) ===")
   print(c.sort_values(["lift","n"],ascending=[False,False]).head(30).to_string(index=False))
 
 if __name__=="__main__": main()
