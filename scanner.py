@@ -191,19 +191,44 @@ def save_state(state):
     )
 
 
-def get_symbols():
-    """Return active crypto USDT perpetuals only.
+def demo_universe_only() -> bool:
+    return os.getenv("LONG3_DEMO_UNIVERSE_ONLY", "").strip().lower() in {
+        "1", "true", "yes", "on"
+    }
 
-    Bitget's USDT-futures catalog also contains RWA/stock/ETF/FX contracts.
-    Automatic scanning excludes contracts tagged isRwa=YES so the live
-    scanner matches the research/data-collection universe.
+
+def get_symbols():
+    """Return the symbol universe used by this scanner run.
+
+    Normal/manual research scans use the live crypto USDT-perpetual catalog.
+    LONG3 Demo forward runs set LONG3_DEMO_UNIVERSE_ONLY=1 and intentionally
+    scan only contracts that the authenticated Bitget Demo environment exposes.
+
+    This is both a correctness and latency control: the Demo account cannot
+    place orders on symbols absent from its contract catalog, and scanning
+    those symbols only delays executable signals.
     """
+    if demo_universe_only():
+        from bitget_demo_lifecycle_test import BitgetDemoClassic
+
+        demo = BitgetDemoClassic()
+        data = demo.private_get(
+            "/api/v2/mix/market/contracts",
+            {"productType": PRODUCT_TYPE},
+        ) or []
+        symbols = active_symbols_from_contracts(data)
+        if not symbols:
+            raise RuntimeError(
+                "Bitget Demo contract universe is empty; refusing to fall back "
+                "to the live universe for Demo forward execution."
+            )
+        return symbols
+
     data = api_get(
         "/api/v2/mix/market/contracts",
         {"productType": PRODUCT_TYPE},
     ) or []
     return active_symbols_from_contracts(data)
-
 
 
 def fetch_market_candles(symbol, granularity):
@@ -1002,6 +1027,10 @@ def main():
     ticker_map = get_all_tickers()
     snapshot_source = "bulk_ticker_near_boundary"
     symbols = get_symbols()
+    universe_source = (
+        "bitget_demo_contracts" if demo_universe_only()
+        else "bitget_live_crypto_contracts"
+    )
     if boundary_lag_ms > 5_000:
         boundary_prices = get_boundary_prices(symbols, signal_boundary_ms)
         snapshot_source = "15m_candle_open_reconstructed"
@@ -1026,6 +1055,8 @@ def main():
                 ).isoformat(),
                 "boundary_lag_ms": boundary_lag_ms,
                 "price_snapshot_source": snapshot_source,
+                "symbol_universe_source": universe_source,
+                "symbol_count": len(symbols),
             },
             ensure_ascii=False,
             indent=2,
@@ -1038,6 +1069,7 @@ def main():
 
     print(
         f"[INFO] scanning {len(symbols)} active USDT perpetual symbols "
+        f"universe={universe_source} "
         f"with {len(ticker_map)} boundary snapshots "
         f"at {datetime.fromtimestamp(signal_boundary_ms / 1000, tz=timezone.utc).isoformat()} "
         f"source={snapshot_source} lag={boundary_lag_ms}ms"
