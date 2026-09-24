@@ -57,7 +57,7 @@ def calibrate_all(panel):
         parts=v5.fast_parts(model,tr)
         for mh in MINHOLDS:
             for th in THRESHOLDS:
-                pred,_=v5.simulate(model,tr,init,th,mh,parts=parts)
+                pred,_=v5.simulate(model,tr,init,th,mh)
                 acc=float((pred==actual).mean()); pf=v3.flip_count(pred); ph=v3.median_run_hours(pred)
                 fr=(pf+1)/(af+1); hr=(ph+.25)/(ah+.25)
                 score=acc-.16*abs(math.log(fr))-.12*abs(math.log(hr))
