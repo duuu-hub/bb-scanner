@@ -34,8 +34,8 @@ jobs:
         run: |
           python - <<'PY'
           import pandas as pd
-          a=pd.read_csv("input/cross/auto50_l3_same_window_trades.csv.gz")
-          b=pd.read_csv("input/cross/new66_l3_long_short_trades.csv.gz")
+          a=pd.read_csv("input/cross/l3_cross_universe_results/auto50_l3_same_window_trades.csv.gz")
+          b=pd.read_csv("input/cross/l3_cross_universe_results/new66_l3_long_short_trades.csv.gz")
           a=a[a["regime_60_40"]=="BEAR"]
           b=b[b["regime_60_40"]=="BEAR"]
           syms=sorted(set(a.symbol)|set(b.symbol)|{"BTCUSDT"})
