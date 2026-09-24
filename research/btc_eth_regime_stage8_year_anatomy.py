@@ -277,6 +277,26 @@ def main():
     bdf=pd.DataFrame(brows)
     bdf.to_csv(OUT/"early3_backtest_compare.csv",index=False)
 
+    # Anatomy of episodes that are non-positive at the causal day-3 checkpoint:
+    # compare eventual recoveries vs eventual losers; descriptive only.
+    d3=pdf[pdf["path_3d_close_pct"]<=0].copy()
+    d3["eventual_group"]=np.where(d3["episode_ret_pct"]>0,"RECOVERED_WIN","STAYED_LOSS")
+    # Merge signal-day features already stored in full episode table.
+    featcols=["entry","start_btc30","start_eth30","start_trend7","start_trend30","start_trend90",
+              "start_er","start_gap","start_rv30","start_dd90","start_corr30","fwd7_pct","fwd14_pct"]
+    d3=d3.merge(full[featcols],on="entry",how="left")
+    d3rows=[]
+    metrics=["episode_days","episode_ret_pct","path_1d_close_pct","path_2d_close_pct","path_3d_close_pct",
+             "path_3d_min_pct","start_btc30","start_eth30","start_trend7","start_trend30","start_trend90",
+             "start_er","start_gap","start_rv30","start_dd90","start_corr30","fwd7_pct","fwd14_pct"]
+    for name,h in d3.groupby("eventual_group"):
+        row={"group":name,"n":len(h)}
+        for m in metrics: row[m+"_median"]=float(h[m].median())
+        d3rows.append(row)
+    d3cdf=pd.DataFrame(d3rows)
+    d3.to_csv(OUT/"day3_nonpositive_episode_detail.csv",index=False)
+    d3cdf.to_csv(OUT/"day3_nonpositive_recovery_compare.csv",index=False)
+
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
         if year<2018: continue
@@ -352,6 +372,8 @@ def main():
     print(esdf.to_string(index=False))
     print("\\n=== EARLY3 BACKTEST BASE VS EARLY EXIT ===")
     print(bdf.to_string(index=False))
+    print("\\n=== DAY3 NONPOSITIVE: RECOVERED VS STAYED LOSS ===")
+    print(d3cdf.to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
