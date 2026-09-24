@@ -1,0 +1,45 @@
+name: BTC ETH Core Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research-btc-eth-core
+    paths:
+      - "research/btc_eth_core_scan.py"
+      - ".github/workflows/btc-eth-core-research.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements-backtest.txt
+
+      - name: Syntax check
+        run: python -m py_compile research/btc_eth_core_scan.py
+
+      - name: Run BTC ETH core scan
+        run: python research/btc_eth_core_scan.py
+
+      - name: Upload research output
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-eth-core-research
+          path: research_output/btc_eth_core/
+          if-no-files-found: error
