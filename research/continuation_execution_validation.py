@@ -116,4 +116,5 @@ def portfolio_study(d):
  print("\n=== OVERLAP SUMMARY ==="); print(pd.DataFrame(overlap).to_string(index=False))
  print("\n=== POSITION SIZING ==="); print(pd.DataFrame(rows).to_string(index=False))
 
-\nif __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz"))
+
+if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz"))
