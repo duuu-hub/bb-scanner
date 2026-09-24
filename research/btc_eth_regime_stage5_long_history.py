@@ -293,6 +293,39 @@ def source_overlap_compare(binance: pd.DataFrame, bitget: pd.DataFrame) -> tuple
     return summary,z
 
 
+
+def direction_decomposition(panel: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for mode in ("BOTH", "LONG_ONLY", "SHORT_ONLY"):
+        x = panel.copy()
+        if mode == "LONG_ONLY":
+            x["position"] = x["position"].where(x["position"] > 0, 0.0)
+        elif mode == "SHORT_ONLY":
+            x["position"] = x["position"].where(x["position"] < 0, 0.0)
+
+        gross = x["position"] * (x["BTCUSDT_fwd"].fillna(0.0) + x["ETHUSDT_fwd"].fillna(0.0)) / 2.0
+        change = x["position"].diff().abs().fillna(x["position"].abs())
+        x["mode_net_pct"] = gross - change * (ROUNDTRIP_COST_PCT / 2.0)
+
+        for name, start, end in PERIODS:
+            g = x[(x["datetime_utc"] >= start) & (x["datetime_utc"] < end)]
+            rows.append({
+                "mode": mode,
+                "period": name,
+                **perf(g["mode_net_pct"].to_numpy(dtype=float)),
+                "active_day_pct": float((g["position"] != 0).mean() * 100.0) if len(g) else math.nan,
+            })
+
+        x["year"] = x["datetime_utc"].dt.year
+        for year, g in x.groupby("year"):
+            rows.append({
+                "mode": mode,
+                "period": f"YEAR_{int(year)}",
+                **perf(g["mode_net_pct"].to_numpy(dtype=float)),
+                "active_day_pct": float((g["position"] != 0).mean() * 100.0),
+            })
+    return pd.DataFrame(rows)
+
 def main() -> None:
     OUT_ROOT.mkdir(parents=True,exist_ok=True)
 
@@ -315,6 +348,9 @@ def main() -> None:
         yearly_table(bitget_panel,"BITGET_PERP"),
     ],ignore_index=True)
     yearly.to_csv(OUT_ROOT/"yearly_summary.csv",index=False)
+
+    direction = direction_decomposition(binance_panel)
+    direction.to_csv(OUT_ROOT/"direction_decomposition.csv",index=False)
 
     episodes=episode_table(binance_panel,"BINANCE_SPOT")
     episodes.to_csv(OUT_ROOT/"binance_episodes.csv",index=False)
@@ -355,6 +391,10 @@ def main() -> None:
     print(periods.to_string(index=False))
     print("\n=== BINANCE YEARLY ===")
     print(yearly[yearly["source"]=="BINANCE_SPOT"].to_string(index=False))
+    print("\n=== DIRECTION DECOMPOSITION PERIODS ===")
+    print(direction[~direction["period"].str.startswith("YEAR_")].to_string(index=False))
+    print("\n=== DIRECTION DECOMPOSITION YEARLY ===")
+    print(direction[direction["period"].str.startswith("YEAR_")].to_string(index=False))
     print("\n=== BACKWARD OOS EPISODES ===")
     print(json.dumps(backward,indent=2))
     print("\n=== SOURCE OVERLAP ===")
