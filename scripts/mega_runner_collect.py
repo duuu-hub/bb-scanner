@@ -50,7 +50,7 @@ def read_zip(key):
         return list(csv.reader(io.TextIOWrapper(z.open(names[0]),encoding="utf-8")))
 def main():
     global MARKET
-    ap=argparse.ArgumentParser(); ap.add_argument("--years",type=int,default=5); ap.add_argument("--interval",default="1d"); ap.add_argument("--market",choices=["spot","um"],default="spot"); ap.add_argument("--out",default=None); ap.add_argument("--max-symbols",type=int,default=0); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--years",type=int,default=5); ap.add_argument("--interval",default="1d"); ap.add_argument("--market",choices=["spot","um"],default="spot"); ap.add_argument("--out",default=None); ap.add_argument("--max-symbols",type=int,default=0); a=ap.parse_args(); MARKET=a.market
     a.out=a.out or f"research/mega_runner/data/binance_{a.market}_{a.interval}"; out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
     now=datetime.now(timezone.utc); y=now.year-a.years; start_ym=f"{y:04d}-{now.month:02d}"
     syms=symbols(); syms=syms[:a.max_symbols] if a.max_symbols else syms
