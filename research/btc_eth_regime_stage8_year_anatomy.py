@@ -54,7 +54,9 @@ def panel(data):
         c=d["close"]
         d[f"{s}_ret1d"]=c.pct_change()*100
         d[f"{s}_fwd1d"]=c.pct_change().shift(-1)*100
-        d[f"{s}_ret7"]=c/c.shift(7)-1\n        d[f"{s}_ret30"]=c/c.shift(WIN)-1\n        d[f"{s}_ret90"]=c/c.shift(90)-1
+        d[f"{s}_ret7"]=c/c.shift(7)-1
+        d[f"{s}_ret30"]=c/c.shift(WIN)-1
+        d[f"{s}_ret90"]=c/c.shift(90)-1
         path=c.diff().abs().rolling(WIN,min_periods=15).sum()
         d[f"{s}_er30"]=(c-c.shift(WIN)).abs()/path.replace(0,np.nan)
         d[f"{s}_rv30"]=d[f"{s}_ret1d"].rolling(WIN,min_periods=15).std(ddof=0)*math.sqrt(365)
@@ -65,7 +67,9 @@ def panel(data):
     x["agree_up"]=(x["BTCUSDT_ret30"]>0)&(x["ETHUSDT_ret30"]>0)
     x["market_er"]=(x["BTCUSDT_er30"]+x["ETHUSDT_er30"])/2
     x["active"]=(x["agree_up"]&(x["market_er"]>=ER_T)).astype(int)
-    x["trend7_avg"]=(x["BTCUSDT_ret7"]+x["ETHUSDT_ret7"])/2\n    x["trend30_avg"]=(x["BTCUSDT_ret30"]+x["ETHUSDT_ret30"])/2\n    x["trend90_avg"]=(x["BTCUSDT_ret90"]+x["ETHUSDT_ret90"])/2
+    x["trend7_avg"]=(x["BTCUSDT_ret7"]+x["ETHUSDT_ret7"])/2
+    x["trend30_avg"]=(x["BTCUSDT_ret30"]+x["ETHUSDT_ret30"])/2
+    x["trend90_avg"]=(x["BTCUSDT_ret90"]+x["ETHUSDT_ret90"])/2
     x["trend30_min"]=np.minimum(x["BTCUSDT_ret30"],x["ETHUSDT_ret30"])
     x["trend30_gap"]=(x["BTCUSDT_ret30"]-x["ETHUSDT_ret30"]).abs()
     x["rv30_avg"]=(x["BTCUSDT_rv30"]+x["ETHUSDT_rv30"])/2
@@ -211,11 +215,14 @@ def main():
 
     print("=== YEARLY ANATOMY ===")
     print(y.to_string(index=False))
-    print("\n=== WIN VS LOSS ===")
+    print("
+=== WIN VS LOSS ===")
     print(c.to_string(index=False))
-    print("\n=== EPISODE STRUCTURE COMPARE ===")
+    print("
+=== EPISODE STRUCTURE COMPARE ===")
     print(pd.DataFrame(comp).to_string(index=False))
-    print("\n=== LOSING YEAR EPISODES ===")
+    print("
+=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
 if __name__=="__main__":
