@@ -13,7 +13,7 @@ START=pd.Timestamp("2017-08-01",tz="UTC")
 # Include all completed monthly Binance archives available through the current month.\nEND=pd.Timestamp("2026-09-01",tz="UTC")
 WIN=30
 ER_T=0.193654
-RT=0.25
+RT=0.25\n# flat-period run trigger 20260925
 
 def months(a,b):
     x=a
