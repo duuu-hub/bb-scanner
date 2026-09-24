@@ -77,6 +77,8 @@ def build_market_candles(raw: pd.DataFrame) -> pd.DataFrame:
     df["trend_z24h"]=df["ret24h"]/df["rv24h"].replace(0,np.nan)
     vol_med=df["rv24h"].rolling(2880,min_periods=672).median()
     df["high_vol"]=(df["rv24h"]>vol_med).astype(float)
+    for n,name in [(1,"fwd15m"),(4,"fwd1h"),(16,"fwd4h"),(96,"fwd24h")]:
+        df[name]=(close.shift(-n)/close-1.0)*10000.0
     return df
 
 
