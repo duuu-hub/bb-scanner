@@ -113,17 +113,74 @@ def fit_initial_direction(candles):
     return pipe,j
 
 
+def _fast_linear_parts(model,df):
+    imp=model.named_steps["imp"]
+    sc=model.named_steps["sc"]
+    lr=model.named_steps["lr"]
+    stats=np.asarray(imp.statistics_,float)
+    mean=np.asarray(sc.mean_,float)
+    scale=np.asarray(sc.scale_,float)
+    coef=np.asarray(lr.coef_[0],float)
+    w=coef/scale
+    intercept=float(lr.intercept_[0]-np.sum(coef*mean/scale))
+    ix={f:i for i,f in enumerate(MODEL_FEATURES)}
+
+    n=len(df)
+    static=np.zeros(n,float)
+    for col in RAW_STATE:
+        v=df[col].to_numpy(float)
+        j=ix[col]
+        v=np.where(np.isfinite(v),v,stats[j])
+        static+=w[j]*v
+
+    def signed_contrib(side):
+        out=np.zeros(n,float)
+        for col in SIGNED_BASE:
+            src=df[col].to_numpy(float)
+            j=ix["signed_"+col]
+            val=side*src
+            val=np.where(np.isfinite(val),val,stats[j])
+            out+=w[j]*val
+        src=df["rsi14"].to_numpy(float)-50.0
+        j=ix["signed_rsi_center"]
+        val=side*src
+        val=np.where(np.isfinite(val),val,stats[j])
+        out+=w[j]*val
+        src=df["range_pos24h"].to_numpy(float)-0.5
+        j=ix["signed_range_center"]
+        val=side*src
+        val=np.where(np.isfinite(val),val,stats[j])
+        out+=w[j]*val
+        return out
+
+    return {
+        "intercept":intercept,
+        "static":static,
+        "pos":signed_contrib(1.0),
+        "neg":signed_contrib(-1.0),
+        "w_side":w[ix["state_side"]],
+        "w_hold":w[ix["log_hold_bars"]],
+    }
+
+
 def simulate_sides(model,df,initial_side,hyst):
+    parts=_fast_linear_parts(model,df)
     side=int(initial_side)
     hold=0
-    pred=[]
-    probs=[]
-    for _,r in df.iterrows():
-        # This side is carried during the current bar.
-        pred.append(side)
-        X=build_features(pd.DataFrame([r]),np.array([side]),np.array([hold]))
-        p=float(model.predict_proba(X)[0,1])
-        probs.append(p)
+    n=len(df)
+    pred=np.empty(n,np.int8)
+    probs=np.empty(n,float)
+    for i in range(n):
+        pred[i]=side
+        logit=(parts["intercept"]+parts["static"][i]+
+               (parts["pos"][i] if side>0 else parts["neg"][i])+
+               parts["w_side"]*side+parts["w_hold"]*math.log1p(hold))
+        if logit>=0:
+            p=1.0/(1.0+math.exp(-min(logit,700.0)))
+        else:
+            e=math.exp(max(logit,-700.0))
+            p=e/(1.0+e)
+        probs[i]=p
         if side>0:
             new_side=-1 if p < 0.5-hyst else 1
         else:
@@ -133,7 +190,7 @@ def simulate_sides(model,df,initial_side,hyst):
         else:
             side=new_side
             hold=0
-    return np.asarray(pred,np.int8),np.asarray(probs,float)
+    return pred,probs
 
 
 def flip_count(side):
