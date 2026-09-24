@@ -215,14 +215,11 @@ def main():
 
     print("=== YEARLY ANATOMY ===")
     print(y.to_string(index=False))
-    print("
-=== WIN VS LOSS ===")
+    print("\\n=== WIN VS LOSS ===")
     print(c.to_string(index=False))
-    print("
-=== EPISODE STRUCTURE COMPARE ===")
+    print("\\n=== EPISODE STRUCTURE COMPARE ===")
     print(pd.DataFrame(comp).to_string(index=False))
-    print("
-=== LOSING YEAR EPISODES ===")
+    print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
 if __name__=="__main__":
