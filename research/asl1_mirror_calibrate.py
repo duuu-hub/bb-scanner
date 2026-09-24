@@ -412,7 +412,7 @@ def main():
     # Diagnostic only: identify whether the signal has edge under different exits.
     GRID_TPS=[0.02,0.04,0.06,0.08,0.10,0.12]
     GRID_SLS=[0.02,0.03,0.04,0.05,0.06,0.08]
-    GRID_HOURS=[3,6,12,24,48]
+    GRID_HOURS=[3,6,12,18,24,30,36,48,60,72]
 
     def simulate_short_grid(x, sig_idx, tp_pct, sl_pct, hold_hours):
         out=[]
@@ -457,6 +457,55 @@ def main():
     gdf.to_csv(OUT/"fresh_short_exit_grid.csv",index=False)
     print("\n=== SHORT EXIT GRID TOP 25 ===")
     print(gdf.head(25).to_string(index=False))
+
+    # Diagnostics: determine whether the apparent ~24h continuation edge is stable
+    # across time, symbols, and the forward return path. Fixed reference exit = 10/6/24h.
+    diag=[]
+    REF_TP=0.10; REF_SL=0.06; REF_H=24
+    path_hours=[6,12,18,24,30,36,48,60,72]
+    for s,x in frames.items():
+        v=vol_masks(x)[FRESH_VOL].fillna(False)
+        base=(x["below_lower15"].fillna(False) & x["below_mid1h"].fillna(False) &
+              x["below_mid4h"].fillna(False) & (x["ret4h"]<=-2.0).fillna(False) & v)
+        trig=first_cross(x["below_lower15"]) & base
+        btc_flat=x["ts"].map(flat_map).fillna(False).astype(bool)
+        trig &= btc_flat & (x["dt"]>=START) & (x["dt"]<=END)
+        for i in np.flatnonzero(trig.to_numpy()):
+            ei=i+1
+            if ei>=len(x): continue
+            entry=float(x.iloc[ei]["open"])
+            rec={"symbol":s,"entry_dt":x.iloc[ei]["dt"],"entry":entry}
+            for hh in path_hours:
+                k=ei+hh*4-1
+                rec[f"fwd_{hh}h_short_pct"]=(1.0-float(x.iloc[min(k,len(x)-1)]["close"])/entry)*100.0
+            rr=simulate_short_grid(x,[i],REF_TP,REF_SL,REF_H)
+            rec["ref_net_ret"]=rr[0] if rr else np.nan
+            diag.append(rec)
+    ddf=pd.DataFrame(diag)
+    ddf.to_csv(OUT/"fresh_short_diagnostics.csv",index=False)
+    if not ddf.empty:
+        split=START+pd.Timedelta(days=60)
+        ddf["bucket"]=np.where(pd.to_datetime(ddf["entry_dt"],utc=True)<split,"EARLY_60D","LATE_120D")
+        def dstat(g):
+            r=g["ref_net_ret"].astype(float); gp=float(r[r>0].sum()); gl=float(-r[r<0].sum())
+            return pd.Series({"trades":len(g),"win_rate_pct":(r>0).mean()*100,"avg_net_pct":r.mean()*100,
+                              "profit_factor":gp/gl if gl>0 else np.inf,"sum_net_pct":r.sum()*100})
+        ts=ddf.groupby("bucket").apply(dstat,include_groups=False).reset_index()
+        ts.to_csv(OUT/"fresh_short_time_split.csv",index=False)
+        ss=ddf.groupby("symbol").apply(dstat,include_groups=False).reset_index().sort_values("sum_net_pct",ascending=False)
+        ss.to_csv(OUT/"fresh_short_symbol_breakdown.csv",index=False)
+        prow=[]
+        for hh in path_hours:
+            z=ddf[f"fwd_{hh}h_short_pct"].astype(float)
+            prow.append({"hold_h":hh,"n":len(z),"mean_short_pct":z.mean(),"median_short_pct":z.median(),
+                         "positive_pct":(z>0).mean()*100})
+        pd.DataFrame(prow).to_csv(OUT/"fresh_short_forward_path.csv",index=False)
+        print("\n=== REF 10/6/24 TIME SPLIT ===")
+        print(ts.to_string(index=False))
+        print("\n=== REF 10/6/24 TOP/BOTTOM SYMBOLS ===")
+        print(pd.concat([ss.head(10),ss.tail(10)]).to_string(index=False))
+        print("\n=== RAW SHORT FORWARD PATH (NO TP/SL, BEFORE COST) ===")
+        print(pd.DataFrame(prow).to_string(index=False))
 
 if __name__ == "__main__":
     main()
