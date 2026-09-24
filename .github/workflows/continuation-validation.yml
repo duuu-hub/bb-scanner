@@ -23,9 +23,9 @@ jobs:
           python-version: "3.12"
       - run: pip install pandas numpy
       - name: Run continuation validation
-        run: cd research && python continuation_validation.py
+        run: python research/continuation_validation.py
       - uses: actions/upload-artifact@v4
         with:
           name: continuation-validation-results
-          path: research/continuation_validation_results/
+          path: continuation_validation_results/
           retention-days: 14
