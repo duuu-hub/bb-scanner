@@ -180,7 +180,7 @@ def main():
         for feat in ["start_er","start_gap"]:
             z=h[[feat,"ret_pct"]].dropna()
             yrows.append({"year":int(year),"feature":feat,"n":len(z),
-                "spearman":float(z[feat].corr(z["ret_pct"],method="spearman")) if len(z)>=3 else math.nan})
+                "spearman":float(z[feat].rank(method="average").corr(z["ret_pct"].rank(method="average"))) if len(z)>=3 else math.nan})
     ycorr=pd.DataFrame(yrows)
     ycorr.to_csv(OUT/"signal_day_yearly_rankcorr.csv",index=False)
 
