@@ -59,3 +59,16 @@ jobs:
                   "returned": [x.get("symbol") for x in data[:3]] if isinstance(data, list) else None,
               })
           PY
+
+      - name: Measure Demo-universe scanner latency (no orders)
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          LONG3_DEMO_UNIVERSE_ONLY: '1'
+          GITHUB_EVENT_NAME: workflow_dispatch
+        run: |
+          start=$(date +%s%3N)
+          python scanner.py
+          end=$(date +%s%3N)
+          echo "DEMO_SCANNER_ELAPSED_MS=$((end-start))"
