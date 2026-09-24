@@ -20,7 +20,7 @@ def exit_trade(g,entry_i,side,tp,sl,bars,entry_px):
   hi,lo=float(g.iloc[j].high),float(g.iloc[j].low)
   if side=="LONG": hit_tp=hi>=entry_px*(1+tp/100); hit_sl=lo<=entry_px*(1-sl/100)
   else: hit_tp=lo<=entry_px*(1-tp/100); hit_sl=hi>=entry_px*(1+sl/100)
-  if hit_tp and hit_sl: return None
+  # Intrabar path is unknown when both levels touch. Count it as SL rather\n  # than dropping the trade, which would bias execution results upward.\n  if hit_tp and hit_sl: return j,-sl,"BOTH_SL"
   if hit_tp: return j,tp,"TP"
   if hit_sl: return j,-sl,"SL"
  px=float(g.iloc[end].close); ret=(px/entry_px-1)*100*(1 if side=="LONG" else -1)
