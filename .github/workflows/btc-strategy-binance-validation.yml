@@ -1,0 +1,24 @@
+name: BTC strategy exact-data validation
+on:
+  push:
+    branches: [research-btc-strategy-lab-replication]
+    paths:
+      - 'research/btc_strategy_lab_replication/run_binance_validation.py'
+      - '.github/workflows/btc-strategy-binance-validation.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-btc-strategy-lab-replication}
+      - run: pip install pandas numpy pyarrow requests
+      - run: python research/btc_strategy_lab_replication/run_binance_validation.py
+      - name: Commit results
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/btc_strategy_lab_replication/out/binance_cost_forward_validation.json
+          git diff --cached --quiet || git commit -m "research: Binance replication cost validation results"
+          git push
