@@ -241,6 +241,42 @@ def main():
     esdf=pd.DataFrame(erows)
     esdf.to_csv(OUT/"early_sign_outcomes.csv",index=False)
 
+    # Causal 3-day early-exit test: entry unchanged; after 3 completed position days,
+    # exit from the following day if close-to-close BTC/ETH basket return <= 0.
+    # This avoids using day-3 close to claim an exit at that same close.
+    base=x["position"].to_numpy(float)
+    early=np.zeros(len(x),dtype=float)
+    entry_i=None; forced=False
+    for i in range(len(x)):
+        if base[i]==1 and (i==0 or base[i-1]==0):
+            entry_i=i; forced=False
+        if base[i]==0:
+            entry_i=None; forced=False
+        if base[i]==1 and not forced:
+            early[i]=1.0
+            if entry_i is not None and i-entry_i==3:
+                r3=fwd_underlying(x,entry_i,3)
+                if np.isfinite(r3) and r3<=0:
+                    forced=True
+        # after forced exit, remain flat until original regime resets
+    intr=((x["BTCUSDT_close"]/x["BTCUSDT_open"]-1)+(x["ETHUSDT_close"]/x["ETHUSDT_open"]-1))*50
+    turn=pd.Series(early,index=x.index).diff().abs().fillna(pd.Series(early,index=x.index).abs())
+    x["early3_position"]=early
+    x["early3_strategy_ret"]=early*intr-turn*(RT/2)
+
+    brows=[]
+    for label,col in [("BASE","strategy_ret"),("EARLY3","early3_strategy_ret")]:
+        for year,g in x[(x["datetime_utc"].dt.year>=2018)&(x["datetime_utc"].dt.year<=2025)].groupby(x["datetime_utc"].dt.year):
+            pp=perf(g[col].to_numpy(float))
+            brows.append({"variant":label,"period":str(int(year)),**pp,
+                "active_day_pct":float((g["position" if label=="BASE" else "early3_position"]==1).mean()*100)})
+        g=x[(x["datetime_utc"].dt.year>=2018)&(x["datetime_utc"].dt.year<=2025)]
+        pp=perf(g[col].to_numpy(float))
+        brows.append({"variant":label,"period":"2018-2025",**pp,
+            "active_day_pct":float((g["position" if label=="BASE" else "early3_position"]==1).mean()*100)})
+    bdf=pd.DataFrame(brows)
+    bdf.to_csv(OUT/"early3_backtest_compare.csv",index=False)
+
     rows=[]
     for year,g in x.groupby(x["datetime_utc"].dt.year):
         if year<2018: continue
@@ -314,6 +350,8 @@ def main():
     print(pcdf.to_string(index=False))
     print("\\n=== EARLY SIGN OUTCOMES ===")
     print(esdf.to_string(index=False))
+    print("\\n=== EARLY3 BACKTEST BASE VS EARLY EXIT ===")
+    print(bdf.to_string(index=False))
     print("\\n=== LOSING YEAR EPISODES ===")
     print(e[e["year"].isin(y.loc[y["outcome"]=="LOSS","year"].tolist())].to_string(index=False))
 
