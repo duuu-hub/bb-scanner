@@ -293,7 +293,7 @@ def main():
                         if hit_tp and hit_sl: exit_px=entry*(1+SL); reason="SL_BOTH"; exit_i=j; break
                         if hit_sl: exit_px=entry*(1+SL); reason="SL"; exit_i=j; break
                         if hit_tp: exit_px=entry*(1-TP); reason="TP"; exit_i=j; break
-                gross=(exit_px/entry-1) if side=="LONG" else (entry/exit_px-1)
+                gross=(exit_px/entry-1) if side=="LONG" else (1-exit_px/entry)
                 net=gross-COST_RT
                 trades.append({"symbol":s,"signal_dt":x.iloc[i]["dt"],"entry_dt":x.iloc[entry_i]["dt"],"exit_dt":x.iloc[exit_i]["dt"],"side":side,"entry":entry,"exit":exit_px,"reason":reason,"gross_ret":gross,"net_ret":net})
     td=pd.DataFrame(trades)
@@ -350,7 +350,7 @@ def main():
                         exit_px=sl; reason="SL"; break
                     if hit_tp:
                         exit_px=tp; reason="TP"; break
-            gross=(exit_px/entry-1.0) if side=="LONG" else (entry/exit_px-1.0)
+            gross=(exit_px/entry-1.0) if side=="LONG" else (1.0-exit_px/entry)
             net=gross-ROUND_TRIP_COST
             out.append({"side":side,"entry_ts":int(x.iloc[entry_i]["ts"]),"entry_dt":str(x.iloc[entry_i]["dt"]),
                         "symbol":str(x.iloc[entry_i]["symbol"]),"entry":entry,"exit":exit_px,
