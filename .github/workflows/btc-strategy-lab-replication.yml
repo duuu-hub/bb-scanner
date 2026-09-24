@@ -41,6 +41,8 @@ jobs:
         run: python research/btc_strategy_lab_replication/run_fixed_windows.py
       - name: Run bear regime experiments
         run: python research/btc_strategy_lab_replication/run_bear_regime_tests.py
+      - name: Calculate flat periods
+        run: python research/btc_strategy_lab_replication/calc_flat_gaps.py
       - name: Commit results
         run: |
           git config user.name github-actions
