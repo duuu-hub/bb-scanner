@@ -3,8 +3,8 @@
 import argparse, csv, json
 from pathlib import Path
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--data",default="research/mega_runner/data/binance_spot_1h"); ap.add_argument("--out",default="research/mega_runner/labels.csv"); ap.add_argument("--horizon-days",type=int,default=365); a=ap.parse_args()
-    out=[]; H=a.horizon_days*24
+    ap=argparse.ArgumentParser(); ap.add_argument("--data",default="research/mega_runner/data/binance_spot_1d"); ap.add_argument("--out",default="research/mega_runner/labels.csv"); ap.add_argument("--horizon-days",type=int,default=365); a=ap.parse_args()
+    out=[]; H=a.horizon_days
     for p in Path(a.data).glob("*USDT.csv"):
         rows=list(csv.DictReader(p.open()))
         lo=[float(x["low"]) for x in rows]; hi=[float(x["high"]) for x in rows]
