@@ -64,6 +64,31 @@ def l2_signals(sym,df):
    if ht: ex=tp;xt=tt;outcome="TP";break
   out.append([sym,t,xt,(ex/en-1)*100-L2FEE,outcome,both])
  return out
+def resolve_1m(tr):
+ amb=tr[tr.samebar_both].copy(); resolved={}; sess=requests.Session(); cache={}
+ for _,r in amb.iterrows():
+  sym=r.symbol; bar=r.exit_time; key=(sym,bar.year,bar.month)
+  if key not in cache:
+   name=f"{sym}-1m-{bar:%Y-%m}.zip"; url=f"https://data.binance.vision/data/futures/um/monthly/klines/{sym}/1m/{name}"
+   q=sess.get(url,timeout=60); q.raise_for_status()
+   with zipfile.ZipFile(io.BytesIO(q.content)) as z:
+    fn=[n for n in z.namelist() if n.endswith(".csv")][0]; m=pd.read_csv(z.open(fn),header=None)
+   m=m.iloc[:,:6]; m.columns=["open_time","open","high","low","close","volume"]; m["dt"]=todt(m.open_time)
+   for k in ["open","high","low","close"]: m[k]=pd.to_numeric(m[k],errors="coerce")
+   cache[key]=m.set_index("dt")
+  q=cache[key]; en=float(r.entry); tp=en*1.10; sl=en*.975; z=q.loc[(q.index>=bar)&(q.index<bar+pd.Timedelta(minutes=15))]; decision=None
+  for tt,v in z.iterrows():
+   ht=v.high>=tp; hs=v.low<=sl
+   if ht and hs: decision="UNRESOLVED_1M"; break
+   if hs: decision="SL"; break
+   if ht: decision="TP"; break
+  resolved[(r.symbol,r.signal_time)]=decision or "UNRESOLVED_1M"
+ tr["resolution_1m"]=[resolved.get((r.symbol,r.signal_time),"NA") for _,r in tr.iterrows()]
+ for i,r in tr[tr.samebar_both].iterrows():
+  if r.resolution_1m=="TP": tr.at[i,"net_pct"]=10.0-L2FEE; tr.at[i,"outcome"]="TP_1M"
+  elif r.resolution_1m=="SL": tr.at[i,"net_pct"]=-2.5-L2FEE; tr.at[i,"outcome"]="SL_1M"
+ return tr
+
 def perf(r):
  a=np.asarray(r,float); w=np.prod(1+a/100); curve=np.r_[1,np.cumprod(1+a/100)]; dd=(curve/np.maximum.accumulate(curve)-1)*100; sd=np.std(a)
  return (w-1)*100,np.mean(a)/sd*math.sqrt(365.25) if sd else np.nan,float(dd.min())
