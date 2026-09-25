@@ -131,3 +131,18 @@ hour is missing or stale.
 - SMC Telegram order messages should show current market price, limit entry,
   setup creation time, and setup age so a retracement order is not mistaken
   for a current-price signal.
+
+
+## 10. Mandatory research audit and handoff protocol
+
+All ChatGPT conversations, agents, and research branches working in this repository must follow the same evidence standard. A new chat must inspect this file and `RESEARCH_RULES.md` before trusting or extending prior research.
+
+- Do not treat a GitHub Actions `success` conclusion as proof that a strategy was actually tested. Verify non-zero universe/input rows, non-zero expected outputs, and artifact/log contents.
+- Do not quote an old PF, return, Sharpe, MDD, win rate, or trade count as current unless the exact strategy version has passed the audit rules in `RESEARCH_RULES.md`.
+- When a material execution/data bug is found, mark every result produced by the affected implementation as `INVALID` or `QUARANTINED`. Do not silently mix pre-fix and post-fix metrics.
+- Fix the root cause on the research branch, rerun on the same canonical data, and compare before/after results.
+- Every strategy must have one clearly identified latest valid lineage: branch, commit, rules, data set, time range, costs, and audit state.
+- Prefer robust parameter neighborhoods and OOS/cost stability over a single best parameter point.
+- Do not start a new strategy family while repository-wide cleanup/audit is explicitly in progress unless the user asks to interrupt it.
+- Killzone research is excluded from the current cleanup/audit program and must not be folded into current conclusions unless the user explicitly re-enables it.
+- Research changes stay off `main` until audited. Live/demo safety rules above remain authoritative.
