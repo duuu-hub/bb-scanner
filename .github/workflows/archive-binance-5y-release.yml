@@ -1,0 +1,37 @@
+name: Archive Binance 5Y Dataset
+on:
+  push:
+    branches:
+      - infra/binance-5y-release-archive
+    paths:
+      - '.research/archive_binance_5y_once'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download source artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p archive
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36095439671 -n "rank5-binance-um-15m-5y-data-shard-$s" -D "tmp/data-$s"
+            gh run download 36095439671 -n "rank5-binance-um-15m-5y-manifest-shard-$s" -D "tmp/manifest-$s"
+          done
+          find tmp -type f -name '*.csv.gz' -exec mv {} archive/ \;
+          find tmp -type f -name 'manifest_shard_*.json' -exec mv {} archive/ \;
+      - name: Validate and checksum
+        run: |
+          test "$(find archive -name '*.csv.gz' | wc -l)" -ge 100
+          test "$(find archive -name 'manifest_shard_*.json' | wc -l)" -eq 8
+          sha256sum archive/* > archive/SHA256SUMS.txt
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create binance-um-15m-5y-v1 archive/* --title "Binance USD-M 15m 5Y Dataset v1" --notes "Frozen research dataset from Actions run 36095439671. Includes source manifests and SHA256 checksums."
