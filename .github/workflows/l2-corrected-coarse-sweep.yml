@@ -6,6 +6,10 @@ on:
     paths: [research/l2_corrected_coarse_sweep.py]
 jobs:
   sweep:
+    strategy:
+      fail-fast: false
+      matrix:
+        rank: [3, 4, 5, 6]
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -23,9 +27,11 @@ jobs:
           done
           find canonical_um -type f -name '*.parquet' | head
           test -n "$(find canonical_um -type f -name '*.parquet' -print -quit)"
-      - name: Sweep
-        run: python research/l2_corrected_coarse_sweep.py | tee artifacts/l2_corrected_coarse_sweep.log
+      - name: Sweep rank shard
+        env:
+          RANK_ONLY: "${{ matrix.rank }}"
+        run: python research/l2_corrected_coarse_sweep.py | tee artifacts/l2_corrected_coarse_sweep_rank${{ matrix.rank }}.log
       - uses: actions/upload-artifact@v4
         with:
-          name: l2-corrected-coarse-sweep
+          name: l2-no-weekly-rank-${{ matrix.rank }}
           path: artifacts/
