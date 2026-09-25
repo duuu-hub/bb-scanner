@@ -1,0 +1,35 @@
+name: PD Array Simple Research
+on:
+  push:
+    branches: [research/pd-array-simple]
+    paths:
+      - research/pd_array_simple.py
+      - .github/workflows/pd-array-simple.yml
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Run 5Y causal PD grid
+        run: python research/pd_array_simple.py --years 5 --out pd_results
+      - name: Audit outputs
+        run: |
+          test -s pd_results/summary.csv
+          test -s pd_results/yearly.csv
+          test -s pd_results/data_audit.csv
+          python - <<'PY'
+          import pandas as pd
+          x=pd.read_csv("pd_results/summary.csv"); a=pd.read_csv("pd_results/data_audit.csv")
+          assert len(x)==270, len(x)
+          assert (x.trades>0).all()
+          assert (a.gaps==0).all(), a
+          assert set(x.symbol)=={"BTCUSDT","ETHUSDT"}
+          print("AUDIT_SANITY_OK",len(x),x.trades.min(),x.trades.max())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-array-simple-5y
+          path: pd_results/
