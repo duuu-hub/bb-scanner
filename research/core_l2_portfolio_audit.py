@@ -176,5 +176,22 @@ def main():
    z,rr,P=simulate(mode,collision)
    print(mode,collision,"2021+",{"return_pct":P[0],"sharpe":P[1],"mdd":P[2],"accepted_l2":len(z),"max_weight_sum_rule":1.0})
    print(mode,collision,"YEARS",[(int(y),)+perf(g) for y,g in rr.groupby(rr.index.year)])
- print("NOTE: samebar collision sensitivity brackets SL-first vs TP-first. Daily portfolio is realized-return approximation; intraday MTM MDD remains a limitation.")
+ # Focused 2025-2026 audit: unresolved 1m remains SL by construction.
+ z,rr,P=simulate("L2_30PCT","SL")
+ z["year"]=z.exit_time.dt.year
+ for y in [2025,2026]:
+  q=z[z.year==y].copy()
+  if q.empty: continue
+  gp=q.loc[q.net_pct>0,"net_pct"].sum(); gl=-q.loc[q.net_pct<0,"net_pct"].sum()
+  print("AUDIT_YEAR",y,{"accepted":len(q),"wins":int((q.net_pct>0).sum()),"losses":int((q.net_pct<0).sum()),"avg_net":float(q.net_pct.mean()),"pf_trade":float(gp/gl) if gl else None,"samebar15":int(q.samebar_both.sum()),"unresolved1m":int((q.resolution_1m=="UNRESOLVED_1M").sum()),"unique_symbols":int(q.symbol.nunique())})
+  bys=q.groupby("symbol").agg(n=("net_pct","size"),sum_net=("net_pct","sum"),avg=("net_pct","mean")).sort_values("sum_net",ascending=False)
+  print("AUDIT_TOP_SYMBOLS",y,bys.head(10).reset_index().to_dict("records"))
+  print("AUDIT_BOTTOM_SYMBOLS",y,bys.tail(10).reset_index().to_dict("records"))
+  # continuity: every trade path must have expected 15m spacing from signal to exit, never > 60m
+  dur=(q.exit_time-q.signal_time).dt.total_seconds()/60
+  print("AUDIT_DURATION",y,{"min":float(dur.min()),"median":float(dur.median()),"max":float(dur.max()),"over60":int((dur>60).sum()),"non15multiple":int(((dur%15)!=0).sum())})
+  # contribution concentration on unweighted trade-net basis
+  pos=q.groupby("symbol").net_pct.sum().sort_values(ascending=False); total=q.net_pct.sum()
+  print("AUDIT_CONCENTRATION",y,{"top1_share_net":float(pos.iloc[0]/total) if total else None,"top5_share_net":float(pos.head(5).sum()/total) if total else None})
+ print("NOTE unresolved 1m collisions remain SL. Daily portfolio is realized-return approximation; intraday MTM MDD remains a limitation.")
 if __name__=="__main__": main()
