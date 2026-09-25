@@ -196,3 +196,16 @@ Before every substantial research run, explicitly check the failure classes that
 - research workflows accidentally sharing live watcher concurrency/state or modifying protected forward-state files.
 
 Where practical, encode these checks as assertions/preflight steps so the workflow fails loudly instead of producing plausible-looking bad results.
+
+
+## 13. Lessons-learned rule for new failure modes
+
+The pre-run known-error checklist is a living control list, not a fixed historical note.
+
+- Whenever a new failure mode is discovered that is not already covered by the checklist, fix the immediate root cause first and then add the generalized failure pattern to this document.
+- Write the lesson as a reusable prevention rule, not as a one-off incident description tied only to one run ID or strategy.
+- Where practical, convert each new lesson into an automated assertion, preflight check, test, or workflow guard so the same class of error fails early next time.
+- Before adding a lesson, check whether an existing rule already covers the same root cause; consolidate instead of creating duplicates.
+- If the new failure invalidates prior research, apply the QUARANTINED/INVALID procedure in `RESEARCH_RULES.md` and identify the affected lineage.
+- After updating this lessons-learned list, future agents must include the new failure class in their pre-run review.
+- The objective is cumulative reliability: every novel failure should make the repository's future research process harder to break in the same way.
