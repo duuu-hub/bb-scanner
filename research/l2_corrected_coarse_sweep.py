@@ -2,13 +2,13 @@
 #!/usr/bin/env python3
 # Coarse re-search of L2 after fixing execution: signal 15m entry bar IS included.\n# trigger retry 2026-09-25
 from pathlib import Path
-import math
+import os, math
 import numpy as np, pandas as pd
 from core_l2_portfolio_audit import ROOT, TF, L2FEE
 
 # Weekly (1W) is deliberately excluded from the BB vote for this rescue test.
 # Re-search the remaining causal parameters broadly; no single-point cherry-pick.
-RANKS=[3,4,5,6]
+RANKS=[int(os.getenv("RANK_ONLY"))] if os.getenv("RANK_ONLY") else [3,4,5,6]
 RET4S=[10,15,20,25,30,35,40,50]
 TPS=[3,5,8,10,12,15,20]
 SLS=[1.5,2.5,4,6,8,10]
@@ -67,7 +67,8 @@ def main():
       rows.append([rank,r4,tp,sl,hold*15,len(a),a.mean(),pf,posyrs,min([yp[y] for y in full],default=np.nan),yp.get(2026,np.nan)])
  out=pd.DataFrame(rows,columns=["rank","ret4","tp","sl","hold_min","n","avg","pf","pos_years_2021_25","worst_pf_2021_25","pf_2026"])
  Path("artifacts").mkdir(exist_ok=True)
- out.to_csv("artifacts/l2_no_weekly_rescue_sweep.csv",index=False)
+ suffix=os.getenv("RANK_ONLY","all")
+ out.to_csv(f"artifacts/l2_no_weekly_rescue_sweep_rank{suffix}.csv",index=False)
  # robust ranking: require >=300 trades, reward PF + breadth, not single best point
  q=out[out.n>=300].copy(); q["score"]=q.pf+0.08*q.pos_years_2021_25+0.10*np.minimum(q.worst_pf_2021_25,1.5)
  print("TOP_ROBUST")
