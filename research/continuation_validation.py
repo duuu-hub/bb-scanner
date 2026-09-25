@@ -37,7 +37,7 @@ def prep():
  return pd.concat([cand.reset_index(drop=True),pd.DataFrame(recs)],axis=1)
 
 def rule_from_train(train,side):
- q=train[(train.direction==side)&(train[PRIMARY]!="AMBIG")].copy()
+ q=train[(train.direction==side)&(~train[PRIMARY].isin(["AMBIG","NO_ENTRY"]))].copy()
  s=cm.lift_table(q,PRIMARY,FEATURES)
  c=cm.combo_table(q,PRIMARY,s)
  if c.empty:return None
@@ -51,7 +51,7 @@ def apply_rule(df,rule):
  return m
 
 def stats(q,label):
- q=q[q[label]!="AMBIG"]; n=len(q)
+ q=q[~q[label].isin(["AMBIG","NO_ENTRY"])]; n=len(q)
  if not n:return dict(n=0,win_rate=np.nan,loss_rate=np.nan,timeout_rate=np.nan)
  return dict(n=n,win_rate=(q[label]=="WIN").mean(),loss_rate=(q[label]=="LOSS").mean(),timeout_rate=(q[label]=="TIMEOUT").mean())
 
@@ -65,7 +65,7 @@ def main():
   if r is None:continue
   rules.append(dict(side=side,rules=r.rules,train_n=int(r.n),train_win_rate=float(r.win_rate),train_lift=float(r.lift)))
   for name,z in (("TRAIN",train),("OOS",test)):
-   q=z[(z.direction==side)&(z[PRIMARY]!="AMBIG")]; base=stats(q,PRIMARY); sel=q[apply_rule(q,r)]; st=stats(sel,PRIMARY)
+   q=z[(z.direction==side)&(~z[PRIMARY].isin(["AMBIG","NO_ENTRY"]))]; base=stats(q,PRIMARY); sel=q[apply_rule(q,r)]; st=stats(sel,PRIMARY)
    rows.append(dict(split=name,side=side,rules=r.rules,baseline_n=base["n"],baseline_win_rate=base["win_rate"],selected_n=st["n"],selected_win_rate=st["win_rate"],lift=st["win_rate"]/base["win_rate"] if base["win_rate"] else np.nan))
  # walk-forward: derive on prior 90d, test next 30d
  start=pd.to_datetime(x.timestamp_ms.min(),unit="ms",utc=True); end=pd.to_datetime(x.timestamp_ms.max(),unit="ms",utc=True); wf=[]; cur=start+pd.Timedelta(days=90)
@@ -90,7 +90,7 @@ def main():
  rob=[]
  for rr in rules:
   side=rr["side"]; r=next(rule_from_train(train,s) for s in (side,))
-  q=test[(test.direction==side)&(test[PRIMARY]!="AMBIG")]; sel=q[apply_rule(q,r)]
+  q=test[(test.direction==side)&(~test[PRIMARY].isin(["AMBIG","NO_ENTRY"]))]; sel=q[apply_rule(q,r)]
   for sym in ["ALL"]+sorted(sel.symbol.value_counts().head(10).index.tolist()):
    z=sel if sym=="ALL" else sel[sel.symbol!=sym]; st=stats(z,PRIMARY)
    rob.append(dict(side=side,excluded_symbol=sym,**st))
