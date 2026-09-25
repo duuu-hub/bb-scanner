@@ -1,0 +1,26 @@
+name: L2 corrected coarse sweep
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-core-l2-portfolio]
+    paths: [research/l2_corrected_coarse_sweep.py]
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install pandas numpy pyarrow requests
+      - name: Download canonical 5Y data
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: |
+          mkdir -p canonical_um artifacts
+          gh release download binance-15m-5y-canonical-v1 -p '*.parquet' -D canonical_um
+      - name: Sweep
+        run: python research/l2_corrected_coarse_sweep.py | tee artifacts/l2_corrected_coarse_sweep.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: l2-corrected-coarse-sweep
+          path: artifacts/
