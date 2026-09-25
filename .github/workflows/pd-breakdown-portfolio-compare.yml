@@ -1,0 +1,32 @@
+name: PD Breakdown Portfolio Compare
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_portfolio_compare_once']
+permissions: {contents: read, actions: read}
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_portfolio_compare.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - run: python research/pd_breakdown_portfolio_compare.py --trades input/trades_all.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd
+          a=pd.read_csv("out/comparison.csv"); o=pd.read_csv("out/comparison_oos.csv")
+          assert len(a)==6 and len(o)==6
+          assert (a.accepted>0).all() and (o.accepted>0).all()
+          assert ((a.mdd_pct>=0)&(a.mdd_pct<=1)).all()
+          assert ((o.mdd_pct>=0)&(o.mdd_pct<=1)).all()
+          assert a.case.nunique()==6 and o.case.nunique()==6
+          print("VERIFIED",len(a),len(o))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-portfolio-compare-VERIFIED, path: out/, if-no-files-found: error}
