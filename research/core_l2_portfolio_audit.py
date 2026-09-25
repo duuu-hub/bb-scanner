@@ -66,23 +66,36 @@ def l2_signals(sym,df):
  return out
 def resolve_1m(tr):
  amb=tr[tr.samebar_both].copy(); resolved={}; sess=requests.Session(); cache={}
+ def parse_zip(raw):
+  with zipfile.ZipFile(io.BytesIO(raw)) as z:
+   fn=[n for n in z.namelist() if n.endswith(".csv")][0]; m=pd.read_csv(z.open(fn),header=None)
+  m=m.iloc[:,:6]; m.columns=["open_time","open","high","low","close","volume"]; m["dt"]=todt(m.open_time)
+  for k in ["open","high","low","close"]: m[k]=pd.to_numeric(m[k],errors="coerce")
+  return m.set_index("dt")
  for _,r in amb.iterrows():
-  sym=r.symbol; bar=r.exit_time; key=(sym,bar.year,bar.month)
-  if key not in cache:
+  sym=r.symbol; bar=r.exit_time; mkey=(sym,bar.year,bar.month)
+  if mkey not in cache:
    name=f"{sym}-1m-{bar:%Y-%m}.zip"; url=f"https://data.binance.vision/data/futures/um/monthly/klines/{sym}/1m/{name}"
-   q=sess.get(url,timeout=60); q.raise_for_status()
-   with zipfile.ZipFile(io.BytesIO(q.content)) as z:
-    fn=[n for n in z.namelist() if n.endswith(".csv")][0]; m=pd.read_csv(z.open(fn),header=None)
-   m=m.iloc[:,:6]; m.columns=["open_time","open","high","low","close","volume"]; m["dt"]=todt(m.open_time)
-   for k in ["open","high","low","close"]: m[k]=pd.to_numeric(m[k],errors="coerce")
-   cache[key]=m.set_index("dt")
-  q=cache[key]; en=float(r.entry); tp=en*1.10; sl=en*.975; z=q.loc[(q.index>=bar)&(q.index<bar+pd.Timedelta(minutes=15))]; decision=None
+   q=sess.get(url,timeout=60)
+   cache[mkey]=parse_zip(q.content) if q.status_code==200 else None
+  qdf=cache[mkey]
+  # monthly missing (typically current month): fetch exact daily archive containing the ambiguous bar
+  if qdf is None:
+   dkey=(sym,bar.date())
+   if dkey not in cache:
+    name=f"{sym}-1m-{bar:%Y-%m-%d}.zip"; url=f"https://data.binance.vision/data/futures/um/daily/klines/{sym}/1m/{name}"
+    q=sess.get(url,timeout=60); cache[dkey]=parse_zip(q.content) if q.status_code==200 else None
+   qdf=cache[dkey]
+  if qdf is None:
+   resolved[(r.symbol,r.signal_time)]="NO_1M_DATA"; continue
+  en=float(r.entry); tp=en*1.10; sl=en*.975
+  z=qdf.loc[(qdf.index>=bar)&(qdf.index<bar+pd.Timedelta(minutes=15))]; decision=None
   for tt,v in z.iterrows():
    ht=v.high>=tp; hs=v.low<=sl
    if ht and hs: decision="UNRESOLVED_1M"; break
    if hs: decision="SL"; break
    if ht: decision="TP"; break
-  resolved[(r.symbol,r.signal_time)]=decision or "UNRESOLVED_1M"
+  resolved[(r.symbol,r.signal_time)]=decision or "NO_HIT_IN_1M"
  tr["resolution_1m"]=[resolved.get((r.symbol,r.signal_time),"NA") for _,r in tr.iterrows()]
  for i,r in tr[tr.samebar_both].iterrows():
   if r.resolution_1m=="TP": tr.at[i,"net_pct"]=10.0-L2FEE; tr.at[i,"outcome"]="TP_1M"
