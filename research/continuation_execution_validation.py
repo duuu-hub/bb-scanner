@@ -40,7 +40,11 @@ def stats(df,cost):
 def main():
  x=cv.prep().sort_values("timestamp_ms").reset_index(drop=True)
  times=np.sort(x.timestamp_ms.unique()); split=times[int(len(times)*.70)]; tr=x[x.timestamp_ms<split]; te=x[x.timestamp_ms>=split]
- groups={s:g.sort_values("timestamp_ms").reset_index(drop=True) for s,g in x.groupby("symbol")}
+ # x is the sparse signal/label table. Execution must use every actual 15m
+ # candle, including bars that are not candidates, for both entries and exits.
+ raw=cm.load("market_data_store/bitget/research_auto100_15m")
+ groups={s:g.sort_values("timestamp_ms").reset_index(drop=True) for s,g in raw.groupby("symbol")}
+ del raw
  rules={s:cv.rule_from_train(tr,s) for s in ("LONG","SHORT")}
  alltr=[]
  for side,tp,sl,h in CANDS:
@@ -49,7 +53,7 @@ def main():
    for rr in sig.itertuples():
     g=groups[rr.symbol]; base=int(np.searchsorted(g.timestamp_ms.to_numpy(),int(rr.timestamp_ms)))
     ei=base+1+delay
-    if ei>=len(g): continue
+    if ei>=len(g) or int(g.iloc[ei].timestamp_ms)!=int(rr.timestamp_ms)+(1+delay)*900_000: continue
     ep=float(g.iloc[ei].open); ex=exit_trade(g,ei,side,tp,sl,int(h*4),ep)
     if ex is None: continue
     xi,ret,why=ex
