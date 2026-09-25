@@ -29,7 +29,7 @@ for fn in sorted(glob.glob(a.input+"/*.csv.gz")):
        if sig=="FIRST_BREAKDOWN": ok=ok and i>0 and np.isfinite(rl[i-1]) and cl[i-1]>=rl[i-1]
        if sig=="BREAKDOWN_0.1ATR": ok=ok and cl[i]<rl[i]-0.1*atr[i]
        if not ok: continue
-       e=i+1; entry=op[e]; stop=entry+stop_atr*atr[i]; risk=stop-entry; tp=entry-rr*risk
+       e=i+1\n       # Entry must be the immediately following 4h candle; skip gaps.\n       if pd.Timestamp(x.dt.iloc[e])-pd.Timestamp(x.dt.iloc[i]) != pd.Timedelta(hours=4): continue\n       entry=op[e]; stop=entry+stop_atr*atr[i]; risk=stop-entry; tp=entry-rr*risk
        if risk<=0: continue
        exit_px=None; reason=None; z=min(e+5,len(x)-1) # 24h max hold: 6 x 4h candles from entry open
        for j in range(e,z+1):
