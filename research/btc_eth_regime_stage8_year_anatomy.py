@@ -472,4 +472,5 @@ def flat_periods_current_rule():
 
 if __name__=="__main__":
     main()
+    flat_periods_current_rule()
 
