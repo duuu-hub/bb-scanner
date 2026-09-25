@@ -23,7 +23,6 @@ jobs:
           from pathlib import Path
           p=Path(".github/workflows/pd-4h-binance-universe.yml").read_text()
           bad=[]
-          if r")\\n          assert" in p: bad.append("literal newline escape in embedded Python")
           if "run-id: 36095439671" not in p: bad.append("canonical source run changed")
           if bad: raise SystemExit("PRECHECK FAIL: "+"; ".join(bad))
           print("PRECHECK OK")
