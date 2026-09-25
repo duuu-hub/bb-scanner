@@ -1,0 +1,25 @@
+name: Continuation 1m Resolve
+on:
+  push:
+    branches: [research-continuation-mining]
+    paths: ["research/continuation_1m_resolve.py",".github/workflows/continuation-1m-resolve.yml"]
+  workflow_dispatch:
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Build phase1 inputs
+        run: python research/continuation_execution_validation.py
+      - name: Resolve ambiguous bars
+        run: python research/continuation_1m_resolve.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuation-1m-results
+          path: continuation_1m_results/
+          retention-days: 14
