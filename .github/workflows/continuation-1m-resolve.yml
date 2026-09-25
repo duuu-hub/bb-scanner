@@ -6,6 +6,10 @@ on:
   workflow_dispatch:
 jobs:
   resolve:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -16,10 +20,13 @@ jobs:
       - run: pip install pandas numpy
       - name: Build phase1 inputs
         run: python research/continuation_execution_validation.py
-      - name: Resolve ambiguous bars
+      - name: Resolve ambiguity shard
+        env:
+          SHARD_INDEX: ${{ matrix.shard }}
+          SHARD_COUNT: "6"
         run: python research/continuation_1m_resolve.py
       - uses: actions/upload-artifact@v4
         with:
-          name: continuation-1m-results
+          name: continuation-1m-shard-${{ matrix.shard }}
           path: continuation_1m_results/
           retention-days: 14
