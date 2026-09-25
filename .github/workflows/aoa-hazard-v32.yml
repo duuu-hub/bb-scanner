@@ -1,0 +1,33 @@
+name: AOA Hazard V32
+
+on:
+  push:
+    branches: [research-aoa-hazard-v32]
+    paths:
+      - "research/aoa_hazard_v32/**"
+      - ".github/workflows/aoa-hazard-v32.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt scikit-learn
+      - run: python -m py_compile research/aoa_hazard_v32/hazard_v32.py
+      - run: python research/aoa_hazard_v32/hazard_v32.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aoa-hazard-v32-results
+          path: research/aoa_hazard_v32/output/
+          if-no-files-found: error
+          retention-days: 30
