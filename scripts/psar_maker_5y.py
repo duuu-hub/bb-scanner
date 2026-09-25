@@ -1,6 +1,6 @@
 import argparse,glob,json
 import pandas as pd,numpy as np
-DISTS=(.001,.0025,.005,.0075,.01); TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
+DISTS=(.015,.02,.03,.05); TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
 
 def psar(h,l,af0=.02,step=.02,afmax=.2):
  n=len(h); s=np.full(n,np.nan); b=np.ones(n,bool)
