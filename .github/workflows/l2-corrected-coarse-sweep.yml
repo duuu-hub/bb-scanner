@@ -17,11 +17,12 @@ jobs:
         env: {GH_TOKEN: "${{ github.token }}"}
         run: |
           mkdir -p canonical_um artifacts downloads
-          gh release download binance-15m-5y-canonical-v1 -p 'binance-spot-15m-5y-parquet-shard-*.zip' -D downloads
+          gh release download binance-15m-5y-canonical-v1 --repo "${{ github.repository }}" -p 'binance-spot-15m-5y-parquet-shard-*.zip' -D downloads
           for z in downloads/*.zip; do
             unzip -q -o "$z" -d canonical_um
           done
           find canonical_um -type f -name '*.parquet' | head
+          test -n "$(find canonical_um -type f -name '*.parquet' -print -quit)"
       - name: Sweep
         run: python research/l2_corrected_coarse_sweep.py | tee artifacts/l2_corrected_coarse_sweep.log
       - uses: actions/upload-artifact@v4
