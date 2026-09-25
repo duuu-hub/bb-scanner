@@ -2,7 +2,7 @@ import io, zipfile, requests, pandas as pd, numpy as np
 from datetime import datetime
 BASE="https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/4h"
 frames=[]
-for p in pd.period_range("2021-09","2026-08",freq="M"):
+for p in pd.period_range("2020-01","2026-05",freq="M"):
     u=f"{BASE}/BTCUSDT-4h-{p}.zip"
     x=requests.get(u,timeout=30)
     if x.status_code!=200: continue
@@ -11,6 +11,8 @@ for p in pd.period_range("2021-09","2026-08",freq="M"):
     d=d.iloc[:,:6]; d.columns=["ts","open","high","low","close","volume"]
     frames.append(d)
 df=pd.concat(frames,ignore_index=True)
+# Exact upstream benchmark end date; archive loop includes full May monthly file.
+
 for c in ["open","high","low","close"]: df[c]=pd.to_numeric(df[c])
 # Binance archive timestamps may be milliseconds or microseconds depending on archive vintage.
 ts=pd.to_numeric(df.ts)
@@ -18,6 +20,7 @@ df["time"]=pd.NaT
 ms=ts < 10**14
 df.loc[ms,"time"]=pd.to_datetime(ts[ms],unit="ms")
 df.loc[~ms,"time"]=pd.to_datetime(ts[~ms],unit="us")
+df=df[df["time"] < pd.Timestamp("2026-05-04")].reset_index(drop=True)
 hi,lo,cl=df.high,df.low,df.close
 ten=(hi.rolling(9).max()+lo.rolling(9).min())/2
 kij=(hi.rolling(26).max()+lo.rolling(26).min())/2
