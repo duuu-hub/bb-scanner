@@ -10,7 +10,7 @@ c=t[(t.n==320)&(t.signal=="FIRST_BREAKDOWN")&(t.stop_atr==1.0)&(t.rr==3.0)].copy
 assert len(c)>1000
 def stats(g):
  w=g.r_net[g.r_net>0].sum();l=-g.r_net[g.r_net<0].sum()
- return pd.Series({"trades":len(g),"symbols":g.symbol.nunique(),"wr":(g.r_net>0).mean(),"pf":w/l if l else np.nan,"expectancy_r":g.r_net.mean(),"median_r":g.r_net.median(),"net_return_sum":g.net_return.sum()})
+ return pd.Series({"trades":len(g),"symbols":g["symbol"].nunique() if "symbol" in g.columns else 1,"wr":(g.r_net>0).mean(),"pf":w/l if l else np.nan,"expectancy_r":g.r_net.mean(),"median_r":g.r_net.median(),"net_return_sum":g.net_return.sum()})
 stats(c).to_frame().T.to_csv(Path(a.out)/"core_overall.csv",index=False)
 c.groupby("year").apply(stats,include_groups=False).reset_index().to_csv(Path(a.out)/"core_yearly.csv",index=False)
 c.groupby("symbol").apply(stats,include_groups=False).reset_index().to_csv(Path(a.out)/"core_symbol.csv",index=False)
