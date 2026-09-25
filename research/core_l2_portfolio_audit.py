@@ -54,7 +54,7 @@ def l2_signals(sym,df):
  exact=pd.DataFrame(A,index=idx).sum(axis=1); p=b.open; raw=(exact>=6)&(p.pct_change(16)*100>=30); trig=raw & ~raw.shift(1,fill_value=False)
  out=[]
  for t in idx[trig]:
-  pos=idx.get_indexer([t])[0]; path=b.iloc[pos+1:pos+5]
+  pos=idx.get_indexer([t])[0]; path=b.iloc[pos:pos+4]
   if path.empty: continue
   en=float(p.loc[t]); tp=en*1.10; sl=en*.975; ex=float(path.iloc[-1].close); xt=path.index[-1]; outcome="TIME"; both=False
   for tt,z in path.iterrows():
@@ -62,7 +62,7 @@ def l2_signals(sym,df):
    if ht and hs: both=True
    if hs: ex=sl;xt=tt;outcome="SL";break
    if ht: ex=tp;xt=tt;outcome="TP";break
-  out.append([sym,t,xt,(ex/en-1)*100-L2FEE,outcome,both])
+  out.append([sym,t,xt,(ex/en-1)*100-L2FEE,outcome,both, bool(xt==t)])
  return out
 def resolve_1m(tr):
  amb=tr[tr.samebar_both].copy(); resolved={}; sess=requests.Session(); cache={}
@@ -110,7 +110,7 @@ def main():
  for p in sorted(ROOT.glob("*.parquet")):
   try: trs+=l2_signals(p.stem,pd.read_parquet(p))
   except Exception as e: print("ERR",p.stem,e)
- tr=pd.DataFrame(trs,columns=["symbol","signal_time","exit_time","net_pct","outcome","samebar_both"])
+ tr=pd.DataFrame(trs,columns=["symbol","signal_time","exit_time","net_pct","outcome","samebar_both","exit_entry_bar"])
  tr["entry"]=np.nan
  # recover exact entry from net/outcome is unsafe; load entry prices from canonical signal bars
  px={}
@@ -118,7 +118,7 @@ def main():
   d=pd.read_parquet(p); d["dt"]=pd.to_datetime(d.open_time,unit="ms",utc=True); px[p.stem]=d.set_index("dt").open.astype(float)
  for i,r in tr.iterrows(): tr.at[i,"entry"]=float(px[r.symbol].loc[r.signal_time])
  tr=resolve_1m(tr)
- print("1M_RESOLUTION",tr.loc[tr.samebar_both,"resolution_1m"].value_counts(dropna=False).to_dict())
+ print("1M_RESOLUTION",tr.loc[tr.samebar_both,"resolution_1m"].value_counts(dropna=False).to_dict())\n print("ENTRY_BAR_EXITS",int(tr.exit_entry_bar.sum()),tr.loc[tr.exit_entry_bar,"outcome"].value_counts().to_dict())
  # Core OFF classification is exact D2_0 calendar-day state. L2 starts only when OFF; existing L2 is allowed to finish.
  state=x.set_index(x.dt.dt.floor("D")).d2
  tr["core_on"]=state.reindex(tr.signal_time.dt.floor("D")).fillna(0).to_numpy().astype(bool)
