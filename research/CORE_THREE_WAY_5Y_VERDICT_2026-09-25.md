@@ -2,9 +2,10 @@
 
 ## Decision
 
-Do **not** run all three modules together. The frozen Continuation SHORT did not
-transfer from the Bitget AUTO100 research universe to the 2021–2026 Binance
-USD-M archive. Keep original BTC/ETH core as the operational control; shadow
+Do **not** run all three modules together. The frozen Continuation SHORT has
+no validated profitable execution on either the original Bitget OOS period
+or the 2021–2026 Binance USD-M archive after correcting two execution bugs.
+Keep original BTC/ETH core as the operational control; shadow
 frozen L2 separately, with core-flat admission as the conservative variant.
 The D2_0 early exit remains a post-hoc parallel shadow, not a replacement.
 
@@ -27,31 +28,45 @@ The D2_0 early exit remains a post-hoc parallel shadow, not a replacement.
   it yields 60,393 trades, 696 symbols, mean -0.411%, PF 0.732. All six
   individual calendar years have PF below 1 (2021 .516; 2022 .775; 2023
   .473; 2024 .576; 2025 .787; 2026 .783). The July 31–August 31 2026 overlap
-  alone has 2,222 trades, PF .822. These results invalidate that short as a
-  cross-venue complement at the tested sizing; they do not disprove its
-  original 53-day Bitget result.
+  alone has 2,222 trades, PF .822. The 2021–2026 result is unprofitable even
+  with zero cost (PF .848), with five simultaneous positions (PF .830),
+  or when considering the first signal per symbol per 24h episode (PF .603).
+  TP is 29.3% of exits while SL is 69.7%; the median SL occurs in the first
+  15m bar. All six years lose, and only 7/60 calendar months have positive
+  aggregate trade return. The fixed TP4/SL2 and 0.20% round trip require
+  about 36.7% TP hits for simple binary break-even; the observed rate is
+  substantially lower.
 
 ### Why the prior SHORT result differs
 
-The completed Bitget execution study was **53 days**, not five years. Its
-AUTO100 OOS selected 792 non-overlapping trades in 24 symbols at PF 1.691.
-The present five-year Binance archive is a different instrument and universe;
-it has 696 selected symbols over the longer window. To check whether the
-five-year losses are *only* due to years outside the original study, compare
-2026-07-31 through 2026-08-31: Binance all selected symbols have 2,222
-trades, PF .822. Restricting Binance to the 10 symbols also selected by
-Bitget improves it to 431 trades, PF 1.038.
+The original Bitget study was **53 days**, not five years. Its published
+AUTO100 OOS claimed PF 1.691 on 792 accepted trades, but **this figure is
+invalid**. Two code defects were found by replaying the *same frozen signal
+timestamps* on its own tracked complete 15m OHLC:
 
-More strictly, pair on identical **symbol and entry timestamp** and require
-Bitget's original one-position-per-symbol acceptance: 307 trades in 10
-symbols overlap. At the same 0.20% round-trip cost, Bitget PF is 1.792,
-average +0.851% per trade; Binance PF is 1.159, average +0.208%.
-Among those matched entries, 35 Bitget TP trades are Binance SL trades and
-3 go the other way. Thus the mismatch is also in the bars/execution outcomes
-at the same entry time, not just calendar coverage or extra Binance symbols.
-Different exchange perpetual OHLC paths and intrabar TP/SL ambiguity can
-contribute; a matched-candle price audit would be needed to isolate their
-shares. Do not treat this transfer as a strict replication of Bitget fills.
+1. The intended conservative same-bar TP/SL guard was embedded as literal
+   `\\n` inside a comment and never executed. Original code checked TP
+   before SL; 34/792 accepted trades were affected. Scoring both-hit as SL
+   alone changed PF 1.691 to 1.421, with no signal or time changes.
+2. The execution `groups` were constructed from `cv.prep()`, which returns
+   candidate rows rather than every candle. Thus 172/792 original accepted
+   trades entered later than the very next 15m bar, and intervening bars
+   were never tested for TP/SL. Full-path replay on the same original 792
+   signal timestamps produces PF .922 and mean -0.111%/trade. Reapplying
+   same-symbol admission after corrected exit times gives 867 trades, PF
+   **.951**, mean **-0.070%/trade** at total cost .20%. At zero cost PF is
+   1.101; at total costs .45%/.70%, PF is .797/.671. Chronological thirds
+   are PF .931/1.179/.772, not a consistently profitable regime.
+
+The executed full-path replay is run `36080590975`, artifact
+`continuation-bitget-fullpath-replay` (`10841792662`). It reuses original
+OOS signals and tracked Bitget 15m files. In the common July–August 2026
+window, pairing the **corrected** Bitget and Binance trades by identical
+symbol and entry timestamp leaves 402 trades on 10 symbols: Bitget PF 1.076
+versus Binance PF 1.020. The earlier comparison of PF 1.792 vs 1.159 for
+307 pairs used the flawed Bitget execution and is superseded. Different
+venues and universe still matter, but they do not explain away the primary
+execution defect or the five-year failure.
 
 ## Three-module comparison (frozen costs)
 
@@ -133,8 +148,9 @@ analyses reuse material that informed research decisions.
   shortly after core reactivates; maximum measured exposure is reported.
 - D2_0 was discovered after looking at core results. Higher historical return
   cannot be used as independent evidence to replace original core.
-- The original Continuation OOS and this five-year Binance transfer have
-  different exchanges, point-in-time symbol selections and date distributions.
+- The previously published Bitget Continuation OOS PF 1.691 is invalid due
+  to optimistic TP/SL precedence and candidate-only execution bars. Corrected
+  Bitget execution PF is .951 and remains a 53-day OOS, not a five-year test.
 - For demo forwarding: keep original core as control, trial frozen L2 as
   **core-flat shadow with separately tracked virtual capital**, and keep D2_0
   alongside original core as exit-only shadow. Do not attach the transferred
