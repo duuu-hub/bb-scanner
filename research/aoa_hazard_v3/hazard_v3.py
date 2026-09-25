@@ -173,8 +173,7 @@ def sim_one(candles,fast_model,start,end,threshold,min_hold_bars,cost_side=0.0):
         equity += qty*(cl-last_px); last_px=cl
         leg_bars+=1
         f=add_state_features(r,side,entry_px,entry_ts)
-        X=pd.DataFrame([f])[FEATURES]
-        p=float(model.predict_proba(X)[:,1][0])
+        p=fast_prob(fast_model,f)
         if leg_bars>=min_hold_bars and p>=threshold:
             pending_flip=True
         curve.append((r["bar_start"],equity,p,side,leg_bars))
