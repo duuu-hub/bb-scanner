@@ -30,6 +30,32 @@ FEATURES=[
     "rv24h","atr14_pct","bb_width20","vol_z96","er24h","high_vol"
 ]
 
+
+def compile_fast_model(pipe):
+    imp=pipe.named_steps["imp"]
+    sc=pipe.named_steps["sc"]
+    lr=pipe.named_steps["lr"]
+    return {
+        "med":np.asarray(imp.statistics_,dtype=float),
+        "mean":np.asarray(sc.mean_,dtype=float),
+        "scale":np.asarray(sc.scale_,dtype=float),
+        "coef":np.asarray(lr.coef_[0],dtype=float),
+        "intercept":float(lr.intercept_[0]),
+    }
+
+def fast_prob(m,f):
+    x=np.asarray([f[k] for k in FEATURES],dtype=float)
+    bad=~np.isfinite(x)
+    if bad.any():
+        x[bad]=m["med"][bad]
+    z=(x-m["mean"])/np.where(m["scale"]==0,1.0,m["scale"])
+    s=m["intercept"]+float(np.dot(m["coef"],z))
+    if s>=0:
+        e=math.exp(-s)
+        return 1.0/(1.0+e)
+    e=math.exp(s)
+    return e/(1.0+e)
+
 def add_state_features(row,side,entry_px,entry_ts):
     atr=max(float(row["atr14_pct"]),1e-9)
     leg=side*(float(row["close"])/entry_px-1.0)*10000.0/atr
@@ -196,3 +222,64 @@ def choose_threshold(candles,fast_model,train_df,min_hold_bars):
     }])
     return th,tab
 
+
+
+def main():
+    OUT.mkdir(parents=True,exist_ok=True)
+    btc,eth,candles,model_meta=era.prep()
+    h=build_hazard_rows(candles)
+    model,tr,te,auc,ap,base,coef=fit_model(h)
+    fast_model=compile_fast_model(model)
+
+    ep=pd.read_csv(EP)
+    dt=pd.to_datetime(ep["st"],unit="s",utc=True)
+    train_ep=ep[dt<TRAIN_END]
+    q10=float(np.quantile(train_ep["duration_sec"]/900.0,0.10))
+    min_hold=max(1,int(round(q10)))
+
+    th,cal=choose_threshold(candles,fast_model,tr,min_hold)
+    cal.to_csv(OUT/"threshold_fidelity_2020.csv",index=False)
+
+    results=[]
+    leg_out=[]
+    for cname,cost in [("ZERO",0.0),("RT_004",0.0004/2)]:
+        m,l,curve=sim_one(candles,fast_model,TEST_START,TEST_END,th,min_hold,cost)
+        results.append({"cost":cname,**m})
+        l["cost"]=cname
+        leg_out.append(l)
+        curve.to_csv(OUT/f"curve_2021_{cname}.csv.gz",index=False,compression="gzip")
+
+    summary=pd.DataFrame(results)
+    summary.to_csv(OUT/"summary_2021.csv",index=False)
+    pd.concat(leg_out,ignore_index=True).to_csv(OUT/"legs_2021.csv",index=False)
+
+    pos=te[te.flip==1]["p"]
+    neg=te[te.flip==0]["p"]
+    diag={
+        "test_2021_auc":auc,
+        "test_2021_average_precision":ap,
+        "test_2021_base_flip_rate":base,
+        "ap_lift_vs_base":float(ap/base) if base>0 else None,
+        "train_rows":int(len(tr)),
+        "train_flips":int(tr.flip.sum()),
+        "test_rows":int(len(te)),
+        "test_flips":int(te.flip.sum()),
+        "threshold_from_train_flip_frequency":th,
+        "min_hold_bars_from_train_q10":min_hold,
+        "actual_2020":actual_stats(2020),
+        "actual_2021":actual_stats(2021),
+        "median_p_at_actual_2021_flip":float(pos.median()),
+        "median_p_at_nonflip_2021":float(neg.median()),
+        "top_coefficients":coef,
+        "note":"Threshold uses only 2019H2-2020 observed per-bar flip frequency. No PnL threshold tuning. 2021 untouched."
+    }
+    (OUT/"meta.json").write_text(json.dumps(diag,ensure_ascii=False,indent=2),encoding="utf-8")
+    print("=== META ===")
+    print(json.dumps(diag,ensure_ascii=False,indent=2))
+    print("\n=== 2020 FREQUENCY CALIBRATION ===")
+    print(cal.to_string(index=False))
+    print("\n=== 2021 AUTONOMOUS ===")
+    print(summary.to_string(index=False))
+
+if __name__=="__main__":
+    main()
