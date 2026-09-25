@@ -26,6 +26,17 @@ d["year"]=pd.to_datetime(d.entry_dt,utc=True).dt.year
 y=d.groupby(["side","hold_h","year"]).apply(stat,include_groups=False).reset_index(); y.to_csv(OUT/"yearly.csv",index=False)
 s=d.groupby(["side","hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["side","hold_h","sum_net_pct"],ascending=[True,True,False]); s.to_csv(OUT/"symbols.csv",index=False)
 # deeper diagnostics for the leading LONG 24h variant
+# Pre-entry-only filter grid: avoid ex-post calendar labels. Filters are frozen simple thresholds.
+d["rv_ratio"]=d.asset_rvpre/d.asset_rvmed.replace(0,np.nan)
+base=d[(d.side=="LONG")&(d.hold_h==24)].copy()
+filter_rows=[]
+filters={"BASE":pd.Series(True,index=base.index),"DROP_GE_-3":base.asset_ret4h<=-3,"DROP_GE_-4":base.asset_ret4h<=-4,"RV_LT_1.5":base.rv_ratio<1.5,"RV_LT_2.0":base.rv_ratio<2.0,"DROP3_RV2":(base.asset_ret4h<=-3)&(base.rv_ratio<2.0)}
+for nm,m in filters.items():
+    z=base[m]
+    st=stat(z); filter_rows.append({"filter":nm,**st.to_dict()})
+pd.DataFrame(filter_rows).to_csv(OUT/"long24_filter_grid.csv",index=False)
+print("\n=== LONG24 FILTER GRID ===\n"+pd.DataFrame(filter_rows).to_string(index=False))
+
 q=d[(d.side=="LONG") & (d.hold_h==24)].copy()
 q["entry_dt"]=pd.to_datetime(q.entry_dt,utc=True); q["month"]=q.entry_dt.dt.to_period("M").astype(str); q["quarter"]=q.entry_dt.dt.to_period("Q").astype(str); q["hour"]=q.entry_dt.dt.hour
 for col,name in [("month","monthly"),("quarter","quarterly"),("reason","exit_reason"),("hour","entry_hour")]:
