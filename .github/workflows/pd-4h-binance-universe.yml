@@ -6,8 +6,31 @@ on:
 permissions:
   contents: read
   actions: read
+
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Compile research code
+        run: python -m py_compile research/pd_direction_4h_universe.py
+      - name: Guard known workflow corruption
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path(".github/workflows/pd-4h-binance-universe.yml").read_text()
+          bad=[]
+          if r")\\n          assert" in p: bad.append("literal newline escape in embedded Python")
+          if "run-id: 36095439671" not in p: bad.append("canonical source run changed")
+          if bad: raise SystemExit("PRECHECK FAIL: "+"; ".join(bad))
+          print("PRECHECK OK")
+          PY
+
   run:
+    needs: preflight
     strategy:
       fail-fast: false
       matrix: {shard: [0,1,2,3,4,5,6,7]}
@@ -18,14 +41,27 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
-      - uses: actions/download-artifact@v4
+      - name: Download canonical shard with retry
+        uses: nick-fields/retry@v3
         with:
-          github-token: ${{ github.token }}
-          run-id: 36095439671
-          name: rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}
-          path: input
-      - name: Syntax check
-        run: python -m py_compile research/pd_direction_4h_universe.py
+          timeout_minutes: 15
+          max_attempts: 3
+          retry_wait_seconds: 10
+          command: |
+            gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D input
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Verify downloaded input
+        run: |
+          python - <<'PY'
+          import glob,gzip,os
+          fs=glob.glob("input/*.csv.gz")
+          assert fs, "no csv.gz files downloaded"
+          assert all(os.path.getsize(f)>100 for f in fs), "empty/tiny input file"
+          for f in fs:
+              with gzip.open(f,"rb") as z: z.read(1)
+          print("INPUT_OK",len(fs))
+          PY
       - name: Run shard
         run: python research/pd_direction_4h_universe.py --input input --out out
       - name: Sanity
@@ -34,14 +70,68 @@ jobs:
           test -s out/audit.csv
           python - <<'PY'
           import pandas as pd
-          r=pd.read_csv("out/direction_4h.csv");a=pd.read_csv("out/audit.csv")
+          r=pd.read_csv("out/direction_4h.csv"); a=pd.read_csv("out/audit.csv")
           assert len(r)>0 and r.events.min()>0
-          eligible=set(a.loc[pd.to_numeric(a.get("rows4"),errors="coerce")>=400,"symbol"].astype(str))
-          assert set(r.symbol.astype(str)).issubset(eligible)
-          assert r.symbol.nunique()==len(set(r.symbol.astype(str))) and len(eligible)>=r.symbol.nunique()
-          print("OK",r.symbol.nunique(),len(r),r.events.min(),r.events.max())
+          rows4=pd.to_numeric(a.get("rows4"),errors="coerce")
+          eligible=set(a.loc[rows4>=400,"symbol"].astype(str))
+          got=set(r.symbol.astype(str))
+          assert got, "zero analyzed symbols"
+          assert got.issubset(eligible), "results contain ineligible short-history symbols"
+          assert len(got)==r.symbol.nunique(), "symbol accounting mismatch"
+          assert r[["mean_cont_return","median_cont_return","continuation_rate"]].notna().all().all()
+          assert ((r.continuation_rate>=0)&(r.continuation_rate<=1)).all()
+          print("SANITY_OK",len(got),len(r),int(r.events.min()),int(r.events.max()),"eligible",len(eligible))
           PY
       - uses: actions/upload-artifact@v4
         with:
           name: pd-4h-direction-shard-${{ matrix.shard }}
           path: out/
+          if-no-files-found: error
+
+  verify:
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Fail if any shard failed
+        if: needs.run.result != 'success'
+        run: |
+          echo "One or more research shards failed; aggregate output is invalid."
+          exit 1
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pd-4h-direction-shard-*
+          path: results
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas
+      - name: Verify all 8 shard artifacts and aggregate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+          root=Path("results")
+          dirs=sorted(root.glob("pd-4h-direction-shard-*"))
+          assert len(dirs)==8, f"expected 8 shard artifacts, got {len(dirs)}"
+          rs=[]; audits=[]
+          for d in dirs:
+              rp=d/"direction_4h.csv"; ap=d/"audit.csv"
+              assert rp.stat().st_size>0 and ap.stat().st_size>0
+              r=pd.read_csv(rp); a=pd.read_csv(ap)
+              assert len(r)>0 and len(a)>0
+              rs.append(r); audits.append(a)
+          R=pd.concat(rs,ignore_index=True); A=pd.concat(audits,ignore_index=True)
+          assert R.symbol.nunique()>=100, f"unexpectedly small universe: {R.symbol.nunique()}"
+          assert len(R)>0 and R.events.min()>0
+          assert not R.duplicated(["symbol","n","q","horizon_bars","zone"]).any()
+          Path("final").mkdir()
+          R.to_csv("final/direction_4h_all.csv",index=False)
+          A.to_csv("final/audit_all.csv",index=False)
+          print("FINAL_VALID",R.symbol.nunique(),len(R),"audit",A.symbol.nunique())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-4h-direction-VERIFIED
+          path: final/
+          if-no-files-found: error
