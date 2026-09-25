@@ -188,6 +188,7 @@ Before every substantial research run, explicitly check the failure classes that
 - missing/expired Actions artifacts or incorrect run/artifact IDs;
 - wrong data path/schema/column names such as `timestamp_ms` vs `open_time`;
 - empty universe, zero-row input, partial shard download, missing symbols, or incomplete historical coverage;
+- sanity checks whose acceptance criteria contradict the analysis filter (for example, analysis intentionally skips short-history symbols but post-run sanity incorrectly requires every audited symbol to meet the eligibility threshold);
 - timestamp disorder, duplicates, gaps, incomplete resampled candles, and incorrect higher-timeframe alignment;
 - look-ahead/future-confirmation leakage and signal/entry timestamp mistakes;
 - omitted entry bar, TP/SL same-bar ambiguity, and incorrect holding-horizon units;
