@@ -57,7 +57,8 @@ def sim(x,idx,hh,sym,side):
                 if lo<=sl: px=sl; reason="SL"; ex=j; break
                 if hi>=tp: px=tp; reason="TP"; ex=j; break
         r=(1-px/e-COST) if side=="SHORT" else (px/e-1-COST)
-        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason))
+        # persist entry-state features so regime filters can be tested without lookahead
+        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason,float(x.ret4h.iloc[i]),float(x.rvpre.iloc[i]),float(x.rvmed.iloc[i])))
     return out
 
 files=list(DATA.rglob("*.csv.gz")); print("FILES",len(files),flush=True)
@@ -72,7 +73,7 @@ for k,p in enumerate(files,1):
             for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side))
         print(f"[{k}/{len(files)}] {p.name} sig={len(idx)}",flush=True)
     except Exception as e: print("ERR",p,e,flush=True)
-t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason"]); t.to_csv(OUT/"trades.csv",index=False)
+t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason","asset_ret4h","asset_rvpre","asset_rvmed"]); t.to_csv(OUT/"trades.csv",index=False)
 def stat(g):
     r=g.net_ret.astype(float); gp=r[r>0].sum(); gl=-r[r<0].sum(); eq=(1+r).cumprod(); dd=eq/eq.cummax()-1
     return pd.Series({"trades":len(g),"win_rate_pct":(r>0).mean()*100,"avg_net_pct":r.mean()*100,"PF":gp/gl if gl>0 else np.inf,"sum_net_pct":r.sum()*100,"trade_seq_MDD_pct":dd.min()*100})
