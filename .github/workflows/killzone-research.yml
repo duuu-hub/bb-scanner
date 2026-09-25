@@ -1,0 +1,31 @@
+name: Killzone BTC ETH Research
+on:
+  push:
+    branches: ["research/killzone-btc-eth"]
+    paths: ["research/killzone_btc_eth.py", ".github/workflows/killzone-research.yml"]
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Run audited 5Y BTC ETH killzone matrix
+        run: python research/killzone_btc_eth.py --years 5 --out killzone_results
+      - name: Sanity
+        run: |
+          test -s killzone_results/summary.csv
+          test -s killzone_results/yearly.csv
+          python - <<'PY'
+          import pandas as pd
+          x=pd.read_csv("killzone_results/summary.csv")
+          assert len(x)==32 and x.trades.sum()>0, (len(x),x.trades.sum())
+          print(x.to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: killzone-btc-eth-5y
+          path: killzone_results/
