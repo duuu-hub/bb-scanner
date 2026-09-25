@@ -74,5 +74,6 @@ for k in agg:
   q["fill_pct"]=round(100*q["fills"]/q["signals"],3) if q["signals"] else 0
   for r in RS:
    pre=f"{r:g}R_";den=q[pre+"win"]+q[pre+"loss"];q[pre+"win_pct_ex_amb"]=round(100*q[pre+"win"]/den,3) if den else None
-res={"files":len(files),"load_errors":errors,"note":"ATR14-normalized PSAR entry distance; NumPy 15m chronological replay; same-15m TP+SL ambiguous/excluded","summary":agg}
+   den_cons=q[pre+"win"]+q[pre+"loss"]+q[pre+"amb"];q[pre+"win_pct_amb_as_loss"]=round(100*q[pre+"win"]/den_cons,3) if den_cons else None
+res={"files":len(files),"load_errors":errors,"note":"ATR14-normalized PSAR entry distance; NumPy 15m chronological replay; reports ambiguous both excluded and conservatively as loss","summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res,indent=2))
