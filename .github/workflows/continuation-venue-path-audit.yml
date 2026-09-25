@@ -1,0 +1,40 @@
+name: Continuation Venue Path Audit
+on:
+  push:
+    branches: [research-core-portfolio-5y]
+    paths: ['research/continuation_venue_path_audit.py']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy requests
+      - name: Retrieve completed trade artifacts and tracked Bitget candles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p bitget_artifact transfer_artifact venue_audit_results
+          gh run download 36067424646 --repo duuu-hub/bb-scanner --name continuation-execution-results --dir bitget_artifact
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio --dir transfer_artifact
+          git fetch --depth=1 origin research-continuation-mining
+          test -s bitget_artifact/trades.csv.gz
+          test -s transfer_artifact/frozen_candidates.csv.gz
+      - name: Audit the 35 matched trade outcome flips on both venues
+        run: |
+          set -o pipefail
+          python research/continuation_venue_path_audit.py 2>&1 | tee venue_audit_results/run.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuation-venue-path-audit
+          path: venue_audit_results/
+          retention-days: 30
