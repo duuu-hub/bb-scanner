@@ -23,9 +23,9 @@ jobs:
           mkdir -p data
           gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Run PSAR direction test
-        run: python scripts/psar_maker_5y.py --data data --out psar_results.json
+        run: python scripts/psar_maker_5y.py --data data --out psar_replay_results.json
       - uses: actions/upload-artifact@v4
         with:
           name: psar-maker-5y-results
-          path: psar_results.json
+          path: psar_replay_results.json
           retention-days: 30
