@@ -16,7 +16,7 @@ for fn in sorted(glob.glob(a.input+"/*.csv.gz")):
   x=x[x.bars==16].drop(columns="bars").reset_index(); audit.append(dict(symbol=sym,rows4=len(x)))
   if len(x)<400: continue
   op=x.open.to_numpy();hi4=x.high.to_numpy();lo4=x.low.to_numpy();cl=x.close.to_numpy();dt=x.dt.to_numpy()
-  for n in (240,280,320,360,400):
+  for n in (320,400,480,560,640):
    rh=x.high.shift(1).rolling(n).max().to_numpy(); rl=x.low.shift(1).rolling(n).min().to_numpy()
    atr=(x.high-x.low).shift(1).rolling(14).mean().to_numpy()
    for sig in ("BREAKDOWN","FIRST_BREAKDOWN","BREAKDOWN_0.1ATR"):
