@@ -135,7 +135,7 @@ hour is missing or stale.
 
 ## 10. Mandatory research audit and handoff protocol
 
-All ChatGPT conversations, agents, and research branches working in this repository must follow the same evidence standard. A new chat must inspect this file and `RESEARCH_RULES.md` before trusting or extending prior research.
+All ChatGPT conversations, agents, and research branches working in this repository must follow the same evidence standard. A new chat must inspect this file, `RESEARCH_RULES.md`, and `LESSONS_LEARNED.md` before trusting or extending prior research.
 
 - Do not treat a GitHub Actions `success` conclusion as proof that a strategy was actually tested. Verify non-zero universe/input rows, non-zero expected outputs, and artifact/log contents.
 - Do not quote an old PF, return, Sharpe, MDD, win rate, or trade count as current unless the exact strategy version has passed the audit rules in `RESEARCH_RULES.md`.
@@ -201,6 +201,8 @@ Where practical, encode these checks as assertions/preflight steps so the workfl
 
 ## 13. Lessons-learned rule for new failure modes
 
+Detailed incidents and control maturity live in `LESSONS_LEARNED.md`; keep this file focused on durable operating rules.
+
 The pre-run known-error checklist is a living control list, not a fixed historical note.
 
 - Whenever a new failure mode is discovered that is not already covered by the checklist, fix the immediate root cause first and then add the generalized failure pattern to this document.
@@ -210,3 +212,37 @@ The pre-run known-error checklist is a living control list, not a fixed historic
 - If the new failure invalidates prior research, apply the QUARANTINED/INVALID procedure in `RESEARCH_RULES.md` and identify the affected lineage.
 - After updating this lessons-learned list, future agents must include the new failure class in their pre-run review.
 - The objective is cumulative reliability: every novel failure should make the repository's future research process harder to break in the same way.
+
+
+## 14. Evidence-driven repair and bounded retries
+
+Do not enter blind retry loops.
+
+- Every retry after a failed validation must be justified by new evidence from logs, artifacts, assertions, or a concrete code/config diff.
+- Never repeat the same unchanged action expecting a different result unless the failure is explicitly classified as transient; transient retries must be bounded.
+- Prefer a cheap reproducer, static check, or focused shard before relaunching an expensive full-universe workflow when the failure can be isolated.
+- Record the observed failure signature and the evidence supporting the proposed fix.
+- If two consecutive repair attempts fail for the same root cause, stop patching symptoms and re-audit the relevant workflow/code path from first principles.
+- A successful retry still requires output verification; success does not erase the preceding failure evidence.
+
+## 15. Instruction, lessons, and live-state separation
+
+Keep repository knowledge in the correct layer so new agents can orient quickly.
+
+- `AGENTS.md` = compact durable operating rules and safety invariants.
+- `RESEARCH_RULES.md` = methodology/audit standard for research validity.
+- `LESSONS_LEARNED.md` = reusable failure-pattern registry and control maturity.
+- `RESEARCH_STATE.md` = current mutable research lineage/status, active branches/runs, blockers, and next verification step.
+- Do not put transient run IDs, queued/running status, or temporary blockers into AGENTS.md.
+- When current research state materially changes, update RESEARCH_STATE.md so another chat can resume from repository evidence instead of conversation memory.
+- When a lesson becomes fully enforced by an automated regression test/guard, keep the concise lesson but mark it REGRESSION-TESTED rather than duplicating long prose across files.
+
+## 16. Independent research verification roles
+
+Separate creation from acceptance where practical.
+
+- The Research Runner may implement and execute an experiment.
+- The Research Auditor validates chronology, data lineage, costs, outputs, and failure semantics before results are accepted.
+- The Portfolio Validator independently checks chronological portfolio combination, exposure/slot constraints, and equity/MDD calculations.
+- The Demo/Forward path must consume only explicitly eligible research lineages and remains subject to the live/demo safety rules above.
+- An agent may perform more than one role in a small task, but it must execute the audit as a distinct checklist rather than treating its own implementation as self-validating.
