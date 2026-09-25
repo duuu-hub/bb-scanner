@@ -3,29 +3,12 @@ from pathlib import Path
 import numpy as np, pandas as pd
 import continuation_validation as cv
 import continuation_mining as cm
+import continuation_execution_core as exec_core
 
 OUT=Path("continuation_execution_results"); OUT.mkdir(exist_ok=True)
 CANDS=[("SHORT",5.,3.,6),("SHORT",4.,3.,6),("SHORT",4.,2.,6),("SHORT",3.,2.,6),("LONG",5.,3.,12),("LONG",5.,2.,12)]
 COSTS=[("base",0.12,0.08),("stress1.5x",0.18,0.12),("stress2x",0.24,0.16)] # round-trip fee%, total slippage%
 DELAY_BARS=[0,1] # 0=next bar open; 1=extra 15m delay (conservative proxy for +1m)
-
-def exit_trade(g,entry_i,side,tp,sl,bars,entry_px):
- # Enforce the frozen horizon in wall-clock time. Row-count horizons can
- # accidentally extend trades across gaps in the stored 15m series.
- entry_ts=int(g.iloc[entry_i].timestamp_ms)
- deadline=entry_ts+bars*15*60_000
- end=int(np.searchsorted(g.timestamp_ms.to_numpy(),deadline,side="left"))-1
- end=max(entry_i,min(len(g)-1,end))
- for j in range(entry_i,end+1):
-  hi,lo=float(g.iloc[j].high),float(g.iloc[j].low)
-  if side=="LONG": hit_tp=hi>=entry_px*(1+tp/100); hit_sl=lo<=entry_px*(1-sl/100)
-  else: hit_tp=lo<=entry_px*(1-tp/100); hit_sl=hi>=entry_px*(1+sl/100)
-  # Unknown intrabar order: conservatively score simultaneous TP and SL as SL.
-  if hit_tp and hit_sl: return j,-sl,"BOTH_SL"
-  if hit_tp: return j,tp,"TP"
-  if hit_sl: return j,-sl,"SL"
- px=float(g.iloc[end].close); ret=(px/entry_px-1)*100*(1 if side=="LONG" else -1)
- return end,ret,"TIME"
 
 def maxdd(rs):
  eq=(1+pd.Series(rs)/100).cumprod(); peak=eq.cummax(); return float(((eq/peak)-1).min()*100)
@@ -54,9 +37,12 @@ def main():
   base=int(np.searchsorted(ts,int(rr.timestamp_ms))); ei=base+1
   if ei>=len(g) or int(g.iloc[ei].timestamp_ms)!=int(rr.timestamp_ms)+900_000:
    skipped_gap+=1; continue
-  ep=float(g.iloc[ei].open); xi,ret,why=exit_trade(g,ei,side,tp,sl,int(h*4),ep)
+  r=exec_core.replay_trade(g,base,side,tp,sl,int(h*4))
+  if r is None:
+   skipped_gap+=1; continue
+  ei=int(r["entry_i"]); xi=int(r["exit_i"])
   rows.append(dict(symbol=rr.symbol,signal_ts=int(rr.timestamp_ms),entry_ts=int(g.iloc[ei].timestamp_ms),
-   exit_ts=int(g.iloc[xi].timestamp_ms),entry_px=ep,gross_ret_pct=ret,exit_reason=why))
+   exit_ts=int(g.iloc[xi].timestamp_ms),entry_px=float(r["entry_px"]),gross_ret_pct=float(r["gross_ret_pct"]),exit_reason=r["exit_reason"]))
  d=pd.DataFrame(rows)
  d.to_csv(OUT/"audit_trades.csv.gz",index=False,compression="gzip")
  amb=d[d.exit_reason.eq("BOTH_SL")].copy()
