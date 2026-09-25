@@ -1,0 +1,22 @@
+name: Continuation Execution Unit Tests
+on:
+  push:
+    branches: [research-continuation-mining]
+    paths:
+      - "research/continuation_execution_core.py"
+      - "research/test_continuation_execution_core.py"
+      - "research/continuation_mining.py"
+      - "research/continuation_validation.py"
+      - ".github/workflows/continuation-execution-unit-tests.yml"
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - run: python -m unittest research/test_continuation_execution_core.py -v
