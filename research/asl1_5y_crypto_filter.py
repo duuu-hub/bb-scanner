@@ -35,6 +35,13 @@ sc=s[(s.side=="LONG")&(s.hold_h==24)].copy(); sc.to_csv(OUT/"long24_symbols.csv"
 for n in [5,10,20,50]:
     z=sc[sc.trades>=n]; print(f"LONG24 SYMBOLS trades>={n}: symbols={len(z)} medianPF={z.PF.replace([np.inf,-np.inf],np.nan).median():.4f} positivePF={(z.PF>1).mean():.3f}",flush=True)
 d.to_csv(OUT/"trades_crypto.csv",index=False)
+# Market-regime comparison using only information available at entry.
+# Join BTC daily trend/volatility proxies is handled in the upstream 15m replay next pass;
+# here first classify observable trade-cluster regimes from signal frequency and contemporaneous LONG24 outcomes.
+q24=d[(d.side=="LONG")&(d.hold_h==24)].copy(); q24["entry_dt"]=pd.to_datetime(q24.entry_dt,utc=True); q24["date"]=q24.entry_dt.dt.floor("D")
+daily=q24.groupby("date").apply(stat,include_groups=False).reset_index(); daily["signal_count"]=q24.groupby("date").size().values
+daily.to_csv(OUT/"long24_daily_regime.csv",index=False)
+
 print("\n=== CRYPTO OVERALL ===\n"+o.to_string(index=False)); print("\n=== CRYPTO YEARLY ===\n"+y.to_string(index=False))
 print("\n=== LONG24 MONTHLY ===\n"+q.groupby("month").apply(stat,include_groups=False).reset_index().to_string(index=False))
 print("\n=== LONG24 EXIT ===\n"+q.groupby("reason").apply(stat,include_groups=False).reset_index().to_string(index=False))
