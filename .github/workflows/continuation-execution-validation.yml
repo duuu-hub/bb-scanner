@@ -7,13 +7,13 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with: {ref: research-continuation-mining, fetch-depth: 1}
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install pandas numpy
-      - run: python research/continuation_execution_validation.py
+      - name: Phase 1 full-path audit\n        run: python research/continuation_execution_validation.py
       - uses: actions/upload-artifact@v4
         with: {name: continuation-execution-results, path: continuation_execution_results/, retention-days: 14}
