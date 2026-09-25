@@ -41,7 +41,7 @@ def signals(x,btcflat):
     m=cross & (x.open<x.basis1h) & (x.open<x.basis4h) & (x.ret4h<=-2) & (x.rvpre>x.rvmed)
     return np.flatnonzero((m & x.ts.map(btcflat).fillna(False).astype(bool)).to_numpy())
 
-def sim(x,idx,hh,sym,side):
+def sim(x,idx,hh,sym,side,btcfeat):
     out=[]; hb=hh*4
     for i in idx:
         ei=i+1
@@ -58,22 +58,29 @@ def sim(x,idx,hh,sym,side):
                 if hi>=tp: px=tp; reason="TP"; ex=j; break
         r=(1-px/e-COST) if side=="SHORT" else (px/e-1-COST)
         # persist entry-state features so regime filters can be tested without lookahead
-        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason,float(x.ret4h.iloc[i]),float(x.rvpre.iloc[i]),float(x.rvmed.iloc[i])))
+        bf=btcfeat.get(int(x.ts.iloc[i]),{})
+        out.append((sym,x.dt.iloc[ei],x.dt.iloc[ex],hh,side,r,reason,float(x.ret4h.iloc[i]),float(x.rvpre.iloc[i]),float(x.rvmed.iloc[i]),bf.get("ret4h",np.nan),bf.get("ret24h",np.nan),bf.get("open",np.nan),bf.get("ma50",np.nan),bf.get("ma200",np.nan),bf.get("btc_rv24",np.nan)))
     return out
 
 files=list(DATA.rglob("*.csv.gz")); print("FILES",len(files),flush=True)
 btcfile=next((p for p in files if p.name=="BTCUSDT.csv.gz"),None)
 if btcfile is None: raise RuntimeError("BTCUSDT missing")
 btc=feat(load(btcfile)); btcflat=pd.Series((btc.ret4h.abs()<=.5).to_numpy(),index=btc.ts.to_numpy())
+# entry-known BTC regime features
+btc["ret24h"]=btc.open.pct_change(96)*100
+btc["ma200"]=btc.open.rolling(96*200,min_periods=96*120).mean()
+btc["ma50"]=btc.open.rolling(96*50,min_periods=96*30).mean()
+btc["btc_rv24"]=btc.open.pct_change().rolling(96,min_periods=48).std(ddof=1)*math.sqrt(96)*100
+btcfeat=btc.set_index("ts")[["ret4h","ret24h","open","ma50","ma200","btc_rv24"]].to_dict("index")
 rows=[]
 for k,p in enumerate(files,1):
     try:
         x=feat(load(p)); idx=signals(x,btcflat)
         for hh in HOLDS:
-            for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side))
+            for side in ["LONG","SHORT"]: rows.extend(sim(x,idx,hh,p.name[:-7],side,btcfeat))
         print(f"[{k}/{len(files)}] {p.name} sig={len(idx)}",flush=True)
     except Exception as e: print("ERR",p,e,flush=True)
-t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason","asset_ret4h","asset_rvpre","asset_rvmed"]); t.to_csv(OUT/"trades.csv",index=False)
+t=pd.DataFrame(rows,columns=["symbol","entry_dt","exit_dt","hold_h","side","net_ret","reason","asset_ret4h","asset_rvpre","asset_rvmed","btc_ret4h","btc_ret24h","btc_open","btc_ma50","btc_ma200","btc_rv24"]); t.to_csv(OUT/"trades.csv",index=False)
 def stat(g):
     r=g.net_ret.astype(float); gp=r[r>0].sum(); gl=-r[r<0].sum(); eq=(1+r).cumprod(); dd=eq/eq.cummax()-1
     return pd.Series({"trades":len(g),"win_rate_pct":(r>0).mean()*100,"avg_net_pct":r.mean()*100,"PF":gp/gl if gl>0 else np.inf,"sum_net_pct":r.sum()*100,"trade_seq_MDD_pct":dd.min()*100})
