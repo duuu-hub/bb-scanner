@@ -35,6 +35,17 @@ for nm,m in filters.items():
     z=base[m]
     st=stat(z); filter_rows.append({"filter":nm,**st.to_dict()})
 pd.DataFrame(filter_rows).to_csv(OUT/"long24_filter_grid.csv",index=False)
+# BTC regime + signal breadth filters, all known at entry
+base["entry_dt"]=pd.to_datetime(base.entry_dt,utc=True); base["day"]=base.entry_dt.dt.floor("D")
+breadth=base.groupby("day").size(); base["day_signals"]=base.day.map(breadth)
+base["btc_above50"]=base.btc_open>base.btc_ma50; base["btc_above200"]=base.btc_open>base.btc_ma200
+regimes={"BTC24_GT_-2":base.btc_ret24h>-2,"BTC24_GT_-4":base.btc_ret24h>-4,"BTC_ABOVE50":base.btc_above50,"BTC_ABOVE200":base.btc_above200,"BREADTH_LE_10":base.day_signals<=10,"BREADTH_LE_20":base.day_signals<=20,"BREADTH_LE_40":base.day_signals<=40,"BTC24_-4_B20":(base.btc_ret24h>-4)&(base.day_signals<=20),"DROP3_RV2_B20":(base.asset_ret4h<=-3)&(base.rv_ratio<2)&(base.day_signals<=20),"DROP3_RV2_B20_BTC4":(base.asset_ret4h<=-3)&(base.rv_ratio<2)&(base.day_signals<=20)&(base.btc_ret24h>-4)}
+reg_rows=[]
+for nm,m in regimes.items():
+ z=base[m]; st=stat(z); reg_rows.append({"filter":nm,**st.to_dict()})
+pd.DataFrame(reg_rows).to_csv(OUT/"long24_regime_grid.csv",index=False)
+print("\n=== LONG24 REGIME GRID ===\n"+pd.DataFrame(reg_rows).to_string(index=False))
+
 print("\n=== LONG24 FILTER GRID ===\n"+pd.DataFrame(filter_rows).to_string(index=False))
 
 q=d[(d.side=="LONG") & (d.hold_h==24)].copy()
