@@ -76,7 +76,8 @@ def main():
          "cost_stress":{"0.20":stats(selected,.2),"0.45":stats(selected,.45),"0.70":stats(selected,.7)},
          "corrected_by_third":{},"corrected_by_symbol":{}}
     s=selected.sort_values("signal_ts")
-    for k,g in enumerate(np.array_split(s,3),1):row["corrected_by_third"][str(k)]=stats(g)
+    for k,idx in enumerate(np.array_split(np.arange(len(s)),3),1):
+        row["corrected_by_third"][str(k)]=stats(s.iloc[idx])
     for sym,g in selected.groupby("symbol"):
         row["corrected_by_symbol"][sym]=stats(g)
     selected.to_csv(OUT/"corrected_accepted.csv.gz",index=False,compression="gzip")
