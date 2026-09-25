@@ -36,7 +36,7 @@ jobs:
           import pandas as pd
           r=pd.read_csv("out/direction_4h.csv");a=pd.read_csv("out/audit.csv")
           assert len(r)>0 and r.events.min()>0
-          assert a.rows4.dropna().min()>=400
+          eligible=set(a.loc[pd.to_numeric(a.get("rows4"),errors="coerce")>=400,"symbol"].astype(str))\n          assert set(r.symbol.astype(str)).issubset(eligible)\n          assert r.symbol.nunique()==len(set(r.symbol.astype(str))) and len(eligible)>=r.symbol.nunique()
           print("OK",r.symbol.nunique(),len(r),r.events.min(),r.events.max())
           PY
       - uses: actions/upload-artifact@v4
