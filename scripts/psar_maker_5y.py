@@ -1,6 +1,6 @@
 import argparse,glob,json
 import pandas as pd,numpy as np
-DISTS=(.015,.02,.03,.05); TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
+ATR_MULTS=(.25,.5,.75,1.,1.5); TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
 
 def psar(h,l,af0=.02,step=.02,afmax=.2):
  n=len(h); s=np.full(n,np.nan); b=np.ones(n,bool)
@@ -32,15 +32,17 @@ def resample(t,o,h,l,c,m):
  st=cut[:-1]; en=cut[1:]; good=(en-st)==m; st=st[good];en=en[good]
  return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
 
-def test(t,o,h,l,c,m,dist,horizon=12):
+def test(t,o,h,l,c,m,atr_mult,horizon=12):
  rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar(rh,rl); n=len(rt)
+ prev=np.r_[np.nan,rc[:-1]]; tr=np.maximum(rh-rl,np.maximum(np.abs(rh-prev),np.abs(rl-prev)))
+ atr=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy()
  out={s:{"signals":0,"fills":0,**{f"{r:g}R_{v}":0 for r in RS for v in ("win","loss","amb")}} for s in ("LONG","SHORT")}
  # map resampled start timestamp to 15m array position once
  pos=np.searchsorted(t,rt)
  for i in range(3,n-horizon-1):
   s=sar[i]
-  if not np.isfinite(s):continue
-  b=bull[i]; side="LONG" if b else "SHORT";q=out[side];q["signals"]+=1;e=s*(1+dist if b else 1-dist)
+  if not np.isfinite(s) or not np.isfinite(atr[i]):continue
+  b=bull[i]; side="LONG" if b else "SHORT";q=out[side];q["signals"]+=1;e=s+(atr_mult*atr[i] if b else -atr_mult*atr[i])
   a=pos[i+1]; first_end=min(a+m,len(t)); hits=np.flatnonzero((l[a:first_end]<=e)&(h[a:first_end]>=e))
   if hits.size==0:continue
   q["fills"]+=1; fs=a+hits[0]; end=min(a+m*horizon,len(t)); ph=h[fs:end];pl=l[fs:end];risk=abs(e-s)
@@ -61,8 +63,8 @@ for z,p in enumerate(files,1):
  try:t,o,h,l,c=load(p)
  except Exception as e:errors.append([p,str(e)]);continue
  for tf,m in TFS.items():
-  for dist in DISTS:
-   rr=test(t,o,h,l,c,m,dist);k=f"{tf}|{dist:.4f}"
+  for atr_mult in ATR_MULTS:
+   rr=test(t,o,h,l,c,m,atr_mult);k=f"{tf}|ATR{atr_mult:g}"
    for side,v in rr.items():
     q=agg.setdefault(k,{}).setdefault(side,{kk:0 for kk in v})
     for kk,vv in v.items():q[kk]+=vv
@@ -72,5 +74,5 @@ for k in agg:
   q["fill_pct"]=round(100*q["fills"]/q["signals"],3) if q["signals"] else 0
   for r in RS:
    pre=f"{r:g}R_";den=q[pre+"win"]+q[pre+"loss"];q[pre+"win_pct_ex_amb"]=round(100*q[pre+"win"]/den,3) if den else None
-res={"files":len(files),"load_errors":errors,"note":"NumPy 15m chronological replay; same-15m TP+SL ambiguous/excluded","summary":agg}
+res={"files":len(files),"load_errors":errors,"note":"ATR14-normalized PSAR entry distance; NumPy 15m chronological replay; same-15m TP+SL ambiguous/excluded","summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res,indent=2))
