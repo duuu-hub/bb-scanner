@@ -1,0 +1,60 @@
+name: PD 4H Breakdown Short
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_4h_breakdown_short_once']
+permissions: {contents: read, actions: read}
+jobs:
+  run:
+    strategy: {fail-fast: false, matrix: {shard: [0,1,2,3,4,5,6,7]}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_short_4h.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36095439671, name: 'rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}', path: input}
+      - run: python research/pd_breakdown_short_4h.py --input input --out out
+      - run: |
+          test -s out/trades.csv
+          test -s out/summary.csv
+          test -s out/yearly.csv
+          python - <<'PY'
+          import pandas as pd
+          t=pd.read_csv("out/trades.csv"); s=pd.read_csv("out/summary.csv")
+          assert len(t)>0 and len(s)>0
+          assert set(t.reason).issubset({"TP","SL","SL_AMBIG","TIME"})
+          assert t.r_net.notna().all()
+          print("SANITY",t.symbol.nunique(),len(t),len(s))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: 'pd-4h-breakdown-short-shard-${{ matrix.shard }}', path: out/, if-no-files-found: error}
+  verify:
+    needs: run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'pd-4h-breakdown-short-shard-*', path: results}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd,numpy as np
+          ds=sorted(Path("results").glob("pd-4h-breakdown-short-shard-*"));assert len(ds)==8
+          T=pd.concat([pd.read_csv(d/"trades.csv") for d in ds],ignore_index=True)
+          def sm(g):
+           w=g.r_net[g.r_net>0].sum();l=-g.r_net[g.r_net<0].sum()
+           return pd.Series({"trades":len(g),"symbols":g.symbol.nunique(),"wr":(g.r_net>0).mean(),"pf":w/l if l else np.nan,"expectancy_r":g.r_net.mean(),"net_return_sum":g.net_return.sum(),"ambiguous":(g.reason=="SL_AMBIG").sum()})
+          S=T.groupby(["n","signal","stop_atr","rr"]).apply(sm,include_groups=False).reset_index()
+          Y=T.groupby(["n","signal","stop_atr","rr","year"]).apply(sm,include_groups=False).reset_index()
+          assert T.symbol.nunique()>=100 and T.r_net.notna().all()
+          Path("final").mkdir();T.to_csv("final/trades_all.csv",index=False);S.to_csv("final/summary_all.csv",index=False);Y.to_csv("final/yearly_all.csv",index=False)
+          print("FINAL",T.symbol.nunique(),len(T));print(S.sort_values("pf",ascending=False).head(30).to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-4h-breakdown-short-VERIFIED, path: final/, if-no-files-found: error}
