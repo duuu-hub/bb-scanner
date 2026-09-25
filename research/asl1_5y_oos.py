@@ -70,11 +70,11 @@ btc=feat(load(btcfile)); btcflat=pd.Series((btc.ret4h.abs()<=.5).to_numpy(),inde
 btc["ret24h"]=btc.open.pct_change(96)*100
 btc["ma200"]=btc.open.rolling(96*200,min_periods=96*120).mean()
 btc["ma30"]=btc.open.rolling(96*30,min_periods=96*20).mean()
-    btc["ma40"]=btc.open.rolling(96*40,min_periods=96*25).mean()
-    btc["ma50"]=btc.open.rolling(96*50,min_periods=96*30).mean()
-    btc["ma60"]=btc.open.rolling(96*60,min_periods=96*35).mean()
-    btc["ma80"]=btc.open.rolling(96*80,min_periods=96*50).mean()
-    btc["ma100"]=btc.open.rolling(96*100,min_periods=96*60).mean()
+btc["ma40"]=btc.open.rolling(96*40,min_periods=96*25).mean()
+btc["ma50"]=btc.open.rolling(96*50,min_periods=96*30).mean()
+btc["ma60"]=btc.open.rolling(96*60,min_periods=96*35).mean()
+btc["ma80"]=btc.open.rolling(96*80,min_periods=96*50).mean()
+btc["ma100"]=btc.open.rolling(96*100,min_periods=96*60).mean()
 btc["btc_rv24"]=btc.open.pct_change().rolling(96,min_periods=48).std(ddof=1)*math.sqrt(96)*100
 btcfeat=btc.set_index("ts")[["ret4h","ret24h","open","ma30","ma40","ma50","ma60","ma80","ma100","ma200","btc_rv24"]].to_dict("index")
 rows=[]
