@@ -38,7 +38,8 @@ def trade(b,t,tpv,slv,hold):
 def main():
  rows=[]
  cache=[]
- for p in sorted(ROOT.glob("*.parquet")):
+ files=sorted(ROOT.rglob("*.parquet"))
+ for p in files:
   try: cache.append((p.stem,*prep(pd.read_parquet(p))))
   except Exception as e: print("ERR",p.stem,e)
  print("UNIVERSE",len(cache))
