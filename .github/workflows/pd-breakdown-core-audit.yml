@@ -1,0 +1,30 @@
+name: PD Breakdown Core Audit
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_core_audit_once']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_core_audit.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36130317219, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - run: python research/pd_breakdown_core_audit.py --trades input/trades_all.csv --out out
+      - name: Verify
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          for f in ["core_overall.csv","core_yearly.csv","core_symbol.csv","core_oos.csv","core_cost_stress.csv","core_concentration.csv","core_portfolio_slots.csv"]:
+           x=pd.read_csv("out/"+f); assert len(x)>0
+          o=pd.read_csv("out/core_oos.csv"); assert set(o["split"])=={"IS","OOS"}
+          print("VERIFIED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-core-audit-VERIFIED, path: out/, if-no-files-found: error}
