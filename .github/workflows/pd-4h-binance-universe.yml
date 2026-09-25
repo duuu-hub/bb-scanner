@@ -1,0 +1,45 @@
+name: PD 4H Binance Universe
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_4h_universe_once']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36095439671
+          name: rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}
+          path: input
+      - name: Syntax check
+        run: python -m py_compile research/pd_direction_4h_universe.py
+      - name: Run shard
+        run: python research/pd_direction_4h_universe.py --input input --out out
+      - name: Sanity
+        run: |
+          test -s out/direction_4h.csv
+          test -s out/audit.csv
+          python - <<'PY'
+          import pandas as pd
+          r=pd.read_csv("out/direction_4h.csv");a=pd.read_csv("out/audit.csv")
+          assert len(r)>0 and r.events.min()>0
+          assert a.rows4.dropna().min()>=400
+          print("OK",r.symbol.nunique(),len(r),r.events.min(),r.events.max())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-4h-direction-shard-${{ matrix.shard }}
+          path: out/
