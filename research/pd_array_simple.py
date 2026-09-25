@@ -47,7 +47,7 @@ def run(d,n,q,exit_mode,hold,cost_bps=8,rr=2):
  return out
 
 def main():
- ap=argparse.ArgumentParser();ap.add_argument("--years",type=float,default=5);ap.add_argument("--out",default="pd_results") # trigger;a=ap.parse_args();Path(a.out).mkdir(exist_ok=True)
+ ap=argparse.ArgumentParser();ap.add_argument("--years",type=float,default=5);ap.add_argument("--out",default="pd_results");a=ap.parse_args();Path(a.out).mkdir(exist_ok=True)
  rows=[];yr=[];audit=[]
  for sym in ("BTCUSDT","ETHUSDT"):
   d,g=load(sym,a.years);audit.append(dict(symbol=sym,rows=len(d),start=d.dt.min(),end=d.dt.max(),gaps=g))
