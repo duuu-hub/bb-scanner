@@ -1,0 +1,27 @@
+name: Core D2 + L2 Portfolio Audit
+on:
+  push:
+    branches: [research-core-l2-portfolio]
+    paths: ['research/core_l2_portfolio_audit.py','.github/workflows/core-l2-portfolio-audit.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+ audit:
+  runs-on: ubuntu-latest
+  timeout-minutes: 360
+  steps:
+   - uses: actions/checkout@v4
+   - uses: actions/setup-python@v5
+     with: {python-version: '3.11'}
+   - run: pip install pandas numpy pyarrow requests
+   - name: Download canonical 5Y
+     env: {GH_TOKEN: '${{ github.token }}'}
+     run: |
+      mkdir -p canonical_um downloads unpack
+      gh release download binance-15m-5y-canonical-v1 --repo duuu-hub/bb-scanner --pattern 'binance-um-15m-5y-parquet-shard-*.zip' --dir downloads
+      for f in downloads/*.zip; do unzip -q "$f" -d unpack; done
+      mv unpack/um/*.parquet canonical_um/
+   - run: python research/core_l2_portfolio_audit.py 2>&1 | tee artifacts/run.log
+   - uses: actions/upload-artifact@v4
+     if: always()
+     with: {name: core-l2-portfolio-audit, path: artifacts/}
