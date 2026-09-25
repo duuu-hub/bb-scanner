@@ -5,7 +5,23 @@ on:
     paths: ["research/continuation_1m_resolve.py",".github/workflows/continuation-1m-resolve.yml"]
   workflow_dispatch:
 jobs:
+  prep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining, fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - run: python research/continuation_execution_validation.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuation-phase1
+          path: continuation_execution_results/
+          retention-days: 14
   resolve:
+    needs: prep
     strategy:
       fail-fast: false
       matrix:
@@ -18,8 +34,10 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install pandas numpy
-      - name: Build phase1 inputs
-        run: python research/continuation_execution_validation.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: continuation-phase1
+          path: continuation_execution_results
       - name: Resolve ambiguity shard
         env:
           SHARD_INDEX: ${{ matrix.shard }}
