@@ -1,0 +1,41 @@
+name: PD Breakdown OOS Diagnosis
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_oos_diagnosis_once']
+permissions: {contents: write, actions: read}
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_oos_diagnosis.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - run: python research/pd_breakdown_oos_diagnosis.py --trades input/trades_all.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd
+          m=pd.read_csv("out/oos_meta.csv"); y=pd.read_csv("out/oos_yearly.csv"); q=pd.read_csv("out/oos_quarterly.csv"); c=pd.read_csv("out/oos_crowding.csv")
+          assert len(m)==1 and len(y)>0 and len(q)>0 and len(c)>0
+          assert m.oos_trades.iloc[0]>1000
+          assert y.trades.sum()==m.oos_trades.iloc[0]
+          assert q.trades.sum()==m.oos_trades.iloc[0]
+          assert c.trades.sum()==m.oos_trades.iloc[0]
+          print("VERIFIED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-oos-diagnosis-VERIFIED, path: out/, if-no-files-found: error}
+      - name: Persist verified diagnosis
+        run: |
+          mkdir -p research/results/pd_breakdown_oos_diagnosis
+          cp out/*.csv research/results/pd_breakdown_oos_diagnosis/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/results/pd_breakdown_oos_diagnosis
+          git commit -m "research: persist verified OOS diagnosis" || exit 0
+          git push origin HEAD:research/pd-4h-binance-universe
