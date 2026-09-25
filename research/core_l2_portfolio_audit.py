@@ -73,6 +73,14 @@ def main():
   try: trs+=l2_signals(p.stem,pd.read_parquet(p))
   except Exception as e: print("ERR",p.stem,e)
  tr=pd.DataFrame(trs,columns=["symbol","signal_time","exit_time","net_pct","outcome","samebar_both"])
+ tr["entry"]=np.nan
+ # recover exact entry from net/outcome is unsafe; load entry prices from canonical signal bars
+ px={}
+ for p in sorted(ROOT.glob("*.parquet")):
+  d=pd.read_parquet(p); d["dt"]=pd.to_datetime(d.open_time,unit="ms",utc=True); px[p.stem]=d.set_index("dt").open.astype(float)
+ for i,r in tr.iterrows(): tr.at[i,"entry"]=float(px[r.symbol].loc[r.signal_time])
+ tr=resolve_1m(tr)
+ print("1M_RESOLUTION",tr.loc[tr.samebar_both,"resolution_1m"].value_counts(dropna=False).to_dict())
  # Core OFF classification is exact D2_0 calendar-day state. L2 starts only when OFF; existing L2 is allowed to finish.
  state=x.set_index(x.dt.dt.floor("D")).d2
  tr["core_on"]=state.reindex(tr.signal_time.dt.floor("D")).fillna(0).to_numpy().astype(bool)
@@ -126,7 +134,7 @@ def main():
   P=perf(rr)
   return z,rr,P
  for mode in ["L2_30PCT","FULL_SEED_SLOT"]:
-  for collision in ["SL","TP"]:
+  for collision in ["SL"]:
    z,rr,P=simulate(mode,collision)
    print(mode,collision,"2021+",{"return_pct":P[0],"sharpe":P[1],"mdd":P[2],"accepted_l2":len(z),"max_weight_sum_rule":1.0})
    print(mode,collision,"YEARS",[(int(y),)+perf(g) for y,g in rr.groupby(rr.index.year)])
