@@ -3,7 +3,7 @@ on:
   push:
     branches: [research/pd-array-simple]
     paths:
-      - research/pd_direction_eventstudy.py
+      - research/pd_direction_4h_eventstudy.py
       - .github/workflows/pd-array-simple.yml
 jobs:
   backtest:
@@ -13,9 +13,9 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
-      - name: Run PD direction event study
-        run: python research/pd_direction_eventstudy.py
+      - name: Run 4H PD direction event study
+        run: python research/pd_direction_4h_eventstudy.py
       - uses: actions/upload-artifact@v4
         with:
-          name: pd-direction-5y
-          path: pd_direction_results/
+          name: pd-direction-4h-5y
+          path: pd_direction_4h_results/
