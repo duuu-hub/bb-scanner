@@ -1,0 +1,31 @@
+name: PSAR 0.25ATR 1m Ambiguity Resolution
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1m_resolve_run']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 15m 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Resolve 4H 0.25ATR ambiguous bars with Binance 1m archive
+        run: python scripts/psar_1m_resolve.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-025atr-1m-resolution
+          path: psar_1m_resolution.json
+          retention-days: 30
