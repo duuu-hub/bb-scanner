@@ -62,6 +62,10 @@ def main():
       gross_ret_pct=ret,exit_reason=why,ret_24h=getattr(rr,"ret_24h",np.nan),rv_4h=getattr(rr,"rv_4h",np.nan),rv_24h=getattr(rr,"rv_24h",np.nan)))
  d=pd.DataFrame(alltr)
  d["wall_hold_h"]=(d.exit_ts-d.entry_ts)/3_600_000
+ # Export every ambiguous 15m exit for exact 1m drill-down/replay.
+ amb=d[d.exit_reason.eq("BOTH_SL")].copy()
+ amb.to_csv(OUT/"ambiguous_15m.csv",index=False)
+ print(f"AMBIGUOUS_15M_COUNT={len(amb)}")
  d.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
  audit=[]
  for keys,z in d.groupby(["side","tp","sl","horizon_h","delay_bars"]):
