@@ -1,0 +1,30 @@
+name: SMC Original 5Y Replay
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/smc_original_5y_once']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download Rank5 data artifacts
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay original SMC
+        run: python scripts/smc_original_replay.py --data data --out results/smc_original_5y.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smc-original-5y-results
+          path: results/smc_original_5y.json
+          retention-days: 30
