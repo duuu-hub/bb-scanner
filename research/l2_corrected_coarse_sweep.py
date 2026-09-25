@@ -28,15 +28,6 @@ def prep(df):
   A[name]=po>mean+2*np.sqrt(var.clip(lower=0))
  return b,pd.DataFrame(A,index=idx).sum(axis=1),b.open.pct_change(16)*100
 
-def trade(b,t,tpv,slv,hold):
- pos=b.index.get_indexer([t])[0]; path=b.iloc[pos:pos+hold]
- if path.empty:return None
- en=float(b.open.loc[t]); tp=en*(1+tpv/100); sl=en*(1-slv/100); ex=float(path.iloc[-1].close)
- for _,z in path.iterrows():
-  ht=z.high>=tp; hs=z.low<=sl
-  if hs: ex=sl; break  # conservative: same 15m bar collision = SL
-  if ht: ex=tp; break
- return (ex/en-1)*100-L2FEE
 
 def main():
  rows=[]
@@ -52,13 +43,27 @@ def main():
    for sym,b,exact,ret4 in cache:
     raw=(exact>=rank)&(ret4>=r4); trig=raw & ~raw.shift(1,fill_value=False)
     sigs.extend((sym,b,t) for t in b.index[trig])
+   # Precompute each signal path once; reuse it across all TP/SL/hold combinations.
+   paths=[]
+   maxhold=max(HOLDS)
+   for sym,b,t in sigs:
+    pos=b.index.get_indexer([t])[0]; path=b.iloc[pos:pos+maxhold]
+    if path.empty: continue
+    paths.append((t,float(b.open.loc[t]),path.high.to_numpy(float),path.low.to_numpy(float),path.close.to_numpy(float)))
    for tp in TPS:
     for sl in SLS:
      for hold in HOLDS:
       vals=[]; yrs={}
-      for sym,b,t in sigs:
-       v=trade(b,t,tp,sl,hold)
-       if v is None: continue
+      for t,en,hi,lo,cl in paths:
+       n=min(hold,len(cl)); h=hi[:n]; l=lo[:n]; tp_px=en*(1+tp/100); sl_px=en*(1-sl/100)
+       hit_tp=np.flatnonzero(h>=tp_px); hit_sl=np.flatnonzero(l<=sl_px)
+       it=int(hit_tp[0]) if hit_tp.size else n
+       is_=int(hit_sl[0]) if hit_sl.size else n
+       # conservative same-bar collision: SL wins ties
+       if is_<=it and is_<n: ex=sl_px
+       elif it<n: ex=tp_px
+       else: ex=float(cl[n-1])
+       v=(ex/en-1)*100-L2FEE
        vals.append(v); yrs.setdefault(t.year,[]).append(v)
       if not vals: continue
       a=np.array(vals); gp=a[a>0].sum(); gl=-a[a<0].sum(); pf=gp/gl if gl else np.inf
