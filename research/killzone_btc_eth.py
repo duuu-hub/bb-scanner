@@ -13,7 +13,7 @@ def load(sym, years):
     if not fs: raise SystemExit(f"no files for {sym}")
     d=pd.concat([pd.read_csv(f) for f in fs],ignore_index=True)
     cols={c.lower():c for c in d.columns}
-    t=next((cols[x] for x in ("timestamp","ts","open_time","datetime","date") if x in cols),None)
+    t=next((cols[x] for x in ("timestamp","timestamp_ms","ts","open_time","datetime_utc","datetime","date") if x in cols),None)
     if t is None: raise SystemExit(f"timestamp column missing: {d.columns.tolist()}")
     s=d[t]
     if np.issubdtype(s.dtype,np.number):
