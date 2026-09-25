@@ -16,7 +16,7 @@ ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0,str(ROOT))
 
-import research.aoa_era_validation.validate_era as era
+import research.aoa_market_context.analyze_market_context as mc
 
 EP=ROOT/"research"/"aoa_market_context"/"aoa_episodes_2019h2_2021_compact.csv"
 OUT=ROOT/"research"/"aoa_hazard_v4"/"output"
@@ -209,10 +209,21 @@ def actual_stats(year):
     }
 
 
-def sim_one(candles,fast_model,start,end,threshold,min_hold_bars,confirm_bars,cost_side=0.0):
+def actual_side_at(ts):
+    ep=pd.read_csv(EP)
+    t=int(pd.Timestamp(ts).timestamp())
+    g=ep[(ep["st"]<=t)&(ep["et"]>t)]
+    if g.empty:
+        g=ep[ep["st"]<=t].sort_values("st").tail(1)
+    if g.empty:
+        raise RuntimeError(f"No actual side available at {ts}")
+    return 1 if g.iloc[0]["d"]=="L" else -1
+
+
+def sim_one(candles,fast_model,start,end,threshold,min_hold_bars,confirm_bars,initial_side,cost_side=0.0):
     df=candles[(candles["bar_start"]>=start-pd.Timedelta(minutes=15))&(candles["bar_start"]<end)].copy().reset_index(drop=True)
     prev=df[df["bar_start"]<start].iloc[-1]
-    side=1 if float(prev["aoa_p_long"])>=0.5 else -1
+    side=int(initial_side)
     entry_px=float(df[df["bar_start"]>=start].iloc[0]["open"])
     entry_ts=int(start.timestamp())
     ectx=entry_context(prev,side)
@@ -305,7 +316,7 @@ def calibrate_2020(candles,fast_model,train_df):
                     candles,fast_model,
                     pd.Timestamp("2020-01-01",tz="UTC"),
                     pd.Timestamp("2021-01-01",tz="UTC"),
-                    th,mh,cb,0.0
+                    th,mh,cb,actual_side_at("2020-01-01"),0.0
                 )
                 count_err=abs(math.log(max(m["legs"],1)/max(actual["legs"],1)))
                 med_err=abs(math.log((m["median_duration_h"]+.25)/(actual["median_duration_h"]+.25)))
@@ -325,7 +336,7 @@ def calibrate_2020(candles,fast_model,train_df):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    _,_,candles,_=era.prep()
+    candles=mc.load_candles()
     h=build_hazard_rows(candles)
     model,tr,te,model_grid,best_C,test,coef=fit_model(h)
     model_grid.to_csv(OUT/"inner_model_selection.csv",index=False)
@@ -336,7 +347,7 @@ def main():
 
     results=[]; legs=[] 
     for cname,cost in [("ZERO",0.0),("RT_004",0.0004/2)]:
-        m,l,c=sim_one(candles,fast,TEST_START,TEST_END,th,mh,cb,cost)
+        m,l,c=sim_one(candles,fast,TEST_START,TEST_END,th,mh,cb,actual_side_at(TEST_START),cost)
         results.append({"cost":cname,**m})
         l["cost"]=cname; legs.append(l)
         c.to_csv(OUT/f"curve_2021_{cname}.csv.gz",index=False,compression="gzip")
@@ -359,7 +370,7 @@ def main():
         "median_p_actual_2021_flip":float(pos.median()),
         "median_p_2021_nonflip":float(neg.median()),
         "top_coefficients":coef,
-        "note":"Model hyperparameter selected on 2019->2020 event ranking. Trigger parameters selected only on 2020 behavior fidelity, excluding PnL. 2021 is validation."
+        "note":"Hazard model uses full 2019H2-2020 training history. Trigger parameters selected only on 2020 behavior fidelity, excluding PnL. 2021 timing validation is conditional on the correct observed direction at 2021-01-01, isolating flip-timing fidelity from the separate initial-direction problem."
     }
     (OUT/"meta.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
