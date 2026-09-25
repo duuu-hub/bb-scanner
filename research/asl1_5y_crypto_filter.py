@@ -40,6 +40,8 @@ base["entry_dt"]=pd.to_datetime(base.entry_dt,utc=True); base["day"]=base.entry_
 breadth=base.groupby("day").size(); base["day_signals"]=base.day.map(breadth)
 base["btc_above50"]=base.btc_open>base.btc_ma50; base["btc_above200"]=base.btc_open>base.btc_ma200
 regimes={"BTC24_GT_-2":base.btc_ret24h>-2,"BTC24_GT_-4":base.btc_ret24h>-4,"BTC_ABOVE50":base.btc_above50,"BTC_ABOVE200":base.btc_above200,"BREADTH_LE_10":base.day_signals<=10,"BREADTH_LE_20":base.day_signals<=20,"BREADTH_LE_40":base.day_signals<=40,"BTC24_-4_B20":(base.btc_ret24h>-4)&(base.day_signals<=20),"DROP3_RV2_B20":(base.asset_ret4h<=-3)&(base.rv_ratio<2)&(base.day_signals<=20),"DROP3_RV2_B20_BTC4":(base.asset_ret4h<=-3)&(base.rv_ratio<2)&(base.day_signals<=20)&(base.btc_ret24h>-4)}
+for n in [30,40,50,60,80,100]:
+    regimes[f"BTC_ABOVE{n}"]=base.btc_open>base[f"btc_ma{n}"]
 reg_rows=[]
 for nm,m in regimes.items():
  z=base[m]; st=stat(z); reg_rows.append({"filter":nm,**st.to_dict()})
