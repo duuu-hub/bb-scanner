@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, time, urllib.parse, urllib.request
+import json, time, urllib.parse, urllib.request, os
 from pathlib import Path
 import pandas as pd
 import continuation_execution_validation as ev
@@ -39,6 +39,8 @@ def resolve(row,bars):
 
 def main():
     a=pd.read_csv(SRC)
+    shard_index=int(os.getenv("SHARD_INDEX","0")); shard_count=int(os.getenv("SHARD_COUNT","1"))
+    a=a.iloc[shard_index::shard_count].copy()
     out=[]
     cache={}
     for i,r in enumerate(a.itertuples(),1):
@@ -55,6 +57,11 @@ def main():
     z=pd.DataFrame(out); z.to_csv(OUT/"ambiguous_1m_resolution.csv",index=False)
     counts=z.verdict_1m.value_counts(dropna=False).rename_axis("verdict").reset_index(name="n")
     counts.to_csv(OUT/"resolution_counts.csv",index=False)
+
+    # Sharded jobs only resolve their assigned ambiguity rows. Final aggregation is separate.
+    if shard_count > 1:
+        print("SHARD_DONE", shard_index, shard_count, len(z), flush=True)
+        return
 
     # Recompute final trade outcomes; only a verified TP-first changes BOTH_SL from -3 to +5.
     d=pd.read_csv("continuation_execution_results/audit_trades.csv.gz")
