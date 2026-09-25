@@ -5,6 +5,7 @@ from pathlib import Path
 from itertools import combinations
 import numpy as np
 import pandas as pd
+import continuation_execution_core as exec_core
 TARGETS=(1.0,1.5,2.0); STOPS=(0.5,0.75,1.0); HORIZONS={1:4,2:8,3:12}
 FEATURES=["ret_30m","ret_1h","ret_2h","ret_4h","ret_24h","accel_1h","rv_4h","rv_24h","vol_surge_1h","range_1h","close_pos_1h","pullback_from_1h_high","dist_24h_high","breadth_1h","breadth_4h","market_med_1h","market_med_4h","rel_vs_market_1h","rel_vs_market_4h"]
 def args():
@@ -29,13 +30,7 @@ def add_features(g):
  hi4=g.high.rolling(4).max(); lo4=g.low.rolling(4).min(); g["range_1h"]=(hi4/lo4-1)*100; g["close_pos_1h"]=(c-lo4)/(hi4-lo4).replace(0,np.nan); g["pullback_from_1h_high"]=(c/hi4-1)*100; g["dist_24h_high"]=(c/g.high.rolling(96).max()-1)*100
  return g
 def barrier_label(g,i,direction,target,stop,bars):
- entry=float(g.close.iloc[i]); end=min(len(g),i+1+bars)
- for j in range(i+1,end):
-  hi=float(g.high.iloc[j]); lo=float(g.low.iloc[j]); tp=(hi>=entry*(1+target/100)) if direction=="LONG" else (lo<=entry*(1-target/100)); sl=(lo<=entry*(1-stop/100)) if direction=="LONG" else (hi>=entry*(1+stop/100))
-  if tp and sl:return "AMBIG"
-  if tp:return "WIN"
-  if sl:return "LOSS"
- return "TIMEOUT"
+ return exec_core.barrier_label(g,i,direction,target,stop,bars)
 def lift_table(df,label,features):
  base=(df[label]=="WIN").mean(); rows=[]
  for f in features:
@@ -87,7 +82,7 @@ def main():
    for st in STOPS:
     lab=f"y_t{t:g}_s{st:g}_h{h}"
     for side in ("ALL","LONG","SHORT"):
-     q=cand if side=="ALL" else cand[cand.direction==side]; q=q[q[lab]!="AMBIG"]; n=len(q)
+     q=cand if side=="ALL" else cand[cand.direction==side]; q=q[~q[lab].isin(["AMBIG","NO_ENTRY"])]; n=len(q)
      if n:grid.append(dict(horizon_h=h,target=t,stop=st,side=side,n=n,win_rate=(q[lab]=="WIN").mean(),loss_rate=(q[lab]=="LOSS").mean(),timeout_rate=(q[lab]=="TIMEOUT").mean()))
  pd.DataFrame(grid).to_csv(out/"target_stop_horizon_grid.csv",index=False); meta={"rows_market":len(d),"candidate_events":len(cand),"symbols":int(cand.symbol.nunique()),"start_ms":int(cand.timestamp_ms.min()),"end_ms":int(cand.timestamp_ms.max()),"candidate_definition":f"|ret_1h| >= {a.min_impulse}% and ret_4h same sign","primary_label":"+1.5% before -0.75%, horizons 1/2/3h","anti_overfit":"descriptive only; chronological OOS required"}; (out/"meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
  print("=== META ==="); print(json.dumps(meta,indent=2)); print(); print("=== PRIMARY ==="); print(pd.DataFrame(summaries).to_string(index=False))
