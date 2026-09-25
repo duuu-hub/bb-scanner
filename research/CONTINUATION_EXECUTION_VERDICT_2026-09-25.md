@@ -1,3 +1,17 @@
+> **ERRATUM — 2026-09-25: RETRACT THE PROFITABLE VERDICT BELOW.** The published
+> Bitget SHORT OOS PF 1.691 used candidate-only rows as execution candles and
+> scored simultaneous TP/SL as TP because the conservative line was commented
+> out by literal escaped newlines. The same frozen SHORT signals replayed on
+> *every actual Bitget 15m candle*, next 15m entry, SL-first ambiguity, one
+> same-symbol position, 0.20% round-trip cost: **867 accepted trades, PF 0.951,
+> mean -0.070% per trade**. Extra total costs 0.45%/0.70%: PF 0.797/0.671.
+> At zero cost PF 1.101. Do not promote this strategy to demo as profitable;
+> original claims about execution robustness, latency, slot capture and
+> positive thirds below are invalid. Source execution was patched on branch
+> `research-continuation-mining`; targeted verified run: [36080590975](https://github.com/duuu-hub/bb-scanner/actions/runs/36080590975).
+> Separate Binance 2021–2026 transfer: 60,393 trades, PF 0.732 at 0.20%
+> costs; detailed [five-year report](https://github.com/duuu-hub/bb-scanner/blob/research-core-portfolio-5y/research/CORE_THREE_WAY_5Y_VERDICT_2026-09-25.md).
+
 # Continuation execution verdict — 2026-09-25
 
 ## One-line conclusion
