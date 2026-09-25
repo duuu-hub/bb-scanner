@@ -1,3 +1,4 @@
+# AUDIT_RERUN_2026_09_25: corrected entry-bar semantics; workflow uses canonical release shards.
 #!/usr/bin/env python3
 # Coarse re-search of L2 after fixing execution: signal 15m entry bar IS included.\n# trigger retry 2026-09-25
 from pathlib import Path
