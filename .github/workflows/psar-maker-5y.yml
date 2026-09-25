@@ -1,0 +1,31 @@
+name: PSAR Maker 5Y Direction Test
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_maker_5y_run']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download existing 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run PSAR direction test
+        run: python scripts/psar_maker_5y.py --data data --out psar_results.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-maker-5y-results
+          path: psar_results.json
+          retention-days: 30
