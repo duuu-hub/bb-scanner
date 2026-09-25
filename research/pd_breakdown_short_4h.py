@@ -16,7 +16,7 @@ for fn in sorted(glob.glob(a.input+"/*.csv.gz")):
   x=x[x.bars==16].drop(columns="bars").reset_index(); audit.append(dict(symbol=sym,rows4=len(x)))
   if len(x)<400: continue
   op=x.open.to_numpy();hi4=x.high.to_numpy();lo4=x.low.to_numpy();cl=x.close.to_numpy();dt=x.dt.to_numpy()
-  for n in (40,160,320):
+  for n in (240,280,320,360,400):
    rh=x.high.shift(1).rolling(n).max().to_numpy(); rl=x.low.shift(1).rolling(n).min().to_numpy()
    atr=(x.high-x.low).shift(1).rolling(14).mean().to_numpy()
    for sig in ("BREAKDOWN","FIRST_BREAKDOWN","BREAKDOWN_0.1ATR"):
@@ -31,7 +31,7 @@ for fn in sorted(glob.glob(a.input+"/*.csv.gz")):
        if not ok: continue
        e=i+1; entry=op[e]; stop=entry+stop_atr*atr[i]; risk=stop-entry; tp=entry-rr*risk
        if risk<=0: continue
-       exit_px=None; reason=None; z=min(e+6,len(x)-1) # 24h max hold
+       exit_px=None; reason=None; z=min(e+5,len(x)-1) # 24h max hold: 6 x 4h candles from entry open
        for j in range(e,z+1):
         hs=hi4[j]>=stop; ht=lo4[j]<=tp
         if hs and ht: exit_px=stop;reason="SL_AMBIG";z=j;break
