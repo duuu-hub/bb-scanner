@@ -75,3 +75,5 @@ def main():
  print(q.sort_values(["score","pf"],ascending=False).head(40).to_string(index=False))
  print("NEIGHBORHOOD_COUNTS",{"pf_gt_1":int((q.pf>1).sum()),"pf_gt_1_1":int((q.pf>1.1).sum()),"pf_gt_1_2":int((q.pf>1.2).sum()),"all_5_years_pf_gt1":int((q.pos_years_2021_25==5).sum())})
 if __name__=="__main__": main()
+
+# trigger rank-sharded sweep
