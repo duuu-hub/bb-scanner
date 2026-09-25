@@ -146,3 +146,53 @@ All ChatGPT conversations, agents, and research branches working in this reposit
 - Do not start a new strategy family while repository-wide cleanup/audit is explicitly in progress unless the user asks to interrupt it.
 - Killzone research is excluded from the current cleanup/audit program and must not be folded into current conclusions unless the user explicitly re-enables it.
 - Research changes stay off `main` until audited. Live/demo safety rules above remain authoritative.
+
+
+## 11. Canonical data asset management
+
+Long-lived research data is a repository asset, not a disposable workflow by-product.
+
+- Before collecting historical market data, check the canonical data locations first. Do not re-download a dataset merely because it is absent from the checked-out repository tree.
+- Check, in order: documented canonical storage / GitHub Releases, repository-managed data, then relevant non-expired Actions artifacts.
+- The canonical Binance USD-M 15m 5Y snapshot is stored as a versioned Release asset when available. Record its release tag, source run, manifests, coverage, symbol count, and checksums in research handoffs.
+- Actions artifacts are temporary transport/results storage and must not be treated as permanent canonical storage.
+- Reusable large datasets must be preserved in versioned long-lived storage with SHA256 checksums before temporary artifacts expire.
+- Never overwrite an established canonical snapshot in place. If the dataset changes, publish a new version such as v2 and preserve the old version for reproducibility.
+- Before a backtest uses a canonical dataset, verify expected assets exist and validate checksums/manifests where available.
+- Every long-history result must identify the exact dataset version/snapshot used.
+- Do not declare that data is missing until canonical storage, repository data, and relevant Actions artifacts have all been checked.
+
+## 12. Mandatory workflow try-run-verify-repair loop
+
+Creating or editing a GitHub Actions workflow is not completion. The agent that changes or triggers it owns the verification loop until the requested workflow is demonstrably working or an external blocker prevents further progress.
+
+Required loop:
+
+1. Before triggering, inspect the workflow/code for known failure modes and run cheap static/preflight checks where practical.
+2. Trigger the real workflow.
+3. Confirm that a workflow run was actually created. A commit or trigger file alone is not evidence that Actions started.
+4. Inspect the run status and jobs. When it completes, inspect the conclusion and relevant job steps/logs.
+5. Verify the actual outputs: expected input count, non-zero rows/universe, expected files, artifacts, sanity assertions, and key result contents. A green Actions badge alone is insufficient.
+6. If the run fails, produces empty/partial output, times out, or violates the intended experiment, diagnose the concrete cause, fix it on the research branch, and trigger a new run.
+7. Repeat trigger -> inspect -> diagnose -> fix -> rerun -> verify until the workflow and its outputs are confirmed correct.
+8. Do not report a task as completed while the run is merely queued/in-progress or while output verification is pending. State the exact current status instead.
+9. If an external limitation makes completion impossible, preserve all valid work and report the specific blocker and last verified state rather than pretending completion.
+
+### Pre-run known-error checklist
+
+Before every substantial research run, explicitly check the failure classes that have repeatedly occurred in this repository:
+
+- syntax/indentation damage from scripted text replacement or accidental literal escape sequences such as `\\n`;
+- trigger edits accidentally commenting out or corrupting executable code;
+- wrong branch, stale commit, wrong workflow, or a trigger that never created a run;
+- missing/expired Actions artifacts or incorrect run/artifact IDs;
+- wrong data path/schema/column names such as `timestamp_ms` vs `open_time`;
+- empty universe, zero-row input, partial shard download, missing symbols, or incomplete historical coverage;
+- timestamp disorder, duplicates, gaps, incomplete resampled candles, and incorrect higher-timeframe alignment;
+- look-ahead/future-confirmation leakage and signal/entry timestamp mistakes;
+- omitted entry bar, TP/SL same-bar ambiguity, and incorrect holding-horizon units;
+- accidental reuse of pre-fix/QUARANTINED metrics;
+- timeout risk from unnecessarily monolithic jobs; shard/chunk large work when appropriate;
+- research workflows accidentally sharing live watcher concurrency/state or modifying protected forward-state files.
+
+Where practical, encode these checks as assertions/preflight steps so the workflow fails loudly instead of producing plausible-looking bad results.
