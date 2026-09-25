@@ -3,7 +3,7 @@ on:
   push:
     branches: [research/pd-4h-binance-universe]
     paths: ['.research/pd_breakdown_portfolio_compare_once']
-permissions: {contents: read, actions: read}
+permissions: {contents: write, actions: read}
 jobs:
   compare:
     runs-on: ubuntu-latest
@@ -30,3 +30,12 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with: {name: pd-breakdown-portfolio-compare-VERIFIED, path: out/, if-no-files-found: error}
+      - name: Persist verified comparison
+        run: |
+          mkdir -p research/results/pd_breakdown_portfolio_compare
+          cp out/comparison.csv out/comparison_oos.csv research/results/pd_breakdown_portfolio_compare/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/results/pd_breakdown_portfolio_compare
+          git commit -m "research: persist verified portfolio comparison" || exit 0
+          git push origin HEAD:research/pd-4h-binance-universe
