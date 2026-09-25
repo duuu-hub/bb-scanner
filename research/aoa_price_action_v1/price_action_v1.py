@@ -329,13 +329,13 @@ def simulate(candles,hfast,start,end,threshold,min_hold,confirm,initial_side,cos
 def calibrate_2020(candles,hfast,tr):
     actual=actual_stats(2020)
     flip_scores=tr.loc[tr.flip==1,"p"].dropna()
-    thresholds=sorted(set(float(flip_scores.quantile(q)) for q in [.60,.70,.75,.80,.85,.90,.93,.95]))
+    thresholds=sorted(set(float(flip_scores.quantile(q)) for q in [.75,.85,.90,.95]))
     ep=pd.read_csv(EP); dt=pd.to_datetime(ep["st"],unit="s",utc=True); dur=ep.loc[dt<TRAIN_END,"duration_sec"]/900
-    mins=sorted(set(max(1,int(math.ceil(float(dur.quantile(q))))) for q in [.10,.20,.25,.33,.50]))
+    mins=sorted(set(max(1,int(math.ceil(float(dur.quantile(q))))) for q in [.25,.33,.50]))
     rows=[]
     for th in thresholds:
         for mh in mins:
-            for cb in [1,2,3,4]:
+            for cb in [2,3]:
                 m,_,_=simulate(candles,hfast,pd.Timestamp("2020-01-01",tz="UTC"),pd.Timestamp("2021-01-01",tz="UTC"),th,mh,cb,actual_side_at("2020-01-01"),0.0)
                 score=abs(math.log(max(m["legs"],1)/actual["legs"])) + abs(math.log((m["median_h"]+.25)/(actual["median_h"]+.25)))
                 score += .5*abs(math.log((m["q75_h"]+.25)/(actual["q75_h"]+.25)))
