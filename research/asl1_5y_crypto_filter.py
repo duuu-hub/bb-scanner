@@ -25,5 +25,16 @@ o=d.groupby(["side","hold_h"]).apply(stat,include_groups=False).reset_index(); o
 d["year"]=pd.to_datetime(d.entry_dt,utc=True).dt.year
 y=d.groupby(["side","hold_h","year"]).apply(stat,include_groups=False).reset_index(); y.to_csv(OUT/"yearly.csv",index=False)
 s=d.groupby(["side","hold_h","symbol"]).apply(stat,include_groups=False).reset_index().sort_values(["side","hold_h","sum_net_pct"],ascending=[True,True,False]); s.to_csv(OUT/"symbols.csv",index=False)
+# deeper diagnostics for the leading LONG 24h variant
+q=d[(d.side=="LONG") & (d.hold_h==24)].copy()
+q["entry_dt"]=pd.to_datetime(q.entry_dt,utc=True); q["month"]=q.entry_dt.dt.to_period("M").astype(str); q["quarter"]=q.entry_dt.dt.to_period("Q").astype(str); q["hour"]=q.entry_dt.dt.hour
+for col,name in [("month","monthly"),("quarter","quarterly"),("reason","exit_reason"),("hour","entry_hour")]:
+    q.groupby(col).apply(stat,include_groups=False).reset_index().to_csv(OUT/f"{name}.csv",index=False)
+# robustness: exclude tiny-history symbols and summarize per-symbol dispersion
+sc=s[(s.side=="LONG")&(s.hold_h==24)].copy(); sc.to_csv(OUT/"long24_symbols.csv",index=False)
+for n in [5,10,20,50]:
+    z=sc[sc.trades>=n]; print(f"LONG24 SYMBOLS trades>={n}: symbols={len(z)} medianPF={z.PF.replace([np.inf,-np.inf],np.nan).median():.4f} positivePF={(z.PF>1).mean():.3f}",flush=True)
 d.to_csv(OUT/"trades_crypto.csv",index=False)
 print("\n=== CRYPTO OVERALL ===\n"+o.to_string(index=False)); print("\n=== CRYPTO YEARLY ===\n"+y.to_string(index=False))
+print("\n=== LONG24 MONTHLY ===\n"+q.groupby("month").apply(stat,include_groups=False).reset_index().to_string(index=False))
+print("\n=== LONG24 EXIT ===\n"+q.groupby("reason").apply(stat,include_groups=False).reset_index().to_string(index=False))
