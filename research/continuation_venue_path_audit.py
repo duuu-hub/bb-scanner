@@ -38,7 +38,8 @@ def binance_month(sym,month="2026-08"):
     with zipfile.ZipFile(io.BytesIO(r.content)) as z:
         csv=next(n for n in z.namelist() if n.endswith(".csv"))
         d=pd.read_csv(z.open(csv),header=None,usecols=[0,1,2,3,4],names=["timestamp_ms","open","high","low","close"])
-    d["timestamp_ms"]=pd.to_numeric(d.timestamp_ms,errors="coerce")
+    for col in ("timestamp_ms","open","high","low","close"):
+        d[col]=pd.to_numeric(d[col],errors="coerce")
     d.loc[d.timestamp_ms>1e14,"timestamp_ms"]/=1000
     return d.dropna().sort_values("timestamp_ms").drop_duplicates("timestamp_ms").reset_index(drop=True)
 
