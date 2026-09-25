@@ -22,8 +22,8 @@ jobs:
       - run: pip install pandas numpy
       - name: Phase 1 full-path audit
         run: python research/continuation_execution_validation.py
-      - uses: actions/upload-artifact@v4
+      - name: Resolve 15m BOTH with Bitget 1m\n        run: python research/continuation_1m_resolve.py\n      - uses: actions/upload-artifact@v4
         with:
           name: continuation-execution-results
-          path: continuation_execution_results/
+          path: |\n            continuation_execution_results/\n            continuation_1m_results/
           retention-days: 14
