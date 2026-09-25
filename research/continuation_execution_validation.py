@@ -274,4 +274,39 @@ def equal_exposure_slot_study(d):
  out=pd.DataFrame(rows); out.to_csv(OUT/"equal_exposure_slots.csv",index=False)
  print("\n=== EQUAL TOTAL EXPOSURE SLOT STUDY (SHORT 5/3/6h) ==="); print(out.to_string(index=False))
 
-if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz")); monte_carlo_slot_study(pd.read_csv(OUT/"trades.csv.gz")); equal_exposure_slot_study(pd.read_csv(OUT/"trades.csv.gz"))
+
+FINE_SLOTS=[2,3,4,5,6,7,8,10]
+def full_seed_fine_slot_study(d):
+ base=d[(d.delay_bars==0)&(d.side=="SHORT")&(d.tp==5.)&(d.sl==3.)&(d.horizon_h==6)].copy()
+ accepted=[]; open_until={}
+ for r in base.sort_values(["signal_ts","symbol"]).itertuples():
+  if open_until.get(r.symbol,-1)>=r.entry_ts: continue
+  accepted.append(r); open_until[r.symbol]=r.exit_ts
+ a=pd.DataFrame([r._asdict() for r in accepted])
+ rows=[]
+ for slots in FINE_SLOTS:
+  alloc=1.0/slots; cash=1.0; active={}; peak=1.0; mdd=0.; taken=missed=0; max_open=0
+  events=sorted(set(a.entry_ts.tolist()+a.exit_ts.tolist()))
+  be={t:g.copy() for t,g in a.groupby("entry_ts")}; bx={t:g for t,g in a.groupby("exit_ts")}
+  for t in events:
+   if t in bx:
+    for r in bx[t].itertuples():
+     k=(r.symbol,r.entry_ts)
+     if k in active:
+      stake=active.pop(k); cash += stake*(1+(r.gross_ret_pct-0.20)/100)
+   if t in be:
+    g=be[t].copy()
+    score=g.rv_24h.rank(pct=True)+g.rv_4h.rank(pct=True)+(-g.ret_24h).rank(pct=True)
+    g=g.assign(_score=score).sort_values(["_score","symbol"],ascending=[False,True])
+    for r in g.itertuples():
+     if len(active)>=slots or cash+1e-12<alloc: missed+=1; continue
+     cash-=alloc; active[(r.symbol,r.entry_ts)]=alloc; taken+=1
+   eq=cash+sum(active.values()); peak=max(peak,eq); mdd=min(mdd,(eq/peak-1)*100); max_open=max(max_open,len(active))
+  final=cash+sum(active.values())
+  rows.append(dict(slots=slots,position_size_pct=100/slots,available_signals=len(a),taken=taken,missed=missed,
+   capture_rate_pct=100*taken/len(a),max_open=max_open,total_return_pct=(final-1)*100,mdd_pct=mdd,
+   return_over_abs_mdd=((final-1)*100/abs(mdd) if mdd else np.inf)))
+ out=pd.DataFrame(rows); out.to_csv(OUT/"full_seed_fine_slots.csv",index=False)
+ print("\n=== FULL SEED FINE SLOT STUDY (SHORT 5/3/6h) ==="); print(out.to_string(index=False))
+
+if __name__=="__main__": main(); portfolio_study(pd.read_csv(OUT/"trades.csv.gz")); slot_study(pd.read_csv(OUT/"trades.csv.gz")); monte_carlo_slot_study(pd.read_csv(OUT/"trades.csv.gz")); equal_exposure_slot_study(pd.read_csv(OUT/"trades.csv.gz")); full_seed_fine_slot_study(pd.read_csv(OUT/"trades.csv.gz"))
