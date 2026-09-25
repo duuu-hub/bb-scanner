@@ -110,7 +110,7 @@ def actual_stats(year):
         "median_ret_bps":float(g["ret_bps"].median()),
     }
 
-def sim_one(candles,model,start,end,threshold,min_hold_bars,cost_side=0.0):
+def sim_one(candles,fast_model,start,end,threshold,min_hold_bars,cost_side=0.0):
     df=candles[(candles["bar_start"]>=start-pd.Timedelta(minutes=15))&(candles["bar_start"]<end)].copy().reset_index(drop=True)
     prev=df[df["bar_start"]<start].iloc[-1]
     side=1 if float(prev["aoa_p_long"])>=0.5 else -1
@@ -174,71 +174,25 @@ def sim_one(candles,model,start,end,threshold,min_hold_bars,cost_side=0.0):
         "turnover_units":float(turnover),
     },l,c
 
-def choose_threshold(candles,model,train_probs,min_hold_bars):
+def choose_threshold(candles,fast_model,train_df,min_hold_bars):
+    # No PnL tuning and no threshold grid. Match only the observed per-bar flip frequency
+    # in the 2019H2-2020 training state path.
+    flip_rate=float(train_df["flip"].mean())
+    q=max(0.0,min(1.0,1.0-flip_rate))
+    th=float(train_df["p"].quantile(q))
     actual=actual_stats(2020)
-    # Candidate thresholds are probability quantiles, not PnL optimized.
-    qs=[0.90,0.93,0.95,0.96,0.97,0.98,0.985,0.99,0.9925,0.995,0.9975]
-    vals=sorted(set(float(train_probs.quantile(q)) for q in qs))
-    rows=[]
-    for th in vals:
-        m,_,_=sim_one(candles,model,pd.Timestamp("2020-01-01",tz="UTC"),pd.Timestamp("2021-01-01",tz="UTC"),th,min_hold_bars,0.0)
-        count_err=abs(m["legs"]-actual["legs"])/max(1,actual["legs"])
-        dur_err=abs(math.log(max(m["median_duration_h"],0.25)/max(actual["median_duration_h"],0.25)))
-        score=count_err+dur_err
-        rows.append({"threshold":th,"fidelity_score":score,**m})
-    tab=pd.DataFrame(rows).sort_values(["fidelity_score","threshold"])
-    return float(tab.iloc[0]["threshold"]),tab
+    m,_,_=sim_one(
+        candles,fast_model,
+        pd.Timestamp("2020-01-01",tz="UTC"),
+        pd.Timestamp("2021-01-01",tz="UTC"),
+        th,min_hold_bars,0.0
+    )
+    tab=pd.DataFrame([{
+        "threshold":th,
+        "train_bar_flip_rate":flip_rate,
+        "actual_2020_legs":actual["legs"],
+        "actual_2020_median_duration_h":actual["median_duration_h"],
+        **m
+    }])
+    return th,tab
 
-def main():
-    OUT.mkdir(parents=True,exist_ok=True)
-    btc,eth,candles,model_meta=era.prep()
-    h=build_hazard_rows(candles)
-    model,tr,te,auc,ap,base,coef=fit_model(h)
-
-    ep=pd.read_csv(EP)
-    dt=pd.to_datetime(ep["st"],unit="s",utc=True)
-    train_ep=ep[dt<TRAIN_END]
-    q10=float(np.quantile(train_ep["duration_sec"]/900.0,0.10))
-    min_hold=max(1,int(round(q10)))
-
-    th,cal=choose_threshold(candles,model,tr["p"],min_hold)
-    cal.to_csv(OUT/"threshold_fidelity_2020.csv",index=False)
-
-    results=[]
-    leg_out=[]
-    for cname,cost in [("ZERO",0.0),("RT_004",0.0004/2)]:
-        m,l,c=sim_one(candles,model,TEST_START,TEST_END,th,min_hold,cost)
-        results.append({"cost":cname,**m})
-        l["cost"]=cname; leg_out.append(l)
-        c.to_csv(OUT/f"curve_2021_{cname}.csv.gz",index=False,compression="gzip")
-    pd.DataFrame(results).to_csv(OUT/"summary_2021.csv",index=False)
-    pd.concat(leg_out,ignore_index=True).to_csv(OUT/"legs_2021.csv",index=False)
-
-    # Event-level ranking diagnostics on actual 2021 state path.
-    pos=te[te.flip==1]["p"]
-    neg=te[te.flip==0]["p"]
-    diag={
-        "test_2021_auc":auc,
-        "test_2021_average_precision":ap,
-        "test_2021_base_flip_rate":base,
-        "ap_lift_vs_base":float(ap/base) if base>0 else None,
-        "train_rows":int(len(tr)),
-        "train_flips":int(tr.flip.sum()),
-        "test_rows":int(len(te)),
-        "test_flips":int(te.flip.sum()),
-        "threshold_from_2020_fidelity":th,
-        "min_hold_bars_from_train_q10":min_hold,
-        "actual_2020":actual_stats(2020),
-        "actual_2021":actual_stats(2021),
-        "median_p_at_actual_2021_flip":float(pos.median()),
-        "median_p_at_nonflip_2021":float(neg.median()),
-        "top_coefficients":coef,
-        "note":"Threshold chosen ONLY to match 2020 leg count/median duration, never PnL. 2021 is untouched validation."
-    }
-    (OUT/"meta.json").write_text(json.dumps(diag,ensure_ascii=False,indent=2),encoding="utf-8")
-    print("=== META ===");print(json.dumps(diag,ensure_ascii=False,indent=2))
-    print("\n=== 2020 THRESHOLD FIDELITY ===");print(cal.to_string(index=False))
-    print("\n=== 2021 AUTONOMOUS ===");print(pd.DataFrame(results).to_string(index=False))
-
-if __name__=="__main__":
-    main()
