@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import itertools, numpy as np, pandas as pd
-from core_l2_portfolio_audit import ROOT
+import os
+ROOT=Path(os.environ.get('CANONICAL_5Y_DIR','canonical'))
 TF={"15m":"15min","1H":"1h","4H":"4h","1D":"1D","3D":"3D"}
 FWD={"15m":1,"1H":4,"4H":16,"12H":48,"24H":96}
 def features(df):
