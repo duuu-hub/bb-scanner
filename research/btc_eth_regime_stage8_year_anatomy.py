@@ -449,21 +449,49 @@ def main():
 
 
 def flat_periods_current_rule():
-    """Consecutive zero-position periods for BASE and D2_0."""
-    x=build()
-    intr=(x["BTCUSDT_intraday"]+x["ETHUSDT_intraday"])/2
-    sig=(x["BTCUSDT_ret30"].gt(0)&x["ETHUSDT_ret30"].gt(0)&x["er_avg"].ge(ER_T)).fillna(False).to_numpy()
-    base=causal_pos(sig,None,None)
-    d20=causal_pos(sig,2,0.0)
+    """Consecutive flat periods using the exact Stage8 BASE and D2_0 construction."""
+    data={s:load(s) for s in SYMS}
+    x=panel(data)
+    base=x["position"].to_numpy(float)
+
+    d20=np.zeros(len(x),dtype=float); ent=None; forced=False
+    for i in range(len(x)):
+        if base[i]==1 and (i==0 or base[i-1]==0):
+            ent=i; forced=False
+        if base[i]==0:
+            ent=None; forced=False
+        if base[i]==1 and not forced:
+            d20[i]=1.0
+            if ent is not None and i-ent==2:
+                rr0=fwd_underlying(x,ent,2)
+                if np.isfinite(rr0) and rr0<=0.0:
+                    forced=True
+
+    # Exclude indicator warm-up: first day the 30d signal inputs are all defined.
+    eligible=(x["BTCUSDT_ret30"].notna() & x["ETHUSDT_ret30"].notna() &
+              x["BTCUSDT_er30"].notna() & x["ETHUSDT_er30"].notna()).to_numpy()
+    first=int(np.flatnonzero(eligible)[0])
+
     rows=[]; summary=[]
-    for name,pos in [("BASE",base),("D2_0",d20)]:
-        flat=np.asarray(pos)==0
+    for name,pos0 in [("BASE",base),("D2_0",d20)]:
+        pos=np.asarray(pos0[first:],float)
+        dates=x["datetime_utc"].iloc[first:].reset_index(drop=True)
+        flat=pos==0
         starts=np.where(flat & np.r_[True,~flat[:-1]])[0]
         ends=np.where(flat & np.r_[~flat[1:],True])[0]
         lens=ends-starts+1
         for s,e,n in zip(starts,ends,lens):
-            rows.append({"variant":name,"start":x.index[s],"end":x.index[e],"days":int(n)})
-        summary.append({"variant":name,"total_days":len(pos),"flat_days":int(flat.sum()),"flat_pct":100*flat.mean(),"periods":len(lens),"avg_days":float(np.mean(lens)),"median_days":float(np.median(lens)),"max_days":int(np.max(lens))})
+            rows.append({"variant":name,"start":dates.iloc[s],"end":dates.iloc[e],"days":int(n)})
+        summary.append({
+            "variant":name,"start_date":dates.iloc[0],"end_date":dates.iloc[-1],
+            "total_days":len(pos),"active_days":int((pos==1).sum()),
+            "flat_days":int(flat.sum()),"flat_pct":float(100*flat.mean()),
+            "periods":int(len(lens)),"avg_days":float(np.mean(lens)),
+            "median_days":float(np.median(lens)),"max_days":int(np.max(lens)),
+            "ge7":int((lens>=7).sum()),"ge14":int((lens>=14).sum()),
+            "ge30":int((lens>=30).sum()),"ge60":int((lens>=60).sum()),
+            "ge90":int((lens>=90).sum()),"ge180":int((lens>=180).sum())
+        })
     p=pd.DataFrame(rows); sm=pd.DataFrame(summary)
     p.to_csv(OUT/"flat_periods.csv",index=False); sm.to_csv(OUT/"flat_summary.csv",index=False)
     print("\n=== FLAT SUMMARY ==="); print(sm.to_string(index=False))
