@@ -1,0 +1,70 @@
+name: PD 4H Breakout Split
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_4h_breakout_split_once']
+permissions: {contents: read, actions: read}
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m py_compile research/pd_breakout_split_4h.py
+  run:
+    needs: preflight
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36095439671
+          name: rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}
+          path: input
+      - run: python research/pd_breakout_split_4h.py --input input --out out
+      - name: Sanity
+        run: |
+          test -s out/breakout_split_4h.csv
+          python - <<'PY'
+          import pandas as pd
+          r=pd.read_csv("out/breakout_split_4h.csv")
+          assert len(r)>0 and r.events.min()>0
+          assert set(r.bucket).issubset({"UPPER_APPROACH","UPPER_BREAKOUT","UPPER_FIRST_BREAKOUT","UPPER_BREAKOUT_0.1ATR","LOWER_APPROACH","LOWER_BREAKDOWN","LOWER_FIRST_BREAKDOWN","LOWER_BREAKDOWN_0.1ATR"})
+          assert ((r.continuation_rate>=0)&(r.continuation_rate<=1)).all()
+          print("OK",r.symbol.nunique(),len(r))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: 'pd-4h-breakout-split-shard-${{ matrix.shard }}', path: out/, if-no-files-found: error}
+  verify:
+    needs: run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'pd-4h-breakout-split-shard-*', path: results}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+          ds=sorted(Path("results").glob("pd-4h-breakout-split-shard-*")); assert len(ds)==8
+          R=pd.concat([pd.read_csv(d/"breakout_split_4h.csv") for d in ds],ignore_index=True)
+          assert R.symbol.nunique()>=100
+          assert not R.duplicated(["symbol","n","q","horizon_bars","bucket"]).any()
+          Path("final").mkdir(); R.to_csv("final/breakout_split_4h_all.csv",index=False)
+          g=R.groupby(["n","q","horizon_bars","bucket"]).apply(lambda x: pd.Series({"symbols":x.symbol.nunique(),"events":x.events.sum(),"mean_of_symbol_means":x.mean_cont_return.mean(),"median_symbol_mean":x.mean_cont_return.median(),"positive_symbol_share":(x.mean_cont_return>0).mean()}),include_groups=False).reset_index()
+          g.to_csv("final/summary.csv",index=False)
+          print(g.sort_values("mean_of_symbol_means",ascending=False).head(30).to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-4h-breakout-split-VERIFIED, path: final/, if-no-files-found: error}
