@@ -1,0 +1,33 @@
+name: Continuation Cached Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-continuation-mining]
+    paths:
+      - "research/continuation_build_cache.py"
+      - "research/continuation_execution_core.py"
+      - "research/continuation_execution_validation.py"
+      - ".github/workflows/continuation-cached-audit.yml"
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-continuation-mining
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas numpy
+      - name: Build reusable cache
+        run: python research/continuation_build_cache.py
+      - name: Run corrected execution audit
+        run: python research/continuation_execution_validation.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuation-corrected-audit
+          path: continuation_execution_results/
+          retention-days: 14
