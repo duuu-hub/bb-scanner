@@ -81,31 +81,54 @@ def main():
  def summ(g):
   gp=g.net_pct[g.net_pct>0].sum(); gl=-g.net_pct[g.net_pct<0].sum(); return len(g),g.net_pct.mean(),gp/gl if gl else np.inf
  print("L2 ALL/OFF/ACTIVE",summ(tr),summ(off),summ(tr[tr.core_on]))
- # Daily portfolio: core has full seed. When core OFF, divide seed equally among simultaneous L2 slots, capped at full seed.
- # Realized L2 returns are booked on exit day; slot weight = 1/max concurrent positions for that entry cohort/day.
- events=[]
- for _,r in off.iterrows(): events.append((r.signal_time,1)); events.append((r.exit_time,-1))
- events.sort(key=lambda z:(z[0],z[1])) # exits before entries at same timestamp
- conc=0; peak=0
- for t,d in events: conc+=d; peak=max(peak,conc)
- # Compare 30%-per-trade legacy and full-seed/slot convention requested.
- for mode in ["L2_30PCT","FULL_SEED_SLOT"]:
+ # Portfolio event simulation. D2_0 is authoritative gate. Existing L2 may finish after core turns on; no new L2 while core on.
+ # At each timestamp: close exits first, then batch all new entries. Total L2 allocated exposure is capped at 100%.
+ # FULL_SEED_SLOT: if flat, split 100% equally across the simultaneous entry batch. If positions already open, no new entries (seed fully allocated).
+ # Also report SAMEBAR_BEST/WORST sensitivity for bars where TP and SL both touched.
+ print("D2_0 OFF audit is intentionally not expected to equal prior BASE-core OFF 1170-trade split.")
+ def simulate(mode, collision="SL"):
+  rows=off.sort_values(["signal_time","symbol"]).copy()
+  if collision=="TP":
+   rows.loc[rows.samebar_both,"net_pct"]=10.0-L2FEE
+  byentry={k:g for k,g in rows.groupby("signal_time",sort=True)}
+  exits={}
+  active=[]; realized=[]
+  timeline=sorted(set(byentry.keys())|set(rows.exit_time))
+  for t in timeline:
+   # release all positions whose exit time is now or earlier
+   still=[]
+   for q in active:
+    if q["exit_time"]<=t:
+     realized.append(q)
+    else: still.append(q)
+   active=still
+   batch=byentry.get(t)
+   if batch is None: continue
+   if mode=="L2_30PCT":
+    cap=max(0.0,1.0-sum(q["weight"] for q in active))
+    for _,r in batch.iterrows():
+     if cap<=1e-12: break
+     w=min(.30,cap); cap-=w; q=r.to_dict(); q["weight"]=w; active.append(q)
+   else:
+    # full seed is already committed while any L2 is open; otherwise split this timestamp's slots equally
+    if active: continue
+    w=1.0/len(batch)
+    for _,r in batch.iterrows():
+     q=r.to_dict(); q["weight"]=w; active.append(q)
+  realized+=active
+  z=pd.DataFrame(realized)
   daily=pd.Series(0.0,index=pd.DatetimeIndex(x.dt.dt.floor("D").unique()))
   daily.loc[x.dt.dt.floor("D")]=x.core_ret.to_numpy()
-  # compute entry-time concurrency incl same timestamp entries; weight fixed for each trade
-  entries=off.sort_values("signal_time").copy(); weights=[]
-  for i,r in entries.iterrows():
-   active=((entries.signal_time<=r.signal_time)&(entries.exit_time>r.signal_time))
-   n=max(1,int(active.sum()))
-   weights.append(.30 if mode=="L2_30PCT" else 1/n)
-  entries["weight"]=weights
-  for _,r in entries.iterrows():
-   day=r.exit_time.floor("D")
-   if day in daily.index: daily.loc[day]+=r.net_pct*r.weight
-  rr=daily[(daily.index>=pd.Timestamp("2021-01-01",tz="UTC"))]
-  P=perf(rr); print(mode,"2021+",{"return_pct":P[0],"sharpe":P[1],"mdd":P[2],"peak_l2_concurrency":peak,"l2_trades":len(entries)})
-  yrs=[]
-  for y,g in rr.groupby(rr.index.year): yrs.append((int(y),)+perf(g))
-  print(mode,"YEARS",yrs)
- print("NOTE samebar_both uses conservative SL-first. Portfolio daily booking is realized-return approximation, not intraday MTM.")
+  for _,r in z.iterrows():
+   day=r["exit_time"].floor("D")
+   if day in daily.index: daily.loc[day]+=r["net_pct"]*r["weight"]
+  rr=daily[daily.index>=pd.Timestamp("2021-01-01",tz="UTC")]
+  P=perf(rr)
+  return z,rr,P
+ for mode in ["L2_30PCT","FULL_SEED_SLOT"]:
+  for collision in ["SL","TP"]:
+   z,rr,P=simulate(mode,collision)
+   print(mode,collision,"2021+",{"return_pct":P[0],"sharpe":P[1],"mdd":P[2],"accepted_l2":len(z),"max_weight_sum_rule":1.0})
+   print(mode,collision,"YEARS",[(int(y),)+perf(g) for y,g in rr.groupby(rr.index.year)])
+ print("NOTE: samebar collision sensitivity brackets SL-first vs TP-first. Daily portfolio is realized-return approximation; intraday MTM MDD remains a limitation.")
 if __name__=="__main__": main()
