@@ -118,7 +118,8 @@ def main():
   d=pd.read_parquet(p); d["dt"]=pd.to_datetime(d.open_time,unit="ms",utc=True); px[p.stem]=d.set_index("dt").open.astype(float)
  for i,r in tr.iterrows(): tr.at[i,"entry"]=float(px[r.symbol].loc[r.signal_time])
  tr=resolve_1m(tr)
- print("1M_RESOLUTION",tr.loc[tr.samebar_both,"resolution_1m"].value_counts(dropna=False).to_dict())\n print("ENTRY_BAR_EXITS",int(tr.exit_entry_bar.sum()),tr.loc[tr.exit_entry_bar,"outcome"].value_counts().to_dict())
+ print("1M_RESOLUTION",tr.loc[tr.samebar_both,"resolution_1m"].value_counts(dropna=False).to_dict())
+ print("ENTRY_BAR_EXITS",int(tr.exit_entry_bar.sum()),tr.loc[tr.exit_entry_bar,"outcome"].value_counts().to_dict())
  # Core OFF classification is exact D2_0 calendar-day state. L2 starts only when OFF; existing L2 is allowed to finish.
  state=x.set_index(x.dt.dt.floor("D")).d2
  tr["core_on"]=state.reindex(tr.signal_time.dt.floor("D")).fillna(0).to_numpy().astype(bool)
