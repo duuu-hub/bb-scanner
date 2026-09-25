@@ -21,9 +21,10 @@ def stats(df,cost):
   max_consecutive_losses=max((sum(1 for _ in grp) for val,grp in __import__("itertools").groupby(z.net<0) if val),default=0))
 
 def main():
- x=cv.prep().sort_values("timestamp_ms").reset_index(drop=True)
+ cache=Path("continuation_cache")
+ x=pd.read_pickle(cache/"prep.pkl").sort_values("timestamp_ms").reset_index(drop=True)
  times=np.sort(x.timestamp_ms.unique()); split=times[int(len(times)*.70)]; tr=x[x.timestamp_ms<split]; te=x[x.timestamp_ms>=split]
- raw=cm.load("market_data_store/bitget/research_auto100_15m")
+ raw=pd.read_pickle(cache/"raw.pkl")
  groups={s:g.sort_values("timestamp_ms").reset_index(drop=True) for s,g in raw.groupby("symbol")}
  del raw
  rules={s:cv.rule_from_train(tr,s) for s in ("LONG","SHORT")}
