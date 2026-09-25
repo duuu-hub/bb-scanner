@@ -6,17 +6,20 @@ import math
 import numpy as np, pandas as pd
 from core_l2_portfolio_audit import ROOT, TF, L2FEE
 
-RANKS=[5,6,7]
-RET4S=[20,25,30,35,40,50]
-TPS=[5,8,10,12,15,20]
-SLS=[2.5,4,6,8,10]
-HOLDS=[1,2,4,8,16]  # 15m bars = 15m..4h
+# Weekly (1W) is deliberately excluded from the BB vote for this rescue test.
+# Re-search the remaining causal parameters broadly; no single-point cherry-pick.
+RANKS=[3,4,5,6]
+RET4S=[10,15,20,25,30,35,40,50]
+TPS=[3,5,8,10,12,15,20]
+SLS=[1.5,2.5,4,6,8,10]
+HOLDS=[1,2,4,8,16,24,32]  # 15m bars = 15m..4h
 
 def prep(df):
  df=df.sort_values("open_time").drop_duplicates("open_time").copy()
  df["dt"]=pd.to_datetime(df.open_time,unit="ms",utc=True)
  b=df.set_index("dt")[["open","high","low","close"]].astype(float); idx=b.index; A={}
  for name,rule in TF.items():
+  if name=="1W": continue
   r=b.resample(rule,origin="epoch",label="left",closed="left").agg({"close":"last"}).dropna(); cc=r.close
   s=cc.rolling(19).sum().shift(1); ss=(cc*cc).rolling(19).sum().shift(1)
   buckets=idx.floor(rule) if name!="1W" else idx.floor("7D")
@@ -63,7 +66,8 @@ def main():
       full=[y for y in range(2021,2026) if y in yp]; posyrs=sum(yp[y]>1 for y in full)
       rows.append([rank,r4,tp,sl,hold*15,len(a),a.mean(),pf,posyrs,min([yp[y] for y in full],default=np.nan),yp.get(2026,np.nan)])
  out=pd.DataFrame(rows,columns=["rank","ret4","tp","sl","hold_min","n","avg","pf","pos_years_2021_25","worst_pf_2021_25","pf_2026"])
- out.to_csv("artifacts/l2_corrected_coarse_sweep.csv",index=False)
+ Path("artifacts").mkdir(exist_ok=True)
+ out.to_csv("artifacts/l2_no_weekly_rescue_sweep.csv",index=False)
  # robust ranking: require >=300 trades, reward PF + breadth, not single best point
  q=out[out.n>=300].copy(); q["score"]=q.pf+0.08*q.pos_years_2021_25+0.10*np.minimum(q.worst_pf_2021_25,1.5)
  print("TOP_ROBUST")
