@@ -75,5 +75,6 @@ for k in agg:
   for r in RS:
    pre=f"{r:g}R_";den=q[pre+"win"]+q[pre+"loss"];q[pre+"win_pct_ex_amb"]=round(100*q[pre+"win"]/den,3) if den else None
    den_cons=q[pre+"win"]+q[pre+"loss"]+q[pre+"amb"];q[pre+"win_pct_amb_as_loss"]=round(100*q[pre+"win"]/den_cons,3) if den_cons else None
+   den_cons=q[pre+"win"]+q[pre+"loss"]+q[pre+"amb"];q[pre+"win_pct_amb_as_loss"]=round(100*q[pre+"win"]/den_cons,3) if den_cons else None
 res={"files":len(files),"load_errors":errors,"note":"ATR14-normalized PSAR entry distance; NumPy 15m chronological replay; reports ambiguous both excluded and conservatively as loss","summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res,indent=2))
