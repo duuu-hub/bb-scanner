@@ -63,7 +63,8 @@ def get1m(sym,ms):
  except Exception as e:
   print("DOWNLOAD_FAIL",sym,ym,e,flush=True);return None
 
-shard=os.environ.get("SHARD","0")\nfiles=glob.glob("data/**/*.csv.gz",recursive=True);events=[]
+shard=os.environ.get("SHARD","0")
+files=glob.glob("data/**/*.csv.gz",recursive=True);events=[]
 for n,p in enumerate(files,1):
  try:events.extend(ambiguous_events(p))
  except Exception as e:print("SCAN_FAIL",p,e,flush=True)
@@ -92,4 +93,4 @@ for gi,((sym,ym),es) in enumerate(groups.items(),1):
 for rk in ("2R","3R"):
  for side,q in out[rk].items():
   d=q["win"]+q["loss"];q["resolved_win_pct"]=round(100*q["win"]/d,3) if d else None
-open(f"psar_1m_shard_{shard}.json","w").write(json.dumps(out,indent=2));print(json.dumps(out,indent=2))
+open("psar_1m_shard_"+shard+".json","w").write(json.dumps(out,indent=2));print(json.dumps(out,indent=2))
