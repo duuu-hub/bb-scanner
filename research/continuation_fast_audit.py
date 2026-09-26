@@ -85,7 +85,7 @@ out.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
 # before that symbol's accepted trade exits are rejected chronologically.
 accepted=[]; busy_until={}
 for ix,r in out.sort_values(["entry_ts","signal_ts","symbol"]).iterrows():
-    if int(r.entry_ts) < busy_until.get(r.symbol,-1):
+    if int(r.entry_ts) <= busy_until.get(r.symbol,-1):
         continue
     accepted.append(ix); busy_until[r.symbol]=int(r.exit_ts)
 port=out.loc[accepted].sort_values(["entry_ts","signal_ts"]).reset_index(drop=True)
