@@ -1,0 +1,41 @@
+name: PD Breakdown Crowding Audit
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_crowding_audit_once']
+permissions: {contents: write, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_crowding_audit.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - run: python research/pd_breakdown_crowding_audit.py --trades input/trades_all.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd
+          s=pd.read_csv("out/audit_summary.csv"); t=pd.read_csv("out/top20_timestamps.csv"); r=pd.read_csv("out/top20_signal_rows.csv")
+          assert len(s)==1 and len(t)==20 and len(r)>0
+          assert s.exact_duplicate_rows.iloc[0]==0, "exact duplicate trades found"
+          assert s.same_symbol_entrytime_duplicate_rows.iloc[0]==0, "same-symbol same-entry duplicate found"
+          assert bool(s.all_timing_ok.iloc[0]), "signal/entry 4h timing mismatch"
+          assert bool(s.all_rows_equal_unique_symbols.iloc[0]), "row count != unique symbols at a timestamp"
+          print("VERIFIED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-crowding-audit-VERIFIED, path: out/, if-no-files-found: error}
+      - name: Persist verified audit
+        run: |
+          mkdir -p research/results/pd_breakdown_crowding_audit
+          cp out/*.csv research/results/pd_breakdown_crowding_audit/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/results/pd_breakdown_crowding_audit
+          git commit -m "research: persist verified crowding audit" || exit 0
+          git push origin HEAD:research/pd-4h-binance-universe
