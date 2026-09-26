@@ -1,0 +1,31 @@
+name: PD Breakdown Risk Sweep 3pct
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_risk_sweep_3pct_once']
+permissions: {contents: read, actions: read}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_risk_sweep_3pct.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36211084008, name: pd-breakdown-walkforward-basket-VERIFIED, path: wf}
+      - run: python research/pd_breakdown_risk_sweep_3pct.py --trades trades/trades_all.csv --wf wf/walkforward.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd,numpy as np
+          r=pd.read_csv("out/risk_sweep.csv")
+          assert len(r)==56 and r.risk_per_symbol.max()==.03 and r.risk_per_symbol.min()==.0005
+          assert np.isfinite(r.mdd).all()
+          print("VERIFIED",len(r),"maxrisk",r.risk_per_symbol.max())
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-risk-sweep-3pct-VERIFIED, path: out/, if-no-files-found: error}
