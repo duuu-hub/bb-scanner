@@ -8,7 +8,7 @@ def features(d):
  idx=pd.to_datetime(d.open_time,unit="ms",utc=True)
  x=d.assign(dt=idx).set_index("dt")[["open","high","low","close"]].astype(float)
  out={}
- ns=idx.view("int64")
+ ns=idx.astype("int64").to_numpy()
  for name,mins in [("1H",60),("1D",1440)]:
   step=mins*60*10**9; bucket=pd.to_datetime((ns//step)*step,utc=True)
   h=pd.DataFrame({"bucket":bucket,"close":x.close.to_numpy()}).groupby("bucket",sort=True).close.last()
