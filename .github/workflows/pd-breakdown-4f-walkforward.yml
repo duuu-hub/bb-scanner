@@ -7,17 +7,30 @@ permissions: {contents: read, actions: read}
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_4f_walkforward.py
+      - name: Download canonical candle shards
+        run: |
+          mkdir -p input
+          for s in 0 1 2 3 4 5 6 7; do gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s; done
+        env: {GH_TOKEN: '${{ github.token }}'}
       - uses: actions/download-artifact@v4
-        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
-      - uses: actions/download-artifact@v4
-        with: {github-token: '${{ github.token }}', run-id: 36211384034, name: pd-breakdown-dispersion-features-VERIFIED, path: dispersion}
-      - run: python research/pd_breakdown_4f_walkforward.py --trades input/trades_all.csv --regime research/results/pd_breakdown_regime_features/events_features.csv --dispersion dispersion/events_dispersion.csv --out out
-      - run: python -c "import pandas as pd; a=pd.read_csv('out/aggregate.csv'); f=pd.read_csv('out/walkforward_folds.csv'); assert len(f)>=3 and set(a['sample'])=={'baseline_same_windows','filtered_walkforward'}; print(a.to_string(index=False))"
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+      - run: python research/pd_breakdown_4f_walkforward.py --input input --trades trades/trades_all.csv --out out
+      - name: Validate outputs
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          s=pd.read_csv("out/sanity.csv").iloc[0];f=pd.read_csv("out/walkforward_folds.csv");a=pd.read_csv("out/aggregate.csv")
+          assert s.raw_oos_events==929 and s.events_51plus==30 and bool(s.timing_ok)
+          assert len(f)==4 and f.kept_events.sum()>0
+          assert set(a["sample"])=={"baseline_same_windows","filtered_walkforward"}
+          print(a.to_string(index=False))
+          PY
       - uses: actions/upload-artifact@v4
         with: {name: pd-breakdown-4f-walkforward-VERIFIED, path: out/, if-no-files-found: error}
