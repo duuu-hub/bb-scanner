@@ -1,0 +1,34 @@
+name: PD Breakdown WF Portfolio Audit
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_wf_portfolio_once']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_wf_portfolio.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36211084008, name: pd-breakdown-walkforward-basket-VERIFIED, path: wf}
+      - run: python research/pd_breakdown_wf_portfolio.py --trades input/trades_all.csv --wf wf/walkforward.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd
+          s=pd.read_csv("out/sanity.csv");p=pd.read_csv("out/portfolio_summary.csv")
+          assert s.core_rows.iloc[0]>10000 and s.symbols.iloc[0]>500
+          assert set(p.basket)=={5,10} and (p.events>0).all()
+          assert np.isfinite(p.final_equity).all()
+          print("VERIFIED",s.to_dict("records")[0],len(p))
+          PY
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: pd-breakdown-wf-portfolio-audit, path: out/, if-no-files-found: warn}
