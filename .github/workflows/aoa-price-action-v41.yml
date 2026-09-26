@@ -1,0 +1,33 @@
+name: AOA Price Action V41
+
+on:
+  push:
+    branches: [research-aoa-price-action-v41]
+    paths:
+      - "research/aoa_price_action_v41/**"
+      - ".github/workflows/aoa-price-action-v41.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt scikit-learn
+      - run: python -m py_compile research/aoa_price_action_v41/price_action_v41.py
+      - run: python research/aoa_price_action_v41/price_action_v41.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aoa-price-action-v41-results
+          path: research/aoa_price_action_v41/output/
+          if-no-files-found: error
+          retention-days: 30
