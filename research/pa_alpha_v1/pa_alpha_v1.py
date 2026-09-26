@@ -8,7 +8,8 @@ import pandas as pd
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-import research.aoa_price_action_v1.price_action_v1 as v1\nimport research.aoa_3way_oos.backtest_3way as b3
+import research.aoa_price_action_v1.price_action_v1 as v1
+import research.aoa_3way_oos.backtest_3way as b3
 
 OUT=ROOT/"research"/"pa_alpha_v1"/"output"
 DEV_START=pd.Timestamp("2022-01-01",tz="UTC")
