@@ -1,0 +1,23 @@
+name: PD Breakdown 4F Walkforward
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_4f_walkforward_once']
+permissions: {contents: read, actions: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: input}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36211384034, name: pd-breakdown-dispersion-features-VERIFIED, path: dispersion}
+      - run: python research/pd_breakdown_4f_walkforward.py --trades input/trades_all.csv --regime research/results/pd_breakdown_regime_features/events_features.csv --dispersion dispersion/events_dispersion.csv --out out
+      - run: python -c "import pandas as pd; a=pd.read_csv('out/aggregate.csv'); f=pd.read_csv('out/walkforward_folds.csv'); assert len(f)>=3 and set(a['sample'])=={'baseline_same_windows','filtered_walkforward'}; print(a.to_string(index=False))"
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-4f-walkforward-VERIFIED, path: out/, if-no-files-found: error}
