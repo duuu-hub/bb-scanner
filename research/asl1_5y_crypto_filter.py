@@ -70,28 +70,32 @@ print("\n=== CRYPTO OVERALL ===\n"+o.to_string(index=False)); print("\n=== CRYPT
 print("\n=== LONG24 MONTHLY ===\n"+q.groupby("month").apply(stat,include_groups=False).reset_index().to_string(index=False))
 print("\n=== LONG24 EXIT ===\n"+q.groupby("reason").apply(stat,include_groups=False).reset_index().to_string(index=False))
 
-# Equal-capital portfolio comparison: fixed 10 slots, 10% initial equity per position.
-# Entry ordering is deterministic; positions reserve a slot until their recorded exit.
+# Event-driven equal-capital portfolio comparison.
 def portfolio(g,name,slots=10,alloc=0.10):
     z=g.sort_values(["entry_dt","symbol"]).copy()
-    equity=1.0; peak=1.0; mdd=0.0; active=[]; executed=0; skipped=0; exposure_days=0.0
-    start=pd.to_datetime(z.entry_dt.min(),utc=True); end=pd.to_datetime(z.exit_dt.max(),utc=True)
-    for row in z.itertuples():
-        t=pd.to_datetime(row.entry_dt,utc=True)
-        active=[x for x in active if x[0]>t]
-        if len(active)>=slots: skipped+=1; continue
-        exit_t=pd.to_datetime(row.exit_dt,utc=True)
-        stake=equity*alloc
-        equity += stake*float(row.net_ret)
-        peak=max(peak,equity); mdd=min(mdd,equity/peak-1)
-        active.append((exit_t,stake)); executed+=1
-        exposure_days += (exit_t-t).total_seconds()/86400.0*alloc
+    z["entry_dt"]=pd.to_datetime(z.entry_dt,utc=True); z["exit_dt"]=pd.to_datetime(z.exit_dt,utc=True)
+    cash=1.0; eq=1.0; peak=1.0; mdd=0.0; active=[]; executed=0; skipped=0; exposure=0.0
+    start=z.entry_dt.min(); end=z.exit_dt.max()
+    for t,batch in z.groupby("entry_dt",sort=True):
+        due=[p for p in active if p["exit"]<=t]
+        for p in sorted(due,key=lambda x:(x["exit"],x["symbol"])):
+            pnl=p["stake"]*p["ret"]; cash+=p["stake"]+pnl; eq+=pnl
+            peak=max(peak,eq); mdd=min(mdd,eq/peak-1)
+        active=[p for p in active if p["exit"]>t]
+        stake=eq*alloc
+        for row in batch.sort_values("symbol").itertuples():
+            if len(active)>=slots or cash+1e-12<stake: skipped+=1; continue
+            cash-=stake; active.append({"exit":row.exit_dt,"stake":stake,"ret":float(row.net_ret),"symbol":row.symbol}); executed+=1
+            exposure+=(row.exit_dt-t).total_seconds()/86400.0*stake
+    for p in sorted(active,key=lambda x:(x["exit"],x["symbol"])):
+        pnl=p["stake"]*p["ret"]; cash+=p["stake"]+pnl; eq+=pnl
+        peak=max(peak,eq); mdd=min(mdd,eq/peak-1)
     years=max((end-start).total_seconds()/(365.25*86400),1/365.25)
     return {"variant":name,"signals":len(z),"executed":executed,"skipped":skipped,"skip_pct":skipped/max(len(z),1)*100,
-            "final_equity":equity,"total_return_pct":(equity-1)*100,"CAGR_pct":(equity**(1/years)-1)*100,
-            "MDD_pct":mdd*100,"avg_capital_use_pct":exposure_days/max((end-start).total_seconds()/86400.0,1)*100}
+      "final_equity":eq,"total_return_pct":(eq-1)*100,"CAGR_pct":(eq**(1/years)-1)*100,
+      "MDD_realized_pct":mdd*100,"avg_capital_use_pct":exposure/max((end-start).total_seconds()/86400.0,1)*100}
 pbase=base.copy()
 variants={"BASE":pbase,"BTC24_GT_-2":pbase[pbase.btc_ret24h>-2],"BTC_ABOVE50":pbase[pbase.btc_open>pbase.btc_ma50]}
 port=pd.DataFrame([portfolio(v,k) for k,v in variants.items()])
-port.to_csv(OUT/"long24_portfolio_compare.csv",index=False)
-print("\n=== LONG24 PORTFOLIO COMPARE 10 SLOTS x 10% ===\n"+port.to_string(index=False))
+port.to_csv(OUT/"long24_portfolio_compare_corrected.csv",index=False)
+print("\n=== CORRECTED LONG24 PORTFOLIO 10 SLOTS x 10% ===\n"+port.to_string(index=False))
