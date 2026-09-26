@@ -23,7 +23,7 @@ jobs:
           python - <<'PY'
           import pandas as pd,numpy as np
           g=pd.read_csv("out/grid.csv");a=pd.read_csv("out/annual.csv");r=pd.read_csv("out/robustness.csv")
-          assert len(g)==72 and set(a.year)=={2023,2024,2025,2026}
+          assert len(g)==84 and set(a.year)=={2023,2024,2025,2026}
           assert np.isfinite(g.final_equity).all() and (g.final_equity>0).all()
           print("VERIFIED",len(g),len(a),len(r),"robust_pass",int(r.all_years_positive.sum()))
           PY
