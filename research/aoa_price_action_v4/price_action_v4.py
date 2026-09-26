@@ -52,6 +52,30 @@ def make_pipe(C=0.10):
     ])
 
 
+
+def update_path_state(state,row,side,entry_px):
+    cl=float(row["close"]); hi=float(row["high"]); lo=float(row["low"])
+    state["path_bps"] += abs(cl/state["prev_close"]-1.0)*10000.0
+    state["prev_close"]=cl
+    if side>0:
+        fav=(hi/entry_px-1.0)*10000.0
+        adv=(lo/entry_px-1.0)*10000.0
+    else:
+        fav=(1.0-lo/entry_px)*10000.0
+        adv=(1.0-hi/entry_px)*10000.0
+    state["mfe_bps"]=max(state["mfe_bps"],fav)
+    state["mae_bps"]=min(state["mae_bps"],adv)
+    net=side*(cl/entry_px-1.0)*10000.0
+    eff=abs(net)/state["path_bps"] if state["path_bps"]>1e-9 else 0.0
+    return {
+        "mfe_bps":state["mfe_bps"],
+        "mae_bps":state["mae_bps"],
+        "path_bps":state["path_bps"],
+        "eff_since_entry":eff,
+        "pullback_from_mfe_bps":max(0.0,state["mfe_bps"]-net),
+        "rebound_from_mae_bps":max(0.0,net-state["mae_bps"]),
+    }
+
 def build_policy_rows(candles):
     ep=pd.read_csv(EP)
     ends=candles["bar_end_s"].to_numpy(dtype=np.int64)
@@ -64,10 +88,11 @@ def build_policy_rows(candles):
         erow=candles.iloc[sidx]
         entry_px=float(erow["close"])
         ectx=v1.entry_context(erow,side)
+        path_state={"prev_close":entry_px,"path_bps":0.0,"mfe_bps":0.0,"mae_bps":0.0}
         for i in range(sidx+1,eidx+1):
             r=candles.iloc[i]
             f=v1.hazard_state(r,side,entry_px,st,ectx)
-            f.update(v3.path_features(candles,sidx,i,side,entry_px))
+            f.update(update_path_state(path_state,r,side,entry_px))
             bars_left=eidx-i
             f.update({
                 "ts":int(r["bar_end_s"]),
@@ -116,10 +141,9 @@ def fast_prob(model,f):
     return 1.0/(1.0+math.exp(-s))
 
 
-def policy_features(candles,sidx,i,side,entry_px,entry_ts,ectx):
-    r=candles.iloc[i]
-    f=v1.hazard_state(r,side,entry_px,entry_ts,ectx)
-    f.update(v3.path_features(candles,sidx,i,side,entry_px))
+def policy_features(row,side,entry_px,entry_ts,ectx,path_state):
+    f=v1.hazard_state(row,side,entry_px,entry_ts,ectx)
+    f.update(update_path_state(path_state,row,side,entry_px))
     return f
 
 
@@ -148,6 +172,7 @@ def simulate(candles,flip_fast,hold_fast,start,end,flip_th,hold_th,min_hold,conf
 
     equity=1.0; qty=side*equity/entry_px; last_px=entry_px; leg_eq=equity
     bars=0; streak=0; pending=False; pending_ctx=None
+    path_state={"prev_close":entry_px,"path_bps":0.0,"mfe_bps":0.0,"mae_bps":0.0}
     equity-=equity*cost_side
     legs=[]; curve=[]
 
@@ -171,11 +196,12 @@ def simulate(candles,flip_fast,hold_fast,start,end,flip_th,hold_th,min_hold,conf
             entry_i=i-1
             leg_eq=equity
             bars=0; streak=0; pending=False
+            path_state={"prev_close":entry_px,"path_bps":0.0,"mfe_bps":0.0,"mae_bps":0.0}
 
         equity += qty*(cl-last_px); last_px=cl
         bars+=1
 
-        f=policy_features(df,entry_i,i,side,entry_px,entry_ts,ectx)
+        f=policy_features(r,side,entry_px,entry_ts,ectx,path_state)
         pflip=fast_prob(flip_fast,f)
         phold=fast_prob(hold_fast,f)
 
