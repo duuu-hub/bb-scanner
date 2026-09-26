@@ -1,6 +1,7 @@
 import argparse,glob,json
 import pandas as pd,numpy as np
-ATR_MULTS=(.25,.5,.75,1.,1.5); TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
+ATR_MULTS=(.25,.5,.75,1.,1.5)
+MIN_RISK_EPS=1e-12; TFS={"1h":4,"4h":16}; RS=(1.,1.5,2.,3.)
 
 def psar(h,l,af0=.02,step=.02,afmax=.2):
  n=len(h); s=np.full(n,np.nan); b=np.ones(n,bool)
@@ -45,7 +46,9 @@ def test(t,o,h,l,c,m,atr_mult,horizon=12):
   b=bull[i]; side="LONG" if b else "SHORT";q=out[side];q["signals"]+=1;e=s+(atr_mult*atr[i] if b else -atr_mult*atr[i])
   a=pos[i+1]; first_end=min(a+m,len(t)); hits=np.flatnonzero((l[a:first_end]<=e)&(h[a:first_end]>=e))
   if hits.size==0:continue
-  q["fills"]+=1; fs=a+hits[0]; end=min(a+m*horizon,len(t)); ph=h[fs:end];pl=l[fs:end];risk=abs(e-s)
+  fs=a+hits[0]; end=min(a+m*horizon,len(t)); ph=h[fs:end];pl=l[fs:end];risk=abs(e-s)
+  if (not np.isfinite(risk)) or risk<=MIN_RISK_EPS*max(1.0,abs(e),abs(s)):continue
+  q["fills"]+=1
   for r in RS:
    tp=e+r*risk if b else e-r*risk
    th=(ph>=tp) if b else (pl<=tp); sh=(pl<=s) if b else (ph>=s)
