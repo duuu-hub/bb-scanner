@@ -1,0 +1,31 @@
+name: PD Breakdown Meta Audit
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_meta_audit_once']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_meta_audit.py
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36211084008, name: pd-breakdown-walkforward-basket-VERIFIED, path: wf}
+      - run: python research/pd_breakdown_meta_audit.py --trades trades/trades_all.csv --wf wf/walkforward.csv --out out
+      - run: |
+          python - <<'PY'
+          import pandas as pd,numpy as np
+          s=pd.read_csv("out/audit_summary.csv").iloc[0];w=pd.read_csv("out/wf_recalc.csv")
+          assert s.duplicate_symbol_entry==0 and s.timing_4h_rate==1 and s.exit_order_rate==1
+          assert s.fee_identity_maxerr<1e-8 and w.match.all()
+          print("AUDIT_PASS",s.to_dict(),w.to_dict("records"))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-meta-audit, path: out/, if-no-files-found: error}
