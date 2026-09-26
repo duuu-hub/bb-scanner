@@ -1,0 +1,29 @@
+name: BB Wonyotti PA Transfer
+on:
+  push:
+    branches: [research-bb-wonyotti-pa-transfer]
+    paths:
+      - 'research/bb_wonyotti_pa_transfer/**'
+      - '.github/workflows/bb-wonyotti-pa-transfer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements-backtest.txt scikit-learn
+      - run: python -m py_compile research/bb_wonyotti_pa_transfer/run_transfer.py
+      - run: python research/bb_wonyotti_pa_transfer/run_transfer.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-wonyotti-pa-transfer-results
+          path: research/bb_wonyotti_pa_transfer/output/
+          retention-days: 30
