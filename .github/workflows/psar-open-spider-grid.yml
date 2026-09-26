@@ -1,0 +1,33 @@
+name: PSAR Open-Spider Grid
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_open_spider_grid_run']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  grid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Preflight only
+        run: python -m py_compile scripts/psar_open_spider_grid.py
+      - name: Download 5Y data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run grid
+        run: python scripts/psar_open_spider_grid.py --data data
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-open-spider-grid
+          path: psar_open_spider_grid.json
+          retention-days: 30
