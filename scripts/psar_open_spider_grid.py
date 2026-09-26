@@ -1,7 +1,7 @@
 import argparse,glob,json
 import pandas as pd,numpy as np
 
-ENTRY_ATR=(0.0,.25,.5,.75,1.0,1.25,1.5)
+ENTRY_ATR=(0.0,.25,.5,.75,1.0,1.25,1.5,2.0,2.5,3.0,4.0)
 SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
 RS=(.5,.75,1.,1.25,1.5,2.,2.5,3.,4.)
 M=16; HORIZON=12; MIN_RISK_EPS=1e-12
