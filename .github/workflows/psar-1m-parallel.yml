@@ -63,7 +63,7 @@ jobs:
         run: |
           python - <<'PY'
           import glob,json
-          out={"meta":{"events":0,"groups":0,"download_fail_events":0,"timestamp_missing":0,"same_1m":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
+          out={"meta":{"events":0,"groups":0,"download_fail_events":0,"timestamp_missing":0,"same_1m":0,"neither_touch":0,"one_sided_only":0,"partial_window":0,"bar_start_mismatch":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
           fs=glob.glob("parts/*.json")
           assert len(fs)==8,fs
           for f in fs:
