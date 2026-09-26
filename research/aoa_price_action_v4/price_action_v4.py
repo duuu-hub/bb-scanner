@@ -242,13 +242,13 @@ def calibrate_2020(candles,flip_fast,hold_fast,valid2020):
     # Score-scaled thresholds from the real 2020 state distribution.
     fp=valid2020["p_flip"].dropna()
     hp=valid2020["p_hold"].dropna()
-    flip_candidates=sorted(set(float(fp.quantile(q)) for q in [.90,.95,.975,.99]))
-    hold_candidates=sorted(set(float(hp.quantile(q)) for q in [.20,.35,.50,.65]))
+    flip_candidates=sorted(set(float(fp.quantile(q)) for q in [.95,.975,.99]))
+    hold_candidates=sorted(set(float(hp.quantile(q)) for q in [.35,.50,.65]))
     rows=[]
 
     for fth in flip_candidates:
         for hth in hold_candidates:
-            for mh in [2,4]:
+            for mh in [4]:
                 for cb in [1,2]:
                     m,_,_=simulate(
                         candles,flip_fast,hold_fast,
