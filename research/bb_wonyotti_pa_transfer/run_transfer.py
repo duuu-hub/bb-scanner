@@ -96,3 +96,5 @@ def main():
     }
     (OUT/"summary.json").write_text(json.dumps(summary,indent=2,default=str)); print(json.dumps(summary,indent=2,default=str))
 if __name__=="__main__":main()
+
+# workflow trigger: frozen transfer v1
