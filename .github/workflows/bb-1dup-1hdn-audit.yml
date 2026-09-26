@@ -1,0 +1,31 @@
+name: BB 1DUP 1HDN Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-core-l2-portfolio]
+    paths: ["research/bb_htf_audit.py","research/bb_1d_up_1h_dn_decompose.py",".github/workflows/bb-1dup-1hdn-audit.yml"]
+jobs:
+ audit:
+  runs-on: ubuntu-latest
+  timeout-minutes: 15
+  steps:
+   - uses: actions/checkout@v4
+     with: {ref: research-core-l2-portfolio}
+   - uses: actions/setup-python@v5
+     with: {python-version: "3.11"}
+   - run: pip install pandas numpy pyarrow
+   - name: Canonical data
+     run: |
+      mkdir -p canonical
+      gh release download binance-15m-5y-canonical-v1 -p 'binance-spot-15m-5y-parquet-shard-*.zip' -D canonical
+      test "$(ls canonical/*.zip | wc -l)" -eq 16
+      for f in canonical/*.zip; do unzip -q "$f" -d canonical; done
+     env: {GH_TOKEN: "${{ github.token }}"}
+   - name: HTF audit
+     env: {CANONICAL_5Y_DIR: canonical}
+     run: python research/bb_htf_audit.py
+   - name: Decompose frozen candidate
+     env: {CANONICAL_5Y_DIR: canonical}
+     run: python research/bb_1d_up_1h_dn_decompose.py
+   - uses: actions/upload-artifact@v4
+     with: {name: bb-1dup-1hdn-audit, path: "artifacts/*"}
