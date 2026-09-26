@@ -46,6 +46,20 @@ for b in [5,10]:
  for scaled in [False,True]:
   n,eq,ret,mdd=sim(q,scaled);ev=q.groupby("entry_time").r_net.mean();gp=ev[ev>0].sum();gl=-ev[ev<0].sum()
   rows.append(dict(basket=b,risk_mode="4f_scaled" if scaled else "fixed",events=q.entry_time.nunique(),candidate_trades=len(q),accepted=n,event_pf=gp/gl,avg_event_r=ev.mean(),final_equity=eq,total_return=ret,mdd_pct=mdd,return_over_mdd=ret/mdd if mdd else np.nan))
+# fixed-risk sensitivity using identical selector/order logic
+def sim_rf(q,rf):
+ eq=1.;peak=1.;mdd=0.;active=[];n=0
+ for r in q.itertuples():
+  done=[p for p in active if p[0]<=r.entry_time]
+  for ex,pnl in sorted(done):eq+=pnl;peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak)
+  active=[p for p in active if p[0]>r.entry_time]
+  if len(active)>=10:continue
+  active.append((r.exit_time,eq*rf*r.r_net));n+=1
+ for ex,pnl in sorted(active):eq+=pnl;peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak)
+ return n,eq,eq-1,mdd
+for rf in [.005,.0075,.01]:
+ n,eq,ret,mdd=sim_rf(q,rf)
+ rows.append(dict(basket=b,risk_mode=f"fixed_{rf:.4f}",events=q.entry_time.nunique(),candidate_trades=len(q),accepted=n,event_pf=gp/gl,avg_event_r=ev.mean(),final_equity=eq,total_return=ret,mdd_pct=mdd,return_over_mdd=ret/mdd if mdd else np.nan))
 pd.DataFrame(rows).to_csv(O/"portfolio_compare.csv",index=False)
 ann=S.groupby(["year","basket"]).agg(events=("entry_time","nunique"),trades=("symbol","size"),avg_r=("r_net","mean"),avg_risk_mult=("risk_mult","mean")).reset_index();ann.to_csv(O/"annual.csv",index=False)
 pd.DataFrame([dict(core_rows=len(T),feature_match=T.break_atr.notna().mean(),selected_events=S.entry_time.nunique(),years=",".join(map(str,sorted(S.year.unique()))))]).to_csv(O/"sanity.csv",index=False)
