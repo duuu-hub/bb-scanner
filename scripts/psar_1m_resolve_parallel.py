@@ -1,6 +1,6 @@
 import glob,os,io,zipfile,urllib.request,json,calendar
 import pandas as pd,numpy as np
-ATR=.25; RS=(2.,3.); M=16; HORIZON=12
+ATR=.5; RS=(2.,3.); M=16; HORIZON=12
 
 def psar(h,l,af0=.02,step=.02,afmax=.2):
  n=len(h);s=np.full(n,np.nan);b=np.ones(n,bool)
