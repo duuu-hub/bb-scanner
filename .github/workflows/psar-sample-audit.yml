@@ -1,0 +1,33 @@
+name: PSAR 0.5ATR Sample Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_sample_audit_run']
+permissions:
+  actions: read
+  contents: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preflight
+        run: python -m py_compile scripts/psar_1m_resolve_parallel.py
+      - name: Download one 15m shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -n rank5-binance-15m-5y-shard-0 -D data
+      - name: Run sample audit
+        env:
+          SHARD: sample
+        run: |
+          python scripts/psar_1m_resolve_parallel.py > sample.log
+          python - <<'PY'
+          import json
+          x=json.load(open("psar_1m_shard_sample.json"))
+          print(json.dumps({"meta":x["meta"],"samples":x.get("samples",[])[:5]},indent=2))
+          assert all(abs(s["entry"]-s["sl"])>1e-12*max(1,abs(s["entry"]),abs(s["sl"])) for s in x.get("samples",[])), "zero-risk sample survived"
+          PY
