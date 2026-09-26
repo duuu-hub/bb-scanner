@@ -1,0 +1,38 @@
+name: PD Breakdown Selector Risk Portfolio
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_selector_risk_portfolio_once']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_selector_risk_portfolio.py
+      - name: Download candle shards
+        run: |
+          mkdir -p input
+          for s in 0 1 2 3 4 5 6 7; do gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s; done
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36211084008, name: pd-breakdown-walkforward-basket-VERIFIED, path: wf}
+      - run: python research/pd_breakdown_selector_risk_portfolio.py --input input --trades trades/trades_all.csv --wf wf/walkforward.csv --out out
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import pandas as pd,numpy as np
+          s=pd.read_csv("out/sanity.csv").iloc[0];p=pd.read_csv("out/portfolio_compare.csv")
+          assert s.core_rows==15940 and s.feature_match>.99
+          assert set(p.basket)=={5,10} and set(p.risk_mode)=={"fixed","4f_scaled"}
+          assert np.isfinite(p[["event_pf","final_equity","mdd_pct"]]).all().all()
+          print(p.to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-selector-risk-portfolio-VERIFIED, path: out/, if-no-files-found: error}
