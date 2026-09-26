@@ -55,11 +55,18 @@ def get1m(sym,ms):
  url=f"https://data.binance.vision/data/futures/um/monthly/klines/{sym}/1m/{sym}-1m-{ym}.zip"
  try:
   raw=urllib.request.urlopen(url,timeout=45).read()
-  z=zipfile.ZipFile(io.BytesIO(raw));df=pd.read_csv(z.open(z.namelist()[0]),header=None,usecols=[0,2,3])
-  # newer archives can store microseconds
-  tt=df.iloc[:,0].to_numpy(np.int64)
+  z=zipfile.ZipFile(io.BytesIO(raw))
+  df=pd.read_csv(z.open(z.namelist()[0]),header=None,usecols=[0,2,3],dtype=str)
+  # Binance Vision archives exist both with and without a header row.
+  ts=pd.to_numeric(df.iloc[:,0],errors="coerce")
+  hi=pd.to_numeric(df.iloc[:,1],errors="coerce")
+  lo=pd.to_numeric(df.iloc[:,2],errors="coerce")
+  valid=ts.notna() & hi.notna() & lo.notna()
+  if not valid.any(): raise ValueError("no numeric 1m rows")
+  tt=ts[valid].to_numpy(np.int64);hh=hi[valid].to_numpy(float);ll=lo[valid].to_numpy(float)
   if tt[0]>10**14:tt=tt//1000
-  return tt,df.iloc[:,1].to_numpy(float),df.iloc[:,2].to_numpy(float)
+  if np.any(np.diff(tt)<=0): raise ValueError("1m timestamps not strictly increasing")
+  return tt,hh,ll
  except Exception as e:
   print("DOWNLOAD_FAIL",sym,ym,e,flush=True);return None
 
