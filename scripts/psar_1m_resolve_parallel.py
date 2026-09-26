@@ -80,7 +80,7 @@ print("EVENTS",len(events),flush=True)
 groups={}
 for e in events:
  dt=pd.to_datetime(e["bar"],unit="ms",utc=True);key=(e["symbol"],dt.strftime("%Y-%m"));groups.setdefault(key,[]).append(e)
-out={"meta":{"events":len(events),"groups":len(groups),"atr_mult":ATR,"download_fail_events":0,"timestamp_missing":0,"same_1m":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
+out={"meta":{"events":len(events),"groups":len(groups),"atr_mult":ATR,"download_fail_events":0,"timestamp_missing":0,"same_1m":0,"neither_touch":0,"one_sided_only":0,"partial_window":0,"bar_start_mismatch":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
 for gi,((sym,ym),es) in enumerate(groups.items(),1):
  data=get1m(sym,es[0]["bar"])
  if data is None:
@@ -94,6 +94,8 @@ for gi,((sym,ym),es) in enumerate(groups.items(),1):
    q["unresolved"]+=1
    out["meta"]["timestamp_missing"]+=1
    continue
+  if tt[a]!=e["bar"]: out["meta"]["bar_start_mismatch"]+=1
+  if b-a!=15: out["meta"]["partial_window"]+=1
   H=hh[a:b];L=ll[a:b];long=e["side"]=="LONG"
   th=(H>=e["tp"]) if long else (L<=e["tp"]);sh=(L<=e["sl"]) if long else (H>=e["sl"])
   ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 999;is_=si[0] if si.size else 999
@@ -101,7 +103,9 @@ for gi,((sym,ym),es) in enumerate(groups.items(),1):
   elif is_<it:q["loss"]+=1
   else:
    q["unresolved"]+=1
-   out["meta"]["same_1m"]+=1
+   if ti.size and si.size and it==is_: out["meta"]["same_1m"]+=1
+   elif (not ti.size) and (not si.size): out["meta"]["neither_touch"]+=1
+   else: out["meta"]["one_sided_only"]+=1
  if gi%100==0:print("resolve",gi,len(groups),flush=True)
 for rk in ("2R","3R"):
  for side,q in out[rk].items():
