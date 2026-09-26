@@ -24,6 +24,8 @@ jobs:
    - name: Preflight HTF
      env: {CANONICAL_5Y_DIR: canonical}
      run: python research/bb_htf_audit.py
+   - name: Compile check
+     run: python -m py_compile research/bb_causal_rescan.py
    - name: Causal rescan
      env: {CANONICAL_5Y_DIR: canonical}
      run: python research/bb_causal_rescan.py
