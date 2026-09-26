@@ -1,7 +1,7 @@
 import glob,os,io,zipfile,urllib.request,json
 import pandas as pd,numpy as np
 from psar_open_spider_grid import load,resample,psar_open_projection
-CANDS=[(0.,.1,2.),(0.,.1,2.5),(0.,.1,3.),(0.,.1,4.),(.25,0.,1.)]
+CANDS=[(e,s,r) for e in (0.,.25,.5,1.,2.,3.,4.,5.,6.,8.,10.) for s in (0.,.1,.2,.3,.5,.75,1.,1.5,2.) for r in (.5,1.,1.5,2.,2.5,3.,4.,5.,6.,8.,10.) if abs(e)+abs(s)>0]
 M=16;HORIZON=12
 def events(p):
  t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c);sar,bull=psar_open_projection(rh,rl)
