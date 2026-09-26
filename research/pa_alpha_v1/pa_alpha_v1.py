@@ -8,7 +8,7 @@ import pandas as pd
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 
-import research.aoa_price_action_v1.price_action_v1 as v1
+import research.aoa_price_action_v1.price_action_v1 as v1\nimport research.aoa_3way_oos.backtest_3way as b3
 
 OUT=ROOT/"research"/"pa_alpha_v1"/"output"
 DEV_START=pd.Timestamp("2022-01-01",tz="UTC")
@@ -203,7 +203,10 @@ def yearly(curve):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    candles=v1.load_pa_candles()
+    raw=b3.load_raw(b3.BTC_DIR)
+    raw["bar_start"]=raw["datetime_utc"]
+    raw["bar_end_s"]=(raw["timestamp_ms"]//1000+900).astype("int64")
+    candles=v1.add_price_action_features(raw[["timestamp_ms","open","high","low","close","bar_start","bar_end_s"]].copy())
     dmodel,hmodel,fitmeta=fit_frozen_models(candles)
     dfast=compile_model(dmodel,v1.DIR_FEATURES); hfast=compile_model(hmodel,v1.HAZARD_FEATURES)
     df,A=prepare(candles)
