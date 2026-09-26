@@ -39,9 +39,16 @@ def candles(symbol,start,end):
 def train_frozen():
     c=v1.load_pa_candles(); rows,dec=v41.build_competing_rows(c)
     tr=dec[dec.year==2019].copy(); va=dec[dec.year==2020].copy()
-    model,m,_=v41.fit_competing(tr,va); return v4.compile_fast(model),m
+    model,m,_=v41.fit_competing(tr,va)
+    fast=v4.compile_fast(model)
+    # Frozen 2019 training feature envelope for transfer diagnostics only.
+    q={}
+    for k in v4.POLICY_FEATURES:
+        s=pd.to_numeric(tr[k],errors="coerce").dropna()
+        q[k]=(float(s.quantile(.001)),float(s.quantile(.999))) if len(s) else (np.nan,np.nan)
+    return fast,m,q
 
-def score_event(ev,fast):
+def score_event(ev,fast,train_q):
     ts=pd.to_datetime(int(ev.signal_ts),unit="ms",utc=True)
     d=candles(ev.symbol,ts-pd.Timedelta(days=8),ts+pd.Timedelta(hours=26))
     before=d[d.bar_end_s<=int(ev.signal_ts/1000)]
@@ -49,13 +56,22 @@ def score_event(ev,fast):
     if len(before)<672 or len(after)<9:return {"pa_valid":False,"pa_error":f"coverage before={len(before)} after={len(after)}"}
     prev=before.iloc[-1]; side=-1; entry=float(ev.signal_price); ets=int(ev.signal_ts/1000)
     ectx=v1.entry_context(prev,side); state={"prev_close":entry,"path_bps":0.0,"mfe_bps":0.0,"mae_bps":0.0}
-    streak=0; confirm=None; scores=[]
+    streak=0; confirm=None; scores=[]; ood_counts=[]; max_abs_z=[]
     for n,(_,r) in enumerate(after.iterrows(),1):
         f=v1.hazard_state(r,side,entry,ets,ectx); f.update(v4.update_path_state(state,r,side,entry))
         p=v4.fast_prob(fast,f); scores.append(p)
+        xv=np.asarray([f[k] for k in v4.POLICY_FEATURES],float)
+        bad=~np.isfinite(xv); xv[bad]=fast["med"][bad]
+        z=(xv-fast["mean"])/np.where(fast["scale"]==0,1.0,fast["scale"])
+        max_abs_z.append(float(np.max(np.abs(z))))
+        ood_counts.append(int(sum((np.isfinite(xv[j]) and (xv[j]<train_q[k][0] or xv[j]>train_q[k][1])) for j,k in enumerate(v4.POLICY_FEATURES))))
         trig=n>=MIN_HOLD and p>=TH; streak=streak+1 if trig else 0
         if streak>=CONFIRM: confirm=r; break
-    out={"pa_valid":True,"pa_max_score_24h":float(max(scores)) if scores else np.nan,"pa_confirm":confirm is not None}
+    out={"pa_valid":True,"pa_max_score_24h":float(max(scores)) if scores else np.nan,"pa_first_score":float(scores[0]) if scores else np.nan,
+         "pa_score_at_minhold":float(scores[MIN_HOLD-1]) if len(scores)>=MIN_HOLD else np.nan,
+         "pa_max_abs_z":float(max(max_abs_z)) if max_abs_z else np.nan,
+         "pa_max_ood_features":int(max(ood_counts)) if ood_counts else 0,
+         "pa_confirm":confirm is not None}
     if confirm is None:return out
     ct=int(confirm.bar_end_s)
     # Frozen PA semantics: confirmation is known only after that bar closes;
@@ -103,10 +119,10 @@ def main():
         loc=e.headers["Location"]
     with urllib.request.urlopen(urllib.request.Request(loc,headers={"User-Agent":"bb-scanner-research"}),timeout=60) as r:b=r.read()
     z=zipfile.ZipFile(io.BytesIO(b)); ev=pd.read_csv(z.open("prewindow_events_enriched.csv"))
-    fast,fitmeta=train_frozen(); rows=[]
+    fast,fitmeta,train_q=train_frozen(); rows=[]
     for _,e in ev.iterrows():
         r=e.to_dict()
-        try:r.update(score_event(e,fast))
+        try:r.update(score_event(e,fast,train_q))
         except Exception as ex:r.update({"pa_valid":False,"pa_error":repr(ex)})
         rows.append(r)
     d=pd.DataFrame(rows); d.to_csv(OUT/"events_scored.csv",index=False)
@@ -127,7 +143,8 @@ def main():
       "hybrid_from_confirmation_1h":metrics(hybrid.pa_short_ret_1h),
       "hybrid_from_confirmation_4h":metrics(hybrid.pa_short_ret_4h),
       "hybrid_from_confirmation_24h":metrics(hybrid.pa_short_ret_24h),
-      "warning":"Transfer test: BTC/AoA PA model trained on 2019 behavior, applied frozen to 2024-26 alt events. No alt PnL tuning. Same-bar TP+SL is conservatively SL."
+      "transfer_diagnostics":{"score_minhold_min":float(d.pa_score_at_minhold.min()),"score_minhold_median":float(d.pa_score_at_minhold.median()),"score_minhold_max":float(d.pa_score_at_minhold.max()),"max_abs_z":float(d.pa_max_abs_z.max()),"max_ood_features":int(d.pa_max_ood_features.max())},
+      "warning":"Transfer test only. If scores saturate or features are far outside the frozen 2019 training envelope, quarantine the transfer result; do not interpret it as a valid PA filter."
     }
     (OUT/"summary.json").write_text(json.dumps(summary,indent=2,default=str)); print(json.dumps(summary,indent=2,default=str))
 if __name__=="__main__":main()
