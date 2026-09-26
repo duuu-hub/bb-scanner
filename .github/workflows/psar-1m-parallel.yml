@@ -1,0 +1,70 @@
+name: PSAR 0.25ATR 1m Parallel Resolution
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1m_parallel_run']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  resolve:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download one 15m shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+      - name: Resolve shard
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: python scripts/psar_1m_resolve_parallel.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1m-shard-${{ matrix.shard }}
+          path: psar_1m_shard_*.json
+          retention-days: 30
+  merge:
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-1m-shard-*
+          path: parts
+          merge-multiple: true
+      - name: Merge
+        run: |
+          python - <<'PY'
+          import glob,json
+          out={"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
+          fs=glob.glob("parts/*.json")
+          assert len(fs)==8,fs
+          for f in fs:
+            x=json.load(open(f))
+            for r in ("2R","3R"):
+              for s in ("LONG","SHORT"):
+                for k in ("win","loss","unresolved"): out[r][s][k]+=x[r][s][k]
+          for r in out:
+            for s,q in out[r].items():
+              d=q["win"]+q["loss"];q["resolved_win_pct"]=round(100*q["win"]/d,3) if d else None
+          open("psar_1m_parallel_results.json","w").write(json.dumps(out,indent=2))
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-025atr-1m-parallel-results
+          path: psar_1m_parallel_results.json
+          retention-days: 30
