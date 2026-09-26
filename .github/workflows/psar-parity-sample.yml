@@ -3,7 +3,9 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths: ['.research/psar_parity_sample_run']
-permissions: {actions: read, contents: read}
+permissions:
+  actions: read
+  contents: read
 jobs:
   parity:
     runs-on: ubuntu-latest
@@ -14,7 +16,8 @@ jobs:
       - name: Preflight both scripts
         run: python -m py_compile scripts/psar_maker_5y.py scripts/psar_1m_resolve_parallel.py
       - name: Download one shard
-        env: {GH_TOKEN: ${{ github.token }}}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p data
           gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-0 -D data
@@ -34,7 +37,8 @@ jobs:
           print(json.dumps({"LONG_2R_amb":q["LONG"]["2R_amb"],"LONG_3R_amb":q["LONG"]["3R_amb"],"SHORT_2R_amb":q["SHORT"]["2R_amb"],"SHORT_3R_amb":q["SHORT"]["3R_amb"]}))
           PY
       - name: Resolver sample
-        env: {SHARD: parity}
+        env:
+          SHARD: parity
         run: |
           python scripts/psar_1m_resolve_parallel.py > /tmp/resolver.log
           python - <<'PY'
