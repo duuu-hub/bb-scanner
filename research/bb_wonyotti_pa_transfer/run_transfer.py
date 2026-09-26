@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import io,json,math,urllib.parse,urllib.request,zipfile
+import io,json,math,os,time,urllib.parse,urllib.request,zipfile
 from pathlib import Path
 import numpy as np,pandas as pd
 import sys
@@ -19,10 +19,17 @@ def get_json(url):
     with urllib.request.urlopen(req,timeout=30) as r:return json.load(r)
 
 def candles(symbol,start,end):
-    q=urllib.parse.urlencode({"category":"USDT-FUTURES","symbol":symbol,"interval":"15m","startTime":str(int(start.timestamp()*1000)),"endTime":str(int(end.timestamp()*1000)),"limit":"100"})
-    j=get_json("https://api.bitget.com/api/v3/market/history-candles?"+q)
-    if j.get("code")!="00000": raise RuntimeError((symbol,j))
-    a=j.get("data",[])
+    # Bitget history endpoint is paginated. Fetch <=90 15m bars per request so
+    # the 8-day PA lookback is actually present instead of silently truncating.
+    start_ms=int(start.timestamp()*1000); end_ms=int(end.timestamp()*1000)
+    step_ms=90*15*60*1000; a=[]; cur=start_ms
+    while cur<=end_ms:
+        chunk_end=min(end_ms,cur+step_ms-1)
+        q=urllib.parse.urlencode({"category":"USDT-FUTURES","symbol":symbol,"interval":"15m","startTime":str(cur),"endTime":str(chunk_end),"limit":"100"})
+        j=get_json("https://api.bitget.com/api/v3/market/history-candles?"+q)
+        if j.get("code")!="00000": raise RuntimeError((symbol,j))
+        a.extend(j.get("data",[])); cur=chunk_end+1
+        time.sleep(0.03)
     d=pd.DataFrame(a,columns=["timestamp_ms","open","high","low","close","base_volume","quote_volume"])
     for c in d.columns:d[c]=pd.to_numeric(d[c],errors="coerce")
     d=d.drop_duplicates("timestamp_ms").sort_values("timestamp_ms").reset_index(drop=True)
@@ -39,7 +46,7 @@ def score_event(ev,fast):
     d=candles(ev.symbol,ts-pd.Timedelta(days=8),ts+pd.Timedelta(hours=26))
     before=d[d.bar_end_s<=int(ev.signal_ts/1000)]
     after=d[d.bar_end_s>int(ev.signal_ts/1000)]
-    if len(before)<672 or len(after)<8:return {"pa_valid":False}
+    if len(before)<672 or len(after)<9:return {"pa_valid":False,"pa_error":f"coverage before={len(before)} after={len(after)}"}
     prev=before.iloc[-1]; side=-1; entry=float(ev.signal_price); ets=int(ev.signal_ts/1000)
     ectx=v1.entry_context(prev,side); state={"prev_close":entry,"path_bps":0.0,"mfe_bps":0.0,"mae_bps":0.0}
     streak=0; confirm=None; scores=[]
@@ -50,20 +57,30 @@ def score_event(ev,fast):
         if streak>=CONFIRM: confirm=r; break
     out={"pa_valid":True,"pa_max_score_24h":float(max(scores)) if scores else np.nan,"pa_confirm":confirm is not None}
     if confirm is None:return out
-    cp=float(confirm.close); ct=confirm.bar_end_s
-    out.update({"pa_confirm_ts":int(ct*1000),"pa_confirm_delay_h":float((ct-ets)/3600),"pa_confirm_price":cp})
-    fut=d[d.bar_end_s>ct].copy()
+    ct=int(confirm.bar_end_s)
+    # Frozen PA semantics: confirmation is known only after that bar closes;
+    # execution is the NEXT 15m bar open, never the confirmation close.
+    nxt=d[d.bar_end_s>ct].head(1)
+    if nxt.empty:
+        out.update({"pa_confirm":False,"pa_error":"no next bar for entry"}); return out
+    er=nxt.iloc[0]; cp=float(er.open); entry_end=int(er.bar_end_s); entry_start=entry_end-900
+    out.update({"pa_confirm_ts":int(ct*1000),"pa_confirm_delay_h":float((ct-ets)/3600),
+                "pa_entry_ts":int(entry_start*1000),"pa_entry_price":cp})
+    fut=d[d.bar_end_s>=entry_end].copy()
     for h in [1,4,24]:
-        z=fut[fut.bar_end_s<=ct+h*3600]
+        z=fut[fut.bar_end_s<=entry_start+h*3600]
         out[f"pa_short_ret_{h}h"]=np.nan if z.empty else float((1-z.iloc[-1].close/cp)*100)
     # same frozen BB payoff shape: TP +9.88 / SL -5.12; if both hit same 15m bar => conservative SL
-    tp=cp*0.90; sl=cp*1.05; result=np.nan; bars=0
+    tp=cp*0.90; sl=cp*1.05; result=np.nan; bars=0; last_close=np.nan
     for _,r in fut.iterrows():
-        bars+=1; hit_tp=r.low<=tp; hit_sl=r.high>=sl
+        bars+=1; last_close=float(r.close); hit_tp=r.low<=tp; hit_sl=r.high>=sl
         if hit_sl: result=-5.12; break
         if hit_tp: result=9.88; break
         if bars>=96: break
-    out["pa_tpsl_24h"]=result; return out
+    unresolved=result is np.nan or (isinstance(result,float) and np.isnan(result))
+    if unresolved and not np.isnan(last_close):
+        result=float((1-last_close/cp)*100-0.12)
+    out["pa_tpsl_24h"]=result; out["pa_tpsl_unresolved_time_exit"]=bool(unresolved); return out
 
 def metrics(x):
     x=pd.to_numeric(pd.Series(x),errors="coerce").dropna()
@@ -73,8 +90,18 @@ def metrics(x):
 
 def main():
     # exact frozen replay artifact is public; GitHub Actions can fetch it without mutating source data
-    req=urllib.request.Request(BB_ARTIFACT,headers={"Authorization":"Bearer "+__import__("os").environ["GITHUB_TOKEN"],"User-Agent":"bb-scanner-research"})
-    with urllib.request.urlopen(req) as r:b=r.read()
+    # GitHub artifact endpoint redirects to blob storage. Do not forward the
+    # Authorization header to the signed cross-host URL (urllib did, causing 401).
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl): return None
+    req=urllib.request.Request(BB_ARTIFACT,headers={"Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],"User-Agent":"bb-scanner-research"})
+    try:
+        urllib.request.build_opener(NoRedirect).open(req)
+        raise RuntimeError("artifact endpoint unexpectedly did not redirect")
+    except urllib.error.HTTPError as e:
+        if e.code not in (301,302,303,307,308): raise
+        loc=e.headers["Location"]
+    with urllib.request.urlopen(urllib.request.Request(loc,headers={"User-Agent":"bb-scanner-research"}),timeout=60) as r:b=r.read()
     z=zipfile.ZipFile(io.BytesIO(b)); ev=pd.read_csv(z.open("prewindow_events_enriched.csv"))
     fast,fitmeta=train_frozen(); rows=[]
     for _,e in ev.iterrows():
@@ -83,10 +110,15 @@ def main():
         except Exception as ex:r.update({"pa_valid":False,"pa_error":repr(ex)})
         rows.append(r)
     d=pd.DataFrame(rows); d.to_csv(OUT/"events_scored.csv",index=False)
-    cand=d[d.candidate_short==True].copy(); hybrid=cand[cand.pa_confirm==True].copy()
+    if len(d)!=24: raise RuntimeError(f"expected 24 parent events, got {len(d)}")
+    if d.duplicated(["symbol","signal_ts"]).any(): raise RuntimeError("duplicate parent events")
+    if int(d.pa_valid.fillna(False).sum())==0: raise RuntimeError("zero PA-valid events")
+    cand=d[d.candidate_short==True].copy(); pa=d[d.pa_confirm==True].copy(); hybrid=cand[cand.pa_confirm==True].copy()
     summary={
       "frozen":{"bb_rule":"2-of-4","pa_threshold":TH,"min_hold_bars":MIN_HOLD,"confirm_bars":CONFIRM,"pa_fit_2020":fitmeta},
-      "counts":{"parent":len(d),"bb_candidate":len(cand),"pa_valid":int(d.pa_valid.fillna(False).sum()),"bb_pa_confirmed":len(hybrid)},
+      "counts":{"parent":len(d),"bb_candidate":len(cand),"pa_valid":int(d.pa_valid.fillna(False).sum()),"pa_only_confirmed":len(pa),"bb_pa_confirmed":len(hybrid)},
+      "pa_only_from_confirmation_tpsl24h":metrics(pa.pa_tpsl_24h),
+      "pa_only_original_d2":metrics(pa.short_net_d2),
       "bb_candidate_d2":metrics(cand.short_net_d2),
       "bb_candidate_d3":metrics(cand.short_net_d3),
       "hybrid_original_d2":metrics(hybrid.short_net_d2),
