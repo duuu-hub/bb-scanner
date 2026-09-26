@@ -99,3 +99,12 @@ variants={"BASE":pbase,"BTC24_GT_-2":pbase[pbase.btc_ret24h>-2],"BTC_ABOVE50":pb
 port=pd.DataFrame([portfolio(v,k) for k,v in variants.items()])
 port.to_csv(OUT/"long24_portfolio_compare_corrected.csv",index=False)
 print("\n=== CORRECTED LONG24 PORTFOLIO 10 SLOTS x 10% ===\n"+port.to_string(index=False))
+
+# Immediate robustness pass: same corrected engine, vary slot count with full-capital allocation.
+sens=[]
+for slots in [5,10,20]:
+    alloc=1.0/slots
+    for nm,v in variants.items():
+        x=portfolio(v,nm,slots=slots,alloc=alloc); x["slots"]=slots; x["alloc_pct"]=alloc*100; sens.append(x)
+sens=pd.DataFrame(sens); sens.to_csv(OUT/"long24_portfolio_slot_sensitivity.csv",index=False)
+print("\n=== CORRECTED SLOT SENSITIVITY ===\n"+sens.to_string(index=False))
