@@ -108,3 +108,12 @@ for slots in [5,10,20]:
         x=portfolio(v,nm,slots=slots,alloc=alloc); x["slots"]=slots; x["alloc_pct"]=alloc*100; sens.append(x)
 sens=pd.DataFrame(sens); sens.to_csv(OUT/"long24_portfolio_slot_sensitivity.csv",index=False)
 print("\n=== CORRECTED SLOT SENSITIVITY ===\n"+sens.to_string(index=False))
+
+# Year-by-year corrected portfolio audit for leading BTC24>-2 filter.
+lead=variants["BTC24_GT_-2"].copy()
+yr=[]
+for y,g in lead.groupby(pd.to_datetime(lead.entry_dt,utc=True).dt.year):
+    for slots in [5,10,20]:
+        x=portfolio(g,f"BTC24_GT_-2_{y}",slots=slots,alloc=1.0/slots); x["year"]=int(y); x["slots"]=slots; yr.append(x)
+yr=pd.DataFrame(yr); yr.to_csv(OUT/"btc24_gt_m2_yearly_portfolio.csv",index=False)
+print("\n=== BTC24>-2 YEARLY CORRECTED PORTFOLIO ===\n"+yr.to_string(index=False))
