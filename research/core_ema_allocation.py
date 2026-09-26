@@ -60,3 +60,5 @@ def main():
     print("\nOVERLAP ONLY\n",pd.read_csv(OUT/"overlap_only_3way.csv").to_string(index=False))
 
 if __name__=="__main__": main()
+
+# trigger allocation run
