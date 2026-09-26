@@ -1,0 +1,29 @@
+name: PSAR Open-Spider 1m Resolve
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/open_spider_1m_run']
+permissions: {contents: read, actions: read}
+jobs:
+  resolve:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile scripts/open_spider_1m.py
+      - name: Download 15m shard
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+      - name: Resolve
+        run: PYTHONPATH=scripts python scripts/open_spider_1m.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: open-spider-1m-${{ matrix.shard }}
+          path: open_spider_1m.json
