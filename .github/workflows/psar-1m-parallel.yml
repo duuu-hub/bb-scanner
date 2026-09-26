@@ -63,15 +63,16 @@ jobs:
         run: |
           python - <<'PY'
           import glob,json
-          out={"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
+          out={"meta":{"events":0,"groups":0,"download_fail_events":0,"timestamp_missing":0,"same_1m":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
           fs=glob.glob("parts/*.json")
           assert len(fs)==8,fs
           for f in fs:
             x=json.load(open(f))
+            for k in out["meta"]: out["meta"][k]+=x["meta"].get(k,0)
             for r in ("2R","3R"):
               for s in ("LONG","SHORT"):
                 for k in ("win","loss","unresolved"): out[r][s][k]+=x[r][s][k]
-          for r in out:
+          for r in ("2R","3R"):
             for s,q in out[r].items():
               d=q["win"]+q["loss"];q["resolved_win_pct"]=round(100*q["win"]/d,3) if d else None
           open("psar_1m_parallel_results.json","w").write(json.dumps(out,indent=2))
