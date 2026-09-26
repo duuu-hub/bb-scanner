@@ -1,0 +1,66 @@
+name: PSAR Open-Spider Sample Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_open_spider_sample_run']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download one shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-0 -D data
+      - name: Pick three files and run grid
+        run: |
+          find data -name '*.csv.gz' | sort | head -3 > /tmp/files
+          mkdir sampledata
+          while read f; do cp "$f" sampledata/; done < /tmp/files
+          echo "FILES:"; cat /tmp/files
+          python scripts/psar_open_spider_grid.py --data sampledata --out sample_grid.json
+      - name: Audit concrete open-bar examples
+        run: |
+          python - <<'PY'
+          import glob,importlib.util,json,numpy as np
+          sp=importlib.util.spec_from_file_location("g","scripts/psar_open_spider_grid.py")
+          # avoid importing CLI module; duplicate only audit around saved source via exec before argparse
+          src=open("scripts/psar_open_spider_grid.py").read().split("ap=argparse.ArgumentParser()")[0]
+          ns={};exec(src,ns)
+          rows=[]
+          for p in glob.glob("sampledata/*.csv.gz"):
+            t,o,h,l,c=ns["load"](p);rt,ro,rh,rl,rc=ns["resample"](t,o,h,l,c)
+            sar,bull=ns["psar_open_projection"](rh,rl)
+            prev=np.r_[np.nan,rc[:-1]]
+            tr=np.maximum(rh-rl,np.maximum(np.abs(rh-prev),np.abs(rl-prev)))
+            import pandas as pd
+            ac=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();ao=np.r_[np.nan,ac[:-1]]
+            pos=np.searchsorted(t,rt)
+            for i in range(15,len(rt)-12):
+              if not np.isfinite(sar[i]) or not np.isfinite(ao[i]):continue
+              b=bool(bull[i]); e=sar[i]+(.5*ao[i] if b else -.5*ao[i]); st=pos[i]
+              hits=np.flatnonzero((l[st:st+16]<=e)&(h[st:st+16]>=e))
+              if hits.size:
+                fs=st+int(hits[0]);sl=sar[i]-(.2*ao[i] if b else -.2*ao[i]);risk=abs(e-sl)
+                rows.append({"file":p.split("/")[-1],"side":"LONG" if b else "SHORT","bar_open":int(rt[i]),"bar_open_iso":str(pd.to_datetime(rt[i],unit="ms",utc=True)),"psar_open":float(sar[i]),"atr_prior":float(ao[i]),"entry":float(e),"sl_buffer_0.2":float(sl),"tp_2R":float(e+(2*risk if b else -2*risk)),"first_fill_15m":int(t[fs]),"first_fill_iso":str(pd.to_datetime(t[fs],unit="ms",utc=True)),"fill_inside_same_4h":bool(t[fs]<rt[i]+4*60*60*1000)})
+                if len(rows)>=10:break
+            if len(rows)>=10:break
+          print(json.dumps(rows,indent=2))
+          assert rows and all(x["first_fill_15m"]>=x["bar_open"] and x["fill_inside_same_4h"] for x in rows)
+          open("sample_audit.json","w").write(json.dumps(rows,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-open-spider-sample
+          path: |
+            sample_grid.json
+            sample_audit.json
