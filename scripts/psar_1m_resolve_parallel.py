@@ -1,6 +1,7 @@
 import glob,os,io,zipfile,urllib.request,json,calendar
 import pandas as pd,numpy as np
 ATR=.5; RS=(2.,3.); M=16; HORIZON=12
+MIN_RISK_EPS=1e-12
 
 def psar(h,l,af0=.02,step=.02,afmax=.2):
  n=len(h);s=np.full(n,np.nan);b=np.ones(n,bool)
@@ -42,6 +43,8 @@ def ambiguous_events(p):
   if not hit.size:continue
   fs=a+hit[0];end=min(a+M*HORIZON,len(t));ph=h[fs:end];pl=l[fs:end]
   risk=abs(e-s)
+  # Invalid geometry: zero/near-zero ATR makes entry=SL=TP and creates fake ambiguity.
+  if (not np.isfinite(risk)) or risk<=MIN_RISK_EPS*max(1.0,abs(e),abs(s)): continue
   for r in RS:
    tp=e+r*risk if b else e-r*risk
    th=(ph>=tp) if b else (pl<=tp);sh=(pl<=s) if b else (ph>=s)
