@@ -1,0 +1,33 @@
+name: PA Alpha V1
+
+on:
+  push:
+    branches: [research-pa-alpha-v1]
+    paths:
+      - "research/pa_alpha_v1/**"
+      - ".github/workflows/pa-alpha-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-backtest.txt scikit-learn
+      - run: python -m py_compile research/pa_alpha_v1/pa_alpha_v1.py
+      - run: python research/pa_alpha_v1/pa_alpha_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pa-alpha-v1-results
+          path: research/pa_alpha_v1/output/
+          if-no-files-found: error
+          retention-days: 30
