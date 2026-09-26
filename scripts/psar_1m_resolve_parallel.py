@@ -80,6 +80,7 @@ print("EVENTS",len(events),flush=True)
 groups={}
 for e in events:
  dt=pd.to_datetime(e["bar"],unit="ms",utc=True);key=(e["symbol"],dt.strftime("%Y-%m"));groups.setdefault(key,[]).append(e)
+samples=[]
 out={"meta":{"events":len(events),"groups":len(groups),"atr_mult":ATR,"download_fail_events":0,"timestamp_missing":0,"same_1m":0,"neither_touch":0,"one_sided_only":0,"partial_window":0,"bar_start_mismatch":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
 for gi,((sym,ym),es) in enumerate(groups.items(),1):
  data=get1m(sym,es[0]["bar"])
@@ -103,11 +104,15 @@ for gi,((sym,ym),es) in enumerate(groups.items(),1):
   elif is_<it:q["loss"]+=1
   else:
    q["unresolved"]+=1
-   if ti.size and si.size and it==is_: out["meta"]["same_1m"]+=1
+   if ti.size and si.size and it==is_:
+    out["meta"]["same_1m"]+=1
+    if len(samples)<5:
+     jj=int(it); samples.append({"symbol":e["symbol"],"bar15":int(e["bar"]),"side":e["side"],"r":e["r"],"entry":e["entry"],"sl":e["sl"],"tp":e["tp"],"minute_ts":int(tt[a+jj]),"minute_high":float(H[jj]),"minute_low":float(L[jj]),"window_high":float(np.max(H)),"window_low":float(np.min(L)),"tp_idx":int(it),"sl_idx":int(is_)})
    elif (not ti.size) and (not si.size): out["meta"]["neither_touch"]+=1
    else: out["meta"]["one_sided_only"]+=1
  if gi%100==0:print("resolve",gi,len(groups),flush=True)
 for rk in ("2R","3R"):
  for side,q in out[rk].items():
   d=q["win"]+q["loss"];q["resolved_win_pct"]=round(100*q["win"]/d,3) if d else None
+out["samples"]=samples
 open("psar_1m_shard_"+shard+".json","w").write(json.dumps(out,indent=2));print(json.dumps(out,indent=2))
