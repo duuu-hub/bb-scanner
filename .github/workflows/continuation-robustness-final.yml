@@ -1,0 +1,23 @@
+name: Continuation Robustness Final
+on:
+  push:
+    branches: [research-continuation-mining]
+    paths: ["research/continuation_robustness.py",".github/workflows/continuation-robustness-final.yml"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Download final accepted trades
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: gh run download 36210816085 -n continuation-accepted-1m-final -D downloaded
+      - name: Pack input
+        run: zip -j input.zip downloaded/*
+      - run: python research/continuation_robustness.py
+      - uses: actions/upload-artifact@v4
+        with: {name: continuation-robustness-final, path: continuation_robustness/, retention-days: 14}
