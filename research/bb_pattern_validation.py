@@ -24,42 +24,45 @@ def frame(df):
  return x,f
 def main():
  rows=[]
- files=sorted(ROOT.rglob("*.parquet")); print("UNIVERSE",len(files))
+ files=sorted(ROOT.rglob("*.parquet")); print("UNIVERSE",len(files),flush=True)
+ combos=list(itertools.product(TPS,SLS,HOLDS))
  for fi,p in enumerate(files):
   try:x,f=frame(pd.read_parquet(p))
-  except Exception as e: print("ERR",p,e); continue
+  except Exception as e: print("ERR",p,e,flush=True); continue
+  op=x.open.to_numpy(float); hi=x.high.to_numpy(float); lo=x.low.to_numpy(float); cl=x.close.to_numpy(float)
+  years=x.index.year.to_numpy()
   for pn,cs in PAT.items():
-   state=np.logical_and.reduce([f[c].to_numpy() for c in cs])
-   ev=state & ~np.r_[False,state[:-1]]
-   ids=np.flatnonzero(ev)
+   state=np.logical_and.reduce([f[z].to_numpy() for z in cs])
+   ids=np.flatnonzero(state & ~np.r_[False,state[:-1]])
    for i in ids:
     ent=i+1
     if ent>=len(x): continue
-    ep=float(x.open.iloc[ent]); yr=x.index[ent].year
-    for hold in HOLDS:
-     end=min(len(x),ent+hold*4); hi=x.high.iloc[ent:end].to_numpy(); lo=x.low.iloc[ent:end].to_numpy(); cl=x.close.iloc[end-1] if end>ent else ep
-     for tp,sl in itertools.product(TPS,SLS):
-      th=ep*(1+tp/100); sh=ep*(1-sl/100); ret=None
-      for h,l in zip(hi,lo):
-       if l<=sh: ret=-sl; break # conservative same-bar: SL first
-       if h>=th: ret=tp; break
-      if ret is None: ret=(cl/ep-1)*100
-      rows.append((pn,yr,tp,sl,hold,ret))
-  if fi%100==0: print("DONE",fi)
+    ep=op[ent]; yr=years[ent]; maxend=min(len(x),ent+96)
+    H=hi[ent:maxend]; L=lo[ent:maxend]
+    # Precompute first touch bar once for every TP and SL threshold.
+    tpfirst={tp:(np.flatnonzero(H>=ep*(1+tp/100))[0] if np.any(H>=ep*(1+tp/100)) else 10**9) for tp in TPS}
+    slfirst={sl:(np.flatnonzero(L<=ep*(1-sl/100))[0] if np.any(L<=ep*(1-sl/100)) else 10**9) for sl in SLS}
+    for tp,sl,hold in combos:
+     lim=min(len(H),hold*4); ti=tpfirst[tp]; si=slfirst[sl]
+     if si<lim and si<=ti: ret=-sl
+     elif ti<lim: ret=tp
+     else:
+      e=min(len(x)-1,ent+hold*4-1); ret=(cl[e]/ep-1)*100
+     rows.append((pn,yr,tp,sl,hold,ret))
+  if fi%50==0: print("DONE",fi,flush=True)
+ print("FILES_DONE",len(files),flush=True)
  d=pd.DataFrame(rows,columns=["pattern","year","tp","sl","hold","gross"])
  out=[]
  for (p,tp,sl,h),g in d.groupby(["pattern","tp","sl","hold"]):
   for cost in COSTS:
-   r=g.gross-cost; wins=r[r>0].sum(); loss=-r[r<0].sum()
-   yrs=(g.assign(net=r).groupby("year").net.mean())
-   # fixed split: 2021-23 IS, 2024+ OOS
+   r=g.gross-cost; yrs=pd.DataFrame({"year":g.year.to_numpy(),"net":r.to_numpy()}).groupby("year").net.mean()
    ins=r[g.year<=2023]; oos=r[g.year>=2024]
    def pf(a):
     return a[a>0].sum()/(-a[a<0].sum()) if (a<0).any() else np.inf
    out.append((p,tp,sl,h,cost,len(r),r.mean(),pf(r),pf(ins),pf(oos),(yrs>0).sum(),yrs.min()))
  o=pd.DataFrame(out,columns=["pattern","tp","sl","hold_h","cost","n","avg_net","pf","pf_is","pf_oos","positive_years","worst_year_avg"])
- Path("artifacts").mkdir(exist_ok=True)
- o.to_csv("artifacts/bb_pattern_validation.csv",index=False)
- print("TOP_BASE");print(o[(o.cost==.20)&(o.n>=300)].sort_values(["pf_oos","pf"],ascending=False).head(40).to_string(index=False))
+ Path("artifacts").mkdir(exist_ok=True);o.to_csv("artifacts/bb_pattern_validation.csv",index=False)
+ base=o[(o.cost==.20)&(o.n>=300)].sort_values(["pf_oos","pf"],ascending=False)
+ print("TOP_BASE");print(base.head(40).to_string(index=False))
  print("ROBUST_COST");print(o[(o.cost==.70)&(o.n>=300)&(o.pf_oos>1)].sort_values("pf_oos",ascending=False).head(30).to_string(index=False))
 if __name__=="__main__":main()
