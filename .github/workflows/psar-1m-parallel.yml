@@ -23,6 +23,18 @@ jobs:
       - run: pip install pandas numpy
       - name: Preflight syntax check
         run: python -m py_compile scripts/psar_1m_resolve_parallel.py
+      - name: Smoke test Binance 1m parser
+        run: |
+          python - <<'PY'
+          import io,zipfile,urllib.request,pandas as pd,numpy as np
+          u="https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2025-01.zip"
+          raw=urllib.request.urlopen(u,timeout=45).read(); z=zipfile.ZipFile(io.BytesIO(raw))
+          d=pd.read_csv(z.open(z.namelist()[0]),header=None,usecols=[0,2,3],dtype=str)
+          t=pd.to_numeric(d.iloc[:,0],errors="coerce"); h=pd.to_numeric(d.iloc[:,1],errors="coerce"); l=pd.to_numeric(d.iloc[:,2],errors="coerce")
+          v=t.notna() & h.notna() & l.notna(); tt=t[v].to_numpy(np.int64)
+          assert len(tt)>40000; assert np.all(np.diff(tt)>0)
+          print("SMOKE_OK",len(tt),tt[0],tt[-1])
+          PY
       - name: Download one 15m shard
         env:
           GH_TOKEN: ${{ github.token }}
