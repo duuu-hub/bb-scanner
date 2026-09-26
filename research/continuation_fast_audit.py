@@ -81,6 +81,18 @@ for r in sig.itertuples():
       exit_ts=int(g.iloc[rr["exit_i"]].timestamp_ms),entry_px=rr["entry_px"],gross_ret_pct=rr["gross_ret_pct"],exit_reason=rr["exit_reason"]))
 out=pd.DataFrame(rows)
 out.to_csv(OUT/"trades.csv.gz",index=False,compression="gzip")
-s=stats(out); s.update(raw_signals=len(sig),gaps=gaps,ambiguous_15m=int((out.exit_reason=="BOTH_SL").sum()),rule=rule)
+# Actual portfolio semantics: at most one live position per symbol. Signals arriving
+# before that symbol's accepted trade exits are rejected chronologically.
+accepted=[]; busy_until={}
+for ix,r in out.sort_values(["entry_ts","signal_ts","symbol"]).iterrows():
+    if int(r.entry_ts) < busy_until.get(r.symbol,-1):
+        continue
+    accepted.append(ix); busy_until[r.symbol]=int(r.exit_ts)
+port=out.loc[accepted].sort_values(["entry_ts","signal_ts"]).reset_index(drop=True)
+port.to_csv(OUT/"trades_one_position_per_symbol.csv.gz",index=False,compression="gzip")
+s=stats(out); ps=stats(port)
+s.update(raw_signals=len(sig),gaps=gaps,ambiguous_15m=int((out.exit_reason=="BOTH_SL").sum()),
+ one_symbol_n=ps["n"],one_symbol_win_rate=ps["win_rate"],one_symbol_expectancy_pct=ps["expectancy_pct"],
+ one_symbol_pf=ps["pf"],one_symbol_ambiguous_15m=int((port.exit_reason=="BOTH_SL").sum()),rule=rule)
 pd.DataFrame([s]).to_csv(OUT/"summary.csv",index=False)
 print("FAST_RESULT",s,flush=True)
