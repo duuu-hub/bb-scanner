@@ -30,7 +30,7 @@ jobs:
           import pandas as pd,numpy as np
           s=pd.read_csv("out/sanity.csv").iloc[0];p=pd.read_csv("out/portfolio_compare.csv")
           assert s.core_rows==15940 and s.feature_match>.99
-          assert set(p.basket)=={5,10} and set(p.risk_mode)=={"fixed","4f_scaled"}
+          assert set(p.basket)=={5,10} and {"fixed","4f_scaled","fixed_0.0050","fixed_0.0075","fixed_0.0100"} <= set(p.risk_mode)
           assert np.isfinite(p[["event_pf","final_equity","mdd_pct"]]).all().all()
           print(p.to_string(index=False))
           PY
