@@ -3,11 +3,14 @@ from __future__ import annotations
 import io,json,math,urllib.parse,urllib.request,zipfile
 from pathlib import Path
 import numpy as np,pandas as pd
+import sys
+ROOT=Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 import research.aoa_price_action_v1.price_action_v1 as v1
 import research.aoa_price_action_v4.price_action_v4 as v4
 import research.aoa_price_action_v41.price_action_v41 as v41
 
-ROOT=Path(__file__).resolve().parents[2]; OUT=ROOT/"research"/"bb_wonyotti_pa_transfer"/"output"; OUT.mkdir(parents=True,exist_ok=True)
+OUT=ROOT/"research"/"bb_wonyotti_pa_transfer"/"output"; OUT.mkdir(parents=True,exist_ok=True)
 BB_ARTIFACT="https://api.github.com/repos/duuu-hub/bb-scanner/actions/artifacts/10781288564/zip"
 TH=0.8354464189135131; MIN_HOLD=8; CONFIRM=1
 
