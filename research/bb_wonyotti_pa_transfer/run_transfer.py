@@ -13,6 +13,9 @@ import research.aoa_price_action_v41.price_action_v41 as v41
 OUT=ROOT/"research"/"bb_wonyotti_pa_transfer"/"output"; OUT.mkdir(parents=True,exist_ok=True)
 BB_ARTIFACT="https://api.github.com/repos/duuu-hub/bb-scanner/actions/artifacts/10781288564/zip"
 TH=0.8354464189135131; MIN_HOLD=8; CONFIRM=1
+# Transfer guard: frozen-model features are clipped to the 2019 training
+# envelope before standardization. This is NOT threshold retuning; it prevents
+# wild extrapolation (observed |z| > 52) while preserving the frozen model/rule.
 
 def get_json(url):
     req=urllib.request.Request(url,headers={"User-Agent":"bb-scanner-research"})
@@ -48,7 +51,7 @@ def train_frozen():
         q[k]=(float(s.quantile(.001)),float(s.quantile(.999))) if len(s) else (np.nan,np.nan)
     return fast,m,q
 
-def score_event(ev,fast,train_q):
+def score_event(ev,fast,train_q,clip_ood=False):
     ts=pd.to_datetime(int(ev.signal_ts),unit="ms",utc=True)
     d=candles(ev.symbol,ts-pd.Timedelta(days=8),ts+pd.Timedelta(hours=26))
     before=d[d.bar_end_s<=int(ev.signal_ts/1000)]
@@ -59,8 +62,18 @@ def score_event(ev,fast,train_q):
     streak=0; confirm=None; scores=[]; ood_counts=[]; max_abs_z=[]
     for n,(_,r) in enumerate(after.iterrows(),1):
         f=v1.hazard_state(r,side,entry,ets,ectx); f.update(v4.update_path_state(state,r,side,entry))
-        p=v4.fast_prob(fast,f); scores.append(p)
         xv=np.asarray([f[k] for k in v4.POLICY_FEATURES],float)
+        if clip_ood:
+            for j,k in enumerate(v4.POLICY_FEATURES):
+                lo,hi=train_q[k]
+                if np.isfinite(xv[j]) and np.isfinite(lo) and np.isfinite(hi):
+                    xv[j]=min(max(xv[j],lo),hi)
+            ff=dict(f)
+            for j,k in enumerate(v4.POLICY_FEATURES): ff[k]=xv[j]
+            p=v4.fast_prob(fast,ff)
+        else:
+            p=v4.fast_prob(fast,f)
+        scores.append(p)
         bad=~np.isfinite(xv); xv[bad]=fast["med"][bad]
         z=(xv-fast["mean"])/np.where(fast["scale"]==0,1.0,fast["scale"])
         max_abs_z.append(float(np.max(np.abs(z))))
@@ -122,7 +135,12 @@ def main():
     fast,fitmeta,train_q=train_frozen(); rows=[]
     for _,e in ev.iterrows():
         r=e.to_dict()
-        try:r.update(score_event(e,fast,train_q))
+        try:
+            raw=score_event(e,fast,train_q,False)
+            clipped=score_event(e,fast,train_q,True)
+            r.update(raw)
+            for k,v in clipped.items(): r["clip_"+k]=v
+        
         except Exception as ex:r.update({"pa_valid":False,"pa_error":repr(ex)})
         rows.append(r)
     d=pd.DataFrame(rows); d.to_csv(OUT/"events_scored.csv",index=False)
@@ -130,9 +148,15 @@ def main():
     if d.duplicated(["symbol","signal_ts"]).any(): raise RuntimeError("duplicate parent events")
     if int(d.pa_valid.fillna(False).sum())==0: raise RuntimeError("zero PA-valid events")
     cand=d[d.candidate_short==True].copy(); pa=d[d.pa_confirm==True].copy(); hybrid=cand[cand.pa_confirm==True].copy()
+    cpa=d[d.clip_pa_confirm==True].copy(); chy=cand[cand.clip_pa_confirm==True].copy()
     summary={
       "frozen":{"bb_rule":"2-of-4","pa_threshold":TH,"min_hold_bars":MIN_HOLD,"confirm_bars":CONFIRM,"pa_fit_2020":fitmeta},
       "counts":{"parent":len(d),"bb_candidate":len(cand),"pa_valid":int(d.pa_valid.fillna(False).sum()),"pa_only_confirmed":len(pa),"bb_pa_confirmed":len(hybrid)},
+      "clip_counts":{"pa_only_confirmed":len(cpa),"bb_pa_confirmed":len(chy)},
+      "clip_pa_only_from_confirmation_tpsl24h":metrics(cpa.clip_pa_tpsl_24h),
+      "clip_hybrid_original_d2":metrics(chy.short_net_d2),
+      "clip_hybrid_from_confirmation_tpsl24h":metrics(chy.clip_pa_tpsl_24h),
+      "clip_diagnostics":{"score_minhold_min":float(d.clip_pa_score_at_minhold.min()),"score_minhold_median":float(d.clip_pa_score_at_minhold.median()),"score_minhold_max":float(d.clip_pa_score_at_minhold.max())},
       "pa_only_from_confirmation_tpsl24h":metrics(pa.pa_tpsl_24h),
       "pa_only_original_d2":metrics(pa.short_net_d2),
       "bb_candidate_d2":metrics(cand.short_net_d2),
