@@ -22,6 +22,7 @@ jobs:
       - run: |
           python - <<'PY'
           import pandas as pd
+          import numpy as np
           s=pd.read_csv("out/sanity.csv");p=pd.read_csv("out/portfolio_summary.csv")
           assert s.core_rows.iloc[0]>10000 and s.symbols.iloc[0]>500
           assert set(p.basket)=={5,10} and (p.events>0).all()
