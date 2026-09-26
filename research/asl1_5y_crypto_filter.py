@@ -117,3 +117,38 @@ for y,g in lead.groupby(pd.to_datetime(lead.entry_dt,utc=True).dt.year):
         x=portfolio(g,f"BTC24_GT_-2_{y}",slots=slots,alloc=1.0/slots); x["year"]=int(y); x["slots"]=slots; yr.append(x)
 yr=pd.DataFrame(yr); yr.to_csv(OUT/"btc24_gt_m2_yearly_portfolio.csv",index=False)
 print("\n=== BTC24>-2 YEARLY CORRECTED PORTFOLIO ===\n"+yr.to_string(index=False))
+
+# Regime improvement scan. Entry-known variables only; no calendar/year labels.
+# Broad plateaus, not a single optimum. Report yearly trade-level PF/avg to expose concentration.
+lead0=base.copy()
+lead0["btc_ma_gap50_pct"]=(lead0.btc_open/lead0.btc_ma50-1)*100
+lead0["btc_ma_gap80_pct"]=(lead0.btc_open/lead0.btc_ma80-1)*100
+cand={"BASE":pd.Series(True,index=lead0.index)}
+for x in [-4,-3,-2,-1,0,1,2]: cand[f"BTC24_GT_{x}"]=lead0.btc_ret24h>x
+for x in [-5,-4,-3,-2.5,-2,-1.5]: cand[f"DROP_LE_{x}"]=lead0.asset_ret4h<=x
+for x in [1.25,1.5,1.75,2,2.5,3]: cand[f"RV_LT_{x}"]=lead0.rv_ratio<x
+for n in [30,40,50,60,80,100]: cand[f"ABOVE_MA{n}"]=lead0.btc_open>lead0[f"btc_ma{n}"]
+for gap in [-3,-2,-1,0,1,2,3]: cand[f"MA50_GAP_GT_{gap}"]=lead0.btc_ma_gap50_pct>gap
+# compact combinations around previously broad plateaus
+for b in [-4,-3,-2,-1]:
+  for drop in [-2,-3,-4]:
+    cand[f"B24_{b}_DROP_{drop}"]=(lead0.btc_ret24h>b)&(lead0.asset_ret4h<=drop)
+for b in [-3,-2,-1]:
+  for n in [40,50,60,80]:
+    cand[f"B24_{b}_MA{n}"]=(lead0.btc_ret24h>b)&(lead0.btc_open>lead0[f"btc_ma{n}"])
+rows=[]; yrows=[]
+for nm,m in cand.items():
+  z=lead0[m].copy()
+  if len(z)<100: continue
+  st=stat(z); yrs=[]
+  for y,gy in z.groupby(pd.to_datetime(z.entry_dt,utc=True).dt.year):
+    if len(gy)>=20:
+      sy=stat(gy); yrs.append((int(y),float(sy.PF),float(sy.avg_net_pct),len(gy)))
+      yrows.append({"candidate":nm,"year":int(y),**sy.to_dict()})
+  pfs=[q[1] for q in yrs]; av=[q[2] for q in yrs]
+  rows.append({"candidate":nm,**st.to_dict(),"eligible_years":len(yrs),"positive_pf_years":sum(x>1 for x in pfs),
+               "worst_year_pf":min(pfs) if pfs else np.nan,"median_year_pf":np.median(pfs) if pfs else np.nan,
+               "worst_year_avg_pct":min(av) if av else np.nan})
+grid=pd.DataFrame(rows).sort_values(["positive_pf_years","worst_year_pf","PF"],ascending=False)
+grid.to_csv(OUT/"long24_regime_improvement_scan.csv",index=False); pd.DataFrame(yrows).to_csv(OUT/"long24_regime_improvement_yearly.csv",index=False)
+print("\n=== REGIME IMPROVEMENT TOP ROBUST ===\n"+grid.head(30).to_string(index=False))
