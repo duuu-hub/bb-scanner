@@ -1,0 +1,30 @@
+name: Continuation Fast Corrected Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-continuation-mining]
+    paths:
+      - "research/continuation_fast_audit.py"
+      - ".github/workflows/continuation-fast-audit.yml"
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-continuation-mining
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas numpy
+      - run: python -m unittest research/test_continuation_execution_core.py -v
+      - name: Fast corrected audit
+        run: python research/continuation_fast_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuation-fast-corrected-audit
+          path: continuation_fast_results/
+          retention-days: 14
