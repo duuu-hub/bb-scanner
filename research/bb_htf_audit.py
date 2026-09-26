@@ -11,11 +11,11 @@ def main():
   idx=pd.to_datetime(d.open_time,unit="ms",utc=True)
   assert not idx.duplicated().any()
   # Base candles must be UTC quarter-hour aligned.
-  assert ((idx.minute%15)==0).all() and (idx.second==0).all()
+  assert ((idx.dt.minute%15)==0).all() and (idx.dt.second==0).all()
   x=d.assign(dt=idx).set_index("dt").close.astype(float)
   # Explicit fixed UTC bins: avoids calendar-resample origin ambiguity.
   for name,mins in [("1H",60),("4H",240),("1D",1440),("3D",4320)]:
-   ns=idx.view("int64"); step=mins*60*10**9
+   ns=idx.astype("int64").to_numpy(); step=mins*60*10**9
    bucket=pd.to_datetime((ns//step)*step,utc=True)
    # feature at t may only use completed HTF buckets strictly before current bucket.
    h=pd.DataFrame({"bucket":bucket,"close":x.to_numpy()}).groupby("bucket",sort=True).close.last()
