@@ -23,46 +23,51 @@ def frame(df):
   f[n+"_UP"]=x.close>m+2*s; f[n+"_DN"]=x.close<m-2*s
  return x,f
 def main():
- rows=[]
+ from collections import defaultdict
+ # key=(pattern,tp,sl,hold,year) -> [n,sum_gross,pos/neg sums computed after cost analytically from stored histogram]
+ # Gross outcomes include TP/SL constants plus timeout returns, so retain compact per-key list of timeout returns and hit counts.
+ stats=defaultdict(lambda:{"tp":0,"sl":0,"timeouts":[]})
  files=sorted(ROOT.rglob("*.parquet")); print("UNIVERSE",len(files),flush=True)
  combos=list(itertools.product(TPS,SLS,HOLDS))
  for fi,p in enumerate(files):
   try:x,f=frame(pd.read_parquet(p))
   except Exception as e: print("ERR",p,e,flush=True); continue
-  op=x.open.to_numpy(float); hi=x.high.to_numpy(float); lo=x.low.to_numpy(float); cl=x.close.to_numpy(float)
-  years=x.index.year.to_numpy()
+  op=x.open.to_numpy(float); hi=x.high.to_numpy(float); lo=x.low.to_numpy(float); cl=x.close.to_numpy(float); years=x.index.year.to_numpy()
   for pn,cs in PAT.items():
-   state=np.logical_and.reduce([f[z].to_numpy() for z in cs])
-   ids=np.flatnonzero(state & ~np.r_[False,state[:-1]])
+   state=np.logical_and.reduce([f[z].to_numpy() for z in cs]); ids=np.flatnonzero(state & ~np.r_[False,state[:-1]])
    for i in ids:
     ent=i+1
     if ent>=len(x): continue
-    ep=op[ent]; yr=years[ent]; maxend=min(len(x),ent+96)
-    H=hi[ent:maxend]; L=lo[ent:maxend]
-    # Precompute first touch bar once for every TP and SL threshold.
+    ep=op[ent]; yr=int(years[ent]); maxend=min(len(x),ent+96); H=hi[ent:maxend]; L=lo[ent:maxend]
     tpfirst={tp:(np.flatnonzero(H>=ep*(1+tp/100))[0] if np.any(H>=ep*(1+tp/100)) else 10**9) for tp in TPS}
     slfirst={sl:(np.flatnonzero(L<=ep*(1-sl/100))[0] if np.any(L<=ep*(1-sl/100)) else 10**9) for sl in SLS}
     for tp,sl,hold in combos:
-     lim=min(len(H),hold*4); ti=tpfirst[tp]; si=slfirst[sl]
-     if si<lim and si<=ti: ret=-sl
-     elif ti<lim: ret=tp
+     lim=min(len(H),hold*4); ti=tpfirst[tp]; si=slfirst[sl]; z=stats[(pn,tp,sl,hold,yr)]
+     if si<lim and si<=ti: z["sl"]+=1
+     elif ti<lim: z["tp"]+=1
      else:
-      e=min(len(x)-1,ent+hold*4-1); ret=(cl[e]/ep-1)*100
-     rows.append((pn,yr,tp,sl,hold,ret))
+      e=min(len(x)-1,ent+hold*4-1); z["timeouts"].append((cl[e]/ep-1)*100)
   if fi%50==0: print("DONE",fi,flush=True)
  print("FILES_DONE",len(files),flush=True)
- d=pd.DataFrame(rows,columns=["pattern","year","tp","sl","hold","gross"])
- out=[]
- for (p,tp,sl,h),g in d.groupby(["pattern","tp","sl","hold"]):
+ rows=[]
+ configs=sorted(set(k[:4] for k in stats))
+ for p,tp,sl,h in configs:
+  yearly={}
   for cost in COSTS:
-   r=g.gross-cost; yrs=pd.DataFrame({"year":g.year.to_numpy(),"net":r.to_numpy()}).groupby("year").net.mean()
-   ins=r[g.year<=2023]; oos=r[g.year>=2024]
-   def pf(a):
-    return a[a>0].sum()/(-a[a<0].sum()) if (a<0).any() else np.inf
-   out.append((p,tp,sl,h,cost,len(r),r.mean(),pf(r),pf(ins),pf(oos),(yrs>0).sum(),yrs.min()))
- o=pd.DataFrame(out,columns=["pattern","tp","sl","hold_h","cost","n","avg_net","pf","pf_is","pf_oos","positive_years","worst_year_avg"])
+   allv=[]; isv=[]; oosv=[]
+   for yr in sorted(set(k[4] for k in stats if k[:4]==(p,tp,sl,h))):
+    z=stats[(p,tp,sl,h,yr)]
+    v=np.r_[np.full(z["tp"],tp-cost),np.full(z["sl"],-sl-cost),np.asarray(z["timeouts"])-cost]
+    yearly[yr]=v.mean() if len(v) else np.nan; allv.append(v)
+    (isv if yr<=2023 else oosv).append(v)
+   A=np.concatenate(allv); I=np.concatenate(isv) if isv else np.array([]); O=np.concatenate(oosv) if oosv else np.array([])
+   def pf(v):
+    neg=-v[v<0].sum(); return v[v>0].sum()/neg if neg>0 else np.inf
+   ys=np.array(list(yearly.values()),float)
+   rows.append((p,tp,sl,h,cost,len(A),A.mean(),pf(A),pf(I),pf(O),int((ys>0).sum()),float(np.nanmin(ys))))
+ o=pd.DataFrame(rows,columns=["pattern","tp","sl","hold_h","cost","n","avg_net","pf","pf_is","pf_oos","positive_years","worst_year_avg"])
  Path("artifacts").mkdir(exist_ok=True);o.to_csv("artifacts/bb_pattern_validation.csv",index=False)
  base=o[(o.cost==.20)&(o.n>=300)].sort_values(["pf_oos","pf"],ascending=False)
- print("TOP_BASE");print(base.head(40).to_string(index=False))
- print("ROBUST_COST");print(o[(o.cost==.70)&(o.n>=300)&(o.pf_oos>1)].sort_values("pf_oos",ascending=False).head(30).to_string(index=False))
+ print("TOP_BASE");print(base.head(40).to_string(index=False),flush=True)
+ print("ROBUST_COST");print(o[(o.cost==.70)&(o.n>=300)&(o.pf_oos>1)].sort_values("pf_oos",ascending=False).head(30).to_string(index=False),flush=True)
 if __name__=="__main__":main()
