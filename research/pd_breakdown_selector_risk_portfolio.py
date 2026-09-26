@@ -60,7 +60,7 @@ def sim_rf(q,rf):
 for rf in [.005,.0075,.01,.0125,.015,.02,.025,.03,.035,.04,.05,.06,.075,.10]:
  n,eq,ret,mdd=sim_rf(q,rf)
  rows.append(dict(basket=b,risk_mode=f"fixed_{rf:.4f}",events=q.entry_time.nunique(),candidate_trades=len(q),accepted=n,event_pf=gp/gl,avg_event_r=ev.mean(),final_equity=eq,total_return=ret,mdd_pct=mdd,return_over_mdd=ret/mdd if mdd else np.nan))
-pd.DataFrame(rows).to_csv(O/"portfolio_compare.csv",index=False)
+S.to_csv(O/"selected_trades.csv",index=False)\npd.DataFrame(rows).to_csv(O/"portfolio_compare.csv",index=False)
 ann=S.groupby(["year","basket"]).agg(events=("entry_time","nunique"),trades=("symbol","size"),avg_r=("r_net","mean"),avg_risk_mult=("risk_mult","mean")).reset_index();ann.to_csv(O/"annual.csv",index=False)
 pd.DataFrame([dict(core_rows=len(T),feature_match=T.break_atr.notna().mean(),selected_events=S.entry_time.nunique(),years=",".join(map(str,sorted(S.year.unique()))))]).to_csv(O/"sanity.csv",index=False)
 print(pd.read_csv(O/"sanity.csv").to_string(index=False));print(pd.read_csv(O/"portfolio_compare.csv").to_string(index=False));print(ann.to_string(index=False))
