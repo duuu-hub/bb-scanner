@@ -29,9 +29,13 @@ jobs:
         run: python -m py_compile research/btc_eth_regime_stage8_year_anatomy.py
       - name: Run
         run: python research/btc_eth_regime_stage8_year_anatomy.py
+      - name: Core vs EMA600 overlap
+        run: python research/core_ema_overlap.py
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: btc-eth-regime-stage8-year-anatomy
-          path: research_output/btc_eth_regime_stage8_year_anatomy/
+          path: |
+            research_output/btc_eth_regime_stage8_year_anatomy/
+            research_output/core_ema_overlap/
           if-no-files-found: error
