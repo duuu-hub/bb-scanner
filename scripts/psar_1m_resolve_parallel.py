@@ -50,7 +50,7 @@ def ambiguous_events(p):
    th=(ph>=tp) if b else (pl<=tp);sh=(pl<=s) if b else (ph>=s)
    ti=np.flatnonzero(th);si=np.flatnonzero(sh)
    if ti.size and si.size and ti[0]==si[0]:
-    k=fs+ti[0];ev.append({"symbol":sym,"bar":int(t[k]),"side":"LONG" if b else "SHORT","r":r,"entry":e,"sl":s,"tp":tp})
+    k=fs+ti[0];ev.append({"symbol":sym,"entry_ts":int(t[fs]),"ambiguous_ts":int(t[k]),"side":"LONG" if b else "SHORT","r":r,"entry":e,"sl":s,"tp":tp})
  return ev
 
 def get1m(sym,ms):
@@ -82,23 +82,23 @@ for n,p in enumerate(files,1):
 print("EVENTS",len(events),flush=True)
 groups={}
 for e in events:
- dt=pd.to_datetime(e["bar"],unit="ms",utc=True);key=(e["symbol"],dt.strftime("%Y-%m"));groups.setdefault(key,[]).append(e)
+ dt=pd.to_datetime(e["ambiguous_ts"],unit="ms",utc=True);key=(e["symbol"],dt.strftime("%Y-%m"));groups.setdefault(key,[]).append(e)
 samples=[]
 out={"meta":{"events":len(events),"groups":len(groups),"atr_mult":ATR,"download_fail_events":0,"timestamp_missing":0,"same_1m":0,"neither_touch":0,"one_sided_only":0,"partial_window":0,"bar_start_mismatch":0},"2R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}},"3R":{"LONG":{"win":0,"loss":0,"unresolved":0},"SHORT":{"win":0,"loss":0,"unresolved":0}}}
 for gi,((sym,ym),es) in enumerate(groups.items(),1):
- data=get1m(sym,es[0]["bar"])
+ data=get1m(sym,es[0]["ambiguous_ts"])
  if data is None:
   for e in es:out[f'{e["r"]:g}R'][e["side"]]["unresolved"]+=1
   out["meta"]["download_fail_events"]+=len(es)
   continue
  tt,hh,ll=data
  for e in es:
-  q=out[f'{e["r"]:g}R'][e["side"]];a=np.searchsorted(tt,e["bar"]);b=np.searchsorted(tt,e["bar"]+900000)
+  q=out[f'{e["r"]:g}R'][e["side"]];a=np.searchsorted(tt,e["ambiguous_ts"]);b=np.searchsorted(tt,e["ambiguous_ts"]+900000)
   if a>=len(tt) or a==b:
    q["unresolved"]+=1
    out["meta"]["timestamp_missing"]+=1
    continue
-  if tt[a]!=e["bar"]: out["meta"]["bar_start_mismatch"]+=1
+  if tt[a]!=e["ambiguous_ts"]: out["meta"]["bar_start_mismatch"]+=1
   if b-a!=15: out["meta"]["partial_window"]+=1
   H=hh[a:b];L=ll[a:b];long=e["side"]=="LONG"
   th=(H>=e["tp"]) if long else (L<=e["tp"]);sh=(L<=e["sl"]) if long else (H>=e["sl"])
@@ -110,7 +110,7 @@ for gi,((sym,ym),es) in enumerate(groups.items(),1):
    if ti.size and si.size and it==is_:
     out["meta"]["same_1m"]+=1
     if len(samples)<5:
-     jj=int(it); samples.append({"symbol":e["symbol"],"bar15":int(e["bar"]),"side":e["side"],"r":e["r"],"entry":e["entry"],"sl":e["sl"],"tp":e["tp"],"minute_ts":int(tt[a+jj]),"minute_high":float(H[jj]),"minute_low":float(L[jj]),"window_high":float(np.max(H)),"window_low":float(np.min(L)),"tp_idx":int(it),"sl_idx":int(is_)})
+     jj=int(it); samples.append({"symbol":e["symbol"],"entry_ts":int(e["entry_ts"]),"ambiguous_ts":int(e["ambiguous_ts"]),"side":e["side"],"r":e["r"],"entry":e["entry"],"sl":e["sl"],"tp":e["tp"],"minute_ts":int(tt[a+jj]),"minute_high":float(H[jj]),"minute_low":float(L[jj]),"window_high":float(np.max(H)),"window_low":float(np.min(L)),"tp_idx":int(it),"sl_idx":int(is_)})
    elif (not ti.size) and (not si.size): out["meta"]["neither_touch"]+=1
    else: out["meta"]["one_sided_only"]+=1
  if gi%100==0:print("resolve",gi,len(groups),flush=True)
