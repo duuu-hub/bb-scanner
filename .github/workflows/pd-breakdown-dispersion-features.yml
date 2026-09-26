@@ -1,0 +1,43 @@
+name: PD Breakdown Dispersion Features
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_dispersion_features_once']
+permissions: {contents: write, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_dispersion_features.py
+      - run: |
+          mkdir -p input
+          for s in 0 1 2 3 4 5 6 7; do gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s; done
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+      - run: python research/pd_breakdown_dispersion_features.py --input input --trades trades/trades_all.csv --out out
+      - name: Validate
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          s=pd.read_csv("out/summary.csv");d=pd.read_csv("out/dispersion_separation.csv");q=pd.read_csv("out/all_oos_quartiles.csv")
+          assert s.oos_events.iloc[0]==929 and s.events51.iloc[0]==30 and s.symbols.iloc[0]>=600
+          assert bool(s.timing_ok.iloc[0]) and len(d)==6 and len(q)>=20
+          print("VERIFIED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-dispersion-features-VERIFIED, path: out/, if-no-files-found: error}
+      - name: Persist
+        run: |
+          mkdir -p research/results/pd_breakdown_dispersion_features
+          cp out/*.csv research/results/pd_breakdown_dispersion_features/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/results/pd_breakdown_dispersion_features
+          git commit -m "research: persist dispersion features" || exit 0
+          git push origin HEAD:research/pd-4h-binance-universe
