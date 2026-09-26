@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: python -m pip install -q pandas numpy
       - name: Preflight
         run: python -m py_compile scripts/psar_1m_resolve_parallel.py
       - name: Download one 15m shard
