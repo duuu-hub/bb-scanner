@@ -1,0 +1,29 @@
+name: Continuation Accepted 1m Final
+on:
+  workflow_dispatch:
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Download accepted trades artifact
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: gh run download 36209096140 -n continuation-fast-corrected-audit -D downloaded && cp downloaded/* input.zip || true
+      - name: Normalize artifact input
+        run: |
+          if [ -f downloaded/trades_one_position_per_symbol.csv.gz ]; then
+            zip -j input.zip downloaded/*
+          fi
+      - name: Resolve accepted BOTH
+        run: python research/continuation_accepted_1m_final.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuation-accepted-1m-final
+          path: continuation_1m_final/
+          retention-days: 14
