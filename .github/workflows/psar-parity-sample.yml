@@ -33,7 +33,7 @@ jobs:
           finally: sys.argv=old
           # use produced baseline output and print 4h ATR0.5
           x=json.load(open("/tmp/unused.json"))
-          q=x["results"]["4h|ATR0.5"]
+          q=x["4h|ATR0.5"]
           print(json.dumps({"LONG_2R_amb":q["LONG"]["2R_amb"],"LONG_3R_amb":q["LONG"]["3R_amb"],"SHORT_2R_amb":q["SHORT"]["2R_amb"],"SHORT_3R_amb":q["SHORT"]["3R_amb"]}))
           PY
       - name: Resolver sample
