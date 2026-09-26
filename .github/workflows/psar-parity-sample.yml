@@ -1,0 +1,44 @@
+name: PSAR Baseline-Resolver Parity Sample
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_parity_sample_run']
+permissions: {actions: read, contents: read}
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install -q pandas numpy
+      - name: Preflight both scripts
+        run: python -m py_compile scripts/psar_maker_5y.py scripts/psar_1m_resolve_parallel.py
+      - name: Download one shard
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-0 -D data
+      - name: Baseline 4H ATR0.5 sample counts
+        run: |
+          python - <<'PY'
+          import glob,importlib.util,json
+          sp=importlib.util.spec_from_file_location("m","scripts/psar_maker_5y.py");m=importlib.util.module_from_spec(sp)
+          import sys
+          old=sys.argv;sys.argv=["psar_maker_5y.py","--data","data","--out","/tmp/unused.json"]
+          try: sp.loader.exec_module(m)
+          except SystemExit: pass
+          finally: sys.argv=old
+          # use produced baseline output and print 4h ATR0.5
+          x=json.load(open("/tmp/unused.json"))
+          q=x["results"]["4h|ATR0.5"]
+          print(json.dumps({"LONG_2R_amb":q["LONG"]["2R_amb"],"LONG_3R_amb":q["LONG"]["3R_amb"],"SHORT_2R_amb":q["SHORT"]["2R_amb"],"SHORT_3R_amb":q["SHORT"]["3R_amb"]}))
+          PY
+      - name: Resolver sample
+        env: {SHARD: parity}
+        run: |
+          python scripts/psar_1m_resolve_parallel.py > /tmp/resolver.log
+          python - <<'PY'
+          import json
+          x=json.load(open("psar_1m_shard_parity.json"))
+          print(json.dumps({"resolver_events":x["meta"]["events"],"same_1m":x["meta"]["same_1m"],"samples":x.get("samples",[])[:3]},indent=2))
+          PY
