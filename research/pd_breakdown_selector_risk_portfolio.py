@@ -57,7 +57,7 @@ def sim_rf(q,rf):
   active.append((r.exit_time,eq*rf*r.r_net));n+=1
  for ex,pnl in sorted(active):eq+=pnl;peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak)
  return n,eq,eq-1,mdd
-for rf in [.005,.0075,.01]:
+for rf in [.005,.0075,.01,.0125,.015,.02,.025,.03]:
  n,eq,ret,mdd=sim_rf(q,rf)
  rows.append(dict(basket=b,risk_mode=f"fixed_{rf:.4f}",events=q.entry_time.nunique(),candidate_trades=len(q),accepted=n,event_pf=gp/gl,avg_event_r=ev.mean(),final_equity=eq,total_return=ret,mdd_pct=mdd,return_over_mdd=ret/mdd if mdd else np.nan))
 pd.DataFrame(rows).to_csv(O/"portfolio_compare.csv",index=False)
