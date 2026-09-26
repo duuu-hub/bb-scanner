@@ -12,7 +12,7 @@ def feats(d):
   ma=h.rolling(20).mean().shift(1); sd=h.rolling(20).std(ddof=0).shift(1)
   m=pd.Series(ma.reindex(bucket).to_numpy(),index=idx); s=pd.Series(sd.reindex(bucket).to_numpy(),index=idx)
   out[n+"_UP"]=(x.close>m+2*s).to_numpy(); out[n+"_DN"]=(x.close<m-2*s).to_numpy()
- return x,out
+ if len(out) and not hasattr(feats,"_printed"):\n  print("SANITY", "rows",len(x), "close_finite",int(np.isfinite(x.close).sum()), *[(k,int(np.isfinite(v).sum()),int(v.sum())) for k,v in out.items()], flush=True); feats._printed=True\n return x,out
 def main():
  fs=sorted(ROOT.rglob("*.parquet")); assert len(fs)==666
  names=[n+s for n in TFS for s in ("_UP","_DN")]; stats={}
@@ -40,7 +40,7 @@ def main():
   n,s,pos,valid=z
   rows.append((kind,a,b,h,n,s/n*100 if n else np.nan,pos/valid if valid else np.nan))
  o=pd.DataFrame(rows,columns=["kind","a","b","horizon","n","mean_ret_pct","up_prob"])
- Path("artifacts").mkdir(exist_ok=True);o.to_csv("artifacts/bb_causal_rescan.csv",index=False)
+ assert (o.n>0).any(), "EMPTY_SIGNAL_OUTPUT: causal BB scan produced zero events"\n Path("artifacts").mkdir(exist_ok=True);o.to_csv("artifacts/bb_causal_rescan.csv",index=False)
  q=o[(o.horizon=="24H")&(o.n>=300)].sort_values("mean_ret_pct",ascending=False)
  print("FILES_DONE",len(fs),flush=True);print("TOP_24H");print(q.head(40).to_string(index=False),flush=True)
  print("BOTTOM_24H");print(q.tail(25).to_string(index=False),flush=True)
