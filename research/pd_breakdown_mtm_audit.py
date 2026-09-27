@@ -28,39 +28,47 @@ for r in S.itertuples():
  vals.append(float(z.iloc[-1]) if len(z) else np.nan)
 S["risk_dist"]=vals
 assert S.ep.notna().all() and S.risk_dist.notna().all() and (S.risk_dist>0).all()
-risks=[.01,.0125,.015,.02,.025,.03]
+risks=[.01,.0125,.015,.02,.025,.03,.035,.04,.05,.06]
 rows=[]
 for rf in risks:
- cash=1.;active=[];peak=1.;mdd=0.;accepted=0
- times=sorted(set(S.entry_time)|set(S.exit_time))
- for t in times:
-  # realize exits first at canonical r_net
-  done=[p for p in active if p["exit_time"]<=t]
-  for p in sorted(done,key=lambda x:x["exit_time"]): cash += p["stake"]*p["r_net"]
-  active=[p for p in active if p["exit_time"]>t]
-  # entries, same ordering as selector sim
-  for r in S[S.entry_time==t].sort_values("symbol").itertuples():
-   if len(active)>=10: break
-   active.append(dict(symbol=r.symbol,entry_time=r.entry_time,exit_time=r.exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf));accepted+=1
-  # evaluate every 15m point until next event boundary using union grid
-  nxt=min([p["exit_time"] for p in active]+[S.entry_time[S.entry_time>t].min() if (S.entry_time>t).any() else pd.Timestamp.max.tz_localize("UTC")])
-  if active:
+ cash=1.;active=[];peak_real=1.;mdd_real=0.;peak_mtm=1.;mdd_mtm=0.;accepted=0
+ # EXACT selector order: process one candidate row at a time; realize exits <= this row's entry before admission.
+ accepted_rows=[]
+ for r in S.sort_values(["entry_time","symbol"]).itertuples():
+  done=[p for p in active if p["exit_time"]<=r.entry_time]
+  for p in sorted(done,key=lambda x:x["exit_time"]):
+   cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
+  active=[p for p in active if p["exit_time"]>r.entry_time]
+  if len(active)>=10: continue
+  p=dict(symbol=r.symbol,entry_time=r.entry_time,exit_time=r.exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf)
+  active.append(p);accepted_rows.append(p);accepted+=1
+ # realized terminal must exactly reproduce canonical sim_rf
+ for p in sorted(active,key=lambda x:x["exit_time"]):
+  cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
+ # MTM replay on accepted positions; stakes are frozen from exact admission simulation.
+ cash2=1.;openp=[];by_entry={}
+ for p in accepted_rows: by_entry.setdefault(p["entry_time"],[]).append(p)
+ exits=sorted(set(p["exit_time"] for p in accepted_rows));entries=sorted(by_entry);bounds=sorted(set(entries+exits))
+ for i,t in enumerate(bounds):
+  done=[p for p in openp if p["exit_time"]<=t]
+  for p in sorted(done,key=lambda x:x["exit_time"]): cash2 += p["stake"]*p["r_net"]
+  openp=[p for p in openp if p["exit_time"]>t]
+  openp.extend(by_entry.get(t,[]))
+  nxt=bounds[i+1] if i+1<len(bounds) else None
+  if openp and nxt is not None:
    grid=None
-   for p in active:
-    ser=px[p["symbol"]]["close"]; idx=ser.loc[(ser.index>=t)&(ser.index<nxt)].index
+   for p in openp:
+    ser=px[p["symbol"]]["close"];idx=ser.loc[(ser.index>=t)&(ser.index<nxt)].index
     grid=idx if grid is None else grid.union(idx)
    for tt in grid:
-    eq=cash
-    for p in active:
+    eq=cash2
+    for p in openp:
      z=px[p["symbol"]]["close"].loc[:tt]
-     if len(z):
-      rr=(p["ep"]-float(z.iloc[-1]))/p["risk_dist"]
-      eq += p["stake"]*rr
-    peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak if peak>0 else np.inf)
-  peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak if peak>0 else np.inf)
- # terminal exits
- for p in sorted(active,key=lambda x:x["exit_time"]): cash += p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
- rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,mtm_mdd_pct=mdd))
+     if len(z): eq += p["stake"]*((p["ep"]-float(z.iloc[-1]))/p["risk_dist"])
+    peak_mtm=max(peak_mtm,eq);mdd_mtm=max(mdd_mtm,(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf)
+ for p in sorted(openp,key=lambda x:x["exit_time"]): cash2 += p["stake"]*p["r_net"]
+ assert abs(cash2-cash)<1e-10
+ rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm))
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
 
 # trigger exact MTM rerun
