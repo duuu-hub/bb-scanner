@@ -9,10 +9,9 @@ Z=pd.concat([T[(T.year==y)&(T.signals>=th)] for y,th in W.itertuples(index=False
 # neutral 5 basket event R
 E=Z.groupby("entry_time").head(5).groupby("entry_time").agg(event_r=("r_net","mean"),breadth=("signals","first")).reset_index()
 # find BTC csv recursively
-files=list(Path(a.data).rglob("*BTCUSDT*15m*.csv"))
-if not files: files=list(Path(a.data).rglob("*BTCUSDT*.csv"))
-assert files, "BTCUSDT csv not found"
-p=files[0]; B=pd.read_csv(p,compression="infer")
+p=Path(a.data)/"BTCUSDT.csv.gz"
+assert p.is_file(), f"BTCUSDT canonical file not found: {p}"
+B=pd.read_csv(p,compression="gzip")
 # normalize Binance kline formats
 if "open_time" in B: ts=pd.to_datetime(B.open_time,unit="ms",utc=True,errors="coerce")
 elif "timestamp" in B: ts=pd.to_datetime(B.timestamp,unit="ms",utc=True,errors="coerce")
