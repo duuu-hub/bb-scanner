@@ -73,11 +73,19 @@ def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
 
 def load(p):
     d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
-    return tuple(d[x].to_numpy(np.int64 if x=="open_time" else float) for x in ["open_time","open","high","low","close"])
+    t=d["open_time"].to_numpy(np.int64)
+    if len(t)>1 and np.any(np.diff(t)!=900000):
+        bad=np.flatnonzero(np.diff(t)!=900000)[:5]
+        raise RuntimeError(f"15m timestamp gap/duplicate at rows {bad.tolist()}")
+    return (t,)+tuple(d[x].to_numpy(float) for x in ["open","high","low","close"])
 
 def resample(t,o,h,l,c,m=16):
     bucket=t//(900000*m); cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
-    st=cut[:-1];en=cut[1:];good=(en-st)==m;st=st[good];en=en[good]
+    st=cut[:-1];en=cut[1:];good=(en-st)==m
+    st=st[good];en=en[good]
+    if len(st):
+        ok=np.array([np.all(np.diff(t[a:b])==900000) for a,b in zip(st,en)],dtype=bool)
+        st=st[ok];en=en[ok]
     return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
 
 def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
