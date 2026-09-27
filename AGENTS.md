@@ -136,3 +136,20 @@ For timeframe TF (currently compare 1H and 4H):
 - Results from implementations that violate this timing definition must be labeled invalid and must not be used for strategy selection or sizing.
 
 Ultimate PSAR research objective: implement the SAME canonical logic on 1H and 4H, then compare them on identical data/execution assumptions before choosing the production timeframe.
+
+## 10. Mandatory intrabar / same-bar execution chronology
+
+This section is authoritative for ALL backtests and research engines in this repository unless the user explicitly changes it. It is not PSAR-specific. A strategy/workflow may not replace, weaken, or silently bypass these rules.
+
+- Never infer TP/SL chronology from OHLC alone when both levels are reachable inside the same parent candle.
+- When a parent research candle (for example 15m, 1H, or 4H) contains both TP and SL after entry and their order is ambiguous, resolve chronology using official Binance 1m candles for the relevant interval.
+- Entry chronology matters. TP/SL touches that occur before the entry is actually filled are NOT exits.
+- For a resting limit order, the first 1m candle that reaches/passes the entry price is the entry minute. A gap-through/reach-through counts as a fill according to the canonical maker-fill logic; do not require the 1m candle to straddle the exact entry price if the canonical engine treats the order as marketable/reached.
+- If TP or SL is touched in the SAME 1m candle in which entry occurs, exact post-entry chronology is unknowable from 1m OHLC. Resolve conservatively as SL / LOSS. This includes an entry-minute TP-only touch when the same 1m OHLC cannot prove that TP happened after entry.
+- If an already-established position has both TP and SL touched in the SAME 1m candle, exact chronology is unknowable. Resolve conservatively as SL / LOSS.
+- If the 1m sequence proves TP occurred first after entry, record TP / WIN. If it proves SL occurred first after entry, record SL / LOSS.
+- If the parent candle claimed an entry/fill but authoritative 1m data cannot reproduce the entry, treat it as a data/execution-integrity mismatch; do not guess a win or loss.
+- Missing, malformed, misaligned, or otherwise unusable official 1m archive data must be treated as DATA_GAP / excluded according to the canonical engine contract, never guessed as TP or SL.
+- All 1H and 4H PSAR research, and any future strategy using OHLC backtests, must call/reproduce this same chronology contract. Do not create a strategy-local shortcut that uses 'TP first', 'SL first', arbitrary OHLC ordering, or same-parent-bar blanket SL without first applying the 1m authority rule.
+- Before trusting a large run, execute chronology smoke tests covering at minimum: pre-entry TP ignored, entry-minute TP=>LOSS, entry-minute SL=>LOSS, entry-minute both=>LOSS, established-position both=>LOSS, entry then later TP=>WIN, entry then later SL=>LOSS, and DATA_GAP handling.
+- A run that does not use this contract, or cannot prove it passed the chronology smoke tests, is INVALID and its PF, return, win rate, MDD, trade count, and sizing conclusions must not be compared with canonical results.
