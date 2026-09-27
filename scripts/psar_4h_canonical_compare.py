@@ -129,7 +129,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
     tr=np.maximum(rh-rl,np.maximum(np.abs(rh-prev),np.abs(rl-prev)))
     atr_closed=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy()
     atr_open=np.r_[np.nan,atr_closed[:-1]]
-    pos=np.searchsorted(t,rt); out={}
+    pos=np.searchsorted(t,rt)
+    if len(pos) and (np.any(pos>=len(t)) or np.any(t[pos]!=rt)):raise RuntimeError("strategy-bar to 15m timestamp mapping mismatch")
+    out={}
     for i in range(max(15,PSAR_BURNIN_BARS),n):
         s=sar[i];a0=atr_open[i]
         if not np.isfinite(s) or not np.isfinite(a0) or a0<=0:continue
