@@ -19,7 +19,7 @@ for c in ["entry_price","stop_price","stop_atr","atr"]:
  if c in S: S[c]=pd.to_numeric(S[c],errors="coerce")
 def entry_px(r):
  if "entry_price" in S.columns and pd.notna(r.entry_price): return float(r.entry_price)
- z=px[r.symbol].loc[:r.entry_time]
+ z=px[r.symbol]["close"].loc[:r.entry_time]
  return float(z.iloc[-1]) if len(z) else np.nan
 S["ep"]=[entry_px(r) for r in S.itertuples()]
 assert S.ep.notna().all()
