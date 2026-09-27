@@ -213,14 +213,18 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
     return out
 
 ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=None);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
-files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files;files=[p for j,p in enumerate(files) if j%a.shards==a.shard]
-agg={};errors=[];seen_ranges=set()
+all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
+seen_ranges=set()
+for p in all_files:
+    data=load(p); sym=_symbol(p); t0=data[0]
+    fp=(sym,int(t0[0]),int(t0[-1]),len(t0))
+    if fp in seen_ranges:raise RuntimeError(f"duplicate symbol/time-range input {fp}")
+    seen_ranges.add(fp)
+files=[p for j,p in enumerate(all_files) if j%a.shards==a.shard]
+agg={};errors=[]
 for z,p in enumerate(files,1):
     try:
-        data=load(p); sym=_symbol(p); t0=data[0]
-        fp=(sym,int(t0[0]),int(t0[-1]),len(t0))
-        if fp in seen_ranges:raise RuntimeError(f"duplicate symbol/time-range input {fp}")
-        seen_ranges.add(fp)
+        data=load(p); sym=_symbol(p)
         rr=evaluate(*data,m,a.horizon,sym)
     except Exception as e:errors.append([p,str(e)]);continue
     for k,v in rr.items():
