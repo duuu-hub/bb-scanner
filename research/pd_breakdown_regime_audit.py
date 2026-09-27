@@ -12,7 +12,7 @@ E=Z.groupby("entry_time").head(5).groupby("entry_time").agg(event_r=("r_net","me
 files=list(Path(a.data).rglob("*BTCUSDT*15m*.csv"))
 if not files: files=list(Path(a.data).rglob("*BTCUSDT*.csv"))
 assert files, "BTCUSDT csv not found"
-p=files[0]; B=pd.read_csv(p)
+p=files[0]; B=pd.read_csv(p,compression="infer")
 # normalize Binance kline formats
 if "open_time" in B: ts=pd.to_datetime(B.open_time,unit="ms",utc=True,errors="coerce")
 elif "timestamp" in B: ts=pd.to_datetime(B.timestamp,unit="ms",utc=True,errors="coerce")
