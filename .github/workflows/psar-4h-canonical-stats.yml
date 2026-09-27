@@ -49,6 +49,11 @@ jobs:
           assert base["tf"]=="4h",base
           assert all(d["definition"]==base for d in docs),"shard definition mismatch"
           assert all(not d.get("errors") for d in docs),"shard contains errors"
+          raw_fields={"fills","taker","maker","win","loss","collision_15m","resolved_1m","collision_1m_loss","unresolved_eod"}
+          derived_fields={"win_pct_amb_loss","gross_expectancy_R_amb_loss"}
+          for d in docs:
+              for k,v in d["summary"].items():
+                  assert set(v)==raw_fields|derived_fields,(k,set(v))
           agg={}
           for d in docs:
               for k,v in d["summary"].items():
