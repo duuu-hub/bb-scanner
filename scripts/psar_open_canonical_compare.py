@@ -1,11 +1,13 @@
-import argparse,glob,json,io,urllib.request,zipfile,os,time
+import argparse,glob,json,io,urllib.request,zipfile,os,time,re
 from datetime import datetime,timezone
 import pandas as pd,numpy as np
 _ONE_MIN_CACHE={}
 def _symbol(p):
     b=os.path.basename(p)
-    if b.endswith(".csv.gz"): b=b[:-7]
-    return b.split("_")[0].split("-")[0].upper()
+    if not b.endswith(".csv.gz"):raise RuntimeError(f"unexpected data filename {b}")
+    sym=b[:-7].upper()
+    if not re.fullmatch(r"[A-Z0-9]+USDT",sym):raise RuntimeError(f"cannot safely parse Binance symbol from {b}")
+    return sym
 def _one_min(symbol,ts):
     ym=datetime.fromtimestamp(ts/1000,tz=timezone.utc).strftime("%Y-%m"); key=(symbol,ym)
     if key in _ONE_MIN_CACHE:return _ONE_MIN_CACHE[key]
