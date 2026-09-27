@@ -77,6 +77,24 @@ jobs:
           for k in ['maker_valid','marketable','maker_valid_touch','marketable_touch']:
               q[k+'_pct_signals']=round(100*q[k]/q['signals'],4) if q['signals'] else None
           q['maker_valid_fill_rate_pct']=round(100*q['maker_valid_touch']/q['maker_valid'],4) if q['maker_valid'] else None
+          # exact split of maker-valid 0ATR touches by direction
+          q['maker_valid_touch_long']=0;q['maker_valid_touch_short']=0
+          for p in files:
+              d=pd.read_csv(p,compression='gzip',usecols=['open_time','open','high','low','close']).sort_values('open_time')
+              t=d.open_time.to_numpy(np.int64);o=d.open.to_numpy(float);h=d.high.to_numpy(float);l=d.low.to_numpy(float);c=d.close.to_numpy(float)
+              bucket=t//(900000*M);cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
+              st=cut[:-1];en=cut[1:];good=(en-st)==M;st=st[good];en=en[good]
+              rt=t[st];ro=o[st];rh=np.maximum.reduceat(h,st);rl=np.minimum.reduceat(l,st)
+              sar,bull=psar_open_projection(rh,rl);pos=np.searchsorted(t,rt)
+              for i in range(15,len(rt)-12):
+                  s=sar[i]
+                  if not np.isfinite(s):continue
+                  b=bool(bull[i]);valid=(s<ro[i]) if b else (s>ro[i])
+                  if not valid:continue
+                  a=pos[i];zz=slice(a,min(a+M,len(t)))
+                  if np.any((l[zz]<=s)&(h[zz]>=s)):
+                      q['maker_valid_touch_long' if b else 'maker_valid_touch_short']+=1
+          assert q['maker_valid_touch_long']+q['maker_valid_touch_short']==q['maker_valid_touch']
           open('psar_0atr_maker_audit.json','w').write(json.dumps(q,indent=2))
           print(json.dumps(q,indent=2))
           assert len(files)==856, len(files)
