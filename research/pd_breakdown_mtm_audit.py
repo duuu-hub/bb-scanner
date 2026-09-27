@@ -48,46 +48,36 @@ for rf in risks:
  # realized terminal must exactly reproduce canonical sim_rf
  for p in sorted(active,key=lambda x:x["exit_time"]):
   cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
- # MTM replay on accepted positions; stakes are frozen from exact admission simulation.
- cash2=1.;openp=[];by_entry={}
- for p in accepted_rows: by_entry.setdefault(p["entry_time"],[]).append(p)
- exits=sorted(set(p["exit_time"] for p in accepted_rows));entries=sorted(by_entry);bounds=sorted(set(entries+exits))
- for i,t in enumerate(bounds):
-  done=[p for p in openp if p["exit_time"]<=t]
-  for p in sorted(done,key=lambda x:x["exit_time"]):
-   cash2 += p["stake"]*p["r_net"]
-   peak_mtm=max(peak_mtm,cash2);mdd_mtm=max(mdd_mtm,(peak_mtm-cash2)/peak_mtm if peak_mtm>0 else np.inf)
-  openp=[p for p in openp if p["exit_time"]>t]
-  openp.extend(by_entry.get(t,[]))
-  nxt=bounds[i+1] if i+1<len(bounds) else None
-  if openp and nxt is not None:
-   grid=None
-   for p in openp:
-    ser=px[p["symbol"]]["close"];idx=ser.loc[(ser.index>=t)&(ser.index<nxt)].index
-    grid=idx if grid is None else grid.union(idx)
-   for tt in grid:
-    eq=cash2
-    for p in openp:
-     # Only mark if this symbol has an actual 15m candle at tt; never carry a future/stale mark across gaps.
-     ser=px[p["symbol"]]["close"]
-     if tt in ser.index:
-      mark=float(ser.loc[tt])
-     else:
-      z=ser.loc[(ser.index>=p["entry_time"])&(ser.index<=tt)]
-      mark=float(z.iloc[-1]) if len(z) else p["ep"]
-     rr=(p["ep"]-mark)/p["risk_dist"]
-     # Canonical strategy exits on 4H boundaries. Within an open canonical 4H trade,
-     # unrealized R cannot be allowed to create impossible unlimited loss for account-equity audit:
-     # conservative mark cap at the canonical 1R stop boundary.
-     rr=max(rr,-1.0)
-     eq += p["stake"]*rr
-    if eq>peak_mtm: peak_mtm=eq; peak_mtm_t=tt
-    dd=(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf
-    if dd>mdd_mtm: mdd_mtm=dd; trough_t=tt
-    if rf==.01: trace.append(dict(t=tt,kind="MARK",equity=eq,cash=cash2,unreal=eq-cash2,open_n=len(openp)))
- for p in sorted(openp,key=lambda x:x["exit_time"]):
-  cash2 += p["stake"]*p["r_net"]
-  peak_mtm=max(peak_mtm,cash2);mdd_mtm=max(mdd_mtm,(peak_mtm-cash2)/peak_mtm if peak_mtm>0 else np.inf)
+ # MTM replay: one strictly chronological 15m timeline. Realized exits are booked at their exact canonical timestamp.
+ cash2=1.;openp=[];by_entry={};by_exit={}
+ for p in accepted_rows:
+  by_entry.setdefault(p["entry_time"],[]).append(p);by_exit.setdefault(p["exit_time"],[]).append(p)
+ allidx=None
+ for sym in set(p["symbol"] for p in accepted_rows):
+  idx=px[sym]["close"].index
+  allidx=idx if allidx is None else allidx.union(idx)
+ event_times=pd.DatetimeIndex(sorted(set(allidx).union(set(by_entry)).union(set(by_exit))))
+ for tt in event_times:
+  # exits first, matching admission rule exit_time <= entry_time
+  for p in by_exit.get(tt,[]):
+   if p in openp:
+    cash2 += p["stake"]*p["r_net"];openp.remove(p)
+  openp.extend(by_entry.get(tt,[]))
+  eq=cash2
+  for p in openp:
+   ser=px[p["symbol"]]["close"]
+   if tt in ser.index: mark=float(ser.loc[tt])
+   else:
+    z=ser.loc[(ser.index>=p["entry_time"])&(ser.index<=tt)]
+    mark=float(z.iloc[-1]) if len(z) else p["ep"]
+   rr=max((p["ep"]-mark)/p["risk_dist"],-1.0)
+   eq += p["stake"]*rr
+  if eq>peak_mtm: peak_mtm=eq;peak_mtm_t=tt
+  dd=(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf
+  if dd>mdd_mtm: mdd_mtm=dd;trough_t=tt
+  if rf==.01: trace.append(dict(t=tt,equity=eq,cash=cash2,unreal=eq-cash2,open_n=len(openp)))
+ # hard chronological sanity: drawdown peak must precede trough
+ assert peak_mtm_t is None or trough_t is None or peak_mtm_t<=trough_t,(peak_mtm_t,trough_t)
  assert abs(cash2-cash)<1e-10
  # MTM series includes every realized exit point; it therefore cannot understate realized MDD.
  assert mdd_mtm+1e-12>=mdd_real, (rf,mdd_real,mdd_mtm)
