@@ -2,21 +2,25 @@ name: PSAR Fixed-Level Execution Audit
 on:
   push:
     branches: [research-rank5-binance-15m-5y]
-    paths: ['.research/psar_fixed_execution_run']
+    paths: ['.research/psar_fixed_execution_parallel_run']
 permissions: {contents: read, actions: read}
 jobs:
   audit:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
-      - run: python -m py_compile scripts/psar_execution_fixed_levels.py
+      - run: python -m py_compile scripts/psar_execution_fixed_parallel.py
       - name: Download 5Y
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
-      - run: python scripts/psar_execution_fixed_levels.py --data data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard ${{ matrix.shard }} --shards 8
       - uses: actions/upload-artifact@v4
-        with: {name: psar-fixed-execution, path: psar_execution_fixed_levels.json}
+        with: {name: psar-fixed-parallel-${{ matrix.shard }}, path: psar_fixed_shard_${{ matrix.shard }}.json}
