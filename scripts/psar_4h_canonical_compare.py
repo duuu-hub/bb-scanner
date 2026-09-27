@@ -253,6 +253,7 @@ for z,p in enumerate(files,1):
         for aa,bb in contiguous_segments(data[0]):
             if bb-aa < m*(PSAR_BURNIN_BARS+1):continue
             part=tuple(x[aa:bb] for x in data)
+            if len(resample(*part,m)[0]) <= PSAR_BURNIN_BARS:continue
             seg=evaluate(*part,m,sym)
             for k,v in seg.items():
                 q=rr.setdefault(k,{kk:0 for kk in v})
