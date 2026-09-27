@@ -17,7 +17,7 @@ def psar(h,l,af0=.02,step=.02,afmax=.2):
    else:sar=z;ep,af=(l[i],min(af+step,afmax)) if l[i]<ep else (ep,af)
  return out,bull
 def ev(p):
- t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c);sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));ac=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();ao=np.r_[np.nan,ac[:-1]];pos=np.searchsorted(t,rt);out={}
+ t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c);sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));ac=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();pos=np.searchsorted(t,rt);out={}
  for i in range(15,len(rt)-HORIZON):
   if not np.isfinite(sar[i]) or not np.isfinite(ao[i]) or ao[i]<=0:continue
   b=bool(bull[i]);start=pos[i];end=min(start+M*HORIZON,len(t))
@@ -29,7 +29,7 @@ def ev(p):
     if not hit.size:continue
     fs=start+int(hit[0]);fill=trigger;mode="LIMIT_TOUCH"
    for sb in SL_BUFFER_ATR:
-    sl=sar[i]-(sb*ao[i] if b else -sb*ao[i]);risk_design=abs(trigger-sl)
+    sl=sar[i]-(sb*a0 if b else -sb*a0);risk_design=abs(trigger-sl)
     if risk_design<=1e-12*max(1.,abs(trigger),abs(sl)):continue
     ph=h[fs:end];pl=l[fs:end]
     for r in RS:
