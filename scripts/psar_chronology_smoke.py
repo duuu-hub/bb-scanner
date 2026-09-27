@@ -40,3 +40,21 @@ run_case("short_entry_then_tp",[(0,101,99),(60000,99,94)],95,105,False,100,"win"
 run_case("short_entry_then_sl",[(0,101,99),(60000,106,99)],95,105,False,100,"loss")
 run_case("short_preentry_tp_then_entry_continue",[(0,98,94),(60000,101,99)],95,105,False,100,"continue")
 print("ALL_CHRONOLOGY_SMOKE_PASS")
+
+
+# Static invariants for the canonical engine added during deep audit.
+src=SRC
+assert "PSAR_BURNIN_BARS=100" in src
+assert "max(15,PSAR_BURNIN_BARS)" in src
+assert 'np.diff(t)!=900000' in src
+assert 'np.diff(v[0])!=60000' in src
+assert 'z-a!=15' in src
+assert 'invalid OHLC geometry' in src
+assert 'invalid 1m high/low' in src
+assert src.count('if (b and not fill>sl) or ((not b) and not fill<sl):continue')==2
+assert 'duplicate symbol/time-range input' in src
+assert 't[a]%span==0' in src
+assert 'gross_expectancy_R_amb_loss' in src
+assert 'independent-signal gross edge scan' in src
+assert 'q["loss"]+=int(rr!="win")' not in src
+print("ALL_CANONICAL_INVARIANTS_PASS")
