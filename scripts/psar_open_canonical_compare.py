@@ -235,7 +235,7 @@ for z,p in enumerate(files,1):
         data=load(p); sym=_symbol(p)
         rr={}
         for aa,bb in contiguous_segments(data[0]):
-            if bb-aa < max(PSAR_BURNIN_BARS+2,m*15):continue
+            if bb-aa < m*(PSAR_BURNIN_BARS+1):continue
             part=tuple(x[aa:bb] for x in data)
             seg=evaluate(*part,m,a.horizon,sym)
             for k,v in seg.items():
