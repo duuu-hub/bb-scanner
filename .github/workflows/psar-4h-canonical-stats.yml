@@ -43,6 +43,10 @@ jobs:
           fs=glob.glob("merged/**/*.json",recursive=True)
           assert len(fs)==8, f"expected 8 shard jsons, got {len(fs)}"
           docs=[json.load(open(x)) for x in fs]
+          base=docs[0]["definition"]
+          assert base["tf"]=="4h",base
+          assert all(d["definition"]==base for d in docs),"shard definition mismatch"
+          assert all(not d.get("errors") for d in docs),"shard contains errors"
           agg={}
           for d in docs:
               for k,v in d["summary"].items():
