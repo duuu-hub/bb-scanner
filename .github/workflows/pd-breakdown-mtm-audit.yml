@@ -1,0 +1,27 @@
+name: PD Breakdown MTM Audit
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_mtm_audit_once']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python -m py_compile research/pd_breakdown_mtm_audit.py
+      - name: Download candle shards
+        run: |
+          mkdir -p input
+          for s in 0 1 2 3 4 5 6 7; do gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s; done
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - uses: actions/download-artifact@v4
+        with: {github-token: '${{ github.token }}', run-id: 36281112666, name: pd-breakdown-selector-risk-portfolio-VERIFIED, path: pd}
+      - run: python research/pd_breakdown_mtm_audit.py --input input --selected pd/selected_trades.csv --out out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: pd-breakdown-mtm-audit, path: out/, if-no-files-found: warn}
