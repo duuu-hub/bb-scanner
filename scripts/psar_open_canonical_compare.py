@@ -1,4 +1,4 @@
-import argparse,glob,json,io,urllib.request,zipfile,os
+import argparse,glob,json,io,urllib.request,zipfile,os,time
 from datetime import datetime,timezone
 import pandas as pd,numpy as np
 _ONE_MIN_CACHE={}
@@ -10,15 +10,21 @@ def _one_min(symbol,ts):
     ym=datetime.fromtimestamp(ts/1000,tz=timezone.utc).strftime("%Y-%m"); key=(symbol,ym)
     if key in _ONE_MIN_CACHE:return _ONE_MIN_CACHE[key]
     u=f"https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/1m/{symbol}-1m-{ym}.zip"
-    try:
-        raw=urllib.request.urlopen(u,timeout=30).read()
-        with zipfile.ZipFile(io.BytesIO(raw)) as z:d=pd.read_csv(z.open(z.namelist()[0]),header=None)
-        v=(d.iloc[:,0].to_numpy(np.int64),d.iloc[:,2].to_numpy(float),d.iloc[:,3].to_numpy(float));_ONE_MIN_CACHE[key]=v;return v
-    except Exception:_ONE_MIN_CACHE[key]=None;return None
+    last=None
+    for attempt in range(4):
+        try:
+            raw=urllib.request.urlopen(u,timeout=60).read()
+            with zipfile.ZipFile(io.BytesIO(raw)) as z:d=pd.read_csv(z.open(z.namelist()[0]),header=None)
+            v=(d.iloc[:,0].to_numpy(np.int64),d.iloc[:,2].to_numpy(float),d.iloc[:,3].to_numpy(float))
+            if len(v[0])==0: raise RuntimeError("empty 1m archive")
+            _ONE_MIN_CACHE[key]=v;return v
+        except Exception as e:
+            last=e
+            if attempt<3: time.sleep(2**attempt)
+    raise RuntimeError(f"1m download failed after retries {symbol} {ym}: {last}")
 def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
     d=_one_min(symbol,ts)
-    if d is None:return None
-    t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000);entered=entry is None
+    t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000);entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
             if not (l[j]<=entry<=h[j]):continue
@@ -27,13 +33,13 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
             # Any same-1m exit touch is therefore ambiguous and conservatively a loss.
             ht=h[j]>=tp if long else l[j]<=tp; hs=l[j]<=sl if long else h[j]>=sl
             if ht or hs:return "loss"
-            entered=True
+            entered=True;entry_seen=True
             continue
         ht=h[j]>=tp if long else l[j]<=tp; hs=l[j]<=sl if long else h[j]>=sl
         if ht and hs:return "loss"
         if hs:return "loss"
         if ht:return "win"
-    return None
+    return "continue" if entry is not None and entry_seen else "data_error"
 
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
 ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
@@ -120,13 +126,16 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
                             q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
-                            if rr=="win":q["win"]+=1
-                            elif rr=="loss":q["loss"]+=1
-                            else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
-                            continue
+                            if rr=="win":q["win"]+=1;continue
+                            if rr=="loss":q["loss"]+=1;continue
+                            if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
+                            # entry was established but no post-entry exit occurred in the fill bar:
+                            # continue tracking from the next 15m bar instead of inventing a loss.
+                            th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
+                            ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win")
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["unresolved_eod"]+=1
@@ -190,5 +199,6 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
+if errors: raise RuntimeError("input/evaluation errors: "+json.dumps(errors[:10]))
 res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; unavailable/unresolved 1m -> conservative loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
