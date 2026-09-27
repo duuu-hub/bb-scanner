@@ -91,6 +91,7 @@ def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
 def load(p):
     d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
     t=d["open_time"].to_numpy(np.int64)
+    if len(t)==0:raise RuntimeError("empty 15m input")
     if len(t)>1 and np.any(np.diff(t)<=0):
         bad=np.flatnonzero(np.diff(t)<=0)[:5]
         raise RuntimeError(f"15m timestamp duplicate/non-monotonic at rows {bad.tolist()}")
@@ -227,7 +228,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     else:q["unresolved_eod"]+=1
     return out
 
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()
+if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")
+m={"1h":4,"4h":16}[a.tf]
 all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
 seen_ranges=set()
 for p in all_files:
