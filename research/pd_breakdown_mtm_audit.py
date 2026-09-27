@@ -12,27 +12,22 @@ for fn in glob.glob(a.input+"/**/*.csv.gz",recursive=True):
  d=pd.read_csv(fn,compression="gzip");tc="open_time" if "open_time" in d else "timestamp_ms"
  d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)
  for c in ["high","low","close"]: d[c]=pd.to_numeric(d[c],errors="coerce")
- d=d.dropna(subset=["dt","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
- px[sym]=d.close
-# infer entry price from canonical stop distance when available; otherwise exact 15m close at/before entry
-for c in ["entry_price","stop_price","stop_atr","atr"]:
- if c in S: S[c]=pd.to_numeric(S[c],errors="coerce")
+ d=d.dropna(subset=["dt","high","low","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
+ x=d.resample("4h",label="left",closed="left").agg(high=("high","max"),low=("low","min"),close=("close","last"),bars=("close","count"))
+ x=x[x.bars==16]
+ atr=x.high.sub(x.low).shift(1).rolling(14).mean()
+ px[sym]={"close":d.close,"atr":atr}
 def entry_px(r):
- if "entry_price" in S.columns and pd.notna(r.entry_price): return float(r.entry_price)
  z=px[r.symbol]["close"].loc[:r.entry_time]
  return float(z.iloc[-1]) if len(z) else np.nan
 S["ep"]=[entry_px(r) for r in S.itertuples()]
-assert S.ep.notna().all()
-# Canonical r_net is terminal truth. Intratrade MTM R for a SHORT is price move / initial risk distance.
-# stop_atr=1 and canonical stop price may not be persisted, so derive risk distance from terminal price/R where possible;
-# safer: use canonical trade's stop_price if present, else ATR if present; fail rather than invent.
-if "stop_price" in S.columns and S.stop_price.notna().all():
- S["risk_dist"]=(S.stop_price-S.ep).abs()
-elif "atr" in S.columns and S.atr.notna().all():
- S["risk_dist"]=S.atr.abs()
-else:
- raise SystemExit("Need stop_price or atr in selected_trades for exact MTM R; refusing proxy")
-assert (S.risk_dist>0).all()
+vals=[]
+for r in S.itertuples():
+ st=r.entry_time-pd.Timedelta(hours=4)
+ z=px[r.symbol]["atr"].loc[:st]
+ vals.append(float(z.iloc[-1]) if len(z) else np.nan)
+S["risk_dist"]=vals
+assert S.ep.notna().all() and S.risk_dist.notna().all() and (S.risk_dist>0).all()
 risks=[.01,.0125,.015,.02,.025,.03]
 rows=[]
 for rf in risks:
