@@ -42,7 +42,7 @@ def _one_min(symbol,ts):
             if first_ym!=ym or last_ym!=ym:raise RuntimeError(f"1m archive month mismatch requested={ym} actual={first_ym}..{last_ym}")
             if len(v[0])>1 and np.any(np.diff(v[0])!=60000):
                 bad=np.flatnonzero(np.diff(v[0])!=60000)[:5]
-                raise RuntimeError(f"1m timestamp gap/duplicate at rows {bad.tolist()}")
+                return ("data_gap", f"1m timestamp gap/duplicate at rows {bad.tolist()}")
             _ONE_MIN_CACHE[key]=v;return v
         except Exception as e:
             last=e
@@ -50,6 +50,7 @@ def _one_min(symbol,ts):
     raise RuntimeError(f"1m download failed after retries {symbol} {ym}: {last}")
 def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None):
     d=_one_min(symbol,ts)
+    if isinstance(d,tuple) and len(d)==2 and d[0]=="data_gap":return "data_gap"
     t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000)
     if z-a!=15 or a>=len(t) or t[a]!=ts or t[z-1]!=ts+840000:
         raise RuntimeError(f"incomplete 1m window {symbol} {ts}: count={z-a}")
@@ -177,7 +178,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"unresolved_eod":0})
+                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
@@ -192,6 +193,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
+                            if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
                             # entry was established but no post-entry exit occurred in the fill bar:
                             # continue tracking from the next 15m bar instead of inventing a loss.
@@ -224,7 +226,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"unresolved_eod":0})
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
@@ -239,6 +241,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
+                            if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
                             th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                             ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
@@ -287,7 +290,7 @@ for z,p in enumerate(files,1):
 for k,q in agg.items():
     if q["taker"]+q["maker"]!=q["fills"]:
         raise RuntimeError(f"accounting invariant failed order types {k}: {q}")
-    if q["win"]+q["loss"]+q["unresolved_eod"]!=q["fills"]:
+    if q["win"]+q["loss"]+q["data_gap"]+q["unresolved_eod"]!=q["fills"]:
         raise RuntimeError(f"accounting invariant failed outcomes {k}: {q}")
     if q["resolved_1m"]>q["fills"] or q["collision_1m_loss"]>q["resolved_1m"]:
         raise RuntimeError(f"accounting invariant failed 1m counters {k}: {q}")
@@ -296,5 +299,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; 1m download/integrity failure -> run fails; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)","one_min_gap_policy":"official Binance 1m timestamp gap/duplicate affecting a required chronology window -> DATA_GAP excluded from win/loss; counted explicitly; other 1m download/schema failures hard-fail"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
