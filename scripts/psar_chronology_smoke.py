@@ -10,6 +10,11 @@ exec(compile(ast.Module(body=keep,type_ignores=[]),"<smoke>","exec"),ns)
 resolve=ns["_resolve_1m"]
 
 def run_case(name, bars, tp, sl, long, entry, expected):
+    last_t=bars[-1][0] if bars else -60000
+    neutral=(entry if entry is not None else (tp+sl)/2)
+    while len(bars)<15:
+        last_t+=60000
+        bars.append((last_t,neutral,neutral))
     old=ns["_one_min"]
     ns["_one_min"]=lambda symbol,ts:(np.array([x[0] for x in bars],dtype=np.int64),np.array([x[1] for x in bars],float),np.array([x[2] for x in bars],float))
     resolve.__globals__["_one_min"]=ns["_one_min"]
