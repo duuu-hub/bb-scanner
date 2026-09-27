@@ -54,12 +54,17 @@ def evaluate(t,o,h,l,c):
         # spider is live immediately from this bar open
         for em in ENTRY_ATR:
             e=s+(em*a0 if b else -em*a0)
-            # Post-only maker validity at the 4H open.
-            # Buy limit must be below open; sell limit must be above open.
-            if (b and e>=ro[i]) or ((not b) and e<=ro[i]):continue
-            hits=np.flatnonzero((l[start:min(start+M,len(t))]<=e)&(h[start:min(start+M,len(t))]>=e))
-            if not hits.size:continue
-            fs=start+int(hits[0]); ph=h[fs:end];pl=l[fs:end]
+            # Canonical execution at the 4H open:
+            # if target is already marketable, fill immediately at OPEN as taker;
+            # otherwise the maker limit is live immediately and may fill in this same 4H bar.
+            taker=(b and e>=ro[i]) or ((not b) and e<=ro[i])
+            if taker:
+                fs=start; fill_px=ro[i]
+            else:
+                hits=np.flatnonzero((l[start:min(start+M,len(t))]<=e)&(h[start:min(start+M,len(t))]>=e))
+                if not hits.size:continue
+                fs=start+int(hits[0]); fill_px=e
+            ph=h[fs:end];pl=l[fs:end]
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0); risk=abs(e-sl)
                 if risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)):continue
@@ -69,7 +74,11 @@ def evaluate(t,o,h,l,c):
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                     k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"win":0,"loss":0,"amb":0,"timeout":0})
                     q["fills"]+=1
-                    if it==is_ and it<10**9:q["amb"]+=1
+                    # 15m OHLC cannot prove that an outcome touch in the entry bar
+                    # happened after entry. Defer every entry-bar outcome to 1m chronology.
+                    entry_bar_outcome=(it==0 or is_==0)
+                    if entry_bar_outcome:q["amb"]+=1
+                    elif it==is_ and it<10**9:q["amb"]+=1
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["timeout"]+=1
@@ -91,5 +100,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; timeout excluded from realized R
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-(q["loss"]+q["amb"]))/resolved,5) if resolved else None
-res={"definition":{"tf":"4h","order_live":"same 4h bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed 4h bar","entry_atr":ENTRY_ATR,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":HORIZON,"ambiguous":"conservative loss until 1m resolution"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":"4h","order_live":"same 4h bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed 4h bar","entry_atr":ENTRY_ATR,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":HORIZON,"execution":"marketable target fills at 4h OPEN as taker; otherwise same-bar-live maker limit","ambiguous":"any TP/SL touch in entry 15m bar, or same later 15m bar, deferred to 1m chronology; conservative loss until resolved"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
