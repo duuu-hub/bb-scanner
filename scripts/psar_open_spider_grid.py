@@ -54,6 +54,9 @@ def evaluate(t,o,h,l,c):
         # spider is live immediately from this bar open
         for em in ENTRY_ATR:
             e=s+(em*a0 if b else -em*a0)
+            # Post-only maker validity at the 4H open.
+            # Buy limit must be below open; sell limit must be above open.
+            if (b and e>=ro[i]) or ((not b) and e<=ro[i]):continue
             hits=np.flatnonzero((l[start:min(start+M,len(t))]<=e)&(h[start:min(start+M,len(t))]>=e))
             if not hits.size:continue
             fs=start+int(hits[0]); ph=h[fs:end];pl=l[fs:end]
