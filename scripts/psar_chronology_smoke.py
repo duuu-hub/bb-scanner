@@ -11,7 +11,7 @@ resolve=ns["_resolve_1m"]
 
 def run_case(name, bars, tp, sl, long, entry, expected):
     last_t=bars[-1][0] if bars else -60000
-    neutral=(entry if entry is not None else (tp+sl)/2)
+    neutral=((bars[-1][1]+bars[-1][2])/2 if bars else (tp+sl)/2)
     while len(bars)<15:
         last_t+=60000
         bars.append((last_t,neutral,neutral))
