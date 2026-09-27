@@ -71,7 +71,8 @@ assert 'independent-signal gross edge scan' in src
 assert 'q["loss"]+=int(rr!="win")' not in src
 assert 'misaligned 1m timestamps' in src
 assert 'misaligned 15m timestamps' in src
-assert '1m/15m price mismatch' in src
+assert 'official Binance 1m archive as the authority' in src
+assert '1m/15m price mismatch' not in src
 assert 'rh=np.array([np.max(h[a:b]) for a,b in zip(st,en)],dtype=float)' in src
 assert 'rl=np.array([np.min(l[a:b]) for a,b in zip(st,en)],dtype=float)' in src
 assert 'accounting invariant failed order types' in src
