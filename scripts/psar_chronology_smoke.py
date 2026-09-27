@@ -59,7 +59,7 @@ assert 'z-a!=15' in src
 assert 'invalid OHLC geometry' in src
 assert 'invalid 1m high/low' in src
 assert src.count('if (b and not fill>sl) or ((not b) and not fill<sl):continue')==2
-assert 'duplicate symbol/time-range input' in src
+assert 'overlapping symbol/time-range input' in src
 assert 't[a]%span==0' in src
 assert 'unexpected 1m ZIP members' in src
 assert 'gap_policy' in src
@@ -75,4 +75,9 @@ assert 'accounting invariant failed order types' in src
 assert 'accounting invariant failed outcomes' in src
 assert 'invalid shard selection' in src
 assert 'empty 15m input' in src
+assert 'strategy-bar to 15m timestamp mapping mismatch' in src
+assert '_ONE_MIN_CACHE.clear()' in src
+assert 'source_data_run' in src
+assert 'code_sha' in src
+assert 'maker_fillbar_amb' not in src
 print("ALL_CANONICAL_INVARIANTS_PASS")
