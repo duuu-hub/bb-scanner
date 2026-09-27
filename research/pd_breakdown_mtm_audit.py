@@ -43,7 +43,7 @@ for rf in risks:
    cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
   active=[p for p in active if p["exit_time"]>r.entry_time]
   if len(active)>=10: continue
-  p=dict(symbol=r.symbol,entry_time=r.entry_time,exit_time=r.exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf)
+  p=dict(pid=len(accepted_rows),symbol=r.symbol,entry_time=r.entry_time,exit_time=r.exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf)
   active.append(p);accepted_rows.append(p);accepted+=1
  # realized terminal must exactly reproduce canonical sim_rf
  for p in sorted(active,key=lambda x:x["exit_time"]):
@@ -60,8 +60,9 @@ for rf in risks:
  for tt in event_times:
   # exits first, matching admission rule exit_time <= entry_time
   for p in by_exit.get(tt,[]):
-   if p in openp:
-    cash2 += p["stake"]*p["r_net"];openp.remove(p)
+   hit=[i for i,q in enumerate(openp) if q["pid"]==p["pid"]]
+   if hit:
+    cash2 += p["stake"]*p["r_net"];openp.pop(hit[0])
   openp.extend(by_entry.get(tt,[]))
   eq=cash2
   for p in openp:
@@ -78,7 +79,8 @@ for rf in risks:
   if rf==.01: trace.append(dict(t=tt,equity=eq,cash=cash2,unreal=eq-cash2,open_n=len(openp)))
  # hard chronological sanity: drawdown peak must precede trough
  assert dd_peak_t is None or trough_t is None or dd_peak_t<=trough_t,(dd_peak_t,trough_t)
- assert abs(cash2-cash)<1e-10
+ if abs(cash2-cash)>=1e-10:
+  raise AssertionError(("cash_parity",rf,cash,cash2,cash2-cash,len(accepted_rows),len(openp),[p["pid"] for p in openp[:20]]))
  # MTM series includes every realized exit point; it therefore cannot understate realized MDD.
  assert mdd_mtm+1e-12>=mdd_real, (rf,mdd_real,mdd_mtm)
  rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm,canonical_exit_parity=int((S.path_exit_time==S.exit_time).all()),mtm_peak_time=dd_peak_t,mtm_trough_time=trough_t))
