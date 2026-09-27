@@ -16,7 +16,7 @@ for fn in glob.glob(a.input+"/**/*.csv.gz",recursive=True):
  x=d.resample("4h",label="left",closed="left").agg(high=("high","max"),low=("low","min"),close=("close","last"),bars=("close","count"))
  x=x[x.bars==16]
  atr=x.high.sub(x.low).shift(1).rolling(14).mean()
- px[sym]={"close":d.close,"atr":atr}
+ px[sym]={"close":d.close,"high":d.high,"low":d.low,"atr":atr}
 def entry_px(r):
  z=px[r.symbol]["close"].loc[:r.entry_time]
  return float(z.iloc[-1]) if len(z) else np.nan
@@ -28,6 +28,22 @@ for r in S.itertuples():
  vals.append(float(z.iloc[-1]) if len(z) else np.nan)
 S["risk_dist"]=vals
 assert S.ep.notna().all() and S.risk_dist.notna().all() and (S.risk_dist>0).all()
+# Reconstruct executable 15m path for SHORT: SL=+1ATR, TP=-3ATR.
+# Conservative collision rule: if both SL and TP are touched in one 15m candle, count SL first.
+path_exit=[];path_r=[];collision=[]
+for r in S.itertuples():
+ sl=r.ep+r.risk_dist;tp=r.ep-3*r.risk_dist
+ h=px[r.symbol]["high"].loc[(px[r.symbol]["high"].index>=r.entry_time)&(px[r.symbol]["high"].index<=r.exit_time)]
+ l=px[r.symbol]["low"].reindex(h.index)
+ ex=r.exit_time;rr=float(r.r_net);col=False
+ for tt in h.index:
+  hs=float(h.loc[tt])>=sl;lt=float(l.loc[tt])<=tp
+  if hs and lt: ex=tt;rr=-1.0;col=True;break
+  if hs: ex=tt;rr=-1.0;break
+  if lt: ex=tt;rr=3.0;break
+ path_exit.append(ex);path_r.append(rr);collision.append(col)
+S["path_exit_time"]=path_exit;S["path_r_gross"]=path_r;S["collision_15m"]=collision
+
 risks=[.01,.0125,.015,.02,.025,.03,.035,.04,.05,.06]
 rows=[]
 for rf in risks:
@@ -40,7 +56,7 @@ for rf in risks:
    cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
   active=[p for p in active if p["exit_time"]>r.entry_time]
   if len(active)>=10: continue
-  p=dict(symbol=r.symbol,entry_time=r.entry_time,exit_time=r.exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf)
+  p=dict(symbol=r.symbol,entry_time=r.entry_time,exit_time=r.path_exit_time,ep=r.ep,risk_dist=r.risk_dist,r_net=r.r_net,stake=cash*rf)
   active.append(p);accepted_rows.append(p);accepted+=1
  # realized terminal must exactly reproduce canonical sim_rf
  for p in sorted(active,key=lambda x:x["exit_time"]):
@@ -68,7 +84,7 @@ for rf in risks:
     peak_mtm=max(peak_mtm,eq);mdd_mtm=max(mdd_mtm,(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf)
  for p in sorted(openp,key=lambda x:x["exit_time"]): cash2 += p["stake"]*p["r_net"]
  assert abs(cash2-cash)<1e-10
- rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm))
+ rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm,collisions_15m=int(S.collision_15m.sum()),path_exit_changed=int((S.path_exit_time!=S.exit_time).sum())))
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
 
 # trigger exact MTM rerun
