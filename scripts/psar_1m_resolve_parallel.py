@@ -3,24 +3,27 @@ import pandas as pd,numpy as np
 ATR=.5; RS=(2.,3.); M=16; HORIZON=12
 MIN_RISK_EPS=1e-12
 
-def psar(h,l,af0=.02,step=.02,afmax=.2):
- n=len(h);s=np.full(n,np.nan);b=np.ones(n,bool)
- if n<3:return s,b
- s[1]=l[0];ep=h[1];af=af0
+def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
+ n=len(h);out=np.full(n,np.nan);bull=np.ones(n,bool)
+ if n<3:return out,bull
+ sar=l[0];trend=True;ep=h[1];af=af0
+ out[1]=sar;bull[1]=trend
  for i in range(2,n):
-  z=s[i-1]+af*(ep-s[i-1])
-  if b[i-1]:
-   z=min(z,l[i-1],l[i-2])
-   if l[i]<z:b[i]=False;z=ep;ep=l[i];af=af0
-   elif h[i]>ep:ep=h[i];af=min(af+step,afmax)
-  else:
-   z=max(z,h[i-1],h[i-2])
-   if h[i]>z:b[i]=True;z=ep;ep=h[i];af=af0
+  z=sar+af*(ep-sar)
+  if trend:z=min(z,l[i-1],l[i-2])
+  else:z=max(z,h[i-1],h[i-2])
+  out[i]=z;bull[i]=trend
+  if trend:
+   if l[i]<z:trend=False;sar=ep;ep=l[i];af=af0
    else:
-    b[i]=False
+    sar=z
+    if h[i]>ep:ep=h[i];af=min(af+step,afmax)
+  else:
+   if h[i]>z:trend=True;sar=ep;ep=h[i];af=af0
+   else:
+    sar=z
     if l[i]<ep:ep=l[i];af=min(af+step,afmax)
-  s[i]=z
- return s,b
+ return out,bull
 
 def load(p):
  d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
@@ -33,15 +36,19 @@ def resample(t,o,h,l,c):
 
 def ambiguous_events(p):
  sym=os.path.basename(p).split(".")[0];t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c)
- sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]]
+ sar,bull=psar_open_projection(rh,rl);prev=np.r_[np.nan,rc[:-1]]
  tr=np.maximum(rh-rl,np.maximum(np.abs(rh-prev),np.abs(rl-prev)))
- atr=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();pos=np.searchsorted(t,rt);ev=[]
- for i in range(14,len(rt)-HORIZON-1):
+ atr_closed=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();atr=np.r_[np.nan,atr_closed[:-1]];pos=np.searchsorted(t,rt);ev=[]
+ for i in range(15,len(rt)-HORIZON):
   if not np.isfinite(sar[i]) or not np.isfinite(atr[i]):continue
-  b=bool(bull[i]);s=sar[i];e=s+(ATR*atr[i] if b else -ATR*atr[i]);a=pos[i+1]
-  hit=np.flatnonzero((l[a:a+M]<=e)&(h[a:a+M]>=e))
-  if not hit.size:continue
-  fs=a+hit[0];end=min(a+M*HORIZON,len(t));ph=h[fs:end];pl=l[fs:end]
+  b=bool(bull[i]);s=sar[i];e=s+(ATR*atr[i] if b else -ATR*atr[i]);a=pos[i]
+  taker=(b and e>=ro[i]) or ((not b) and e<=ro[i])
+  if taker:fs=a
+  else:
+   hit=np.flatnonzero((l[a:a+M]<=e)&(h[a:a+M]>=e))
+   if not hit.size:continue
+   fs=a+hit[0]
+  end=min(a+M*HORIZON,len(t));ph=h[fs:end];pl=l[fs:end]
   risk=abs(e-s)
   # Invalid geometry: zero/near-zero ATR makes entry=SL=TP and creates fake ambiguity.
   if (not np.isfinite(risk)) or risk<=MIN_RISK_EPS*max(1.0,abs(e),abs(s)): continue
