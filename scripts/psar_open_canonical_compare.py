@@ -83,11 +83,11 @@ def evaluate(t,o,h,l,c,m,horizon):
             e=s*(1+pct/100.0) if b else s*(1-pct/100.0)
             crossed=(b and ro[i]<=e) or ((not b) and ro[i]>=e)
             if crossed:
-                fs=start
+                fs=start; fill=ro[i]
             else:
                 hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
                 if not hits.size: continue
-                fs=start+int(hits[0])
+                fs=start+int(hits[0]); fill=e
             ph=h[fs:end];pl=l[fs:end]
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0); risk=abs(fill-sl)
