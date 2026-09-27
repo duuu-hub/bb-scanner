@@ -27,9 +27,16 @@ run_case("long_entry_same1m_both_loss",[(0,106,94)],105,95,True,100,"loss")
 # entry-only minute, later TP/SL
 run_case("long_entry_then_tp",[(0,101,99),(60000,106,101)],105,95,True,100,"win")
 run_case("long_entry_then_sl",[(0,101,99),(60000,101,94)],105,95,True,100,"loss")
+# pre-entry TP is not an exit; after later entry with no exit in this 15m, position must continue
+run_case("long_preentry_tp_then_entry_continue",[(0,106,102),(60000,101,99)],105,95,True,100,"continue")
+# 15m claimed maker fill but 1m never contains entry => data integrity mismatch
+run_case("long_entry_not_seen_data_error",[(0,110,106),(60000,104,102)],105,95,True,100,"data_error")
+# established position: same 1m TP+SL collision remains conservative loss
+run_case("long_established_same1m_both_loss",[(0,106,94)],105,95,True,None,"loss")
 # short mirrors
 run_case("short_entry_same1m_tp_loss",[(0,101,94)],95,105,False,100,"loss")
 run_case("short_entry_same1m_sl_loss",[(0,106,99)],95,105,False,100,"loss")
 run_case("short_entry_then_tp",[(0,101,99),(60000,99,94)],95,105,False,100,"win")
 run_case("short_entry_then_sl",[(0,101,99),(60000,106,99)],95,105,False,100,"loss")
+run_case("short_preentry_tp_then_entry_continue",[(0,98,94),(60000,101,99)],95,105,False,100,"continue")
 print("ALL_CHRONOLOGY_SMOKE_PASS")
