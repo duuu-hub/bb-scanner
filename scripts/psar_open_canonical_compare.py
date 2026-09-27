@@ -19,9 +19,20 @@ def _one_min(symbol,ts):
             with zipfile.ZipFile(io.BytesIO(raw)) as z:
                 members=[n for n in z.namelist() if n.lower().endswith(".csv")]
                 if len(members)!=1:raise RuntimeError(f"unexpected 1m ZIP members: {members}")
-                d=pd.read_csv(z.open(members[0]),header=None)
+                d=pd.read_csv(z.open(members[0]),header=None,dtype=str)
             if d.shape[1] < 4:raise RuntimeError(f"invalid 1m CSV schema: {d.shape}")
-            v=(d.iloc[:,0].to_numpy(np.int64),d.iloc[:,2].to_numpy(float),d.iloc[:,3].to_numpy(float))
+            # Binance monthly archives exist both with and without a CSV header.
+            # Detect only a non-numeric first timestamp as a header; never drop a real candle.
+            first_ts=pd.to_numeric(pd.Series([d.iat[0,0]]),errors="coerce").iat[0] if len(d) else np.nan
+            if len(d) and not np.isfinite(first_ts): d=d.iloc[1:].reset_index(drop=True)
+            if len(d)==0:raise RuntimeError("empty 1m archive")
+            try:
+                vt=pd.to_numeric(d.iloc[:,0],errors="raise").to_numpy(np.int64)
+                vh=pd.to_numeric(d.iloc[:,2],errors="raise").to_numpy(float)
+                vl=pd.to_numeric(d.iloc[:,3],errors="raise").to_numpy(float)
+            except Exception as e:
+                raise RuntimeError(f"invalid numeric data in 1m CSV: {e}") from e
+            v=(vt,vh,vl)
             if len(v[0])==0: raise RuntimeError("empty 1m archive")
             if not np.all(np.isfinite(v[1])) or not np.all(np.isfinite(v[2])):raise RuntimeError("non-finite 1m high/low")
             if np.any(v[1]<=0) or np.any(v[2]<=0) or np.any(v[1]<v[2]):raise RuntimeError("invalid 1m high/low")
