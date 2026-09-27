@@ -10,7 +10,7 @@ for fn in glob.glob(a.input+"/**/*.csv.gz",recursive=True):
  sym=Path(fn).name.replace(".csv.gz","")
  if sym not in need: continue
  d=pd.read_csv(fn,compression="gzip");tc="open_time" if "open_time" in d else "timestamp_ms"
- d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True);d["close"]=pd.to_numeric(d.close,errors="coerce")
+ d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)\n for c in ["high","low","close"]: d[c]=pd.to_numeric(d[c],errors="coerce")
  d=d.dropna(subset=["dt","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
  px[sym]=d.close
 # infer entry price from canonical stop distance when available; otherwise exact 15m close at/before entry
@@ -51,12 +51,12 @@ for rf in risks:
   if active:
    grid=None
    for p in active:
-    idx=px[p["symbol"]].loc[(px[p["symbol"]].index>=t)&(px[p["symbol"]].index<nxt)].index
+    ser=px[p["symbol"]]["close"]; idx=ser.loc[(ser.index>=t)&(ser.index<nxt)].index
     grid=idx if grid is None else grid.union(idx)
    for tt in grid:
     eq=cash
     for p in active:
-     z=px[p["symbol"]].loc[:tt]
+     z=px[p["symbol"]]["close"].loc[:tt]
      if len(z):
       rr=(p["ep"]-float(z.iloc[-1]))/p["risk_dist"]
       eq += p["stake"]*rr
