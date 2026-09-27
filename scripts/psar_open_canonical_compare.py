@@ -22,6 +22,7 @@ def _one_min(symbol,ts):
             if len(v[0])==0: raise RuntimeError("empty 1m archive")
             if not np.all(np.isfinite(v[1])) or not np.all(np.isfinite(v[2])):raise RuntimeError("non-finite 1m high/low")
             if np.any(v[1]<=0) or np.any(v[2]<=0) or np.any(v[1]<v[2]):raise RuntimeError("invalid 1m high/low")
+            if np.any(v[0]%60000!=0):raise RuntimeError("misaligned 1m timestamps")
             if len(v[0])>1 and np.any(np.diff(v[0])!=60000):
                 bad=np.flatnonzero(np.diff(v[0])!=60000)[:5]
                 raise RuntimeError(f"1m timestamp gap/duplicate at rows {bad.tolist()}")
@@ -92,6 +93,7 @@ def load(p):
     d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
     t=d["open_time"].to_numpy(np.int64)
     if len(t)==0:raise RuntimeError("empty 15m input")
+    if np.any(t%900000!=0):raise RuntimeError("misaligned 15m timestamps")
     if len(t)>1 and np.any(np.diff(t)<=0):
         bad=np.flatnonzero(np.diff(t)<=0)[:5]
         raise RuntimeError(f"15m timestamp duplicate/non-monotonic at rows {bad.tolist()}")
