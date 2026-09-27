@@ -49,6 +49,11 @@ jobs:
           assert base["tf"]=="1h",base
           assert all(d["definition"]==base for d in docs),"shard definition mismatch"
           assert all(not d.get("errors") for d in docs),"shard contains errors"
+          assert {d["definition"]["shard_index"] for d in docs}==set(range(8)),"missing/duplicate shard index"
+          assert all(d["definition"]["shard_count"]==8 for d in docs),"wrong shard_count"
+          expected={d["definition"]["input_files_total"] for d in docs}
+          assert len(expected)==1,"input file total mismatch across shards"
+          assert sum(d["files"] for d in docs)==next(iter(expected)),"merged file coverage mismatch"
           raw_fields={"fills","taker","maker","win","loss","collision_15m","resolved_1m","collision_1m_loss","unresolved_eod"}
           derived_fields={"win_pct_amb_loss","gross_expectancy_R_amb_loss"}
           for d in docs:
