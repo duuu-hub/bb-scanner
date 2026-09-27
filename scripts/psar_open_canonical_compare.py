@@ -114,7 +114,7 @@ def resample(t,o,h,l,c,m=16):
     rl=np.array([np.min(l[a:b]) for a,b in zip(st,en)],dtype=float)
     return t[st],o[st],rh,rl,c[en-1]
 
-def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
+def evaluate(t,o,h,l,c,m,symbol=None):
     rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar_open_projection(rh,rl); n=len(rt)
     # ATR available at bar i open = ATR14 through bar i-1 only
     prev=np.r_[np.nan,rc[:-1]]
@@ -222,7 +222,7 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                     else:q["unresolved_eod"]+=1
     return out
 
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=None);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
 all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
 seen_ranges=set()
 for p in all_files:
@@ -239,7 +239,7 @@ for z,p in enumerate(files,1):
         for aa,bb in contiguous_segments(data[0]):
             if bb-aa < m*(PSAR_BURNIN_BARS+1):continue
             part=tuple(x[aa:bb] for x in data)
-            seg=evaluate(*part,m,a.horizon,sym)
+            seg=evaluate(*part,m,sym)
             for k,v in seg.items():
                 q=rr.setdefault(k,{kk:0 for kk in v})
                 for kk,vv in v.items():q[kk]+=vv
