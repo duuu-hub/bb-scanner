@@ -2,6 +2,7 @@ import argparse,glob,json
 import pandas as pd,numpy as np
 
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
+ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
 SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
 RS=(.5,.75,1.,1.25,1.5,2.,2.5,3.,4.)
 MIN_RISK_EPS=1e-12
@@ -77,10 +78,34 @@ def evaluate(t,o,h,l,c,m,horizon):
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["timeout"]+=1
+        # Fixed-percent distance from open-time PSAR, same execution semantics.
+        for pct in ENTRY_PCT:
+            e=s*(1+pct/100.0) if b else s*(1-pct/100.0)
+            crossed=(b and ro[i]<=e) or ((not b) and ro[i]>=e)
+            if crossed:
+                fs=start
+            else:
+                hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
+                if not hits.size: continue
+                fs=start+int(hits[0])
+            ph=h[fs:end];pl=l[fs:end]
+            for sb in SL_BUFFER_ATR:
+                sl=s-(sb*a0 if b else -sb*a0); risk=abs(e-sl)
+                if risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)): continue
+                for r in RS:
+                    tp=e+r*risk if b else e-r*risk
+                    th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
+                    ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"win":0,"loss":0,"amb":0,"timeout":0})
+                    q["fills"]+=1
+                    if it==is_ and it<10**9:q["amb"]+=1
+                    elif it<is_:q["win"]+=1
+                    elif is_<it:q["loss"]+=1
+                    else:q["timeout"]+=1
     return out
 
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=12);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
-files=glob.glob(a.data+"/**/*.csv.gz",recursive=True);assert files
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=12);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
+files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files;files=[p for j,p in enumerate(files) if j%a.shards==a.shard]
 agg={};errors=[]
 for z,p in enumerate(files,1):
     try: rr=evaluate(*load(p),m,a.horizon)
@@ -95,5 +120,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; timeout excluded from realized R
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-(q["loss"]+q["amb"]))/resolved,5) if resolved else None
-res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":a.horizon,"ambiguous":"conservative loss until 1m resolution"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":a.horizon,"ambiguous":"conservative loss until 1m resolution"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
