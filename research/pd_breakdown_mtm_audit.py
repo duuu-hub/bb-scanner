@@ -49,21 +49,23 @@ for rf in risks:
  for p in sorted(active,key=lambda x:x["exit_time"]):
   cash += p["stake"]*p["r_net"];peak_real=max(peak_real,cash);mdd_real=max(mdd_real,(peak_real-cash)/peak_real)
  # MTM replay: one strictly chronological 15m timeline. Realized exits are booked at their exact canonical timestamp.
- cash2=1.;openp=[];by_entry={};by_exit={}
+ cash2=1.;openp=[]
+ # Normalize every timestamp to int64 nanoseconds. This avoids pandas Timestamp hash/resolution mismatches.
+ by_entry={};by_exit={}
  for p in accepted_rows:
-  by_entry.setdefault(p["entry_time"],[]).append(p);by_exit.setdefault(p["exit_time"],[]).append(p)
- allidx=None
+  ek=int(pd.Timestamp(p["entry_time"]).value);xk=int(pd.Timestamp(p["exit_time"]).value)
+  by_entry.setdefault(ek,[]).append(p);by_exit.setdefault(xk,[]).append(p)
+ allkeys=set(by_entry).union(by_exit)
  for sym in set(p["symbol"] for p in accepted_rows):
-  idx=px[sym]["close"].index
-  allidx=idx if allidx is None else allidx.union(idx)
- event_times=pd.DatetimeIndex(sorted(set(allidx.tolist()).union(set(by_entry.keys())).union(set(by_exit.keys()))))
- for tt in event_times:
+  allkeys.update(int(x.value) for x in px[sym]["close"].index)
+ for tk in sorted(allkeys):
+  tt=pd.Timestamp(tk,tz="UTC")
   # exits first, matching admission rule exit_time <= entry_time
-  for p in by_exit.get(tt,[]):
+  for p in by_exit.get(tk,[]):
    hit=[i for i,q in enumerate(openp) if q["pid"]==p["pid"]]
-   if hit:
-    cash2 += p["stake"]*p["r_net"];openp.pop(hit[0])
-  openp.extend(by_entry.get(tt,[]))
+   assert hit,("missing_open_exit",tk,p["pid"])
+   cash2 += p["stake"]*p["r_net"];openp.pop(hit[0])
+  openp.extend(by_entry.get(tk,[]))
   eq=cash2
   for p in openp:
    ser=px[p["symbol"]]["close"]
