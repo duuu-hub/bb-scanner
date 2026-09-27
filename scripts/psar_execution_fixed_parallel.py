@@ -17,13 +17,16 @@ def psar(h,l,af0=.02,step=.02,afmax=.2):
    else:sar=z;ep,af=(l[i],min(af+step,afmax)) if l[i]<ep else (ep,af)
  return out,bull
 def ev(p):
- t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c);sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));ac=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();pos=np.searchsorted(t,rt);out={}
- for i in range(15,len(rt)-HORIZON):
-  if not np.isfinite(sar[i]) or not np.isfinite(ao[i]) or ao[i]<=0:continue
-  b=bool(bull[i]);start=pos[i];end=min(start+M*HORIZON,len(t))
+ t,o,h,l,c=load(p);rt,ro,rh,rl,rc=resample(t,o,h,l,c);sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]]
+ tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));atr=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();pos=np.searchsorted(t,rt);out={}
+ # Signal is known only AFTER 4H bar i closes. Earliest executable time is 4H bar i+1 open.
+ for i in range(15,len(rt)-1-HORIZON):
+  if not np.isfinite(sar[i]) or not np.isfinite(atr[i]) or atr[i]<=0:continue
+  b=bool(bull[i]);a0=atr[i];start=pos[i+1];end=min(start+M*HORIZON,len(t));next_open=ro[i+1]
   for em in ENTRY_ATR:
-   trigger=sar[i]+(em*ao[i] if b else -em*ao[i]);crossed=(b and ro[i]<=trigger) or ((not b) and ro[i]>=trigger)
-   if crossed: fs=start;fill=ro[i];mode="TAKER_OPEN"
+   trigger=sar[i]+(em*a0 if b else -em*a0)
+   crossed=(b and next_open<=trigger) or ((not b) and next_open>=trigger)
+   if crossed: fs=start;fill=next_open;mode="TAKER_OPEN"
    else:
     hit=np.flatnonzero((l[start:start+M]<=trigger)&(h[start:start+M]>=trigger))
     if not hit.size:continue
