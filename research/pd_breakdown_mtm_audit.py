@@ -68,3 +68,5 @@ pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).
 # rerun after newline normalization
 
 # trigger latest exact ATR build
+
+# verified trigger
