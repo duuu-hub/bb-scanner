@@ -247,6 +247,12 @@ for z,p in enumerate(files,1):
         for kk,vv in v.items():q[kk]+=vv
     if z%20==0:print("progress",z,len(files),flush=True)
 for k,q in agg.items():
+    if q["taker"]+q["maker"]!=q["fills"]:
+        raise RuntimeError(f"accounting invariant failed order types {k}: {q}")
+    if q["win"]+q["loss"]+q["unresolved_eod"]!=q["fills"]:
+        raise RuntimeError(f"accounting invariant failed outcomes {k}: {q}")
+    if q["resolved_1m"]>q["fills"] or q["collision_1m_loss"]>q["resolved_1m"]:
+        raise RuntimeError(f"accounting invariant failed 1m counters {k}: {q}")
     resolved=q["win"]+q["loss"]
     q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
