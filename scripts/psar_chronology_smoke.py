@@ -1,0 +1,35 @@
+import ast
+from pathlib import Path
+import numpy as np
+
+SRC=Path("scripts/psar_open_canonical_compare.py").read_text()
+tree=ast.parse(SRC)
+keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.Assign,ast.FunctionDef)) and (not isinstance(n,ast.FunctionDef) or n.name in {"_resolve_1m"})]
+ns={}
+exec(compile(ast.Module(body=keep,type_ignores=[]),"<smoke>","exec"),ns)
+resolve=ns["_resolve_1m"]
+
+def run_case(name, bars, tp, sl, long, entry, expected):
+    old=ns["_one_min"]
+    ns["_one_min"]=lambda symbol,ts:(np.array([x[0] for x in bars],dtype=np.int64),np.array([x[1] for x in bars],float),np.array([x[2] for x in bars],float))
+    resolve.__globals__["_one_min"]=ns["_one_min"]
+    got=resolve("TEST",0,tp,sl,long,entry)
+    resolve.__globals__["_one_min"]=old
+    assert got==expected, f"{name}: got {got}, expected {expected}"
+    print("PASS",name,got)
+
+# long: pre-entry exit-looking candle ignored
+run_case("long_preentry_tp_ignored",[(0,111,109),(60000,101,99),(120000,106,102)],105,95,True,100,"win")
+# first entry minute also touches TP -> chronology unknowable => loss
+run_case("long_entry_same1m_tp_loss",[(0,106,99)],105,95,True,100,"loss")
+run_case("long_entry_same1m_sl_loss",[(0,101,94)],105,95,True,100,"loss")
+run_case("long_entry_same1m_both_loss",[(0,106,94)],105,95,True,100,"loss")
+# entry-only minute, later TP/SL
+run_case("long_entry_then_tp",[(0,101,99),(60000,106,101)],105,95,True,100,"win")
+run_case("long_entry_then_sl",[(0,101,99),(60000,101,94)],105,95,True,100,"loss")
+# short mirrors
+run_case("short_entry_same1m_tp_loss",[(0,101,94)],95,105,False,100,"loss")
+run_case("short_entry_same1m_sl_loss",[(0,106,99)],95,105,False,100,"loss")
+run_case("short_entry_then_tp",[(0,101,99),(60000,99,94)],95,105,False,100,"win")
+run_case("short_entry_then_sl",[(0,101,99),(60000,106,99)],95,105,False,100,"loss")
+print("ALL_CHRONOLOGY_SMOKE_PASS")
