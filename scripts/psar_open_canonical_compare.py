@@ -83,9 +83,9 @@ def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
 def load(p):
     d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
     t=d["open_time"].to_numpy(np.int64)
-    if len(t)>1 and np.any(np.diff(t)!=900000):
-        bad=np.flatnonzero(np.diff(t)!=900000)[:5]
-        raise RuntimeError(f"15m timestamp gap/duplicate at rows {bad.tolist()}")
+    if len(t)>1 and np.any(np.diff(t)<=0):
+        bad=np.flatnonzero(np.diff(t)<=0)[:5]
+        raise RuntimeError(f"15m timestamp duplicate/non-monotonic at rows {bad.tolist()}")
     vals=tuple(d[x].to_numpy(float) for x in ["open","high","low","close"])
     o,h,l,c=vals
     if not all(np.all(np.isfinite(x)) for x in vals):raise RuntimeError("non-finite OHLC")
@@ -93,6 +93,11 @@ def load(p):
     if np.any(h<np.maximum.reduce([o,l,c])) or np.any(l>np.minimum.reduce([o,h,c])):
         raise RuntimeError("invalid OHLC geometry")
     return (t,)+vals
+
+def contiguous_segments(t):
+    if len(t)==0:return []
+    cut=np.r_[0,np.flatnonzero(np.diff(t)!=900000)+1,len(t)]
+    return [(int(a),int(b)) for a,b in zip(cut[:-1],cut[1:])]
 
 def resample(t,o,h,l,c,m=16):
     bucket=t//(900000*m); cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
@@ -225,7 +230,14 @@ agg={};errors=[]
 for z,p in enumerate(files,1):
     try:
         data=load(p); sym=_symbol(p)
-        rr=evaluate(*data,m,a.horizon,sym)
+        rr={}
+        for aa,bb in contiguous_segments(data[0]):
+            if bb-aa < max(PSAR_BURNIN_BARS+2,m*15):continue
+            part=tuple(x[aa:bb] for x in data)
+            seg=evaluate(*part,m,a.horizon,sym)
+            for k,v in seg.items():
+                q=rr.setdefault(k,{kk:0 for kk in v})
+                for kk,vv in v.items():q[kk]+=vv
     except Exception as e:errors.append([p,str(e)]);continue
     for k,v in rr.items():
         q=agg.setdefault(k,{kk:0 for kk in v})
