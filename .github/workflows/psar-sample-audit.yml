@@ -1,4 +1,4 @@
-name: PSAR 0.5ATR Sample Audit
+name: PSAR Open-Spider 0ATR Maker Audit
 on:
   push:
     branches: [research-rank5-binance-15m-5y]
@@ -9,27 +9,81 @@ permissions:
 jobs:
   sample:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: python -m pip install -q pandas numpy
       - name: Preflight
-        run: python -m py_compile scripts/psar_1m_resolve_parallel.py
-      - name: Download one 15m shard
+        run: python -m py_compile scripts/psar_open_spider_grid.py
+      - name: Download 5Y data
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p data
-          gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-0 -D data
-      - name: Run sample audit
-        env:
-          SHARD: sample
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Audit 0ATR maker validity
         run: |
-          python scripts/psar_1m_resolve_parallel.py > sample.log
           python - <<'PY'
-          import json
-          x=json.load(open("psar_1m_shard_sample.json"))
-          print(json.dumps({"meta":x["meta"],"samples":x.get("samples",[])[:5]},indent=2))
-          assert all(abs(s["entry"]-s["sl"])>1e-12*max(1,abs(s["entry"]),abs(s["sl"])) for s in x.get("samples",[])), "zero-risk sample survived"
+          import glob,json
+          import pandas as pd,numpy as np
+          M=16
+          def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
+              n=len(h);out=np.full(n,np.nan);bull=np.ones(n,bool)
+              if n<3:return out,bull
+              sar=l[0];trend=True;ep=h[1];af=af0
+              out[1]=sar;bull[1]=trend
+              for i in range(2,n):
+                  z=sar+af*(ep-sar)
+                  z=min(z,l[i-1],l[i-2]) if trend else max(z,h[i-1],h[i-2])
+                  out[i]=z;bull[i]=trend
+                  if trend:
+                      if l[i]<z:trend=False;sar=ep;ep=l[i];af=af0
+                      else:
+                          sar=z
+                          if h[i]>ep:ep=h[i];af=min(af+step,afmax)
+                  else:
+                      if h[i]>z:trend=True;sar=ep;ep=h[i];af=af0
+                      else:
+                          sar=z
+                          if l[i]<ep:ep=l[i];af=min(af+step,afmax)
+              return out,bull
+          q={k:0 for k in ['signals','maker_valid','marketable','touch_same4h','maker_valid_touch','maker_valid_no_touch','marketable_touch','marketable_no_touch','long_signals','short_signals']}
+          files=glob.glob('data/**/*.csv.gz',recursive=True); errors=[]
+          for z,p in enumerate(files,1):
+              try:
+                  d=pd.read_csv(p,compression='gzip',usecols=['open_time','open','high','low','close']).sort_values('open_time')
+                  t=d.open_time.to_numpy(np.int64);o=d.open.to_numpy(float);h=d.high.to_numpy(float);l=d.low.to_numpy(float);c=d.close.to_numpy(float)
+                  bucket=t//(900000*M);cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
+                  st=cut[:-1];en=cut[1:];good=(en-st)==M;st=st[good];en=en[good]
+                  rt=t[st];ro=o[st];rh=np.maximum.reduceat(h,st);rl=np.minimum.reduceat(l,st)
+                  sar,bull=psar_open_projection(rh,rl);pos=np.searchsorted(t,rt)
+                  for i in range(15,len(rt)-12):
+                      s=sar[i]
+                      if not np.isfinite(s):continue
+                      b=bool(bull[i]);q['signals']+=1;q['long_signals' if b else 'short_signals']+=1
+                      # Post-only maker validity at order placement:
+                      # LONG buy limit must be strictly below open; SHORT sell limit strictly above open.
+                      valid=(s<ro[i]) if b else (s>ro[i])
+                      q['maker_valid' if valid else 'marketable']+=1
+                      a=pos[i];zz=slice(a,min(a+M,len(t)))
+                      touch=bool(np.any((l[zz]<=s)&(h[zz]>=s)))
+                      q['touch_same4h']+=int(touch)
+                      if valid:q['maker_valid_touch' if touch else 'maker_valid_no_touch']+=1
+                      else:q['marketable_touch' if touch else 'marketable_no_touch']+=1
+              except Exception as e: errors.append([p,str(e)])
+              if z%50==0:print('progress',z,len(files),flush=True)
+          q['files']=len(files);q['errors']=errors
+          for k in ['maker_valid','marketable','maker_valid_touch','marketable_touch']:
+              q[k+'_pct_signals']=round(100*q[k]/q['signals'],4) if q['signals'] else None
+          q['maker_valid_fill_rate_pct']=round(100*q['maker_valid_touch']/q['maker_valid'],4) if q['maker_valid'] else None
+          open('psar_0atr_maker_audit.json','w').write(json.dumps(q,indent=2))
+          print(json.dumps(q,indent=2))
+          assert len(files)==856, len(files)
+          assert not errors, errors[:3]
           PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-0atr-maker-audit
+          path: psar_0atr_maker_audit.json
+          retention-days: 30
