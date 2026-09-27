@@ -234,12 +234,14 @@ ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_arg
 if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")
 m={"1h":4,"4h":16}[a.tf]
 all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
-seen_ranges=set()
+seen_ranges={}
 for p in all_files:
     data=load(p); sym=_symbol(p); t0=data[0]
-    fp=(sym,int(t0[0]),int(t0[-1]),len(t0))
-    if fp in seen_ranges:raise RuntimeError(f"duplicate symbol/time-range input {fp}")
-    seen_ranges.add(fp)
+    lo,hi=int(t0[0]),int(t0[-1])
+    for old_lo,old_hi,old_p in seen_ranges.get(sym,[]):
+        if max(lo,old_lo)<=min(hi,old_hi):
+            raise RuntimeError(f"overlapping symbol/time-range input {sym}: {old_p} [{old_lo},{old_hi}] vs {p} [{lo},{hi}]")
+    seen_ranges.setdefault(sym,[]).append((lo,hi,p))
 files=[p for j,p in enumerate(all_files) if j%a.shards==a.shard]
 agg={};errors=[]
 for z,p in enumerate(files,1):
