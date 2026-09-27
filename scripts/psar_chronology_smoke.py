@@ -4,7 +4,7 @@ import numpy as np
 
 SRC=Path("scripts/psar_open_canonical_compare.py").read_text()
 tree=ast.parse(SRC)
-keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.Assign,ast.FunctionDef)) and (not isinstance(n,ast.FunctionDef) or n.name in {"_resolve_1m"})]
+keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name in {"_one_min","_resolve_1m"})]
 ns={}
 exec(compile(ast.Module(body=keep,type_ignores=[]),"<smoke>","exec"),ns)
 resolve=ns["_resolve_1m"]
