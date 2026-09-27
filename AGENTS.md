@@ -115,3 +115,24 @@ execution capability filter, not a signal-generation filter.
 
 This separation keeps the forward-research environment aligned with eventual
 real trading while respecting the smaller Demo orderable universe.
+
+## 9. PSAR research canonical timing definition
+
+This section is authoritative for all PSAR research unless the user explicitly changes it.
+
+The strategy acts on the PSAR value that is visible/available at the exact OPEN of a new strategy timeframe candle. It must never use that candle's future high, low, or close.
+
+For timeframe TF (currently compare 1H and 4H):
+
+- At candle i OPEN, compute/project the PSAR value using only information that was closed before candle i opened.
+- ATR or any other volatility input used at candle i OPEN must likewise use only data available before candle i opened.
+- The order becomes live immediately at candle i OPEN. Do NOT delay it to candle i+1 merely because a conventional end-of-bar PSAR implementation labels a value with index i.
+- Backtests must reproduce the PSAR dot that would actually be visible on the chart when the new TF candle opens. No same-candle future H/L/C may influence that value.
+- Entry target: LONG = open-time PSAR + N*ATR; SHORT = open-time PSAR - N*ATR.
+- If the market at candle OPEN is already at a better price than the designed target, execute immediately at the OPEN as taker; do not delete the opportunity.
+- Otherwise place the target as a limit and test fills only after the order is live.
+- TP/SL design levels remain anchored to the open-time PSAR/ATR/target definition; a favorable taker fill must not silently move the strategy's designed levels.
+- Every large PSAR backtest must first pass a small timestamp audit proving: input-data cutoff < order-live timestamp, and sampled trades reproduce the intended open-time PSAR/ATR without lookahead.
+- Results from implementations that violate this timing definition must be labeled invalid and must not be used for strategy selection or sizing.
+
+Ultimate PSAR research objective: implement the SAME canonical logic on 1H and 4H, then compare them on identical data/execution assumptions before choosing the production timeframe.
