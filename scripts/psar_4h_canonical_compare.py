@@ -125,7 +125,7 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                             # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
-                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
+                            q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
@@ -170,7 +170,7 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                             # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
-                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
+                            q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
