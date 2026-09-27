@@ -1,15 +1,11 @@
-name: PSAR Fixed-Level Execution Audit
+name: PSAR Fixed Parallel
 on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths: ['.research/psar_fixed_execution_parallel_run']
 permissions: {contents: read, actions: read}
 jobs:
-  audit:
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+  audit0:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -17,10 +13,123 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
-      - run: python -m py_compile scripts/psar_execution_fixed_parallel.py
       - name: Download 5Y
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
-      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard ${{ matrix.shard }} --shards 8
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 0 --shards 8
       - uses: actions/upload-artifact@v4
-        with:\n          name: "psar-fixed-parallel-${{ matrix.shard }}"\n          path: "psar_fixed_shard_${{ matrix.shard }}.json"
+        with:
+          name: psar-fixed-parallel-0
+          path: psar_fixed_shard_0.json
+  audit1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 1 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-1
+          path: psar_fixed_shard_1.json
+  audit2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 2 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-2
+          path: psar_fixed_shard_2.json
+  audit3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 3 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-3
+          path: psar_fixed_shard_3.json
+  audit4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 4 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-4
+          path: psar_fixed_shard_4.json
+  audit5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 5 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-5
+          path: psar_fixed_shard_5.json
+  audit6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 6 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-6
+          path: psar_fixed_shard_6.json
+  audit7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_execution_fixed_parallel.py --data data --shard 7 --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-fixed-parallel-7
+          path: psar_fixed_shard_7.json
