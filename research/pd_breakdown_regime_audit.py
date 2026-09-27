@@ -17,12 +17,14 @@ if "open_time" in B: ts=pd.to_datetime(B.open_time,unit="ms",utc=True,errors="co
 elif "timestamp" in B: ts=pd.to_datetime(B.timestamp,unit="ms",utc=True,errors="coerce")
 else: ts=pd.to_datetime(B.iloc[:,0],unit="ms",utc=True,errors="coerce")
 close=pd.to_numeric(B["close"] if "close" in B else B.iloc[:,4],errors="coerce")
-D=pd.DataFrame({"ts":ts,"close":close}).dropna().set_index("ts").resample("1D").last().dropna()
-for d in [7,30,90]: D[f"ret{d}"]=D.close/D.close.shift(d)-1
-D["ma200"]=D.close.rolling(200).mean();D["ma200_dist"]=D.close/D.ma200-1
-D["rv30"]=D.close.pct_change().rolling(30).std()*np.sqrt(365)
-D=D.reset_index().sort_values("ts")
-E["entry_time"]=pd.to_datetime(E.entry_time,utc=True);E=pd.merge_asof(E.sort_values("entry_time"),D.sort_values("ts"),left_on="entry_time",right_on="ts",direction="backward")
+B4=pd.DataFrame({"ts":ts,"close":close}).dropna().set_index("ts").sort_index()["close"].resample("4h",label="right",closed="left").last().dropna().to_frame("close")
+for d,n in [(7,42),(30,180),(90,540)]: B4[f"ret{d}"]=B4.close/B4.close.shift(n)-1
+B4["ma200"]=B4.close.rolling(1200).mean();B4["ma200_dist"]=B4.close/B4.ma200-1
+B4["rv30"]=B4.close.pct_change().rolling(180).std()*np.sqrt(6*365)
+D=B4.reset_index().sort_values("ts")
+E["entry_time"]=pd.to_datetime(E.entry_time,utc=True).astype("datetime64[ms, UTC]")
+D["ts"]=pd.to_datetime(D.ts,utc=True).astype("datetime64[ms, UTC]")
+E=pd.merge_asof(E.sort_values("entry_time"),D,left_on="entry_time",right_on="ts",direction="backward")
 # predeclared descriptive buckets; no tuning
 E["trend30"]=pd.cut(E.ret30,[-np.inf,-.10,.10,np.inf],labels=["BTC30_DOWN","BTC30_FLAT","BTC30_UP"])
 E["ma200_regime"]=np.where(E.ma200_dist>=0,"ABOVE200","BELOW200")
