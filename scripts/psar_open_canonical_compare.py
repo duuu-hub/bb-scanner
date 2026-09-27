@@ -171,13 +171,14 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
                             q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
-                            if rr=="win":q["win"]+=1
-                            elif rr=="loss":q["loss"]+=1
-                            else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
-                            continue
+                            if rr=="win":q["win"]+=1;continue
+                            if rr=="loss":q["loss"]+=1;continue
+                            if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
+                            th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
+                            ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win")
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["unresolved_eod"]+=1
