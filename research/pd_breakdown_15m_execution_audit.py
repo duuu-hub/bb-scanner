@@ -3,7 +3,7 @@ import argparse,glob
 from pathlib import Path
 import pandas as pd,numpy as np
 ap=argparse.ArgumentParser();ap.add_argument("--input",required=True);ap.add_argument("--selected",required=True);ap.add_argument("--out",required=True);a=ap.parse_args();O=Path(a.out);O.mkdir(parents=True,exist_ok=True)
-S=pd.read_csv(a.selected,parse_dates=["entry_time","exit_time"]);S=S[S.basket==10].copy()
+S=pd.read_csv(a.selected,parse_dates=["entry_time","exit_time"]);S=S[S.basket==5].copy()
 need=set(S.symbol);px={}
 for fn in glob.glob(a.input+"/**/*.csv.gz",recursive=True):
  sym=Path(fn).name.replace(".csv.gz","")
@@ -40,7 +40,7 @@ for rf in [.01,.0125,.015,.02,.025,.03]:
   for p in sorted(done,key=lambda x:x["exit15"]):
    cash+=p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
   active=[p for p in active if p["exit15"]>r.entry_time]
-  if len(active)>=10:continue
+  if len(active)>=5:continue
   p=dict(symbol=r.symbol,entry_time=r.entry_time,exit15=r.exit15,r_net=r.r_net,stake=cash*rf,entry=r.entry,exitpx15=r.exitpx15,reason15=r.reason15,risk_dist=r.risk_dist)
   active.append(p);acc.append(p)
  for p in sorted(active,key=lambda x:x["exit15"]):
@@ -71,7 +71,7 @@ for rf in [.01,.0125,.015,.02,.025,.03]:
   if dd>mm:mm=dd;tr=t
  assert abs(cash2-cash)<1e-9
  out.append(dict(risk=rf,accepted=len(acc),final_equity=cash,realized_mdd=mdd,mtm_mdd=mm))
- if rf==.01:pd.DataFrame(acc).to_csv(O/"accepted_15m.csv",index=False)
-pd.DataFrame(out).to_csv(O/"summary_15m.csv",index=False)
-pd.DataFrame({"canonical_reason":S.reason,"reason15":S.reason15}).value_counts().rename("n").reset_index().to_csv(O/"reason_compare.csv",index=False)
+ if rf==.01:pd.DataFrame(acc).to_csv(O/"accepted_15m_b5.csv",index=False)
+pd.DataFrame(out).to_csv(O/"summary_15m_b5.csv",index=False)
+pd.DataFrame({"canonical_reason":S.reason,"reason15":S.reason15}).value_counts().rename("n").reset_index().to_csv(O/"reason_compare_b5.csv",index=False)
 print(pd.DataFrame(out).to_string(index=False));print("candidate timing changed",int((S.exit15!=S.exit_time).sum()),"of",len(S));print(pd.Series(S.reason15).value_counts().to_string())
