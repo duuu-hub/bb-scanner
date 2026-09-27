@@ -100,4 +100,15 @@ hh2=hh1.copy(); ll2=ll1.copy(); hh2[4]=100.; ll2[4]=1.
 p2,b2=psar(hh2,ll2)
 assert p1[4]==p2[4] and b1[4]==b2[4]
 print("PASS psar_open_causality")
+
+# Burn-in sanity: after 100 bars, perturbing only the first two initialization bars
+# must no longer affect the projected PSAR on a reversal-rich deterministic path.
+x=np.arange(180,dtype=float)
+base=100+4*np.sin(x/3.0)+2*np.sin(x/11.0)
+hh3=base+1.5; ll3=base-1.5
+p3,b3=psar(hh3,ll3)
+hh4=hh3.copy(); ll4=ll3.copy(); hh4[:2]+=25; ll4[:2]-=25
+p4,b4=psar(hh4,ll4)
+assert np.allclose(p3[100:],p4[100:],rtol=0,atol=1e-12) and np.array_equal(b3[100:],b4[100:])
+print("PASS psar_burnin_initialization_sanity")
 print("ALL_CANONICAL_INVARIANTS_PASS")
