@@ -104,3 +104,5 @@ pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).
 # trigger path-aware MTM audit
 
 # trigger canonical-semantics MTM
+
+# trigger invariant-checked MTM
