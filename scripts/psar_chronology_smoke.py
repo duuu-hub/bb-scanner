@@ -27,6 +27,9 @@ def run_case(name, bars, tp, sl, long, entry, expected):
 run_case("long_preentry_tp_ignored",[(0,111,109),(60000,101,99),(120000,106,102)],105,95,True,100,"win")
 # first entry minute also touches TP -> chronology unknowable => loss
 run_case("long_entry_same1m_tp_loss",[(0,106,99)],105,95,True,100,"loss")
+# A resting limit is filled when price reaches/passes it even if the 1m candle no longer straddles the exact price.
+run_case("long_gap_through_entry_then_tp",[(0,99,98),(60000,106,101)],105,95,True,100,"win")
+run_case("short_gap_through_entry_then_tp",[(0,102,101),(60000,99,94)],95,105,False,100,"win")
 run_case("long_entry_same1m_sl_loss",[(0,101,94)],105,95,True,100,"loss")
 run_case("long_entry_same1m_both_loss",[(0,106,94)],105,95,True,100,"loss")
 # entry-only minute, later TP/SL
