@@ -12,7 +12,7 @@ for ts,g in Z.groupby("entry_time",sort=True):
 assert len(E)==42
 rng=np.random.default_rng(20260927);rows=[]
 for bp in [8,24]:
- for risk in [.02,.03,.04,.05,.06]:
+ for risk in [.02,.0225,.025,.0275,.03]:
   finals=np.empty(a.sims);dds=np.empty(a.sims)
   for i in range(a.sims):
    eq=peak=1.;dd=0.
