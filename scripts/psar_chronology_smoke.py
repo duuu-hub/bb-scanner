@@ -4,7 +4,7 @@ import numpy as np
 
 SRC=Path("scripts/psar_open_canonical_compare.py").read_text()
 tree=ast.parse(SRC)
-keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name in {"_one_min","_resolve_1m"})]
+keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name in {"_one_min","_resolve_1m","resample","psar_open_projection"})]
 ns={}
 exec(compile(ast.Module(body=keep,type_ignores=[]),"<smoke>","exec"),ns)
 resolve=ns["_resolve_1m"]
@@ -78,6 +78,26 @@ assert 'empty 15m input' in src
 assert 'strategy-bar to 15m timestamp mapping mismatch' in src
 assert '_ONE_MIN_CACHE.clear()' in src
 assert 'source_data_run' in src
-assert 'code_sha' in src
+assert 'workflow_commit_sha' in src
+assert 'engine_blob_sha' in src
+assert 'invalid 1m CSV schema' in src
 assert 'maker_fillbar_amb' not in src
+# Execute resample, not just static-string check.
+resample=ns["resample"]
+tt=np.arange(0,8*900000,900000,dtype=np.int64)
+oo=np.arange(10,18,dtype=float); hh=oo+2; ll=oo-2; cc=oo+1
+rt,ro,rh,rl,rc=resample(tt,oo,hh,ll,cc,4)
+assert len(rt)==2 and rt.tolist()==[0,3600000]
+assert ro.tolist()==[10.0,14.0] and rc.tolist()==[14.0,18.0]
+assert rh.tolist()==[15.0,19.0] and rl.tolist()==[8.0,12.0]
+print("PASS resample_exact_buckets")
+
+# Execute PSAR projection causality: changing current bar H/L must not change its open projection.
+psar=ns["psar_open_projection"]
+hh1=np.array([10.,11.,12.,13.,14.,15.]); ll1=np.array([8.,9.,10.,11.,12.,13.])
+p1,b1=psar(hh1,ll1)
+hh2=hh1.copy(); ll2=ll1.copy(); hh2[4]=100.; ll2[4]=1.
+p2,b2=psar(hh2,ll2)
+assert p1[4]==p2[4] and b1[4]==b2[4]
+print("PASS psar_open_causality")
 print("ALL_CANONICAL_INVARIANTS_PASS")
