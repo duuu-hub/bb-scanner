@@ -27,7 +27,10 @@ def _one_min(symbol,ts):
     raise RuntimeError(f"1m download failed after retries {symbol} {ym}: {last}")
 def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
     d=_one_min(symbol,ts)
-    t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000);entered=entry is None;entry_seen=entered
+    t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000)
+    if z-a!=15 or a>=len(t) or t[a]!=ts or t[z-1]!=ts+840000:
+        raise RuntimeError(f"incomplete 1m window {symbol} {ts}: count={z-a}")
+    entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
             if not (l[j]<=entry<=h[j]):continue
