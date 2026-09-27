@@ -1,5 +1,33 @@
-import argparse,glob,json
+import argparse,glob,json,io,urllib.request,zipfile,os
+from datetime import datetime,timezone
 import pandas as pd,numpy as np
+_ONE_MIN_CACHE={}
+def _symbol(p):
+    b=os.path.basename(p)
+    if b.endswith(".csv.gz"): b=b[:-7]
+    return b.split("_")[0].split("-")[0].upper()
+def _one_min(symbol,ts):
+    ym=datetime.fromtimestamp(ts/1000,tz=timezone.utc).strftime("%Y-%m"); key=(symbol,ym)
+    if key in _ONE_MIN_CACHE:return _ONE_MIN_CACHE[key]
+    u=f"https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/1m/{symbol}-1m-{ym}.zip"
+    try:
+        raw=urllib.request.urlopen(u,timeout=30).read()
+        with zipfile.ZipFile(io.BytesIO(raw)) as z:d=pd.read_csv(z.open(z.namelist()[0]),header=None)
+        v=(d.iloc[:,0].to_numpy(np.int64),d.iloc[:,2].to_numpy(float),d.iloc[:,3].to_numpy(float));_ONE_MIN_CACHE[key]=v;return v
+    except Exception:_ONE_MIN_CACHE[key]=None;return None
+def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
+    d=_one_min(symbol,ts)
+    if d is None:return None
+    t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000);entered=entry is None
+    for j in range(a,z):
+        if not entered:
+            if l[j]<=entry<=h[j]:entered=True
+            else:continue
+        ht=h[j]>=tp if long else l[j]<=tp; hs=l[j]<=sl if long else h[j]>=sl
+        if ht and hs:return "loss"
+        if hs:return "loss"
+        if ht:return "win"
+    return None
 
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
 ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
@@ -40,7 +68,7 @@ def resample(t,o,h,l,c,m=16):
     st=cut[:-1];en=cut[1:];good=(en-st)==m;st=st[good];en=en[good]
     return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
 
-def evaluate(t,o,h,l,c,m,horizon=None):
+def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
     rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar_open_projection(rh,rl); n=len(rt)
     # ATR available at bar i open = ATR14 through bar i-1 only
     prev=np.r_[np.nan,rc[:-1]]
@@ -73,26 +101,30 @@ def evaluate(t,o,h,l,c,m,horizon=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"amb":0,"timeout":0})
+                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"maker_fillbar_amb":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
                     # may have occurred before entry. Never credit that as a win.
                     if not is_taker:
                         fill_tp=bool(th[0]); fill_sl=bool(sh[0])
-                        if fill_sl:
-                            q["loss"]+=1
-                            if fill_tp:q["amb"]+=1
-                            continue
+                        if fill_sl and fill_tp:
+                            q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss")
+                            q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win"); continue
+                        if fill_sl:q["loss"]+=1; continue
                         if fill_tp:
-                            q["amb"]+=1; q["loss"]+=1
+                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
+                            else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
                             continue
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["amb"]+=1; q["loss"]+=1
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win")
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
-                    else:q["timeout"]+=1
+                    else:q["unresolved_eod"]+=1
         # Fixed-percent distance from open-time PSAR, same execution semantics.
         for pct in ENTRY_PCT:
             e=s*(1+pct/100.0) if b else s*(1-pct/100.0)
@@ -112,33 +144,37 @@ def evaluate(t,o,h,l,c,m,horizon=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"amb":0,"timeout":0})
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"maker_fillbar_amb":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
                     # may have occurred before entry. Never credit that as a win.
                     if not is_taker:
                         fill_tp=bool(th[0]); fill_sl=bool(sh[0])
-                        if fill_sl:
-                            q["loss"]+=1
-                            if fill_tp:q["amb"]+=1
-                            continue
+                        if fill_sl and fill_tp:
+                            q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss")
+                            q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win"); continue
+                        if fill_sl:q["loss"]+=1; continue
                         if fill_tp:
-                            q["amb"]+=1; q["loss"]+=1
+                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
+                            else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
                             continue
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["amb"]+=1; q["loss"]+=1
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win")
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
-                    else:q["timeout"]+=1
+                    else:q["unresolved_eod"]+=1
     return out
 
 ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=None);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
 files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files;files=[p for j,p in enumerate(files) if j%a.shards==a.shard]
 agg={};errors=[]
 for z,p in enumerate(files,1):
-    try: rr=evaluate(*load(p),m,a.horizon)
+    try: rr=evaluate(*load(p),m,a.horizon,_symbol(p))
     except Exception as e:errors.append([p,str(e)]);continue
     for k,v in rr.items():
         q=agg.setdefault(k,{kk:0 for kk in v})
@@ -150,5 +186,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"same-15m TP/SL collision is loss; maker fill-bar TP without provable post-fill chronology is also conservatively loss; actual risk always abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; unavailable/unresolved 1m -> conservative loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
