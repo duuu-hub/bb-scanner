@@ -56,7 +56,7 @@ for rf in risks:
  for sym in set(p["symbol"] for p in accepted_rows):
   idx=px[sym]["close"].index
   allidx=idx if allidx is None else allidx.union(idx)
- event_times=pd.DatetimeIndex(sorted(set(allidx).union(set(by_entry)).union(set(by_exit))))
+ event_times=pd.DatetimeIndex(sorted(set(allidx.tolist()).union(set(by_entry.keys())).union(set(by_exit.keys()))))
  for tt in event_times:
   # exits first, matching admission rule exit_time <= entry_time
   for p in by_exit.get(tt,[]):
