@@ -81,6 +81,10 @@ assert 'source_data_run' in src
 assert 'workflow_commit_sha' in src
 assert 'engine_blob_sha' in src
 assert 'invalid 1m CSV schema' in src
+assert 'cannot safely parse Binance symbol' in src
+assert '1m archive month mismatch' in src
+assert 'input_files_total' in src
+assert 'shard_index' in src and 'shard_count' in src
 assert 'maker_fillbar_amb' not in src
 # Execute resample, not just static-string check.
 resample=ns["resample"]
