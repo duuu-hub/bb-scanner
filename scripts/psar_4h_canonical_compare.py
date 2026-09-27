@@ -159,7 +159,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"maker_fillbar_amb":0,"unresolved_eod":0})
+                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
@@ -206,7 +206,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"maker_fillbar_amb":0,"unresolved_eod":0})
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
                     # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
@@ -259,7 +259,7 @@ for z,p in enumerate(files,1):
                 for kk,vv in v.items():q[kk]+=vv
     except Exception as e:
         _ONE_MIN_CACHE.clear()
-        errors.append([p,str(e)]);continue
+        raise RuntimeError(f"{p}: {e}") from e
     _ONE_MIN_CACHE.clear()
     for k,v in rr.items():
         q=agg.setdefault(k,{kk:0 for kk in v})
@@ -277,6 +277,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-if errors: raise RuntimeError("input/evaluation errors: "+json.dumps(errors[:10]))
 res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; 1m download/integrity failure -> run fails; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
