@@ -14,7 +14,10 @@ def _one_min(symbol,ts):
     for attempt in range(4):
         try:
             raw=urllib.request.urlopen(u,timeout=60).read()
-            with zipfile.ZipFile(io.BytesIO(raw)) as z:d=pd.read_csv(z.open(z.namelist()[0]),header=None)
+            with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                members=[n for n in z.namelist() if n.lower().endswith(".csv")]
+                if len(members)!=1:raise RuntimeError(f"unexpected 1m ZIP members: {members}")
+                d=pd.read_csv(z.open(members[0]),header=None)
             v=(d.iloc[:,0].to_numpy(np.int64),d.iloc[:,2].to_numpy(float),d.iloc[:,3].to_numpy(float))
             if len(v[0])==0: raise RuntimeError("empty 1m archive")
             if not np.all(np.isfinite(v[1])) or not np.all(np.isfinite(v[2])):raise RuntimeError("non-finite 1m high/low")
