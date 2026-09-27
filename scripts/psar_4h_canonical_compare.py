@@ -99,7 +99,8 @@ def resample(t,o,h,l,c,m=16):
     st=cut[:-1];en=cut[1:];good=(en-st)==m
     st=st[good];en=en[good]
     if len(st):
-        ok=np.array([np.all(np.diff(t[a:b])==900000) for a,b in zip(st,en)],dtype=bool)
+        span=900000*m
+        ok=np.array([t[a]%span==0 and np.all(np.diff(t[a:b])==900000) for a,b in zip(st,en)],dtype=bool)
         st=st[ok];en=en[ok]
     return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
 
