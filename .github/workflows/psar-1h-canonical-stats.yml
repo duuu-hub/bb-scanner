@@ -1,0 +1,27 @@
+name: PSAR 1H Canonical Stats
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_stats_run']
+permissions: {contents: read, actions: read}
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run 1H canonical statistics
+        run: python scripts/psar_open_canonical_compare.py --data data --tf 1h --horizon 48 --shard ${{ matrix.shard }} --shards 8 --out psar_1h_stats_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-stats-${{ matrix.shard }}
+          path: psar_1h_stats_${{ matrix.shard }}.json
