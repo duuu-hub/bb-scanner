@@ -66,4 +66,13 @@ assert 'gap_policy' in src
 assert 'gross_expectancy_R_amb_loss' in src
 assert 'independent-signal gross edge scan' in src
 assert 'q["loss"]+=int(rr!="win")' not in src
+assert 'misaligned 1m timestamps' in src
+assert 'misaligned 15m timestamps' in src
+assert '1m/15m price mismatch' in src
+assert 'rh=np.array([np.max(h[a:b]) for a,b in zip(st,en)],dtype=float)' in src
+assert 'rl=np.array([np.min(l[a:b]) for a,b in zip(st,en)],dtype=float)' in src
+assert 'accounting invariant failed order types' in src
+assert 'accounting invariant failed outcomes' in src
+assert 'invalid shard selection' in src
+assert 'empty 15m input' in src
 print("ALL_CANONICAL_INVARIANTS_PASS")
