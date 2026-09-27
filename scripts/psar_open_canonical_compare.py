@@ -257,7 +257,10 @@ for z,p in enumerate(files,1):
             for k,v in seg.items():
                 q=rr.setdefault(k,{kk:0 for kk in v})
                 for kk,vv in v.items():q[kk]+=vv
-    except Exception as e:errors.append([p,str(e)]);continue
+    except Exception as e:
+        _ONE_MIN_CACHE.clear()
+        errors.append([p,str(e)]);continue
+    _ONE_MIN_CACHE.clear()
     for k,v in rr.items():
         q=agg.setdefault(k,{kk:0 for kk in v})
         for kk,vv in v.items():q[kk]+=vv
