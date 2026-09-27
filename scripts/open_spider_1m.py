@@ -1,6 +1,32 @@
 import glob,os,io,zipfile,urllib.request,json
 import pandas as pd,numpy as np
-from psar_open_spider_grid import load,resample,psar_open_projection
+def load(p):
+ d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time")
+ return tuple(d[x].to_numpy(np.int64 if x=="open_time" else float) for x in ["open_time","open","high","low","close"])
+def resample(t,o,h,l,c,m=16):
+ bucket=t//(900000*m);cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
+ st=cut[:-1];en=cut[1:];good=(en-st)==m;st=st[good];en=en[good]
+ return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
+def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
+ n=len(h);out=np.full(n,np.nan);bull=np.ones(n,bool)
+ if n<3:return out,bull
+ sar=l[0];trend=True;ep=h[1];af=af0;out[1]=sar;bull[1]=trend
+ for i in range(2,n):
+  z=sar+af*(ep-sar)
+  if trend:z=min(z,l[i-1],l[i-2])
+  else:z=max(z,h[i-1],h[i-2])
+  out[i]=z;bull[i]=trend
+  if trend:
+   if l[i]<z:trend=False;sar=ep;ep=l[i];af=af0
+   else:
+    sar=z
+    if h[i]>ep:ep=h[i];af=min(af+step,afmax)
+  else:
+   if h[i]>z:trend=True;sar=ep;ep=h[i];af=af0
+   else:
+    sar=z
+    if l[i]<ep:ep=l[i];af=min(af+step,afmax)
+ return out,bull
 CANDS=[(e,s,r) for e in (0.,.25,.5,1.,2.,3.,4.,5.,6.,8.,10.) for s in (0.,.1,.2,.3,.5,.75,1.,1.5,2.) for r in (.5,1.,1.5,2.,2.5,3.,4.,5.,6.,8.,10.) if abs(e)+abs(s)>0]
 M=16;HORIZON=12
 def events(p):
@@ -11,7 +37,10 @@ def events(p):
   if not np.isfinite(sar[i]) or not np.isfinite(ao[i]) or ao[i]<=0:continue
   b=bool(bull[i]);start=pos[i];end=min(start+M*HORIZON,len(t))
   for em,sb,r in CANDS:
-   e=sar[i]+(em*ao[i] if b else -em*ao[i]); hit=np.flatnonzero((l[start:start+M]<=e)&(h[start:start+M]>=e))
+   e=sar[i]+(em*ao[i] if b else -em*ao[i])
+   # Must match grid: order has to be a valid post-only maker at the 4H open.
+   if (b and e>=ro[i]) or ((not b) and e<=ro[i]):continue
+   hit=np.flatnonzero((l[start:start+M]<=e)&(h[start:start+M]>=e))
    if not hit.size:continue
    fs=start+int(hit[0]);sl=sar[i]-(sb*ao[i] if b else -sb*ao[i]);risk=abs(e-sl)
    if risk<=1e-12*max(1.,abs(e),abs(sl)):continue
