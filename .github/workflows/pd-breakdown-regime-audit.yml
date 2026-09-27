@@ -11,17 +11,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - run: pip install pandas numpy
       - uses: actions/download-artifact@v4
-        with: {github-token: '${{ github.token }}', run-id: 36159685183, name: pd-4h-breakdown-short-VERIFIED, path: trades}
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36159685183
+          name: pd-4h-breakdown-short-VERIFIED
+          path: trades
       - uses: actions/download-artifact@v4
-        with: {github-token: '${{ github.token }}', run-id: 36211084008, name: pd-breakdown-walkforward-basket-VERIFIED, path: wf}
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36211084008
+          name: pd-breakdown-walkforward-basket-VERIFIED
+          path: wf
       - uses: actions/download-artifact@v4
-        with: {github-token: '${{ github.token }}', run-id: 36095439671, pattern: 'rank5-binance-um-15m-5y-data-shard-*', path: data, merge-multiple: true}
-      - name: Inspect canonical data layout\n        run: |\n          echo '=== TOP FILES ==='\n          find data -type f | head -100\n          echo '=== BTC MATCHES ==='\n          find data -type f | grep -i 'BTC' || true\n          echo '=== GZ MATCHES ==='\n          find data -type f | grep -E '\\.gz
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36095439671
+          pattern: 'rank5-binance-um-15m-5y-data-shard-*'
+          path: data
+          merge-multiple: true
+      - name: Inspect canonical data layout
+        run: |
+          echo "=== TOP FILES ==="
+          find data -type f | head -100
+          echo "=== BTC MATCHES ==="
+          find data -type f | grep -i BTC || true
+          echo "=== GZ MATCHES ==="
+          find data -type f | grep -E '\\.gz$' | head -30 || true
+      - run: python research/pd_breakdown_regime_audit.py --trades trades/trades_all.csv --wf wf/walkforward.csv --data data --out out
       - uses: actions/upload-artifact@v4
-        with: {name: pd-breakdown-regime-audit-VERIFIED, path: out/, if-no-files-found: error}
- | head -30 || true\n      - run: python research/pd_breakdown_regime_audit.py --trades trades/trades_all.csv --wf wf/walkforward.csv --data data --out out
-      - uses: actions/upload-artifact@v4
-        with: {name: pd-breakdown-regime-audit-VERIFIED, path: out/, if-no-files-found: error}
+        with:
+          name: pd-breakdown-regime-audit-VERIFIED
+          path: out/
+          if-no-files-found: error
