@@ -10,7 +10,8 @@ for fn in glob.glob(a.input+"/**/*.csv.gz",recursive=True):
  sym=Path(fn).name.replace(".csv.gz","")
  if sym not in need: continue
  d=pd.read_csv(fn,compression="gzip");tc="open_time" if "open_time" in d else "timestamp_ms"
- d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)\n for c in ["high","low","close"]: d[c]=pd.to_numeric(d[c],errors="coerce")
+ d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)
+ for c in ["high","low","close"]: d[c]=pd.to_numeric(d[c],errors="coerce")
  d=d.dropna(subset=["dt","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
  px[sym]=d.close
 # infer entry price from canonical stop distance when available; otherwise exact 15m close at/before entry
@@ -66,4 +67,5 @@ for rf in risks:
  for p in sorted(active,key=lambda x:x["exit_time"]): cash += p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
  rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,mtm_mdd_pct=mdd))
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
-\n# trigger exact MTM rerun\n
+
+# trigger exact MTM rerun
