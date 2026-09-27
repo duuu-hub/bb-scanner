@@ -1,0 +1,16 @@
+name: PSAR Chronology Smoke
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_chronology_smoke']
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Run chronology smoke cases
+        run: python scripts/psar_chronology_smoke.py
