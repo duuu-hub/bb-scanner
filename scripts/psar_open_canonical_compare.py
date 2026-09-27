@@ -30,11 +30,16 @@ def _one_min(symbol,ts):
             last=e
             if attempt<3: time.sleep(2**attempt)
     raise RuntimeError(f"1m download failed after retries {symbol} {ym}: {last}")
-def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
+def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None):
     d=_one_min(symbol,ts)
     t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000)
     if z-a!=15 or a>=len(t) or t[a]!=ts or t[z-1]!=ts+840000:
         raise RuntimeError(f"incomplete 1m window {symbol} {ts}: count={z-a}")
+    if source_high is not None and source_low is not None:
+        ah=float(np.max(h[a:z])); al=float(np.min(l[a:z]))
+        tol=1e-10*max(1.0,abs(source_high),abs(source_low),abs(ah),abs(al))
+        if abs(ah-source_high)>tol or abs(al-source_low)>tol:
+            raise RuntimeError(f"1m/15m price mismatch {symbol} {ts}: 1m=({ah},{al}) 15m=({source_high},{source_low})")
     entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
@@ -160,7 +165,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
                             # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
-                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
                             q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
@@ -171,7 +176,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b,None,float(h[fs+it]),float(l[fs+it])); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["unresolved_eod"]+=1
@@ -207,7 +212,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
                             # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
-                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
                             q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
@@ -216,7 +221,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                         th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
                         ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
+                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b,None,float(h[fs+it]),float(l[fs+it])); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss") else None
                     elif it<is_:q["win"]+=1
                     elif is_<it:q["loss"]+=1
                     else:q["unresolved_eod"]+=1
