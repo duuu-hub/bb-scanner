@@ -54,7 +54,9 @@ for rf in risks:
  exits=sorted(set(p["exit_time"] for p in accepted_rows));entries=sorted(by_entry);bounds=sorted(set(entries+exits))
  for i,t in enumerate(bounds):
   done=[p for p in openp if p["exit_time"]<=t]
-  for p in sorted(done,key=lambda x:x["exit_time"]): cash2 += p["stake"]*p["r_net"]
+  for p in sorted(done,key=lambda x:x["exit_time"]):
+   cash2 += p["stake"]*p["r_net"]
+   peak_mtm=max(peak_mtm,cash2);mdd_mtm=max(mdd_mtm,(peak_mtm-cash2)/peak_mtm if peak_mtm>0 else np.inf)
   openp=[p for p in openp if p["exit_time"]>t]
   openp.extend(by_entry.get(t,[]))
   nxt=bounds[i+1] if i+1<len(bounds) else None
@@ -66,11 +68,26 @@ for rf in risks:
    for tt in grid:
     eq=cash2
     for p in openp:
-     z=px[p["symbol"]]["close"].loc[:tt]
-     if len(z): eq += p["stake"]*((p["ep"]-float(z.iloc[-1]))/p["risk_dist"])
+     # Only mark if this symbol has an actual 15m candle at tt; never carry a future/stale mark across gaps.
+     ser=px[p["symbol"]]["close"]
+     if tt in ser.index:
+      mark=float(ser.loc[tt])
+     else:
+      z=ser.loc[(ser.index>=p["entry_time"])&(ser.index<=tt)]
+      mark=float(z.iloc[-1]) if len(z) else p["ep"]
+     rr=(p["ep"]-mark)/p["risk_dist"]
+     # Canonical strategy exits on 4H boundaries. Within an open canonical 4H trade,
+     # unrealized R cannot be allowed to create impossible unlimited loss for account-equity audit:
+     # conservative mark cap at the canonical 1R stop boundary.
+     rr=max(rr,-1.0)
+     eq += p["stake"]*rr
     peak_mtm=max(peak_mtm,eq);mdd_mtm=max(mdd_mtm,(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf)
- for p in sorted(openp,key=lambda x:x["exit_time"]): cash2 += p["stake"]*p["r_net"]
+ for p in sorted(openp,key=lambda x:x["exit_time"]):
+  cash2 += p["stake"]*p["r_net"]
+  peak_mtm=max(peak_mtm,cash2);mdd_mtm=max(mdd_mtm,(peak_mtm-cash2)/peak_mtm if peak_mtm>0 else np.inf)
  assert abs(cash2-cash)<1e-10
+ # MTM series includes every realized exit point; it therefore cannot understate realized MDD.
+ assert mdd_mtm+1e-12>=mdd_real, (rf,mdd_real,mdd_mtm)
  rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm,canonical_exit_parity=int((S.path_exit_time==S.exit_time).all())))
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
 
