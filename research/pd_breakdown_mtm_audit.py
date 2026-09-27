@@ -34,7 +34,7 @@ S["collision_15m"]=False
 risks=[.01,.0125,.015,.02,.025,.03,.035,.04,.05,.06]
 rows=[]
 for rf in risks:
- cash=1.;active=[];peak_real=1.;mdd_real=0.;peak_mtm=1.;mdd_mtm=0.;accepted=0
+ cash=1.;active=[];peak_real=1.;mdd_real=0.;peak_mtm=1.;peak_mtm_t=None;mdd_mtm=0.;trough_t=None;accepted=0;trace=[]
  # EXACT selector order: process one candidate row at a time; realize exits <= this row's entry before admission.
  accepted_rows=[]
  for r in S.sort_values(["entry_time","symbol"]).itertuples():
@@ -81,14 +81,22 @@ for rf in risks:
      # conservative mark cap at the canonical 1R stop boundary.
      rr=max(rr,-1.0)
      eq += p["stake"]*rr
-    peak_mtm=max(peak_mtm,eq);mdd_mtm=max(mdd_mtm,(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf)
+    if eq>peak_mtm: peak_mtm=eq; peak_mtm_t=tt
+    dd=(peak_mtm-eq)/peak_mtm if peak_mtm>0 else np.inf
+    if dd>mdd_mtm: mdd_mtm=dd; trough_t=tt
+    if rf==.01: trace.append(dict(t=tt,kind="MARK",equity=eq,cash=cash2,unreal=eq-cash2,open_n=len(openp)))
  for p in sorted(openp,key=lambda x:x["exit_time"]):
   cash2 += p["stake"]*p["r_net"]
   peak_mtm=max(peak_mtm,cash2);mdd_mtm=max(mdd_mtm,(peak_mtm-cash2)/peak_mtm if peak_mtm>0 else np.inf)
  assert abs(cash2-cash)<1e-10
  # MTM series includes every realized exit point; it therefore cannot understate realized MDD.
  assert mdd_mtm+1e-12>=mdd_real, (rf,mdd_real,mdd_mtm)
- rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm,canonical_exit_parity=int((S.path_exit_time==S.exit_time).all())))
+ rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,realized_mdd_pct=mdd_real,mtm_mdd_pct=mdd_mtm,canonical_exit_parity=int((S.path_exit_time==S.exit_time).all()),mtm_peak_time=peak_mtm_t,mtm_trough_time=trough_t))
+ if rf==.01:
+  q=pd.DataFrame(trace).sort_values("t");q.to_csv(O/"mtm_trace_risk1.csv",index=False)
+  if peak_mtm_t is not None and trough_t is not None:
+   q[(q.t>=peak_mtm_t)&(q.t<=trough_t)].to_csv(O/"mtm_worst_segment_risk1.csv",index=False)
+   ar=pd.DataFrame(accepted_rows);ar[(ar.entry_time<=trough_t)&(ar.exit_time>=peak_mtm_t)].to_csv(O/"mtm_worst_positions_risk1.csv",index=False)
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
 
 # trigger exact MTM rerun
