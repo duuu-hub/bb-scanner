@@ -20,7 +20,11 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Run 4H canonical statistics
-        run: python scripts/psar_4h_canonical_compare.py --data data --tf 4h --shard ${{ matrix.shard }} --shards 8 --out psar_4h_canonical_${{ matrix.shard }}.json
+        env:
+          PSAR_ENGINE_BLOB_SHA: ${{ env.PSAR_ENGINE_BLOB_SHA }}
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_4h_canonical_compare.py)
+          python scripts/psar_4h_canonical_compare.py --data data --tf 4h --shard ${{ matrix.shard }} --shards 8 --out psar_4h_canonical_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
         with:
           name: psar-4h-canonical-${{ matrix.shard }}
