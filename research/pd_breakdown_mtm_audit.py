@@ -66,3 +66,4 @@ for rf in risks:
  for p in sorted(active,key=lambda x:x["exit_time"]): cash += p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
  rows.append(dict(risk=rf,accepted=accepted,final_equity=cash,total_return=cash-1,mtm_mdd_pct=mdd))
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
+\n# trigger exact MTM rerun\n
