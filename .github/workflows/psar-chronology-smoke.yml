@@ -14,5 +14,24 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - name: Run chronology smoke cases
         run: python scripts/psar_chronology_smoke.py
+      - name: Real Binance 1m archive integration
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+          from datetime import datetime,timezone
+          src=Path("scripts/psar_open_canonical_compare.py").read_text()
+          tree=ast.parse(src)
+          keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name=="_one_min")]
+          ns={}
+          exec(compile(ast.Module(body=keep,type_ignores=[]),"<real1m>","exec"),ns)
+          cases=[("0GUSDT","2025-09"),("0GUSDT","2025-10"),("BTCUSDT","2025-09")]
+          for sym,ym in cases:
+              ts=int(datetime.strptime(ym+"-15","%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp()*1000)
+              t,h,l=ns["_one_min"](sym,ts)
+              assert len(t)>1000 and t[0]%60000==0 and t[-1]%60000==0
+              print("PASS real_binance_1m",sym,ym,len(t),int(t[0]),int(t[-1]))
+          print("ALL_REAL_BINANCE_1M_PASS")
+          PY
 
 
