@@ -66,10 +66,10 @@ def evaluate(t,o,h,l,c,m,horizon):
                 fs=start+int(hits[0]); fill=e
             ph=h[fs:end];pl=l[fs:end]
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0); risk=abs(e-sl)
-                if risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)):continue
+                sl=s-(sb*a0 if b else -sb*a0); risk=abs(fill-sl)
+                if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
                 for r in RS:
-                    tp=e+r*risk if b else e-r*risk
+                    tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                     k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"win":0,"loss":0,"amb":0,"timeout":0})
@@ -90,10 +90,10 @@ def evaluate(t,o,h,l,c,m,horizon):
                 fs=start+int(hits[0])
             ph=h[fs:end];pl=l[fs:end]
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0); risk=abs(e-sl)
-                if risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)): continue
+                sl=s-(sb*a0 if b else -sb*a0); risk=abs(fill-sl)
+                if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
                 for r in RS:
-                    tp=e+r*risk if b else e-r*risk
+                    tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
                     ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
                     k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"win":0,"loss":0,"amb":0,"timeout":0})
@@ -120,5 +120,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; timeout excluded from realized R
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-(q["loss"]+q["amb"]))/resolved,5) if resolved else None
-res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":a.horizon,"ambiguous":"conservative loss until 1m resolution"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":a.horizon,"ambiguous":"same 15m TP/SL collision counted conservatively as loss in expectancy; actual risk always abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
