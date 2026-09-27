@@ -61,7 +61,8 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
     entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
-            if not (l[j]<=entry<=h[j]):continue
+            touched=(l[j]<=entry) if long else (h[j]>=entry)
+            if not touched:continue
             # Entry first appears inside this 1m candle. OHLC cannot prove whether
             # TP/SL in the same candle happened before or after the maker fill.
             # Any same-1m exit touch is therefore ambiguous and conservatively a loss.
