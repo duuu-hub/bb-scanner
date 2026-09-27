@@ -40,7 +40,7 @@ def resample(t,o,h,l,c,m=16):
     st=cut[:-1];en=cut[1:];good=(en-st)==m;st=st[good];en=en[good]
     return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
 
-def evaluate(t,o,h,l,c,m,horizon):
+def evaluate(t,o,h,l,c,m,horizon=None):
     rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar_open_projection(rh,rl); n=len(rt)
     # ATR available at bar i open = ATR14 through bar i-1 only
     prev=np.r_[np.nan,rc[:-1]]
@@ -48,10 +48,10 @@ def evaluate(t,o,h,l,c,m,horizon):
     atr_closed=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy()
     atr_open=np.r_[np.nan,atr_closed[:-1]]
     pos=np.searchsorted(t,rt); out={}
-    for i in range(15,n-horizon):
+    for i in range(15,n):
         s=sar[i];a0=atr_open[i]
         if not np.isfinite(s) or not np.isfinite(a0) or a0<=0:continue
-        b=bool(bull[i]);side="LONG" if b else "SHORT"; start=pos[i]; end=min(start+m*horizon,len(t))
+        b=bool(bull[i]);side="LONG" if b else "SHORT"; start=pos[i]; end=len(t)
         # spider is live immediately from this bar open
         for em in ENTRY_ATR:
             e=s+(em*a0 if b else -em*a0)
@@ -104,7 +104,7 @@ def evaluate(t,o,h,l,c,m,horizon):
                     else:q["timeout"]+=1
     return out
 
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=12);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--horizon",type=int,default=None);ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args();m={"1h":4,"4h":16}[a.tf]
 files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files;files=[p for j,p in enumerate(files) if j%a.shards==a.shard]
 agg={};errors=[]
 for z,p in enumerate(files,1):
@@ -117,8 +117,8 @@ for z,p in enumerate(files,1):
 for k,q in agg.items():
     resolved=q["win"]+q["loss"]+q["amb"]
     q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
-    # expectancy in R with ambiguous conservatively loss; timeout excluded from realized R
+    # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-(q["loss"]+q["amb"]))/resolved,5) if resolved else None
-res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":a.horizon,"ambiguous":"same 15m TP/SL collision counted conservatively as loss in expectancy; actual risk always abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"same 15m TP/SL collision counted conservatively as loss in expectancy; actual risk always abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
