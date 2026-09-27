@@ -60,12 +60,23 @@ for rf in risks:
   allkeys.update(int(x.value) for x in px[sym]["close"].index)
  for tk in sorted(allkeys):
   tt=pd.Timestamp(tk,tz="UTC")
-  # exits first, matching admission rule exit_time <= entry_time
-  for p in by_exit.get(tk,[]):
+  # Canonical admission realizes OLD positions with exit<=entry before admitting a new row.
+  # A newly admitted trade may itself have exit_time==entry_time; that exit must occur AFTER its entry.
+  exiting=by_exit.get(tk,[])
+  exiting_ids={p["pid"] for p in exiting}
+  old_ids={p["pid"] for p in openp}
+  for p in exiting:
+   if p["pid"] not in old_ids: continue
    hit=[i for i,q in enumerate(openp) if q["pid"]==p["pid"]]
-   assert hit,("missing_open_exit",tk,p["pid"])
+   assert hit,("missing_old_exit",tk,p["pid"])
    cash2 += p["stake"]*p["r_net"];openp.pop(hit[0])
-  openp.extend(by_entry.get(tk,[]))
+  entrants=by_entry.get(tk,[])
+  openp.extend(entrants)
+  for p in exiting:
+   if p["pid"] in old_ids: continue
+   hit=[i for i,q in enumerate(openp) if q["pid"]==p["pid"]]
+   assert hit,("missing_same_time_exit",tk,p["pid"])
+   cash2 += p["stake"]*p["r_net"];openp.pop(hit[0])
   eq=cash2
   for p in openp:
    ser=px[p["symbol"]]["close"]
