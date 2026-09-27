@@ -1,0 +1,33 @@
+name: PD Breakdown Event Bootstrap
+on: workflow_dispatch
+permissions:
+  contents: read
+  actions: read
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36159685183
+          name: pd-4h-breakdown-short-VERIFIED
+          path: trades
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 36211084008
+          name: pd-breakdown-walkforward-basket-VERIFIED
+          path: wf
+      - run: python research/pd_breakdown_event_bootstrap.py --trades trades/trades_all.csv --wf wf/walkforward.csv --out out --sims 50000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-breakdown-event-bootstrap-VERIFIED
+          path: out/
+          if-no-files-found: error
