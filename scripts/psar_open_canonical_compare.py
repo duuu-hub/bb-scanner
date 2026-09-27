@@ -84,7 +84,13 @@ def load(p):
     if len(t)>1 and np.any(np.diff(t)!=900000):
         bad=np.flatnonzero(np.diff(t)!=900000)[:5]
         raise RuntimeError(f"15m timestamp gap/duplicate at rows {bad.tolist()}")
-    return (t,)+tuple(d[x].to_numpy(float) for x in ["open","high","low","close"])
+    vals=tuple(d[x].to_numpy(float) for x in ["open","high","low","close"])
+    o,h,l,c=vals
+    if not all(np.all(np.isfinite(x)) for x in vals):raise RuntimeError("non-finite OHLC")
+    if any(np.any(x<=0) for x in vals):raise RuntimeError("non-positive OHLC")
+    if np.any(h<np.maximum.reduce([o,l,c])) or np.any(l>np.minimum.reduce([o,h,c])):
+        raise RuntimeError("invalid OHLC geometry")
+    return (t,)+vals
 
 def resample(t,o,h,l,c,m=16):
     bucket=t//(900000*m); cut=np.r_[0,np.flatnonzero(bucket[1:]!=bucket[:-1])+1,len(t)]
