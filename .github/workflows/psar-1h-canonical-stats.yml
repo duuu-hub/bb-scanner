@@ -73,7 +73,8 @@ jobs:
               r=float(k.split("|R")[1].split("|")[0])
               q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
               q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-          out={"definition":docs[0]["definition"],"files":sum(d["files"] for d in docs),"errors":[],"summary":agg,"merged_shards":len(docs)}
+          merged_definition=common(docs[0])
+          out={"definition":merged_definition,"files":sum(d["files"] for d in docs),"errors":[],"summary":agg,"merged_shards":len(docs)}
           json.dump(out,open("psar_1h_canonical_merged.json","w"),indent=2)
           print("MERGE_PASS",len(fs),out["files"],len(agg))
           PY
