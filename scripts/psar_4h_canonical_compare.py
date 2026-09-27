@@ -110,7 +110,9 @@ def resample(t,o,h,l,c,m=16):
         span=900000*m
         ok=np.array([t[a]%span==0 and np.all(np.diff(t[a:b])==900000) for a,b in zip(st,en)],dtype=bool)
         st=st[ok];en=en[ok]
-    return t[st],o[st],np.maximum.reduceat(h,st),np.minimum.reduceat(l,st),c[en-1]
+    rh=np.array([np.max(h[a:b]) for a,b in zip(st,en)],dtype=float)
+    rl=np.array([np.min(l[a:b]) for a,b in zip(st,en)],dtype=float)
+    return t[st],o[st],rh,rl,c[en-1]
 
 def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
     rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar_open_projection(rh,rl); n=len(rt)
