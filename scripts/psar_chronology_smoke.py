@@ -115,4 +115,12 @@ hh4=hh3.copy(); ll4=ll3.copy(); hh4[:2]+=25; ll4[:2]-=25
 p4,b4=psar(hh4,ll4)
 assert np.allclose(p3[100:],p4[100:],rtol=0,atol=1e-12) and np.array_equal(b3[100:],b4[100:])
 print("PASS psar_burnin_initialization_sanity")
+
+# Binance CSV parser contract: canonical engine must support both headered and headerless archives.
+assert 'header=None,dtype=str' in src
+assert 'first_ts=pd.to_numeric' in src
+assert 'if len(d) and not np.isfinite(first_ts): d=d.iloc[1:]' in src
+assert 'invalid numeric data in 1m CSV' in src
+print("PASS binance_1m_header_contract")
+
 print("ALL_CANONICAL_INVARIANTS_PASS")
