@@ -48,9 +48,9 @@ run_case("short_entry_then_tp",[(0,101,99),(60000,99,94)],95,105,False,100,"win"
 run_case("short_entry_then_sl",[(0,101,99),(60000,106,99)],95,105,False,100,"loss")
 run_case("short_preentry_tp_then_entry_continue",[(0,98,94),(60000,101,99)],95,105,False,100,"continue")
 # DATA_GAP contract: official 1m archive integrity gaps are excluded, never guessed as win/loss.
-assert '"data_gap":0' in src
-assert '"data_gap"]+q["unresolved_eod"]' in src
-assert '"one_min_gap_policy"' in src
+assert '"data_gap":0' in SRC
+assert '"data_gap"]+q["unresolved_eod"]' in SRC
+assert '"one_min_gap_policy"' in SRC
 print("ALL_CHRONOLOGY_SMOKE_PASS")
 
 
