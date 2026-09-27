@@ -48,11 +48,12 @@ def ev(p):
      elif ss<it:q["loss"]+=1;q["pnl_price"]+=(sl-fill if b else fill-sl)
      else:q["timeout"]+=1
  return out
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");a=ap.parse_args();agg={}
-for p in glob.glob(a.data+"/**/*.csv.gz",recursive=True):
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--nshards",type=int,default=1);a=ap.parse_args();agg={}
+files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));files=[p for n,p in enumerate(files) if n%a.nshards==a.shard]
+for p in files:
  try:x=ev(p)
  except Exception as e:print("FAIL",p,e);continue
  for k,v in x.items():
   q=agg.setdefault(k,{kk:0 for kk in v})
   for kk,vv in v.items():q[kk]+=vv
-open("psar_execution_fixed_levels.json","w").write(json.dumps({"definition":"fixed PSAR design levels; crossed-at-open => taker at 4H open; otherwise limit touch","summary":agg},indent=2))
+open(f"psar_execution_fixed_levels_{a.shard}.json","w").write(json.dumps({"definition":"fixed PSAR design levels; crossed-at-open => taker at 4H open; otherwise limit touch","summary":agg},indent=2))
