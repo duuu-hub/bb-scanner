@@ -46,6 +46,8 @@ print("ALL_CHRONOLOGY_SMOKE_PASS")
 src=SRC
 assert "PSAR_BURNIN_BARS=100" in src
 assert "max(15,PSAR_BURNIN_BARS)" in src
+assert 'np.diff(t)<=0' in src
+assert 'def contiguous_segments(t):' in src
 assert 'np.diff(t)!=900000' in src
 assert 'np.diff(v[0])!=60000' in src
 assert 'z-a!=15' in src
@@ -54,6 +56,8 @@ assert 'invalid 1m high/low' in src
 assert src.count('if (b and not fill>sl) or ((not b) and not fill<sl):continue')==2
 assert 'duplicate symbol/time-range input' in src
 assert 't[a]%span==0' in src
+assert 'unexpected 1m ZIP members' in src
+assert 'gap_policy' in src
 assert 'gross_expectancy_R_amb_loss' in src
 assert 'independent-signal gross edge scan' in src
 assert 'q["loss"]+=int(rr!="win")' not in src
