@@ -26,6 +26,9 @@ def _one_min(symbol,ts):
             if not np.all(np.isfinite(v[1])) or not np.all(np.isfinite(v[2])):raise RuntimeError("non-finite 1m high/low")
             if np.any(v[1]<=0) or np.any(v[2]<=0) or np.any(v[1]<v[2]):raise RuntimeError("invalid 1m high/low")
             if np.any(v[0]%60000!=0):raise RuntimeError("misaligned 1m timestamps")
+            first_ym=datetime.fromtimestamp(int(v[0][0])/1000,tz=timezone.utc).strftime("%Y-%m")
+            last_ym=datetime.fromtimestamp(int(v[0][-1])/1000,tz=timezone.utc).strftime("%Y-%m")
+            if first_ym!=ym or last_ym!=ym:raise RuntimeError(f"1m archive month mismatch requested={ym} actual={first_ym}..{last_ym}")
             if len(v[0])>1 and np.any(np.diff(v[0])!=60000):
                 bad=np.flatnonzero(np.diff(v[0])!=60000)[:5]
                 raise RuntimeError(f"1m timestamp gap/duplicate at rows {bad.tolist()}")
