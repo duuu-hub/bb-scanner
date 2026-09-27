@@ -47,7 +47,8 @@ jobs:
           docs=[json.load(open(x)) for x in fs]
           base=docs[0]["definition"]
           assert base["tf"]=="1h",base
-          assert all(d["definition"]==base for d in docs),"shard definition mismatch"
+          common=lambda d:{k:v for k,v in d["definition"].items() if k!="shard_index"}
+          assert all(common(d)==common(docs[0]) for d in docs),"shard definition mismatch"
           assert all(not d.get("errors") for d in docs),"shard contains errors"
           assert {d["definition"]["shard_index"] for d in docs}==set(range(8)),"missing/duplicate shard index"
           assert all(d["definition"]["shard_count"]==8 for d in docs),"wrong shard_count"
