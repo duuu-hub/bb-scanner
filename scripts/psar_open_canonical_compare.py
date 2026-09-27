@@ -115,7 +115,9 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
             ph=h[fs:end];pl=l[fs:end]
             is_taker=bool(crossed)
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0); risk=abs(fill-sl)
+                sl=s-(sb*a0 if b else -sb*a0)
+                if (b and not fill>sl) or ((not b) and not fill<sl):continue
+                risk=abs(fill-sl)
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
@@ -160,7 +162,9 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
             ph=h[fs:end];pl=l[fs:end]
             is_taker=bool(crossed)
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0); risk=abs(fill-sl)
+                sl=s-(sb*a0 if b else -sb*a0)
+                if (b and not fill>sl) or ((not b) and not fill<sl):continue
+                risk=abs(fill-sl)
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
