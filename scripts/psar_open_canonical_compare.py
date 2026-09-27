@@ -21,8 +21,14 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None):
     t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000);entered=entry is None
     for j in range(a,z):
         if not entered:
-            if l[j]<=entry<=h[j]:entered=True
-            else:continue
+            if not (l[j]<=entry<=h[j]):continue
+            # Entry first appears inside this 1m candle. OHLC cannot prove whether
+            # TP/SL in the same candle happened before or after the maker fill.
+            # Any same-1m exit touch is therefore ambiguous and conservatively a loss.
+            ht=h[j]>=tp if long else l[j]<=tp; hs=l[j]<=sl if long else h[j]>=sl
+            if ht or hs:return "loss"
+            entered=True
+            continue
         ht=h[j]>=tp if long else l[j]<=tp; hs=l[j]<=sl if long else h[j]>=sl
         if ht and hs:return "loss"
         if hs:return "loss"
