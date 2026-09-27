@@ -52,6 +52,7 @@ ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
 SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
 RS=(.5,.75,1.,1.25,1.5,2.,2.5,3.,4.)
 MIN_RISK_EPS=1e-12
+PSAR_BURNIN_BARS=100
 
 def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
     n=len(h); out=np.full(n,np.nan); bull=np.ones(n,bool)
@@ -102,7 +103,7 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
     atr_closed=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy()
     atr_open=np.r_[np.nan,atr_closed[:-1]]
     pos=np.searchsorted(t,rt); out={}
-    for i in range(15,n):
+    for i in range(max(15,PSAR_BURNIN_BARS),n):
         s=sar[i];a0=atr_open[i]
         if not np.isfinite(s) or not np.isfinite(a0) or a0<=0:continue
         b=bool(bull[i]);side="LONG" if b else "SHORT"; start=pos[i]; end=len(t)
@@ -219,5 +220,5 @@ for k,q in agg.items():
     r=float(k.split("|R")[1].split("|")[0])
     q["expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
 if errors: raise RuntimeError("input/evaluation errors: "+json.dumps(errors[:10]))
-res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only","atr":"ATR14 through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; 1m download/integrity failure -> run fails; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; 1m download/integrity failure -> run fails; maker 1m starts only after entry touch; actual risk=abs(fill-SL)"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
