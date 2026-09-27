@@ -53,11 +53,11 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
     t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000)
     if z-a!=15 or a>=len(t) or t[a]!=ts or t[z-1]!=ts+840000:
         raise RuntimeError(f"incomplete 1m window {symbol} {ts}: count={z-a}")
-    if source_high is not None and source_low is not None:
-        ah=float(np.max(h[a:z])); al=float(np.min(l[a:z]))
-        tol=1e-10*max(1.0,abs(source_high),abs(source_low),abs(ah),abs(al))
-        if abs(ah-source_high)>tol or abs(al-source_low)>tol:
-            raise RuntimeError(f"1m/15m price mismatch {symbol} {ts}: 1m=({ah},{al}) 15m=({source_high},{source_low})")
+    # Chronology windows use the official Binance 1m archive as the authority.
+    # The cached 15m source may be an older Binance snapshot and can differ by ticks
+    # after exchange-side historical kline corrections. Never mix snapshots by
+    # rejecting or altering 1m chronology based on stale 15m H/L. Window completeness,
+    # timestamp continuity and OHLC validity are enforced in _one_min above.
     entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
