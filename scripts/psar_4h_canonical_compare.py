@@ -108,13 +108,12 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                     # may have occurred before entry. Never credit that as a win.
                     if not is_taker:
                         fill_tp=bool(th[0]); fill_sl=bool(sh[0])
-                        if fill_sl and fill_tp:
-                            q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
-                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss")
-                            q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win"); continue
-                        if fill_sl:q["loss"]+=1; continue
-                        if fill_tp:
+                        if fill_tp or fill_sl:
+                            # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
+                            # Resolve every fill-bar exit candidate on official 1m data starting at entry.
+                            q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1
                             elif rr=="loss":q["loss"]+=1
                             else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
@@ -151,13 +150,12 @@ def evaluate(t,o,h,l,c,m,horizon=None,symbol=None):
                     # may have occurred before entry. Never credit that as a win.
                     if not is_taker:
                         fill_tp=bool(th[0]); fill_sl=bool(sh[0])
-                        if fill_sl and fill_tp:
-                            q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
-                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss")
-                            q["win"]+=int(rr=="win"); q["loss"]+=int(rr!="win"); continue
-                        if fill_sl:q["loss"]+=1; continue
-                        if fill_tp:
+                        if fill_tp or fill_sl:
+                            # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
+                            # Resolve every fill-bar exit candidate on official 1m data starting at entry.
+                            q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill)
+                            q["resolved_1m"]+=int(rr is not None); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1
                             elif rr=="loss":q["loss"]+=1
                             else:q["maker_fillbar_amb"]+=1;q["loss"]+=1
