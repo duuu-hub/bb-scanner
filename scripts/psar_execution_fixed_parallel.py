@@ -1,6 +1,6 @@
 import argparse,glob,json,os
 import pandas as pd,numpy as np
-ENTRY_ATR=(0.,.25,.5,1.,2.,3.,4.,5.,6.,8.,10.); SL_BUFFER_ATR=(.1,.2,.3,.5,.75,1.,1.5,2.); RS=(.5,1.,1.5,2.,2.5,3.,4.,5.,6.,8.,10.); M=16;HORIZON=12
+ENTRY_ATR=(0.,.25,.5,1.,2.,3.,4.,5.,6.,8.,10.); SL_BUFFER_ATR=(0.,.1,.2,.3,.5,.75,1.,1.5,2.); RS=(.5,1.,1.5,2.,2.5,3.,4.,5.,6.,8.,10.); M=16;HORIZON=12
 def load(p):
  d=pd.read_csv(p,compression="gzip",usecols=["open_time","open","high","low","close"]).sort_values("open_time"); return tuple(d[x].to_numpy(np.int64 if x=="open_time" else float) for x in ["open_time","open","high","low","close"])
 def resample(t,o,h,l,c,m=16):
@@ -32,11 +32,11 @@ def ev(p):
     if not hit.size:continue
     fs=start+int(hit[0]);fill=trigger;mode="LIMIT_TOUCH"
    for sb in SL_BUFFER_ATR:
-    sl=sar[i]-(sb*a0 if b else -sb*a0);risk_design=abs(trigger-sl)
-    if risk_design<=1e-12*max(1.,abs(trigger),abs(sl)):continue
+    sl=sar[i]-(sb*a0 if b else -sb*a0);risk_actual=abs(fill-sl)
+    if risk_actual<=1e-12*max(1.,abs(fill),abs(sl)):continue
     ph=h[fs:end];pl=l[fs:end]
     for r in RS:
-     tp=trigger+(r*risk_design if b else -r*risk_design);ti=np.flatnonzero((ph>=tp) if b else (pl<=tp));si=np.flatnonzero((pl<=sl) if b else (ph>=sl));it=ti[0] if ti.size else 10**9;ss=si[0] if si.size else 10**9
+     tp=fill+(r*risk_actual if b else -r*risk_actual);ti=np.flatnonzero((ph>=tp) if b else (pl<=tp));si=np.flatnonzero((pl<=sl) if b else (ph>=sl));it=ti[0] if ti.size else 10**9;ss=si[0] if si.size else 10**9
      k=f"E{em:g}|SB{sb:g}|R{r:g}|{'LONG' if b else 'SHORT'}";q=out.setdefault(k,dict(fills=0,taker_open=0,limit_touch=0,win=0,loss=0,amb=0,timeout=0,pnl_price=0.));q["fills"]+=1;q["taker_open" if mode=="TAKER_OPEN" else "limit_touch"]+=1
      if it==ss and it<10**9:q["amb"]+=1
      elif it<ss:q["win"]+=1;q["pnl_price"]+=(tp-fill if b else fill-tp)
