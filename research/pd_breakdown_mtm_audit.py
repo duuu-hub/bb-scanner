@@ -69,3 +69,5 @@ for rf in risks:
 pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).to_string(index=False))
 
 # trigger exact MTM rerun
+
+# rerun after newline normalization
