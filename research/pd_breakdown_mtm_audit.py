@@ -96,3 +96,5 @@ pd.DataFrame(rows).to_csv(O/"mtm_mdd.csv",index=False);print(pd.DataFrame(rows).
 # verified trigger
 
 # parity-gated rerun
+
+# trigger path-aware MTM audit
