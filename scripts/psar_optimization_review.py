@@ -82,7 +82,7 @@ def deterministic_checks(fast):
     h = np.array([100., 101., 106., 103.])
     l = np.array([99., 98., 100., 94.])
     cases.append(("tp_first", fast(h, l, 0, 105., 95., True), (2, True, False)))
-    cases.append(("sl_first", fast(h, l, 0, 110., 98.5, True), (0, False, True)))
+    cases.append(("sl_first", fast(h, l, 0, 110., 98.5, True), (1, False, True)))
     h2 = np.array([100., 106., 103.])
     l2 = np.array([99., 94., 100.])
     cases.append(("same_bar_both", fast(h2, l2, 0, 105., 95., True), (1, True, True)))
