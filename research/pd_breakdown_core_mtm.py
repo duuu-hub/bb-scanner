@@ -259,7 +259,8 @@ def data_smoke(core_path,cache_dir):
     btc=download_spot_15m('BTCUSDT',s,e,cache_dir);eth=download_spot_15m('ETHUSDT',s,e,cache_dir)
     marks,par=build_core_marks(c,btc,eth,prev)
     active=int(c.base.sum()); assert len(marks)==active*96
-    assert active>0\n    print('DATA_SMOKE_PASS',{'days':len(c),'active_days':active,'mark_rows':len(marks),'btc_missing':int(par.btc_missing.sum()),'eth_missing':int(par.eth_missing.sum()),'max_btc_gap':int(par.btc_max_gap.max()),'max_eth_gap':int(par.eth_max_gap.max()),'max_endpoint_err':float((par.expected_gross.where(par.bars==0, par.expected_gross)-par.expected_gross).abs().max())})
+    assert active>0
+    print('DATA_SMOKE_PASS',{'days':len(c),'active_days':active,'mark_rows':len(marks),'btc_missing':int(par.btc_missing.sum()),'eth_missing':int(par.eth_missing.sum()),'max_btc_gap':int(par.btc_max_gap.max()),'max_eth_gap':int(par.eth_max_gap.max()),'max_endpoint_err':float((par.expected_gross.where(par.bars==0, par.expected_gross)-par.expected_gross).abs().max())})
 
 
 def full_run(core_path,short_path,um_dir,out_dir,spot_cache):
