@@ -54,18 +54,9 @@ def sim(mode,w,idx,base_ret,idle,b15,hour,orig_open,orig_trail):
     want=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
     px=px.reindex(want)
     miss=px.close.isna()
-    # Small official-archive gaps: represent the missing interval as a flat bar at previous close.
-    # Abort on larger uncertainty rather than silently fabricating a path.
-    runs=(miss.astype(int).groupby((~miss).cumsum()).sum() if miss.any() else pd.Series([0]))
-    max_run=int(runs.max()) if len(runs) else 0
-    nmiss=int(miss.sum())
-    if max_run>4 or nmiss>100:
-        raise AssertionError(("BTC15 gap too large",nmiss,max_run))
-    prev=px.close.ffill()
-    for col in ["open","high","low","close"]:
-        px[col]=px[col].where(~miss,prev)
-    if px[["open","high","low","close"]].isna().any().any():
-        raise AssertionError("cannot fill BTC15 leading gap")
+    if miss.any():
+        # b15 is already repaired in main from official 1m; remaining gaps are not allowed.
+        raise AssertionError(("unrepaired BTC15 gaps",int(miss.sum()),list(px.index[miss][:10])))
     E=1.;pos=False;stake=0.;ep=0.;peak=0.;pending=None;curve=[(START,E)]
     trades=0
     for mt in idx[1:]:
@@ -143,12 +134,24 @@ def main():
     ap.add_argument("--base8",required=True);ap.add_argument("--base24",required=True);ap.add_argument("--out",required=True);ap.add_argument("--cache",default="spotcache")
     a=ap.parse_args();O=Path(a.out);O.mkdir(parents=True,exist_ok=True);mod=load_mod(a.combo_script)
     h=mod.dl_spot("BTCUSDT","1h",pd.Timestamp("2019-01-01",tz="UTC"),END,a.cache)
-    b15=mod.dl_spot("BTCUSDT","15m",START,END,a.cache);hour=prep_hourly(mod,h,a.funding);orig_open,orig_trail=original_active(hour,b15)
+    b15=mod.dl_spot("BTCUSDT","15m",START,END,a.cache)
     full_open_idx=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
-    raw_idx=b15.set_index("dt").sort_index().reindex(full_open_idx)
-    miss=raw_idx.close.isna()
-    runs=(miss.astype(int).groupby((~miss).cumsum()).sum() if miss.any() else pd.Series([0]))
-    print("BTC15_GAPS",{"missing":int(miss.sum()),"max_run":int(runs.max()) if len(runs) else 0})
+    raw=b15.set_index("dt").sort_index().reindex(full_open_idx)
+    miss=raw.close.isna()
+    if miss.any():
+        ms=raw.index[miss]
+        one=mod.dl_spot("BTCUSDT","1m",ms.min(),ms.max()+pd.Timedelta(minutes=15),a.cache)
+        agg=one.set_index("dt").resample("15min",label="left",closed="left").agg(
+            open=("open","first"),high=("high","max"),low=("low","min"),close=("close","last"),volume=("volume","sum"),bars=("close","count"))
+        for t in ms:
+            if t in agg.index and int(agg.at[t,"bars"])==15:
+                for col in ["open","high","low","close","volume"]:
+                    raw.at[t,col]=float(agg.at[t,col])
+        rem=raw.close.isna()
+        if rem.any(): raise AssertionError(("BTC15 gap unresolved from 1m",int(rem.sum()),list(raw.index[rem][:10])))
+    b15=raw.reset_index().rename(columns={"index":"dt"})
+    print("BTC15_GAPS_REPAIRED",{"missing_15m":int(miss.sum())})
+    hour=prep_hourly(mod,h,a.funding);orig_open,orig_trail=original_active(hour,b15)
     orig_open=orig_open.reindex(full_open_idx).ffill().fillna(False).astype(bool)
 
     allrows=[]
