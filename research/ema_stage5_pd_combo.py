@@ -47,7 +47,7 @@ def build_ema(hourly,funding,b15):
     d["xit"]=(d.close<d.ema*.98)&(d.close.shift(1)>=d.ema.shift(1)*.98)
 
     # Reproduce original 1H engine exactly for parity.
-    x=d.loc[EMA_FULL_START:"2026-08-21"].copy();cap=1.;pos=False;ep=0.;peak=0.;pending=None;tr=[]
+    x=d[(d.index>=EMA_FULL_START)&(d.index<END)].copy();cap=1.;pos=False;ep=0.;peak=0.;pending=None;tr=[]
     for dt,r in x.iterrows():
         if pending=="buy" and not pos:
             ep=float(r.open);peak=ep;cap*=1-EMA_COST;pos=True;ent=dt;pending=None
