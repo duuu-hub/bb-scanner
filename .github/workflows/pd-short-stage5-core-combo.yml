@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir -p core pd
           gh run download 35952730823 --repo duuu-hub/bb-scanner --name btc-eth-regime-stage5-long-history -D core
-          gh run download 36369567684 --repo duuu-hub/bb-scanner --name pd-short-15m-selector-rebuild -D pd
+          gh run download 36374061982 --repo duuu-hub/bb-scanner --name pd-short-15m-selector-rebuild -D pd
         env: {GH_TOKEN: "${{ github.token }}"}
       - name: Run exact combo
         run: python research/pd_short_stage5_core_combo.py --core core/binance_daily_strategy.csv --selected pd/selected_candidates.csv --out out
