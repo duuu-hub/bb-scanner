@@ -1,0 +1,48 @@
+name: PD Short Top10 Final Coverage
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_short_top10_final_coverage_once']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests
+      - run: |
+          python -m py_compile research/pd_short_top10_final_coverage.py research/pd_short_top10_1m_ambiguity_resolution.py research/pd_short_top10_cost_slippage_stress.py research/pd_breakdown_core_mtm.py
+          python research/pd_short_top10_final_coverage.py --self-test
+      - run: |
+          mkdir -p core
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
+          python research/pd_breakdown_core_mtm.py --data-smoke --core core/core_daily.csv.gz --spot-cache spot-smoke
+        env: {GH_TOKEN: '${{ github.token }}'}
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests
+      - run: |
+          mkdir -p input canonical core
+          gh run download 36159685183 --repo duuu-hub/bb-scanner --name pd-4h-breakdown-short-VERIFIED -D canonical
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36095439671 --repo duuu-hub/bb-scanner --name rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s
+          done
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - run: python research/pd_short_top10_final_coverage.py --core core/core_daily.csv.gz --canonical canonical/trades_all.csv --um input --out out --spot-cache spot15m --one-cache um1m
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-short-top10-final-coverage-VERIFIED
+          path: out/
+          if-no-files-found: error
