@@ -1,0 +1,56 @@
+name: PD Breakdown Core 15m MTM
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_core_mtm_once']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests
+      - run: |
+          python -m py_compile research/pd_breakdown_core_mtm.py
+          python research/pd_breakdown_core_mtm.py --self-test
+      - run: |
+          mkdir -p core
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - run: python research/pd_breakdown_core_mtm.py --data-smoke --core core/core_daily.csv.gz --spot-cache spot-smoke
+
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests
+      - run: |
+          mkdir -p core short input
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
+          gh run download 36366258412 --repo duuu-hub/bb-scanner --name pd-breakdown-15m-execution-audit -D short
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36095439671 --repo duuu-hub/bb-scanner --name rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s
+          done
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - run: |
+          python research/pd_breakdown_core_mtm.py \
+            --core core/core_daily.csv.gz \
+            --short short/candidates_15m_b5.csv \
+            --um input \
+            --spot-cache spot15m \
+            --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pd-breakdown-core-15m-mtm-VERIFIED
+          path: out/
+          if-no-files-found: error
