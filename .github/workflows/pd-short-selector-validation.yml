@@ -28,13 +28,13 @@ jobs:
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
       - run: |
-          mkdir -p input raw core
-          gh run download 36370381449 --repo duuu-hub/bb-scanner --name pd-long-short-15m-revalidation -D raw
+          mkdir -p input canonical core
+          gh run download 36159685183 --repo duuu-hub/bb-scanner --name pd-4h-breakdown-short-VERIFIED -D canonical
           gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
           for s in 0 1 2 3 4 5 6 7; do
             gh run download 36095439671 --repo duuu-hub/bb-scanner --name rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s
           done
         env: {GH_TOKEN: '${{ github.token }}'}
-      - run: python research/pd_short_selector_validation.py --input input --trades raw/trades_15m.csv --core core/core_daily.csv.gz --sims 10000 --out out
+      - run: python research/pd_short_selector_validation.py --input input --canonical canonical/trades_all.csv --core core/core_daily.csv.gz --sims 10000 --out out
       - uses: actions/upload-artifact@v4
         with: {name: pd-short-selector-validation-VERIFIED, path: out/, if-no-files-found: error}
