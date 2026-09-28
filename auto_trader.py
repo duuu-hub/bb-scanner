@@ -988,8 +988,13 @@ def manage_signal_shadows(
                 continue
             candle_end = candle_open + 60_000
             last_close = float(candle["close"])
-            tp_hit = float(candle["high"]) >= float(shadow["tp"])
-            sl_hit = float(candle["low"]) <= float(shadow["sl"])
+            is_short = str(shadow.get("side") or "LONG").upper() == "SHORT"
+            if is_short:
+                tp_hit = float(candle["low"]) <= float(shadow["tp"])
+                sl_hit = float(candle["high"]) >= float(shadow["sl"])
+            else:
+                tp_hit = float(candle["high"]) >= float(shadow["tp"])
+                sl_hit = float(candle["low"]) <= float(shadow["sl"])
             if tp_hit and sl_hit:
                 close_reason = "AMBIGUOUS_TP_SL_SAME_CANDLE"
                 break
@@ -1024,7 +1029,10 @@ def manage_signal_shadows(
         entry = float(shadow.get("shadow_entry_price") or 0.0)
         ret = None
         if entry > 0 and exit_price is not None:
-            ret = (float(exit_price) / entry - 1.0) * 100.0
+            if str(shadow.get("side") or "LONG").upper() == "SHORT":
+                ret = (entry / float(exit_price) - 1.0) * 100.0
+            else:
+                ret = (float(exit_price) / entry - 1.0) * 100.0
 
         closed = {
             **shadow,
