@@ -15,46 +15,10 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
       - name: Chronology and canonical invariants
         run: python scripts/psar_chronology_smoke.py
-      - name: First-exit parity randomized
-        run: |
-          python - <<'PY'
-          import ast,random
-          from pathlib import Path
-          import numpy as np
-          src=Path("scripts/psar_open_canonical_compare.py").read_text().replace("@njit(cache=True)","@njit(cache=False)")
-          tree=ast.parse(src)
-          keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.FunctionDef) and n.name=="_first_hits")]
-          ns={};exec(compile(ast.Module(body=keep,type_ignores=[]),"<parity>","exec"),ns)
-          fast=ns["_first_hits"]
-          rng=np.random.default_rng(20260928)
-          for case in range(2000):
-              n=int(rng.integers(1,500)); mid=np.cumsum(rng.normal(0,1,n))+100
-              spread=rng.uniform(.01,3,n); h=mid+spread; l=mid-spread
-              start=int(rng.integers(0,n)); long=bool(case%2)
-              base=float(mid[start]); tp=base+rng.uniform(.01,8) if long else base-rng.uniform(.01,8)
-              sl=base-rng.uniform(.01,8) if long else base+rng.uniform(.01,8)
-              th=(h[start:]>=tp) if long else (l[start:]<=tp)
-              sh=(l[start:]<=sl) if long else (h[start:]>=sl)
-              ti=np.flatnonzero(th);si=np.flatnonzero(sh)
-              old=(int(ti[0]) if ti.size else -1,int(si[0]) if si.size else -1)
-              got=tuple(map(int,fast(h,l,start,tp,sl,long)))
-              if old!=got: raise AssertionError((case,old,got,start,tp,sl,long))
-          print("PARITY_PASS randomized_cases=2000",flush=True)
-          PY
-      - name: Micro benchmark first-exit scan
-        run: |
-          python - <<'PY'
-          import ast,time
-          from pathlib import Path
-          import numpy as np
-          src=Path("scripts/psar_open_canonical_compare.py").read_text().replace("@njit(cache=True)","@njit(cache=False)");tree=ast.parse(src)
-          keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.FunctionDef) and n.name=="_first_hits")]
-          ns={};exec(compile(ast.Module(body=keep,type_ignores=[]),"<bench>","exec"),ns);fast=ns["_first_hits"]
-          n=180000;rng=np.random.default_rng(7);mid=np.cumsum(rng.normal(0,.2,n))+100;sp=rng.uniform(.01,1,n);h=mid+sp;l=mid-sp
-          fast(h,l,0,105,95,True)
-          qs=[(int(rng.integers(0,n-1)),100+rng.uniform(-5,5),100+rng.uniform(-5,5),bool(i%2)) for i in range(5000)]
-          t=time.time()
-          for s,tp,sl,long in qs: fast(h,l,s,tp,sl,long)
-          dt=time.time()-t
-          print(f"BENCH_PASS calls={len(qs)} seconds={dt:.3f} calls_per_sec={len(qs)/dt:.1f}",flush=True)
-          PY
+      - name: Optimization parity review 30x
+        run: python scripts/psar_optimization_review.py
+      - name: Upload optimization review
+        uses: actions/upload-artifact@v4
+        with:
+          name: psar-optimization-review
+          path: psar_optimization_review.json
