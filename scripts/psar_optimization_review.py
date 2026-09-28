@@ -29,7 +29,8 @@ def load_first_exit(path):
                             kw.value = ast.Constant(False)
             keep.append(node)
     ns = {}
-    exec(compile(ast.Module(body=keep, type_ignores=[]), str(path), "exec"), ns)
+    module=ast.fix_missing_locations(ast.Module(body=keep, type_ignores=[]))
+    exec(compile(module, str(path), "exec"), ns)
     return src, ns["_first_exit"]
 
 
