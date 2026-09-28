@@ -264,7 +264,7 @@ def contract_config(client: BitgetDemoClassic, symbol: str) -> dict:
         ) or []
     except RuntimeError as exc:
         message = str(exc)
-        if "code=40034" in message:
+        if "code=40034" in message or "code=40309" in message:
             raise DemoSymbolUnsupported(
                 f"{symbol} is not available in Bitget Demo: {message}"
             ) from exc
