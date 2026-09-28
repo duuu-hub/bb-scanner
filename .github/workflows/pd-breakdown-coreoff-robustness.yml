@@ -1,0 +1,37 @@
+name: PD Breakdown Core-Off Robustness
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/pd_breakdown_coreoff_robustness_once']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: |
+          python -m py_compile research/pd_breakdown_coreoff_robustness.py
+          python research/pd_breakdown_coreoff_robustness.py --self-test
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: |
+          mkdir -p core short
+          gh run download 36072122659 --repo duuu-hub/bb-scanner --name core-three-way-5y-portfolio -D core
+          gh run download 36366258412 --repo duuu-hub/bb-scanner --name pd-breakdown-15m-execution-audit -D short
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - run: python research/pd_breakdown_coreoff_robustness.py --core core/core_daily.csv.gz --short short/candidates_15m_b5.csv --out out
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-breakdown-coreoff-robustness-VERIFIED, path: out/, if-no-files-found: error}
