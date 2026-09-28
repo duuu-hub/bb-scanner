@@ -19,11 +19,15 @@ C["held_day"]=C.datetime_utc.dt.floor("D")+pd.Timedelta(days=1)
 C["core_long"]=(C.position>0).astype(int)
 gross=C.core_long*(C.BTCUSDT_fwd.fillna(0)+C.ETHUSDT_fwd.fillna(0))/2.0
 chg=C.core_long.diff().abs().fillna(C.core_long.abs())
-C["core_gross_pct"]=gross\nC["core_long_net_pct"]=gross-chg*(0.25/2.0)
+C["core_gross_pct"]=gross
+C["core_long_net_pct"]=gross-chg*(0.25/2.0)
 H=C[(C.held_day>=START)&(C.held_day<END)].copy()
 assert H.held_day.is_unique
 active_map=H.set_index("held_day").core_long.to_dict()
-ret_map=H.set_index("held_day").core_long_net_pct.to_dict()\ngross_map=H.set_index("held_day").core_gross_pct.to_dict()\n_before=C[C.held_day<START]\ninitial_prev_state=int(_before.core_long.iloc[-1]) if len(_before) else 0
+ret_map=H.set_index("held_day").core_long_net_pct.to_dict()
+gross_map=H.set_index("held_day").core_gross_pct.to_dict()
+_before=C[C.held_day<START]
+initial_prev_state=int(_before.core_long.iloc[-1]) if len(_before) else 0
 
 S=pd.read_csv(a.selected,parse_dates=["entry_time","exit_time"])
 S=S[(S.entry_time>=START)&(S.entry_time<END)].copy()
