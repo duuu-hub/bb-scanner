@@ -1,0 +1,130 @@
+name: PSAR 4H SHORT Stop Policy Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_stop_policy_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke
+        run: |
+          python scripts/psar_4h_short_stop_policy_audit.py --data data --shard 0 --shards 1 --max-files 8 --out smoke.csv.gz --meta smoke.json
+          python - <<'PY'
+          import json,pandas as pd
+          m=json.load(open("smoke.json"));d=pd.read_csv("smoke.csv.gz")
+          assert m["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4"
+          assert "BTCUSDT" not in set(d.symbol)
+          assert set(d.variant).issubset({"P4T26_DD8","P9T27_DD9"})
+          assert set(d.policy)=={"FIXED","RATCHET"}
+          assert len(d)>0
+          for k,g in d.groupby(["variant","symbol","signal_ts","fill_ts"]):
+              assert set(g.policy)=={"FIXED","RATCHET"},k
+          print("SMOKE_PASS",len(d),d.groupby(["variant","policy"]).size().to_dict())
+          PY
+
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run stop policy audit
+        run: python scripts/psar_4h_short_stop_policy_audit.py --data data --shard ${{ matrix.shard }} --shards 8 --out stop_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-stop-policy-${{ matrix.shard }}
+          path: |
+            stop_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-4h-short-stop-policy-*
+          path: merged
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Analyze fixed vs ratchet
+        run: |
+          python - <<'PY'
+          import glob,json
+          import pandas as pd,numpy as np
+          fs=glob.glob("merged/**/stop_*.csv.gz",recursive=True)
+          ms=glob.glob("merged/**/meta_*.json",recursive=True)
+          assert len(fs)==len(ms)==8,(len(fs),len(ms))
+          D=pd.concat([pd.read_csv(x) for x in fs],ignore_index=True)
+          metas=[json.load(open(x)) for x in ms]
+          assert all(x["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4" for x in metas)
+          assert "BTCUSDT" not in set(D.symbol)
+          def pf(x):
+              x=np.asarray(x,float);p=x[x>0].sum();l=-x[x<0].sum()
+              return float(p/l) if l>0 else None
+          out={"definition":metas[0]["definition"],"rows":int(len(D)),"results":{}}
+          for v in ("P4T26_DD8","P9T27_DD9"):
+              out["results"][v]={}
+              for pol in ("FIXED","RATCHET"):
+                  x=D[(D.variant==v)&(D.policy==pol)].copy()
+                  r=x[x.outcome.isin(["win","loss"]) & x.pnl_pct.notna()].copy()
+                  yr={}
+                  for y,g in r.groupby(pd.to_datetime(r.fill_ts,unit="ms",utc=True).dt.year):
+                      yr[str(int(y))]={"n":int(len(g)),"gross_pf":pf(g.pnl_pct),"net20_pf":pf(g.pnl_pct-0.20),
+                                      "mean_pct":float(g.pnl_pct.mean()),"win_pct":float((g.pnl_pct>0).mean()*100)}
+                  reasons=x.exit_reason.value_counts().to_dict()
+                  out["results"][v][pol]={
+                    "fills":int(len(x)),"resolved":int(len(r)),"unresolved_eod":int((x.outcome=="unresolved_eod").sum()),
+                    "gross_pf":pf(r.pnl_pct),"net20_pf":pf(r.pnl_pct-0.20),"net40_pf":pf(r.pnl_pct-0.40),
+                    "mean_gross_pct":float(r.pnl_pct.mean()) if len(r) else None,
+                    "win_pct":float((r.pnl_pct>0).mean()*100) if len(r) else None,
+                    "hold_hours_mean":float(r.hold_hours.mean()) if len(r) else None,
+                    "hold_hours_p50":float(r.hold_hours.quantile(.5)) if len(r) else None,
+                    "hold_hours_p90":float(r.hold_hours.quantile(.9)) if len(r) else None,
+                    "exit_reason":{str(k):int(vv) for k,vv in reasons.items()},
+                    "by_year":yr,
+                  }
+              a=out["results"][v]["FIXED"];b=out["results"][v]["RATCHET"]
+              out["results"][v]["delta_ratchet_minus_fixed"]={
+                "gross_pf":b["gross_pf"]-a["gross_pf"],
+                "net20_pf":b["net20_pf"]-a["net20_pf"],
+                "net40_pf":b["net40_pf"]-a["net40_pf"],
+                "mean_gross_pct":b["mean_gross_pct"]-a["mean_gross_pct"],
+                "hold_hours_mean":b["hold_hours_mean"]-a["hold_hours_mean"],
+              }
+          json.dump(out,open("psar_4h_short_stop_policy_analysis.json","w"),indent=2)
+          print("STOP_MERGE_PASS",len(D))
+          for v,z in out["results"].items():
+              print("VAR",v)
+              for p in ("FIXED","RATCHET"):
+                  q=z[p]
+                  print(p,"PF",round(q["gross_pf"],5),"20bp",round(q["net20_pf"],5),"40bp",round(q["net40_pf"],5),
+                        "mean%",round(q["mean_gross_pct"],5),"win%",round(q["win_pct"],3),
+                        "hold",round(q["hold_hours_mean"],2),"reasons",q["exit_reason"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-stop-policy-analysis
+          path: psar_4h_short_stop_policy_analysis.json
