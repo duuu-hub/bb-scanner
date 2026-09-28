@@ -279,7 +279,7 @@ def main():
                 mk(t)
             if openp: raise AssertionError(f"open PD remains {len(openp)}")
             return cash,bm,mm,len(acc),len(set(p["entry_time"] for p in acc))
-        for RF in [.005,.0075,.01,.0125,.015]:
+        for RF in [.005,.0075,.008,.0085,.009,.0095,.01,.0125,.015]:
             cash,bm,mm,n,ne=sim_with_markpid()
             rows.append(dict(cost_bps=bps,risk=RF,final_equity=cash,booked_mdd=bm,mtm_mdd=mm,pd_trades=n,pd_events=ne))
 
