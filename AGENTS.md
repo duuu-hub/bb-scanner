@@ -131,7 +131,9 @@ For timeframe TF (currently compare 1H and 4H):
 - Entry target: LONG = open-time PSAR + N*ATR; SHORT = open-time PSAR - N*ATR.
 - If the market at candle OPEN is already at a better price than the designed target, execute immediately at the OPEN as taker; do not delete the opportunity.
 - Otherwise place the target as a limit and test fills only after the order is live.
-- TP/SL design levels remain anchored to the open-time PSAR/ATR/target definition; a favorable taker fill must not silently move the strategy's designed levels.
+- Freeze the open-time PSAR as `PSAR_ref` for the trade. SL is anchored to `PSAR_ref`: at buffer 0, `SL = PSAR_ref`; ATR buffer variants move SL only by the configured buffer from that frozen PSAR.
+- After the actual fill is known (OPEN taker or target-limit fill), define `actual_risk = abs(actual_fill - SL)`.
+- TP uses the actual fill and that PSAR-anchored actual risk: LONG `TP = actual_fill + R*actual_risk`; SHORT `TP = actual_fill - R*actual_risk`. Never anchor TP to the designed entry target, and never recompute SL from the actual fill.
 - Every large PSAR backtest must first pass a small timestamp audit proving: input-data cutoff < order-live timestamp, and sampled trades reproduce the intended open-time PSAR/ATR without lookahead.
 - Results from implementations that violate this timing definition must be labeled invalid and must not be used for strategy selection or sizing.
 
