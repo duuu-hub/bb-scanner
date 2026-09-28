@@ -23,7 +23,7 @@ def _max_missing_run(mask):
         else:
             cur=0
     return best
-\ndef download_spot_15m(symbol,start,end,cache_dir):
+def download_spot_15m(symbol,start,end,cache_dir):
     cache=Path(cache_dir);cache.mkdir(parents=True,exist_ok=True);frames=[]
     for month in pd.date_range(start.floor("D").replace(day=1),end-pd.Timedelta(seconds=1),freq="MS"):
         ym=month.strftime("%Y-%m"); fp=cache/f"{symbol}-15m-{ym}.csv.gz"
