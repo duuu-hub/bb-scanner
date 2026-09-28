@@ -76,7 +76,9 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
         if ht and hs:return "loss"
         if hs:return "loss"
         if ht:return "win"
-    return "continue" if entry is not None and entry_seen else "data_error"
+    if entry is not None:
+        return "continue" if entry_seen else "entry_mismatch"
+    return "exit_mismatch"
 
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
 ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
@@ -191,7 +193,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
-                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
+                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
                     # whether an exit touch on fs happened before or after entry.
@@ -209,7 +211,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
-                            if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
+                            if rr=="entry_mismatch":
+                                # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
+                                # Do not guess a fill or an outcome: exclude this parameterized signal.
+                                q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1;continue
                             if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
                         scan_start=fs+1
                     off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
@@ -225,6 +230,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="win":q["win"]+=1
                             elif rr=="loss":q["loss"]+=1
                             elif rr=="data_gap":q["data_gap"]+=1
+                            elif rr=="exit_mismatch":
+                                # Parent 15m exit collision is not reproducible in authoritative 1m.
+                                # Exclude the outcome rather than invent chronology.
+                                q["exit_mismatch"]+=1
                             else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
                         elif hit_tp:q["win"]+=1
                         else:q["loss"]+=1
@@ -246,7 +255,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
-                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
                     # whether an exit touch on fs happened before or after entry.
@@ -264,7 +273,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
-                            if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
+                            if rr=="entry_mismatch":
+                                # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
+                                # Do not guess a fill or an outcome: exclude this parameterized signal.
+                                q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1;continue
                             if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
                         scan_start=fs+1
                     off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
@@ -280,6 +292,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="win":q["win"]+=1
                             elif rr=="loss":q["loss"]+=1
                             elif rr=="data_gap":q["data_gap"]+=1
+                            elif rr=="exit_mismatch":
+                                # Parent 15m exit collision is not reproducible in authoritative 1m.
+                                # Exclude the outcome rather than invent chronology.
+                                q["exit_mismatch"]+=1
                             else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
                         elif hit_tp:q["win"]+=1
                         else:q["loss"]+=1
@@ -322,12 +338,12 @@ for z,p in enumerate(files,1):
         q=agg.setdefault(k,{kk:0 for kk in v})
         for kk,vv in v.items():q[kk]+=vv
     _elapsed=time.time()-_run_started; _file_elapsed=time.time()-_file_started
-    _fills=sum(v.get("fills",0) for v in agg.values()); _coll=sum(v.get("collision_15m",0) for v in agg.values()); _gaps=sum(v.get("data_gap",0) for v in agg.values())
-    print(f"PROGRESS tf={a.tf} shard={a.shard}/{a.shards} file={z}/{len(files)} symbol={sym} file_sec={_file_elapsed:.1f} elapsed_min={_elapsed/60:.1f} files_per_min={z/max(_elapsed/60,1e-9):.2f} fills={_fills} collisions15m={_coll} data_gap={_gaps} cache_months={len(_ONE_MIN_CACHE)}",flush=True)
+    _fills=sum(v.get("fills",0) for v in agg.values()); _coll=sum(v.get("collision_15m",0) for v in agg.values()); _gaps=sum(v.get("data_gap",0) for v in agg.values()); _em=sum(v.get("entry_mismatch",0) for v in agg.values()); _xm=sum(v.get("exit_mismatch",0) for v in agg.values())
+    print(f"PROGRESS tf={a.tf} shard={a.shard}/{a.shards} file={z}/{len(files)} symbol={sym} file_sec={_file_elapsed:.1f} elapsed_min={_elapsed/60:.1f} files_per_min={z/max(_elapsed/60,1e-9):.2f} fills={_fills} collisions15m={_coll} data_gap={_gaps} entry_mismatch={_em} exit_mismatch={_xm} cache_months={len(_ONE_MIN_CACHE)}",flush=True)
 for k,q in agg.items():
     if q["taker"]+q["maker"]!=q["fills"]:
         raise RuntimeError(f"accounting invariant failed order types {k}: {q}")
-    if q["win"]+q["loss"]+q["data_gap"]+q["unresolved_eod"]!=q["fills"]:
+    if q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]!=q["fills"]:
         raise RuntimeError(f"accounting invariant failed outcomes {k}: {q}")
     if q["resolved_1m"]>q["fills"] or q["collision_1m_loss"]>q["resolved_1m"]:
         raise RuntimeError(f"accounting invariant failed 1m counters {k}: {q}")
@@ -336,5 +352,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)","one_min_gap_policy":"official Binance 1m timestamp gap/duplicate affecting a required chronology window -> DATA_GAP excluded from win/loss; counted explicitly; other 1m download/schema failures hard-fail"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)","one_min_gap_policy":"official Binance 1m timestamp gap/duplicate affecting a required chronology window -> DATA_GAP excluded from win/loss; parent-15m maker fill not reproducible in authoritative 1m -> ENTRY_MISMATCH excluded from fills/outcomes; parent-15m exit collision not reproducible in authoritative 1m -> EXIT_MISMATCH excluded from win/loss; other 1m download/schema failures hard-fail"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
