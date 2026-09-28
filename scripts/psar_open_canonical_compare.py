@@ -94,9 +94,9 @@ def _first_hits(h,l,start,tp,sl,long):
             if (long and h[j]>=tp) or ((not long) and l[j]<=tp): ti=j-start
         if si<0:
             if (long and l[j]<=sl) or ((not long) and h[j]>=sl): si=j-start
-        if ti>=0 or si>=0:
-            # First bar containing either exit is sufficient; if both occur on it,
-            # caller resolves chronology with authoritative 1m data.
+        if ti>=0 and si>=0:
+            # Match the legacy vectorized engine exactly: preserve the first
+            # index for TP and SL independently, then let the caller compare them.
             return ti,si
     return ti,si
 
