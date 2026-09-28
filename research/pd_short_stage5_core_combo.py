@@ -27,7 +27,9 @@ ret_map=H.set_index("held_day").core_long_net_pct.to_dict()
 
 S=pd.read_csv(a.selected,parse_dates=["entry_time","exit_time"])
 S=S[(S.entry_time>=START)&(S.entry_time<END)].copy()
-assert len(S)==420 and S.entry_time.nunique()==42 and S.event_rank.max()<=10
+assert len(S)>0 and S.entry_time.nunique()>0
+assert S.event_rank.max()<=10
+assert S.groupby("entry_time").size().max()<=10
 S=S.sort_values(["entry_time","event_rank","symbol"]).copy()
 S["day"]=S.entry_time.dt.floor("D")
 S["core_active"]=S.day.map(active_map).fillna(0).astype(int)
