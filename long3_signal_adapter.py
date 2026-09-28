@@ -17,7 +17,9 @@ SCAN_RUNTIME = Path("scan_runtime.json")
 PRODUCT_TYPE = "usdt-futures"
 BASE_URL = "https://api.bitget.com"
 LONG3_PRIORITY = ["L1", "L2", "L3"]
-HOLD_MIN = {"L1": 720, "L2": 60, "L3": 720}
+SHORT_PRIORITY = ["S1", "S2", "S3"]
+ALL_PRIORITY = LONG3_PRIORITY + SHORT_PRIORITY
+HOLD_MIN = {"L1": 720, "L2": 60, "L3": 720, "S1": 720, "S2": 240, "S3": 60}
 
 
 def utc_iso() -> str:
@@ -33,7 +35,8 @@ def floor_15m(ts_ms: int) -> int:
 
 
 def make_signal_id(strategy: str, symbol: str, boundary_ms: int) -> str:
-    return f"LONG3:{strategy.upper()}:{symbol.upper()}:{int(boundary_ms)}"
+    prefix = "LONG3" if strategy.upper() in LONG3_PRIORITY else "SHORT3"
+    return f"{prefix}:{strategy.upper()}:{symbol.upper()}:{int(boundary_ms)}"
 
 
 def existing_ids() -> set[str]:
@@ -184,28 +187,22 @@ def load_recent_rows(max_age_sec: int = 900) -> list[dict]:
 def _sort_matches(values: set[str]) -> list[str]:
     return sorted(
         values,
-        key=lambda x: (LONG3_PRIORITY.index(x) if x in LONG3_PRIORITY else 99, x),
+        key=lambda x: (ALL_PRIORITY.index(x) if x in ALL_PRIORITY else 99, x),
     )
 
 
-def choose_group(rows: list[dict]) -> dict | None:
-    """Choose one order strategy for one symbol/15m boundary.
-
-    Priority is applied only to LONG3 strategies that were newly emitted on this
-    boundary. all_matches is retained separately for forward-analysis context.
-    This avoids suppressing a newly-added L2/L3 just because an older L1 remains
-    active in scanner state.
-    """
-    new_long3 = {
+def choose_group(rows: list[dict], priority: list[str]) -> dict | None:
+    """Choose one newly-emitted strategy for one symbol/15m boundary."""
+    new_matches = {
         str(row.get("strategy") or "").upper()
         for row in rows
-        if str(row.get("strategy") or "").upper() in LONG3_PRIORITY
+        if str(row.get("strategy") or "").upper() in priority
     }
-    selected = next((x for x in LONG3_PRIORITY if x in new_long3), None)
+    selected = next((x for x in priority if x in new_matches), None)
     if not selected:
         return None
 
-    all_matches = set(new_long3)
+    all_matches = set(new_matches)
     for row in rows:
         for code in str(row.get("all_matches") or "").split("+"):
             code = code.strip().upper()
@@ -217,21 +214,19 @@ def choose_group(rows: list[dict]) -> dict | None:
     ]
     if not selected_rows:
         return None
-
     return {
         "base": selected_rows[-1],
         "matches": _sort_matches(all_matches),
-        "new_matches": _sort_matches(new_long3),
+        "new_matches": _sort_matches(new_matches),
         "selected": selected,
     }
-
 
 def main() -> int:
     rows = load_recent_rows()
     groups: dict[tuple[str, int], list[dict]] = {}
     for row in rows:
         strategy = str(row.get("strategy") or "").upper()
-        if strategy not in LONG3_PRIORITY:
+        if strategy not in ALL_PRIORITY:
             continue
         symbol = str(row.get("symbol") or "").upper()
         boundary = floor_15m(int(row["_created_ms"]))
@@ -241,41 +236,43 @@ def main() -> int:
     snap = market_snapshot()
     created = 0
     for (symbol, boundary), group in sorted(groups.items(), key=lambda kv: kv[0][1]):
-        chosen = choose_group(group)
-        if not chosen:
-            continue
-        row = chosen["base"]
-        strategy = chosen["selected"]
-        sid = make_signal_id(strategy, symbol, boundary)
-        if sid in seen:
-            continue
+        for priority in (LONG3_PRIORITY, SHORT_PRIORITY):
+            chosen = choose_group(group, priority)
+            if not chosen:
+                continue
+            row = chosen["base"]
+            strategy = chosen["selected"]
+            sid = make_signal_id(strategy, symbol, boundary)
+            if sid in seen:
+                continue
+            is_long = strategy in LONG3_PRIORITY
+            signal = {
+                "signal_id": sid,
+                "portfolio": "LONG3" if is_long else "SHORT3",
+                "strategy": strategy,
+                "symbol": symbol,
+                "side": "LONG" if is_long else "SHORT",
+                "signal_time_ms": boundary,
+                "detected_price": float(row["entry_price"]),
+                "entry_min": float(row["entry_low"]),
+                "entry_max": float(row["entry_high"]),
+                "tp": float(row["tp_price"]),
+                "sl": float(row["sl_price"]),
+                "max_hold_minutes": HOLD_MIN[strategy],
+                "scan_started_at": scan_started_at(row["timestamp_utc"]),
+                "signal_created_at": utc_iso(),
+                "matched_strategies": chosen["matches"],
+                "new_matching_strategies": chosen["new_matches"],
+                "selected_strategy": strategy,
+                "market_snapshot": snap,
+            }
+            append_signal_dict(SIGNALS, signal)
+            seen.add(sid)
+            created += 1
+            tag = "LONG3_SIGNAL" if is_long else "SHORT3_SIGNAL"
+            print(f"[{tag}] " + json.dumps(signal, ensure_ascii=False, sort_keys=True))
 
-        signal = {
-            "signal_id": sid,
-            "portfolio": "LONG3",
-            "strategy": strategy,
-            "symbol": symbol,
-            "side": "LONG",
-            "signal_time_ms": boundary,
-            "detected_price": float(row["entry_price"]),
-            "entry_min": float(row["entry_low"]),
-            "entry_max": float(row["entry_high"]),
-            "tp": float(row["tp_price"]),
-            "sl": float(row["sl_price"]),
-            "max_hold_minutes": HOLD_MIN[strategy],
-            "scan_started_at": scan_started_at(row["timestamp_utc"]),
-            "signal_created_at": utc_iso(),
-            "matched_strategies": chosen["matches"],
-            "new_matching_strategies": chosen["new_matches"],
-            "selected_strategy": strategy,
-            "market_snapshot": snap,
-        }
-        append_signal_dict(SIGNALS, signal)
-        seen.add(sid)
-        created += 1
-        print("[LONG3_SIGNAL] " + json.dumps(signal, ensure_ascii=False, sort_keys=True))
-
-    print(f"[DONE] LONG3 adapter created={created}")
+    print(f"[DONE] LONG3/SHORT3 adapter created={created}")
     return 0
 
 

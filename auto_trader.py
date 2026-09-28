@@ -921,8 +921,10 @@ def mark_signal_shadow_execution(state: dict, signal_id: str, status: str) -> No
                 return
 
 
-def signal_shadow_stats(state: dict, cfg: dict) -> dict:
+def signal_shadow_stats(state: dict, cfg: dict, side: str | None = None) -> dict:
     rows = list(state.get("signal_shadow_closed", []))
+    if side:
+        rows = [r for r in rows if str(r.get("side") or "LONG").upper() == side.upper()]
     valid = []
     for row in rows:
         value = row.get("shadow_return_pct")
@@ -988,8 +990,13 @@ def manage_signal_shadows(
                 continue
             candle_end = candle_open + 60_000
             last_close = float(candle["close"])
-            tp_hit = float(candle["high"]) >= float(shadow["tp"])
-            sl_hit = float(candle["low"]) <= float(shadow["sl"])
+            is_short = str(shadow.get("side") or "LONG").upper() == "SHORT"
+            if is_short:
+                tp_hit = float(candle["low"]) <= float(shadow["tp"])
+                sl_hit = float(candle["high"]) >= float(shadow["sl"])
+            else:
+                tp_hit = float(candle["high"]) >= float(shadow["tp"])
+                sl_hit = float(candle["low"]) <= float(shadow["sl"])
             if tp_hit and sl_hit:
                 close_reason = "AMBIGUOUS_TP_SL_SAME_CANDLE"
                 break
@@ -1024,7 +1031,10 @@ def manage_signal_shadows(
         entry = float(shadow.get("shadow_entry_price") or 0.0)
         ret = None
         if entry > 0 and exit_price is not None:
-            ret = (float(exit_price) / entry - 1.0) * 100.0
+            if str(shadow.get("side") or "LONG").upper() == "SHORT":
+                ret = (entry / float(exit_price) - 1.0) * 100.0
+            else:
+                ret = (float(exit_price) / entry - 1.0) * 100.0
 
         closed = {
             **shadow,
@@ -1048,7 +1058,8 @@ def manage_signal_shadows(
             }
         )
 
-        stats = signal_shadow_stats(state, cfg)
+        shadow_side = str(shadow.get("side") or "LONG").upper()
+        stats = signal_shadow_stats(state, cfg, shadow_side)
         pf_text = (
             "∞" if stats["pf"] == math.inf
             else ("N/A" if stats["pf"] is None else f"{stats['pf']:.2f}")
@@ -1059,13 +1070,10 @@ def manage_signal_shadows(
         avg_text = "N/A" if stats["avg_return_pct"] is None else f"{stats['avg_return_pct']:+.2f}%"
         notify(
             cfg,
-            "📊 LONG3 신호 가상포지션 종료\n"
-            f"{shadow.get('strategy')} {shadow.get('symbol')} LONG | {close_reason}\n"
-            f"entry={entry} exit={exit_text} return={ret_text}\n"
-            f"실제 Demo={shadow.get('actual_execution')}\n"
-            f"누적: closed={stats['closed']} W/L={stats['wins']}/{stats['losses']} "
-            f"win={wr_text} avg={avg_text} PF={pf_text}\n"
-            f"30% 단순복리≈{stats['weighted_compounded_pct']:+.2f}%",
+            f"📊 {shadow_side} 가상포지션 종료\n"
+            f"{shadow.get('strategy')} {shadow.get('symbol')} · {close_reason}\n"
+            f"이번 {ret_text}\n"
+            f"{shadow_side} 누적 {stats['weighted_compounded_pct']:+.2f}%",
         )
 
     state["signal_shadow_open"] = kept
