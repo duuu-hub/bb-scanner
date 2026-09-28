@@ -731,106 +731,43 @@ def telegram_send(text):
 
 
 def build_alert(candidate, reason, strategy_code=None):
+    """Compact actionable Telegram alert.
+
+    First/new signals show only entry, TP, SL and time limit.
+    Re-scans show only previous scan price -> current price.
+    Detailed BB diagnostics remain in logs/paper_signals, not Telegram.
+    """
     symbol = candidate["symbol"]
-    stage = candidate["stage"]
-    tf_results = candidate["tf_results"]
     ticker = candidate["ticker"]
-    score = score_candidate(tf_results)
-
-    exact_kr = [TF_KR[x] for x in score["exact"]]
-    near_kr = [TF_KR[x] for x in score["near"]]
-    far_kr = [TF_KR[x] for x in score["far"]]
-
-    streak = int(candidate.get("streak", 1))
     strategy_code = strategy_code or primary_strategy(candidate)
     cfg = STRATEGY_RULES[strategy_code]
     levels = trade_levels(candidate, strategy_code)
-    matches = candidate.get("strategies", [strategy_code])
     price = ticker.get("last_price")
     prev_scan_price = candidate.get("previous_scan_price")
-
-    rank_emoji = {
-        1: "🥇",
-        2: "🥈",
-        3: "🥉",
-        4: "4️⃣",
-        5: "5️⃣",
-        6: "6️⃣",
-    }.get(cfg["priority"], "🎯")
-
-    lines = [
-        f"🪙 {symbol}" + (f"  🔁 {streak}회 연속" if streak >= 2 else ""),
-        f"{rank_emoji} 추천 {cfg['priority']}순위 · {cfg['direction']} · {strategy_code} {cfg['name']}",
-        f"상태 {reason}",
-        f"경계신호가 {fmt_price(price)}  |  24H {fmt_pct(ticker.get('change24h_pct'))}",
-    ]
+    streak = int(candidate.get("streak", 1))
 
     if streak >= 2 and prev_scan_price and price:
-        scan_move = (price / float(prev_scan_price) - 1.0) * 100.0
-        lines.append(
-            f"지난스캔 {fmt_price(float(prev_scan_price))} → "
-            f"현재 {fmt_price(price)}  ({scan_move:+.2f}%)"
+        move = (float(price) / float(prev_scan_price) - 1.0) * 100.0
+        return (
+            f"🔁 {symbol} 재스캔\n"
+            f"지난스캔가 {fmt_price(float(prev_scan_price))} → 현재가 {fmt_price(float(price))} "
+            f"({move:+.2f}%)"
         )
 
-    if levels:
-        lines += [
-            "────────────",
-            f"진입권장 {fmt_price(levels['entry_low'])} ~ {fmt_price(levels['entry_high'])}",
-            f"TP {fmt_price(levels['tp'])} ({cfg['tp_pct']:+.1f}%)"
-            f"  |  SL {fmt_price(levels['sl'])} (-{cfg['sl_pct']:.1f}%)",
-            f"손익비 1:{cfg['rr']:.1f}  |  BT성공률 {cfg['bt_win_rate']:.1f}% (검증 {cfg['bt_n']}회)",
-            f"⏱ TIME LIMIT {fmt_horizon(cfg['horizon_min'])} · TP/SL 미도달 시 시간종료",
-            "기준 비중 시드 30%",
+    direction = cfg["direction"]
+    icon = "🟢" if direction == "LONG" else "🔴"
+    if not levels:
+        return f"{icon} {direction} · {strategy_code} · {symbol}"
+
+    return "\n".join(
+        [
+            f"{icon} {direction} · {strategy_code} · {symbol}",
+            f"진입가 {fmt_price(float(levels['entry'])) if 'entry' in levels else fmt_price(float(price))}",
+            f"TP {fmt_price(float(levels['tp']))}",
+            f"SL {fmt_price(float(levels['sl']))}",
+            f"TIME LIMIT {fmt_horizon(cfg['horizon_min'])}",
         ]
-
-    same_direction = [
-        code for code in matches
-        if code != strategy_code
-        and STRATEGY_RULES[code]["direction"] == cfg["direction"]
-    ]
-    opposite_direction = [
-        code for code in matches
-        if STRATEGY_RULES[code]["direction"] != cfg["direction"]
-    ]
-    if same_direction:
-        lines.append("동방향 동시신호 " + " + ".join(same_direction))
-    if opposite_direction:
-        lines.append(
-            "⚠️ 반대방향 동시신호 " + " + ".join(opposite_direction)
-            + " · 후보1은 별도 신호로 유지"
-        )
-
-    r15 = tf_results.get("15M") or {}
-    ret_1h = r15.get("ret_1h_pct")
-    ret_4h = r15.get("ret_4h_pct")
-    lines += [
-        "────────────",
-        f"{stage_label(stage)}",
-        f"최근 1H {fmt_pct(ret_1h)}  |  최근 4H {fmt_pct(ret_4h)}",
-        f"✅ 돌파 {len(exact_kr)}/7" + (f" · {', '.join(exact_kr)}" if exact_kr else ""),
-    ]
-
-    if near_kr:
-        lines.append(f"🟨 근접 · {', '.join(near_kr)}")
-    if far_kr:
-        lines.append(f"❌ 미달 · {', '.join(far_kr)}")
-
-    lines.append("BB상단 대비")
-    for tf, _ in TIMEFRAMES:
-        r = tf_results.get(tf)
-        if not r:
-            continue
-        d = r.get("distance_pct")
-        if r.get("above"):
-            mark = "✅"
-        elif d is not None and d >= -NEAR_BB_PCT:
-            mark = "🟨"
-        else:
-            mark = "❌"
-        lines.append(f"{TF_KR[tf]} {mark} {fmt_pct(d)}")
-
-    return "\n".join(lines)
-
+    )
 
 def fetch_tf_for_symbol(symbol, tf, granularity, ticker):
     live_price = ticker.get("last_price") or ticker.get("mark_price")
@@ -901,7 +838,7 @@ def telegram_send_batched(messages, max_chars=3800):
     if not messages:
         return 0
 
-    header = f"📡 BB 알림 {len(messages)}건"
+    header = f"📡 매매 신호 {len(messages)}건"
     chunks = []
     current = header
 
