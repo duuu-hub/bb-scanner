@@ -283,7 +283,10 @@ for p in all_files:
     seen_ranges.setdefault(sym,[]).append((lo,hi,p))
 files=[p for j,p in enumerate(all_files) if j%a.shards==a.shard]
 agg={};errors=[]
+_run_started=time.time()
+print(f"RUN_START tf={a.tf} shard={a.shard}/{a.shards} files={len(files)} total_inputs={len(all_files)}",flush=True)
 for z,p in enumerate(files,1):
+    _file_started=time.time()
     try:
         data=load(p); sym=_symbol(p)
         rr={}
@@ -302,7 +305,9 @@ for z,p in enumerate(files,1):
     for k,v in rr.items():
         q=agg.setdefault(k,{kk:0 for kk in v})
         for kk,vv in v.items():q[kk]+=vv
-    if z%20==0:print("progress",z,len(files),flush=True)
+    _elapsed=time.time()-_run_started; _file_elapsed=time.time()-_file_started
+    _fills=sum(v.get("fills",0) for v in agg.values()); _coll=sum(v.get("collision_15m",0) for v in agg.values()); _gaps=sum(v.get("data_gap",0) for v in agg.values())
+    print(f"PROGRESS tf={a.tf} shard={a.shard}/{a.shards} file={z}/{len(files)} symbol={sym} file_sec={_file_elapsed:.1f} elapsed_min={_elapsed/60:.1f} files_per_min={z/max(_elapsed/60,1e-9):.2f} fills={_fills} collisions15m={_coll} data_gap={_gaps} cache_months={len(_ONE_MIN_CACHE)}",flush=True)
 for k,q in agg.items():
     if q["taker"]+q["maker"]!=q["fills"]:
         raise RuntimeError(f"accounting invariant failed order types {k}: {q}")
