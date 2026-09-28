@@ -1,5 +1,6 @@
 import ast
 import json
+import re
 import time
 from pathlib import Path
 
@@ -180,8 +181,11 @@ def main():
     src1, fast1 = loaded[0]
     src4, fast4 = loaded[1]
 
-    if src1 != src4:
-        raise AssertionError("1H/4H canonical engine files diverged")
+    # Research parameter grids may intentionally differ by timeframe (e.g. 4H R20 boundary extension).
+    # Compare executable engine source after normalizing only the RS assignment.
+    norm=lambda s: re.sub(r"^RS=.*$", "RS=<PARAM_GRID>", s, flags=re.MULTILINE)
+    if norm(src1) != norm(src4):
+        raise AssertionError("1H/4H canonical engine files diverged outside RS parameter grid")
 
     static = static_checks(src1)
     deterministic = deterministic_checks(fast1) + deterministic_checks(fast4)
