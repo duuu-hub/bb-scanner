@@ -12,6 +12,7 @@ def sim(S,cmap,sel,rf=.02,rng=None):
   done=[p for p in active if p["exit_time"]<=et]
   for xt in sorted({p["exit_time"] for p in done}):
    b=[p for p in done if p["exit_time"]==xt];cash+=sum(p["stake"]*p["r"] for p in b);peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+   if cash<=0:return 0.,1.,pd.DataFrame(acc)
   active=[p for p in active if p["exit_time"]>et]
   if int(cmap.get(et.floor("D"),0)):continue
   free=5-len(active)
@@ -26,6 +27,7 @@ def sim(S,cmap,sel,rf=.02,rng=None):
    active.append(p);acc.append(p)
  for xt in sorted({p["exit_time"] for p in active}):
   b=[p for p in active if p["exit_time"]==xt];cash+=sum(p["stake"]*p["r"] for p in b);peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+  if cash<=0:return 0.,1.,pd.DataFrame(acc)
  A=pd.DataFrame(acc);return cash,mdd,A
 def selftest():
  day=START;cmap={day:0};z=[]
@@ -33,7 +35,7 @@ def selftest():
  S=pd.DataFrame(z);_,_,a=sim(S,cmap,"break",.01);_,_,b=sim(S,cmap,"liquidity",.01);_,_,c=sim(S,cmap,"random",.01,np.random.default_rng(1))
  assert list(a.symbol)==["S7","S6","S5","S4","S3"];assert list(b.symbol)==["S0","S1","S2","S3","S4"];assert len(c)==5 and len(set(c.symbol))==5;print("SELF_TEST_PASS")
 def main():
- ap=argparse.ArgumentParser();ap.add_argument("--self-test",action="store_true");ap.add_argument("--input");ap.add_argument("--canonical");ap.add_argument("--core");ap.add_argument("--out",default="out");ap.add_argument("--sims",type=int,default=10000);ap.add_argument("--seed",type=int,default=20260928);a=ap.parse_args()
+ ap=argparse.ArgumentParser();ap.add_argument("--self-test",action="store_true");ap.add_argument("--input");ap.add_argument("--canonical");ap.add_argument("--legacy");ap.add_argument("--core");ap.add_argument("--out",default="out");ap.add_argument("--sims",type=int,default=10000);ap.add_argument("--seed",type=int,default=20260928);a=ap.parse_args()
  if a.self_test:selftest();return
  C=pd.read_csv(a.core,compression="gzip",parse_dates=["dt"]);C["dt"]=pd.to_datetime(C.dt,utc=True);C=C[(C.dt>=START)&(C.dt<END)];cmap=C.set_index("dt").base.to_dict()
  T=pd.read_csv(a.canonical,parse_dates=["signal_time","entry_time","exit_time"]);T=T[(T.n==320)&(T.signal=="FIRST_BREAKDOWN")&(T.stop_atr==1)&(T.rr==3)].copy();T["year"]=T.entry_time.dt.year
@@ -76,18 +78,26 @@ def main():
  S=pd.DataFrame(out);cov=len(S)/4632
  if cov<.995:raise AssertionError(("execution coverage",cov,len(S)))
  S["core_active"]=S.entry_time.dt.floor("D").map(cmap).fillna(0).astype(int)
+ legacy_changed=np.nan
+ if a.legacy:
+  L=pd.read_csv(a.legacy,parse_dates=["entry_time"])
+  L["legacy_r24"]=L.r_net-.0016/(L.risk_dist/L.entry)
+  B=S.sort_values(["entry_time","break_atr","symbol"],ascending=[True,False,True]).groupby("entry_time",group_keys=False).head(5)
+  M=B[["symbol","entry_time","r24"]].merge(L[["symbol","entry_time","legacy_r24"]],on=["symbol","entry_time"],how="outer",indicator=True)
+  assert len(M)==210 and (M["_merge"]=="both").all(),M["_merge"].value_counts().to_dict()
+  legacy_changed=int((M.r24-M.legacy_r24).abs().gt(1e-9).sum())
  O=Path(a.out);O.mkdir(parents=True,exist_ok=True);pd.DataFrame([(2023,51),(2024,71),(2025,71),(2026,71)],columns=["year","threshold"]).to_csv(O/"wf_thresholds.csv",index=False)
  pool=S.groupby("entry_time").agg(candidates=("symbol","nunique"),core_active=("core_active","first")).reset_index();pool.to_csv(O/"event_pool.csv",index=False)
  rows=[];det={}
  for sel in ["neutral","break","liquidity"]:
   eq,mdd,A=sim(S,cmap,sel);rows.append(dict(selector=sel,equity=eq,total_return=eq-1,mdd=mdd,events=A.entry_time.nunique(),trades=len(A),pf=pf(A.r),avg_r=A.r.mean()));det[sel]=(eq,mdd,A);A.to_csv(O/f"accepted_{sel}.csv",index=False)
- D=pd.DataFrame(rows);D.to_csv(O/"selector_summary.csv",index=False)
+ D=pd.DataFrame(rows);D.to_csv(O/"selector_summary.csv",index=False);br=D[D.selector=="break"].iloc[0];assert int(br.trades)==179 and int(br.events)==36,(br.trades,br.events)
  rng=np.random.default_rng(a.seed);eqs=np.empty(a.sims);mdds=np.empty(a.sims);pfs=np.empty(a.sims);avgs=np.empty(a.sims)
  for i in range(a.sims):
   eq,mdd,A=sim(S,cmap,"random",rng=rng);eqs[i]=eq;mdds[i]=mdd;pfs[i]=pf(A.r);avgs[i]=A.r.mean()
- R=dict(sims=a.sims,equity_p01=np.quantile(eqs,.01),equity_p05=np.quantile(eqs,.05),equity_p50=np.quantile(eqs,.5),equity_p95=np.quantile(eqs,.95),equity_p99=np.quantile(eqs,.99),mdd_p05=np.quantile(mdds,.05),mdd_p50=np.quantile(mdds,.5),mdd_p95=np.quantile(mdds,.95),mdd_p99=np.quantile(mdds,.99),pf_p05=np.quantile(pfs,.05),pf_p50=np.quantile(pfs,.5),pf_p95=np.quantile(pfs,.95),avg_r_p05=np.quantile(avgs,.05),avg_r_p50=np.quantile(avgs,.5),avg_r_p95=np.quantile(avgs,.95))
+ R=dict(sims=a.sims,prob_bankrupt=float((eqs<=0).mean()),equity_p01=np.quantile(eqs,.01),equity_p05=np.quantile(eqs,.05),equity_p50=np.quantile(eqs,.5),equity_p95=np.quantile(eqs,.95),equity_p99=np.quantile(eqs,.99),mdd_p05=np.quantile(mdds,.05),mdd_p50=np.quantile(mdds,.5),mdd_p95=np.quantile(mdds,.95),mdd_p99=np.quantile(mdds,.99),pf_p05=np.quantile(pfs,.05),pf_p50=np.quantile(pfs,.5),pf_p95=np.quantile(pfs,.95),avg_r_p05=np.quantile(avgs,.05),avg_r_p50=np.quantile(avgs,.5),avg_r_p95=np.quantile(avgs,.95))
  for sel,(eq,mdd,A) in det.items():
   R[sel+"_equity_pct"]=float((eqs<=eq).mean());R[sel+"_mdd_pct"]=float((mdds<=mdd).mean());R[sel+"_pf_pct"]=float((pfs<=pf(A.r)).mean())
  pd.DataFrame([R]).to_csv(O/"random5_distribution.csv",index=False)
- print("WF",[(2023,51),(2024,71),(2025,71),(2026,71)]);print("SELECTORS");print(D.to_string(index=False));print("RANDOM5");print(pd.DataFrame([R]).to_string(index=False));print("NEUTRAL_PARITY_DELTA",float(D.loc[D.selector=="neutral","equity"].iloc[0]-4.085172));print("COVERAGE",cov)
+ print("WF",[(2023,51),(2024,71),(2025,71),(2026,71)]);print("SELECTORS");print(D.to_string(index=False));print("RANDOM5");print(pd.DataFrame([R]).to_string(index=False));print("NEUTRAL_PARITY_DELTA",float(D.loc[D.selector=="neutral","equity"].iloc[0]-4.085172));print("COVERAGE",cov);print("LEGACY_BREAK_ECON_CHANGED",legacy_changed)
 if __name__=="__main__":main()
