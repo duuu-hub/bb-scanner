@@ -1,6 +1,7 @@
 import argparse,glob,json,io,urllib.request,zipfile,os,time,re
 from datetime import datetime,timezone
 import pandas as pd,numpy as np
+from numba import njit
 _ONE_MIN_CACHE={}
 def _symbol(p):
     b=os.path.basename(p)
@@ -83,6 +84,21 @@ SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
 RS=(.5,.75,1.,1.25,1.5,2.,2.5,3.,4.)
 MIN_RISK_EPS=1e-12
 PSAR_BURNIN_BARS=100
+
+@njit(cache=True)
+def _first_hits(h,l,start,tp,sl,long):
+    """Exact first 15m TP/SL hit indices without allocating/scanning full suffix arrays."""
+    ti=-1; si=-1
+    for j in range(start,len(h)):
+        if ti<0:
+            if (long and h[j]>=tp) or ((not long) and l[j]<=tp): ti=j-start
+        if si<0:
+            if (long and l[j]<=sl) or ((not long) and h[j]>=sl): si=j-start
+        if ti>=0 or si>=0:
+            # First bar containing either exit is sufficient; if both occur on it,
+            # caller resolves chronology with authoritative 1m data.
+            return ti,si
+    return ti,si
 
 def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
     n=len(h); out=np.full(n,np.nan); bull=np.ones(n,bool)
@@ -177,7 +193,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
-                    ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
+                    _ti,_si=_first_hits(h,l,fs,tp,sl,b);it=_ti if _ti>=0 else 10**9;is_=_si if _si>=0 else 10**9
                     k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
@@ -225,7 +241,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
                     th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
-                    ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
+                    _ti,_si=_first_hits(h,l,fs,tp,sl,b);it=_ti if _ti>=0 else 10**9;is_=_si if _si>=0 else 10**9
                     k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
