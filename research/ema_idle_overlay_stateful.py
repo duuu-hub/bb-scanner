@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse,importlib.util
+import argparse,importlib.util,requests
 from pathlib import Path
 import numpy as np,pandas as pd
 
