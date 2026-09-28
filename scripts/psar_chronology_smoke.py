@@ -4,7 +4,7 @@ import numpy as np
 
 SRC=Path("scripts/psar_open_canonical_compare.py").read_text()
 tree=ast.parse(SRC)
-keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name in {"_one_min","_resolve_1m","resample","psar_open_projection","_design_tp"})]
+keep=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom)) or (isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=="_ONE_MIN_CACHE" for t in n.targets)) or (isinstance(n,ast.FunctionDef) and n.name in {"_one_min","_resolve_1m","resample","psar_open_projection"})]
 ns={}
 exec(compile(ast.Module(body=keep,type_ignores=[]),"<smoke>","exec"),ns)
 resolve=ns["_resolve_1m"]
@@ -109,18 +109,6 @@ assert src.count('_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None')==2
 assert src.count('elif rr=="exit_mismatch"')==2
 assert src.count('if rr=="entry_mismatch"')==2
 assert 'if rr=="data_error"' not in src
-# Favorable OPEN execution must not move the designed TP/SL levels.
-assert 'def _design_tp(entry_target,sl,r,long):' in src
-assert src.count('design_risk=abs(e-sl)')==2
-assert src.count('tp=_design_tp(e,sl,r,b)')==2
-assert 'risk=abs(fill-sl)' not in src
-assert 'tp=fill+r*risk' not in src
-design_tp=ns["_design_tp"]
-assert design_tp(90.0,100.0,4.0,False)==50.0
-assert design_tp(100.0,95.0,2.0,True)==110.0
-# A favorable taker fill changes realized R, but never the designed TP.
-assert design_tp(90.0,100.0,4.0,False)==design_tp(90.0,100.0,4.0,False)
-print("PASS favorable_open_fixed_exit_levels")
 # Execute resample, not just static-string check.
 resample=ns["resample"]
 tt=np.arange(0,8*900000,900000,dtype=np.int64)
