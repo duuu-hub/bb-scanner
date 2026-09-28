@@ -103,41 +103,41 @@ def build_stage5(stage5,b15,e15):
     C=pd.read_csv(stage5,parse_dates=["datetime_utc"]).sort_values("datetime_utc").copy()
     C["held_day"]=C.datetime_utc.dt.floor("D")+pd.Timedelta(days=1)
     C["state"]=(C.position>0).astype(int)
-    gross=C.state*(C.BTCUSDT_fwd.fillna(0)+C.ETHUSDT_fwd.fillna(0))/2.0
-    chg=C.state.diff().abs().fillna(C.state.abs())
-    C["net_pct"]=gross-chg*(0.25/2.0)
+    C["gross_pct"]=C.state*(C.BTCUSDT_fwd.fillna(0)+C.ETHUSDT_fwd.fillna(0))/2.0
     H=C[(C.held_day>=START)&(C.held_day<END)].copy()
-    prev_rows=C[C.held_day<START];prev=int(prev_rows.state.iloc[-1]) if len(prev_rows) else 0
-    b=b15.set_index("dt");e=e15.set_index("dt");cash=1.;stake=0.;day=None;daygross=0.;rows=[]
-    amap=H.set_index("held_day").state.to_dict()
+    before=C[C.held_day<START];prev=int(before.state.iloc[-1]) if len(before) else 0
+    amap=H.set_index("held_day").state.to_dict();gmap=H.set_index("held_day").gross_pct.to_dict()
+    b=b15.set_index("dt").sort_index();e=e15.set_index("dt").sort_index()
+    cash=1.;stake=0.;day=None;daygross=0.;rows=[]
+
     for t in pd.date_range(START,END,freq="15min",inclusive="both"):
         if t.floor("D")==t:
             if day is not None and int(amap.get(day,0)):
                 cash+=stake*daygross
             if t>=END:
                 rows.append((t,cash,False));break
-            st=int(amap.get(t,0));fee=abs(st-prev)*STAGE5_HALF_FEE;base=cash
+            st=int(amap.get(t,0));base=cash
+            fee=abs(st-prev)*STAGE5_HALF_FEE
             cash-=base*fee;stake=base if st else 0.;day=t;daygross=0.;prev=st
-        if t>=END:break
+
         st=int(amap.get(t.floor("D"),0))
         active=bool(st)
         if active:
             d=t.floor("D")
-            idx=pd.date_range(d,t,freq="15min")
             bo=float(b.loc[d,"open"]) if d in b.index else float(b[b.index<d].close.iloc[-1])
             eo=float(e.loc[d,"open"]) if d in e.index else float(e[e.index<d].close.iloc[-1])
             bc=float(b.loc[t,"close"]) if t in b.index else float(b[b.index<t].close.iloc[-1])
             ec=float(e.loc[t,"close"]) if t in e.index else float(e[e.index<t].close.iloc[-1])
             raw=.5*((bc/bo-1)+(ec/eo-1))
-            exp=float(H.set_index("held_day").loc[d,"net_pct"])/100.0 + abs(st-(int(C[C.held_day<d].state.iloc[-1]) if len(C[C.held_day<d]) else 0))*STAGE5_HALF_FEE
-            # endpoint scaling by daily raw close at 23:45 for parity
             de=d+pd.Timedelta(hours=23,minutes=45)
             bce=float(b.loc[de,"close"]) if de in b.index else float(b[b.index<=de].close.iloc[-1])
             ece=float(e.loc[de,"close"]) if de in e.index else float(e[e.index<=de].close.iloc[-1])
             raw_end=.5*((bce/bo-1)+(ece/eo-1))
-            daygross=raw*(exp/raw_end if abs(raw_end)>1e-15 else 1.)
+            target=float(gmap.get(d,0.0))/100.0
+            daygross=raw*(target/raw_end if abs(raw_end)>1e-15 else 1.)
         eq=cash+stake*daygross
         rows.append((t+pd.Timedelta(minutes=15),eq,active))
+
     M=pd.DataFrame(rows,columns=["time","equity","active_open"]).drop_duplicates("time",keep="last").set_index("time")
     M=M[(M.index>START)&(M.index<=END)]
     eq=pd.concat([pd.Series([1.0],index=[START]),M.equity]).sort_index()
@@ -181,19 +181,16 @@ def simulate_combo(name,S,pmarks,ema_ret,ema_active,s5_ret,s5_active,bps,rf=.008
     cash=1.;openp=[];curve=[];accepted=[];overlap=0
     for mt in times:
         ot=mt-pd.Timedelta(minutes=15)
-        # realize PD exits known by this mark time
-        done=[p for p in openp if p["exit_time"]<=mt]
-        for p in sorted(done,key=lambda x:(x["exit_time"],x["pid"])):
-            cash+=p["stake"]*p["r_real"];openp.remove(p)
+        # Admission is decided at interval OPEN. Positions exiting at mt still occupy a slot at ot.
         long_on=bool(ea.loc[mt]) if name=="EMA_PD" else bool(ea.loc[mt] or sa.loc[mt])
         if ot in entries and not long_on:
-            active_before=[p for p in openp if p["exit_time"]>ot];openp=active_before
             free=10-len(openp);base=cash
             for r in entries[ot].head(max(0,free)).itertuples():
                 rr=(float(r.net_return)+.0008-bps/10000.0)/float(r.risk_pct)
                 p=dict(pid=int(r.pid),entry_time=r.entry_time,exit_time=r.exit_time,stake=base*rf,r_real=rr)
                 openp.append(p);accepted.append(p)
         if long_on and openp:overlap+=1
+
         if name=="EMA_PD":
             lr=float(er.loc[mt]) if bool(ea.loc[mt]) else 0.
         else:
@@ -202,6 +199,12 @@ def simulate_combo(name,S,pmarks,ema_ret,ema_active,s5_ret,s5_active,bps,rf=.008
             if bool(sa.loc[mt]):vals.append(float(sr.loc[mt]))
             lr=float(np.mean(vals)) if vals else 0.
         cash*=1+lr
+
+        # Outcomes inside this 15m interval become known only at its close mt.
+        done=[p for p in openp if p["exit_time"]<=mt]
+        for p in sorted(done,key=lambda x:(x["exit_time"],x["pid"])):
+            cash+=p["stake"]*p["r_real"];openp.remove(p)
+
         unr=0.
         for p in openp:
             mm=pmarks[p["pid"]];ks=[k for k in mm if k<=mt]
