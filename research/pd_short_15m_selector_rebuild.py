@@ -22,7 +22,7 @@ for fn in sorted(glob.glob(a.input+"/**/*.csv.gz",recursive=True)):
     for c in ["high","low","close"]:
         d[c]=pd.to_numeric(d[c],errors="coerce")
     d=d.dropna(subset=["dt","high","low","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
-    px[sym]=d.close
+    mark=d.close.copy();mark.index=mark.index+pd.Timedelta(minutes=15);px[sym]=mark
     x=d.resample("4h",label="left",closed="left").agg(high=("high","max"),low=("low","min"),close=("close","last"),bars=("close","count"))
     x=x[x.bars==16]
     rl=x.low.shift(1).rolling(320).min()
@@ -106,8 +106,11 @@ def mtm(acc):
                     cash+=p["stake"]*p["r_net"];openp.pop(hit[0])
         eq=cash
         for p in openp:
-            z=px[p["symbol"]].loc[:t]
-            mark=float(z.iloc[-1]) if len(z) else p["entry"]
+            if t<=p["entry_time"]:
+                mark=p["entry"]
+            else:
+                z=px[p["symbol"]].loc[:t]
+                mark=float(z.iloc[-1]) if len(z) else p["entry"]
             rr=max((p["entry"]-mark)/p["riskdist"],-1.0)
             eq+=p["stake"]*rr
         peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak)
