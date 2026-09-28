@@ -1,0 +1,109 @@
+name: PSAR 4H SHORT Year-Symbol Attribution
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_year_symbol_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke 8 files
+        run: |
+          python scripts/psar_4h_short_year_symbol_audit.py --data data --shard 0 --shards 1 --max-files 8 --out smoke.json
+          python - <<'PY'
+          import json
+          d=json.load(open("smoke.json"))
+          assert d["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4"
+          assert d["files"]==8
+          assert set(d["summary"])=={"P4|SB0|T26|SHORT","P9|SB0|T27|SHORT"},d["summary"].keys()
+          assert d["by_year_symbol"],"missing year-symbol"
+          print("SMOKE_PASS",d["files"],len(d["summary"]),len(d["by_year_symbol"]))
+          PY
+
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run year-symbol attribution
+        run: python scripts/psar_4h_short_year_symbol_audit.py --data data --shard ${{ matrix.shard }} --shards 8 --out psar_4h_short_year_symbol_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-year-symbol-${{ matrix.shard }}
+          path: psar_4h_short_year_symbol_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-4h-short-year-symbol-*
+          path: merged
+      - name: Merge
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("merged/**/*.json",recursive=True)
+          assert len(fs)==8,len(fs)
+          ds=[json.load(open(x)) for x in fs]
+          def common(d):
+              z=dict(d["definition"]);z.pop("shard_index",None);return z
+          assert all(common(d)==common(ds[0]) for d in ds)
+          assert {d["definition"]["shard_index"] for d in ds}==set(range(8))
+          assert sum(d["files"] for d in ds)==ds[0]["definition"]["input_files_total"]
+          derived={"win_pct","pf_design_R","expectancy_design_R","pf_gross_pct","taker_pct"}
+          def isderived(k): return k in derived or k.startswith("pf_net_")
+          def merge_section(name):
+              out={}
+              for d in ds:
+                  for k,v in d[name].items():
+                      q=out.setdefault(k,{})
+                      for kk,vv in v.items():
+                          if not isderived(kk):q[kk]=q.get(kk,0)+vv
+              return out
+          def metric(q):
+              r=q["win"]+q["loss"]
+              q["win_pct"]=round(100*q["win"]/r,4) if r else None
+              q["pf_design_R"]=round(q["gross_profit_design_R"]/q["gross_loss_design_R"],6) if q["gross_loss_design_R"]>0 else None
+              q["expectancy_design_R"]=round((q["gross_profit_design_R"]-q["gross_loss_design_R"])/r,6) if r else None
+              q["pf_gross_pct"]=round(q["gross_profit_pct"]/q["gross_loss_pct"],6) if q["gross_loss_pct"]>0 else None
+              if "taker" in q:
+                  q["taker_pct"]=round(100*q["taker"]/q["fills"],4) if q["fills"] else None
+                  for bp in (0,10,20,30,40):
+                      gp=q[f"net_profit_pct_{bp}bp"];gl=q[f"net_loss_pct_{bp}bp"]
+                      q[f"pf_net_{bp}bp"]=round(gp/gl,6) if gl>0 else None
+              return q
+          out={"definition":common(ds[0]),"files":sum(d["files"] for d in ds)}
+          for name in ("summary","by_order","by_year","by_symbol","by_year_symbol"):
+              out[name]=merge_section(name)
+              for q in out[name].values():metric(q)
+          assert set(out["summary"])=={"P4|SB0|T26|SHORT","P9|SB0|T27|SHORT"}
+          json.dump(out,open("psar_4h_short_year_symbol_merged.json","w"),separators=(",",":"))
+          print("MERGE_PASS",out["files"],len(out["by_year_symbol"]))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-year-symbol-merged
+          path: psar_4h_short_year_symbol_merged.json
