@@ -245,27 +245,34 @@ def main():
             cm={d:g.set_index("mark_time").gross.to_dict() for d,g in core_marks.groupby("day")}
             pm={pid:g.set_index("mark_time").mark_r.to_dict() for pid,g in PM.groupby("pid")}
             cash=1.;bp=1.;bm=0.;mp=1.;mm=0.;openp=[];acc=[];core_day=None;core_stake=0.;core_gross=0.;prev=int(H.attrs.get("initial_prev_state",0))
+            core_realized=0.;pd_realized=0.;capture=abs(RF-.008)<1e-12;curve=[]
             ent={et:g for et,g in S2.groupby("entry_time",sort=True)}
             def rex(t):
-                nonlocal cash,bp,bm,openp
+                nonlocal cash,bp,bm,openp,pd_realized
                 done=[p for p in openp if p["exit_time"]<=t]
                 for p in sorted(done,key=lambda x:(x["exit_time"],x["mark_pid"])):
-                    cash+=p["stake"]*p["r_real"];openp.remove(p);bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
+                    pnl=p["stake"]*p["r_real"];cash+=pnl;pd_realized+=pnl;openp.remove(p);bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
             def mk(t):
                 nonlocal mp,mm
-                eq=cash
-                if core_day is not None and int(am.get(core_day,0)): eq+=core_stake*core_gross
+                core_unr=core_stake*core_gross if core_day is not None and int(am.get(core_day,0)) else 0.
+                pd_unr=0.
                 for p in openp:
-                    m=pm[p["mark_pid"]];ks=[k for k in m if k<=t];rr=m[max(ks)] if ks else 0.;eq+=p["stake"]*rr
+                    m=pm[p["mark_pid"]];ks=[k for k in m if k<=t];rr=m[max(ks)] if ks else 0.;pd_unr+=p["stake"]*rr
+                eq=cash+core_unr+pd_unr
                 mp=max(mp,eq);mm=max(mm,(mp-eq)/mp)
+                if capture:
+                    curve.append(dict(time=t,equity=eq,cash=cash,core_component=core_realized+core_unr,
+                                      pd_component=pd_realized+pd_unr,core_unrealized=core_unr,
+                                      pd_unrealized=pd_unr,open_pd=len(openp),core_active=int(am.get(t.floor("D"),0))))
             for t in pd.date_range(START,END,freq="15min",inclusive="both"):
                 if t.floor("D")==t:
                     if core_day is not None and int(am.get(core_day,0)):
-                        core_gross=cm[core_day][t];mk(t);cash+=core_stake*core_gross;bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
+                        core_gross=cm[core_day][t];mk(t);pnl=core_stake*core_gross;cash+=pnl;core_realized+=pnl;bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
                     rex(t)
                     if t>=END: break
                     st=int(am.get(t,0));base=cash;fee=abs(st-prev)*CORE_HALF_FEE
-                    if fee: cash-=base*fee;bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
+                    if fee:
+                        cost=base*fee;cash-=cost;core_realized-=cost;bp=max(bp,cash);bm=max(bm,(bp-cash)/bp)
                     core_day=t;core_stake=base if st else 0.;core_gross=0.;prev=st
                 else:
                     rex(t)
@@ -278,6 +285,41 @@ def main():
                         openp.append(p);acc.append(p)
                 mk(t)
             if openp: raise AssertionError(f"open PD remains {len(openp)}")
+            if capture:
+                cf=pd.DataFrame(curve)
+                cf["seq"]=np.arange(len(cf))
+                cf.to_csv(O/f"equity_curve_{bps}bp_risk080.csv",index=False)
+                z=cf.copy();z["peak"]=z.equity.cummax();z["dd"]=(z["peak"]-z.equity)/z["peak"]
+                ti=int(z.dd.idxmax());tr=z.loc[ti];peak_eq=float(tr["peak"])
+                pi=int(z.loc[:ti][z.loc[:ti].equity>=peak_eq-1e-12].index[-1]);pr=z.loc[pi]
+                rec=z.loc[ti+1:][z.loc[ti+1:].equity>=peak_eq-1e-12]
+                ri=int(rec.index[0]) if len(rec) else None;rr=z.loc[ri] if ri is not None else None
+                diag=pd.DataFrame([dict(cost_bps=bps,risk=RF,final_equity=cash,mtm_mdd=mm,
+                    peak_time=pr.time,trough_time=tr.time,recovery_time=(rr.time if rr is not None else pd.NaT),
+                    peak_equity=float(pr.equity),trough_equity=float(tr.equity),
+                    days_peak_to_trough=(tr.time-pr.time).total_seconds()/86400.,
+                    days_to_recovery=((rr.time-pr.time).total_seconds()/86400. if rr is not None else np.nan),
+                    core_contribution_peak_to_trough=float(tr.core_component-pr.core_component),
+                    pd_contribution_peak_to_trough=float(tr.pd_component-pr.pd_component),
+                    cash_change_peak_to_trough=float(tr.cash-pr.cash),
+                    core_unrealized_at_trough=float(tr.core_unrealized),
+                    pd_unrealized_at_trough=float(tr.pd_unrealized),open_pd_at_trough=int(tr.open_pd))])
+                diag.to_csv(O/f"worst_dd_{bps}bp_risk080.csv",index=False)
+                q=cf.copy();q["year"]=q.time.dt.year;q["quarter"]=q.time.dt.to_period("Q")
+                yr=[];qr=[]
+                for k,g in q.groupby("year"):
+                    gg=g.set_index("seq").equity;pk=gg.cummax()
+                    yr.append(dict(cost_bps=bps,year=int(k),start_equity=float(gg.iloc[0]),end_equity=float(gg.iloc[-1]),
+                                   return_pct=(float(gg.iloc[-1])/float(gg.iloc[0])-1)*100,mdd_pct=float(((pk-gg)/pk).max()*100)))
+                for k,g in q.groupby("quarter"):
+                    gg=g.set_index("seq").equity;pk=gg.cummax()
+                    qr.append(dict(cost_bps=bps,quarter=str(k),start_equity=float(gg.iloc[0]),end_equity=float(gg.iloc[-1]),
+                                   return_pct=(float(gg.iloc[-1])/float(gg.iloc[0])-1)*100,mdd_pct=float(((pk-gg)/pk).max()*100)))
+                pd.DataFrame(yr).to_csv(O/f"yearly_{bps}bp_risk080.csv",index=False)
+                pd.DataFrame(qr).to_csv(O/f"quarterly_{bps}bp_risk080.csv",index=False)
+                print("DIAG",diag.to_dict("records")[0])
+                print("YEARLY",pd.DataFrame(yr).to_dict("records"))
+                print("QUARTERLY",pd.DataFrame(qr).to_dict("records"))
             return cash,bm,mm,len(acc),len(set(p["entry_time"] for p in acc))
         for RF in [.005,.0075,.008,.0085,.009,.0095,.01,.0125,.015]:
             cash,bm,mm,n,ne=sim_with_markpid()
