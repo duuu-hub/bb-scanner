@@ -1,0 +1,28 @@
+name: EMA600 Overlay Temporal Audit
+on:
+  push:
+    paths: [".research/ema_overlay_temporal_audit_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Download canonical artifacts
+        run: |
+          mkdir -p canon cost
+          gh run download 36439791639 --repo duuu-hub/bb-scanner --name ema-idle-overlay-canonical-audit -D canon
+          gh run download 36442110654 --repo duuu-hub/bb-scanner --name ema-overlay-cost-grid -D cost
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Run temporal audit
+        run: |
+          python research/ema_overlay_temporal_audit.py --canon canon --costgrid cost --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ema-overlay-temporal-audit
+          path: out/
+          if-no-files-found: error
