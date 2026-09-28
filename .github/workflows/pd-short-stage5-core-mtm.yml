@@ -1,0 +1,29 @@
+name: PD Short Stage5 Core 15m MTM
+on:
+  push:
+    paths: [".research/pd_short_stage5_core_mtm_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy requests
+      - name: Syntax check
+        run: python -m py_compile research/pd_short_stage5_core_mtm.py
+      - name: Download inputs
+        run: |
+          mkdir -p core pd input
+          gh run download 35952730823 --repo duuu-hub/bb-scanner --name btc-eth-regime-stage5-long-history -D core
+          gh run download 36374061982 --repo duuu-hub/bb-scanner --name pd-short-15m-selector-rebuild -D pd
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36095439671 --repo duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s
+          done
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Run Stage5 plus PD MTM
+        run: python research/pd_short_stage5_core_mtm.py --core core/binance_daily_strategy.csv --selected pd/selected_candidates.csv --um input --out out --spot-cache spot15m
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-short-stage5-core-15m-mtm, path: out/}
