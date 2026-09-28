@@ -1,0 +1,86 @@
+name: PSAR 1H Fixed-Level Stats
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_fixed_level_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run 1H fixed-level statistics
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_open_canonical_compare.py)
+          python scripts/psar_open_canonical_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 8 --out psar_1h_fixed_level_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-fixed-level-${{ matrix.shard }}
+          path: psar_1h_fixed_level_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-1h-fixed-level-*
+          path: merged
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Merge raw shard counts and recompute metrics
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("merged/**/*.json",recursive=True)
+          assert len(fs)==8, f"expected 8 shard jsons, got {len(fs)}"
+          docs=[json.load(open(x)) for x in fs]
+          base=docs[0]["definition"]
+          assert base["tf"]=="1h",base
+          common=lambda d:{k:v for k,v in d["definition"].items() if k!="shard_index"}
+          assert all(common(d)==common(docs[0]) for d in docs),"shard definition mismatch"
+          assert all(not d.get("errors") for d in docs),"shard contains errors"
+          assert {d["definition"]["shard_index"] for d in docs}==set(range(8)),"missing/duplicate shard index"
+          assert all(d["definition"]["shard_count"]==8 for d in docs),"wrong shard_count"
+          expected={d["definition"]["input_files_total"] for d in docs}
+          assert len(expected)==1,"input file total mismatch across shards"
+          assert sum(d["files"] for d in docs)==next(iter(expected)),"merged file coverage mismatch"
+          raw_fields={"fills","taker","maker","win","loss","collision_15m","resolved_1m","collision_1m_loss","data_gap","entry_mismatch","exit_mismatch","unresolved_eod","gross_profit_design_R","gross_loss_design_R"}
+          derived_fields={"win_pct_amb_loss","gross_expectancy_R_amb_loss","gross_pf_realized_design_R","gross_expectancy_realized_design_R"}
+          for d in docs:
+              for k,v in d["summary"].items():
+                  assert set(v)==raw_fields|derived_fields,(k,set(v))
+          agg={}
+          for d in docs:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived_fields})
+                  for kk,vv in v.items():
+                      if kk not in derived_fields: q[kk]+=vv
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"],(k,q)
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"],(k,q)
+              resolved=q["win"]+q["loss"]
+              r=float(k.split("|R")[1].split("|")[0])
+              q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
+              q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
+              q["gross_pf_realized_design_R"]=round(q["gross_profit_design_R"]/q["gross_loss_design_R"],5) if q["gross_loss_design_R"]>0 else None
+              q["gross_expectancy_realized_design_R"]=round((q["gross_profit_design_R"]-q["gross_loss_design_R"])/resolved,5) if resolved else None
+          out={"definition":common(docs[0]),"files":sum(d["files"] for d in docs),"errors":[],"summary":agg,"merged_shards":len(docs)}
+          json.dump(out,open("psar_1h_fixed_level_merged.json","w"),indent=2)
+          print("MERGE_PASS",len(fs),out["files"],len(agg))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-fixed-level-merged
+          path: psar_1h_fixed_level_merged.json
