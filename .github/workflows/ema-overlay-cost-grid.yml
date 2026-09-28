@@ -1,0 +1,48 @@
+name: EMA600 Overlay Cost Grid
+on:
+  push:
+    paths: [".research/ema_overlay_cost_grid_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy requests pyarrow
+      - name: Syntax check
+        run: |
+          python -m py_compile research/pd_short_stage5_core_cost_grid.py
+          python -m py_compile research/ema_stage5_pd_combo.py
+          python -m py_compile research/ema_overlay_cost_grid.py
+      - name: Download exact Stage5 PD inputs
+        run: |
+          mkdir -p core pd input
+          gh run download 35952730823 --repo duuu-hub/bb-scanner --name btc-eth-regime-stage5-long-history -D core
+          gh run download 36374061982 --repo duuu-hub/bb-scanner --name pd-short-15m-selector-rebuild -D pd
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36095439671 --repo duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s
+          done
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Build exact Stage5 PD cost curves
+        run: |
+          python research/pd_short_stage5_core_cost_grid.py             --core core/binance_daily_strategy.csv             --selected pd/selected_candidates.csv             --um input --out base --spot-cache spot15m
+      - name: Fetch EMA funding
+        run: |
+          git fetch --depth=1 origin research-btc-strategy-lab-replication
+          mkdir -p ema_source
+          git show FETCH_HEAD:research/btc_strategy_lab_replication/source_data/funding.feather > ema_source/funding.feather
+          test -s ema_source/funding.feather
+      - name: Run canonical EMA overlay cost grid
+        run: |
+          python research/ema_overlay_cost_grid.py             --combo-script research/ema_stage5_pd_combo.py             --funding ema_source/funding.feather             --base-dir base --out out --cache spotcache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ema-overlay-cost-grid
+          path: |
+            base/stage5_pd_15m_mtm.csv
+            base/equity_curve_*bp_risk080.csv
+            out/
+          if-no-files-found: error
