@@ -1,0 +1,37 @@
+name: EMA600 D365 Rolling OOS
+on:
+  push:
+    paths: [".research/ema_overlay_d365_rolling_oos_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy requests pyarrow
+      - name: Syntax check
+        run: python -m py_compile research/ema_overlay_d365_rolling_oos.py
+      - name: Download exact 8bp base
+        run: |
+          mkdir -p prior
+          gh run download 36442110654 --repo duuu-hub/bb-scanner --name ema-overlay-cost-grid -D prior
+          BASE=$(find prior -name 'equity_curve_8bp_risk080.csv' -type f | head -1)
+          test -s "$BASE"
+          cp "$BASE" prior/base8.csv
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Fetch EMA funding
+        run: |
+          git fetch --depth=1 origin research-btc-strategy-lab-replication
+          mkdir -p ema_source
+          git show FETCH_HEAD:research/btc_strategy_lab_replication/source_data/funding.feather > ema_source/funding.feather
+      - name: Run rolling OOS audit
+        run: |
+          python research/ema_overlay_d365_rolling_oos.py             --combo-script research/ema_stage5_pd_combo.py             --funding ema_source/funding.feather             --base prior/base8.csv --out out --cache spotcache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ema-overlay-d365-rolling-oos
+          path: out/
+          if-no-files-found: error
