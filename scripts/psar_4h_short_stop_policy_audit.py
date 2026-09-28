@@ -217,11 +217,13 @@ def _run_exit(policy,t,o,h,l,rt,ro,sar,bull,pos,entry_i,fs,fill,tp,initial_sl,sy
                 open_px=float(ro[next_4h])
                 ns=float(sar[next_4h])
                 if bool(bull[next_4h]):
-                    # confirmed PSAR direction flip at this OPEN: short thesis invalid.
-                    return ("win" if fill>open_px else "loss"),int(t[k]),open_px,"PSAR_FLIP",sl
+                    # Bullish PSAR is below price and is not a valid short stop.
+                    # Do NOT exit on flip; freeze the last valid bearish ratchet stop.
+                    next_4h+=1
+                    continue
                 if np.isfinite(ns) and ns<sl:
                     sl=ns
-                # gap beyond tightened stop -> execute at OPEN (worse/favorable actual open).
+                # gap beyond newly tightened bearish stop -> execute at OPEN.
                 if open_px>=sl:
                     return ("win" if fill>open_px else "loss"),int(t[k]),open_px,"RATCHET_GAP_SL",sl
                 next_4h+=1
@@ -311,7 +313,7 @@ meta={"definition":{
  "source_data_run":"36095439671","tf":"4h","side":"SHORT","variants":VARIANTS,
  "btc_blacklist":["BTCUSDT"],
  "fixed":"entry-time PSAR SL never changes",
- "ratchet":"at each later 4H OPEN, if bearish open-time PSAR is lower, tighten SL only downward; never loosen; bullish open-time PSAR flip exits at OPEN",
+ "ratchet":"at each later 4H OPEN, if bearish open-time PSAR is lower, tighten SL only downward; never loosen; bullish PSAR does not exit and the last valid bearish stop is frozen until a later bearish PSAR can tighten it",
  "chronology":"ratchet update occurs before processing the new 4H candle; current candle future H/L/C never used",
  "statistics_scope":"independent signals; overlap allowed; portfolio cap not yet applied"
  },"files":len(files),"rows":len(rows)}
