@@ -1073,7 +1073,8 @@ def manage_signal_shadows(
             f"📊 {shadow_side} 가상포지션 종료\n"
             f"{shadow.get('strategy')} {shadow.get('symbol')} · {close_reason}\n"
             f"이번 {ret_text}\n"
-            f"{shadow_side} 누적 {stats['weighted_compounded_pct']:+.2f}%",
+            f"{shadow_side} 누적 {stats['wins']}승 {stats['losses']}패 · "
+            f"{stats['weighted_compounded_pct']:+.2f}%",
         )
 
     state["signal_shadow_open"] = kept
