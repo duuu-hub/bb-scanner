@@ -921,8 +921,10 @@ def mark_signal_shadow_execution(state: dict, signal_id: str, status: str) -> No
                 return
 
 
-def signal_shadow_stats(state: dict, cfg: dict) -> dict:
+def signal_shadow_stats(state: dict, cfg: dict, side: str | None = None) -> dict:
     rows = list(state.get("signal_shadow_closed", []))
+    if side:
+        rows = [r for r in rows if str(r.get("side") or "LONG").upper() == side.upper()]
     valid = []
     for row in rows:
         value = row.get("shadow_return_pct")
@@ -1056,7 +1058,8 @@ def manage_signal_shadows(
             }
         )
 
-        stats = signal_shadow_stats(state, cfg)
+        shadow_side = str(shadow.get("side") or "LONG").upper()
+        stats = signal_shadow_stats(state, cfg, shadow_side)
         pf_text = (
             "∞" if stats["pf"] == math.inf
             else ("N/A" if stats["pf"] is None else f"{stats['pf']:.2f}")
@@ -1067,8 +1070,8 @@ def manage_signal_shadows(
         avg_text = "N/A" if stats["avg_return_pct"] is None else f"{stats['avg_return_pct']:+.2f}%"
         notify(
             cfg,
-            "📊 LONG3 신호 가상포지션 종료\n"
-            f"{shadow.get('strategy')} {shadow.get('symbol')} LONG | {close_reason}\n"
+            f"📊 {shadow_side} 가상포지션 종료\n"
+            f"{shadow.get('strategy')} {shadow.get('symbol')} {shadow_side} | {close_reason}\n"
             f"entry={entry} exit={exit_text} return={ret_text}\n"
             f"실제 Demo={shadow.get('actual_execution')}\n"
             f"누적: closed={stats['closed']} W/L={stats['wins']}/{stats['losses']} "
