@@ -21,14 +21,14 @@ S["risk_dist"]=[atr15(r.symbol,r.entry_time) for r in S.itertuples()]
 # reconstruct true first 15m touch over canonical max-hold window; same 15m bar both => SL
 def refine(r):
  d=px[r.symbol]; ep=float(r.entry); rd=float(r.risk_dist); sl=ep+rd; tp=ep-3*rd
- w=d[(d.index>=r.entry_time)&(d.index<=r.entry_time+pd.Timedelta(hours=24))]
+ w=d[(d.index>=r.entry_time)&(d.index<r.entry_time+pd.Timedelta(hours=24))]
  for t,b in w.iterrows():
   hs=b.high>=sl; ht=b.low<=tp
-  if hs and ht:return t,sl,"SL_AMBIG_15M"
-  if hs:return t,sl,"SL"
-  if ht:return t,tp,"TP"
+  if hs and ht:return t+pd.Timedelta(minutes=15),sl,"SL_AMBIG_15M"
+  if hs:return t+pd.Timedelta(minutes=15),sl,"SL"
+  if ht:return t+pd.Timedelta(minutes=15),tp,"TP"
  # canonical timeout is 6 4H bars; preserve canonical exit price/R if no barrier touch
- return r.exit_time,float(r.exit),"TIME"
+ return r.entry_time+pd.Timedelta(hours=24),float(r.exit),"TIME"
 rr=[refine(r) for r in S.itertuples()];S["exit15"]=[x[0] for x in rr];S["exitpx15"]=[x[1] for x in rr];S["reason15"]=[x[2] for x in rr]
 S.to_csv(O/"candidates_15m_b5.csv",index=False)
 # Keep canonical net R economics for TP/SL and recompute TIME from canonical r_net; only timing changes. This isolates timing/admission effect.
@@ -36,16 +36,21 @@ S.to_csv(O/"candidates_15m_b5.csv",index=False)
 out=[]
 for rf in [.01,.0125,.015,.02,.025,.03]:
  cash=1.;peak=1.;mdd=0.;active=[];acc=[]
- for r in S.sort_values(["entry_time","symbol"]).itertuples():
-  done=[p for p in active if p["exit15"]<=r.entry_time]
-  for p in sorted(done,key=lambda x:x["exit15"]):
-   cash+=p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
-  active=[p for p in active if p["exit15"]>r.entry_time]
-  if len(active)>=5:continue
-  p=dict(symbol=r.symbol,entry_time=r.entry_time,exit15=r.exit15,r_net=r.r_net,stake=cash*rf,entry=r.entry,exitpx15=r.exitpx15,reason15=r.reason15,risk_dist=r.risk_dist)
-  active.append(p);acc.append(p)
- for p in sorted(active,key=lambda x:x["exit15"]):
-  cash+=p["stake"]*p["r_net"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+ for et,g in S.sort_values(["entry_time","symbol"]).groupby("entry_time",sort=True):
+  done=[p for p in active if p["exit15"]<=et]
+  for xt in sorted({p["exit15"] for p in done}):
+   batch=[p for p in done if p["exit15"]==xt]
+   cash+=sum(p["stake"]*p["r_net"] for p in batch);peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+  active=[p for p in active if p["exit15"]>et]
+  free=5-len(active)
+  if free<=0:continue
+  base=cash
+  for r in g.head(free).itertuples():
+   p=dict(symbol=r.symbol,entry_time=r.entry_time,exit15=r.exit15,r_net=r.r_net,stake=base*rf,entry=r.entry,exitpx15=r.exitpx15,reason15=r.reason15,risk_dist=r.risk_dist)
+   active.append(p);acc.append(p)
+ for xt in sorted({p["exit15"] for p in active}):
+  batch=[p for p in active if p["exit15"]==xt]
+  cash+=sum(p["stake"]*p["r_net"] for p in batch);peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
  # strict 15m MTM replay on accepted set, stop/TP mark frozen at canonical R once refined exit occurs via cash realization
  cash2=1.;openp=[];pm=1.;mm=0.;pt=None;tr=None
  be={};bx={}
@@ -53,7 +58,7 @@ for rf in [.01,.0125,.015,.02,.025,.03]:
   p["pid"]=i;be.setdefault(int(p["entry_time"].value),[]).append(p);bx.setdefault(int(p["exit15"].value),[]).append(p)
  keys=set(be)|set(bx)
  for p in acc:
-  keys.update(int(t.value) for t in px[p["symbol"]].index if p["entry_time"]<=t<=p["exit15"])
+  keys.update(int((t+pd.Timedelta(minutes=15)).value) for t in px[p["symbol"]].index if p["entry_time"]<=t and t+pd.Timedelta(minutes=15)<=p["exit15"])
  for k in sorted(keys):
   t=pd.Timestamp(k,tz="UTC");old={p["pid"] for p in openp}
   for p in bx.get(k,[]):
