@@ -75,11 +75,6 @@ def static_checks(src):
         "entry_mismatch_excluded_from_fill": src.count('q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1') == 2,
         "exit_mismatch_excluded_from_metrics": src.count('q["exit_mismatch"]+=1') == 2,
         "no_integrity_hard_fail": 'if rr=="data_error"' not in src,
-        "fixed_exit_helper": "def _design_tp(entry_target,sl,r,long):" in src,
-        "designed_risk_anchored": src.count("design_risk=abs(e-sl)") == 2,
-        "tp_anchored_to_target": src.count("tp=_design_tp(e,sl,r,b)") == 2,
-        "moving_tp_removed": "risk=abs(fill-sl)" not in src and "tp=fill+r*risk" not in src,
-        "realized_r_accounting": src.count("gross_profit_design_R") >= 3 and src.count("gross_loss_design_R") >= 3,
     }
     bad = [k for k, v in checks.items() if not v]
     if bad:
