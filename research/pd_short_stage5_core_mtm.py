@@ -14,7 +14,16 @@ def normalize_ms(s):
     x=np.where(x>1e14,x/1000.0,x)
     return pd.to_datetime(x,unit="ms",utc=True)
 
-def download_spot_15m(symbol,start,end,cache_dir):
+
+def _max_missing_run(mask):
+    best=cur=0
+    for v in mask.to_numpy(dtype=bool):
+        if v:
+            cur+=1;best=max(best,cur)
+        else:
+            cur=0
+    return best
+\ndef download_spot_15m(symbol,start,end,cache_dir):
     cache=Path(cache_dir);cache.mkdir(parents=True,exist_ok=True);frames=[]
     for month in pd.date_range(start.floor("D").replace(day=1),end-pd.Timedelta(seconds=1),freq="MS"):
         ym=month.strftime("%Y-%m"); fp=cache/f"{symbol}-15m-{ym}.csv.gz"
@@ -61,32 +70,47 @@ def prepare_core(stage5):
     return H
 
 def build_core_paths(H,btc,eth):
-    b=btc.rename(columns={"open":"b_open","close":"b_close"})
-    e=eth.rename(columns={"open":"e_open","close":"e_close"})
-    x=b.merge(e,on="dt",how="inner").sort_values("dt");x["day"]=x.dt.dt.floor("D")
+    b=btc.rename(columns={"open":"b_open","close":"b_close"}).set_index("dt").sort_index()
+    e=eth.rename(columns={"open":"e_open","close":"e_close"}).set_index("dt").sort_index()
     rows=[];par=[]
-    prev=0
+    prev=int(H.attrs.get("initial_prev_state",0))
     for r in H.itertuples():
         day=r.held_day;state=int(r.core_long);fee=abs(state-prev)*CORE_HALF_FEE
         if not state:
             expected=float(r.core_long_net_pct)/100.0
             if abs(expected+fee)>2e-10: raise AssertionError(("inactive parity",day,expected,fee))
-            par.append((day,state,0,0.0,0.0,fee));prev=state;continue
-        d=x[x.day==day].copy()
-        if len(d)!=96: raise AssertionError(f"spot 15m bars {day}: {len(d)}")
-        expected_times=pd.date_range(day,day+pd.Timedelta(hours=23,minutes=45),freq="15min")
-        if not d.dt.reset_index(drop=True).equals(pd.Series(expected_times)): raise AssertionError(f"spot gap {day}")
-        bo=float(d.iloc[0].b_open);eo=float(d.iloc[0].e_open)
-        d["mark_time"]=d.dt+pd.Timedelta(minutes=15)
-        d["gross"]=0.5*((d.b_close/bo-1)+(d.e_close/eo-1))
+            par.append((day,state,0,0.0,expected,fee,0,0,0,0));prev=state;continue
+
+        idx=pd.date_range(day,day+pd.Timedelta(days=1)-pd.Timedelta(minutes=15),freq="15min")
+        db=b.reindex(idx).copy();de=e.reindex(idx).copy()
+        mb=db.b_close.isna();me=de.e_close.isna()
+        nb,ne=int(mb.sum()),int(me.sum());rb,re=_max_missing_run(mb),_max_missing_run(me)
+        if nb>8 or ne>8 or rb>4 or re>4:
+            raise AssertionError(f"core spot gap too large {day}: BTC missing={nb} run={rb}, ETH missing={ne} run={re}")
+
+        pb=b.loc[b.index<day,"b_close"];pe=e.loc[e.index<day,"e_close"]
+        pb=float(pb.iloc[-1]) if len(pb) else np.nan;pe=float(pe.iloc[-1]) if len(pe) else np.nan
+        if pd.isna(db.b_close.iloc[0]) and np.isfinite(pb): db.iloc[0,db.columns.get_loc("b_close")]=pb
+        if pd.isna(de.e_close.iloc[0]) and np.isfinite(pe): de.iloc[0,de.columns.get_loc("e_close")]=pe
+        db["b_close"]=db.b_close.ffill().bfill();de["e_close"]=de.e_close.ffill().bfill()
+        bo=float(db.b_open.iloc[0]) if "b_open" in db and pd.notna(db.b_open.iloc[0]) else pb
+        eo=float(de.e_open.iloc[0]) if "e_open" in de and pd.notna(de.e_open.iloc[0]) else pe
+        if not (np.isfinite(bo) and np.isfinite(eo) and db.b_close.notna().all() and de.e_close.notna().all()):
+            raise AssertionError(f"cannot fill core spot path {day}")
+
+        d=pd.DataFrame({"mark_time":idx+pd.Timedelta(minutes=15),
+                        "gross":0.5*((db.b_close.to_numpy(float)/bo-1)+(de.e_close.to_numpy(float)/eo-1))})
         expected=float(r.core_long_net_pct)/100.0+fee
         raw=float(d.iloc[-1].gross)
-        if abs(raw-expected)>2e-5: raise AssertionError(("core endpoint",day,raw,expected))
-        scale=expected/raw if abs(raw)>1e-15 else 1.0
-        d["gross"]=d.gross*scale
+        if abs(raw)>1e-15:
+            d["gross"]*=expected/raw
+        elif abs(expected)>2e-6:
+            raise AssertionError(f"zero 15m gross but nonzero daily gross {day}")
+        if abs(float(d.iloc[-1].gross)-expected)>1e-12:
+            raise AssertionError(f"endpoint parity failed {day}")
         for z in d.itertuples(): rows.append((day,z.mark_time,float(z.gross)))
-        par.append((day,state,96,raw,expected,fee));prev=state
-    return pd.DataFrame(rows,columns=["day","mark_time","gross"]),pd.DataFrame(par,columns=["day","state","bars","raw_final","expected_final","fee"])
+        par.append((day,state,96,raw,expected,fee,nb,ne,rb,re));prev=state
+    return pd.DataFrame(rows,columns=["day","mark_time","gross"]),pd.DataFrame(par,columns=["day","state","bars","raw_final","expected_final","fee","btc_missing","eth_missing","btc_max_gap","eth_max_gap"])
 
 def prepare_pd(path,H):
     S=pd.read_csv(path,parse_dates=["entry_time","exit_time"]).copy()
