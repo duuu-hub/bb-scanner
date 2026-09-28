@@ -245,7 +245,7 @@ def main():
             cm={d:g.set_index("mark_time").gross.to_dict() for d,g in core_marks.groupby("day")}
             pm={pid:g.set_index("mark_time").mark_r.to_dict() for pid,g in PM.groupby("pid")}
             cash=1.;bp=1.;bm=0.;mp=1.;mm=0.;openp=[];acc=[];core_day=None;core_stake=0.;core_gross=0.;prev=int(H.attrs.get("initial_prev_state",0))
-            core_realized=0.;pd_realized=0.;capture=abs(RF-.008)<1e-12;curve=[]
+            core_realized=0.;pd_realized=0.;capture=(abs(RF)<1e-12 or abs(RF-.008)<1e-12);curve=[]
             ent={et:g for et,g in S2.groupby("entry_time",sort=True)}
             def rex(t):
                 nonlocal cash,bp,bm,openp,pd_realized
@@ -288,7 +288,8 @@ def main():
             if capture:
                 cf=pd.DataFrame(curve)
                 cf["seq"]=np.arange(len(cf))
-                cf.to_csv(O/f"equity_curve_{bps}bp_risk080.csv",index=False)
+                rlab="risk000" if abs(RF)<1e-12 else "risk080"
+                cf.to_csv(O/f"equity_curve_{bps}bp_{rlab}.csv",index=False)
                 z=cf.copy();z["peak"]=z.equity.cummax();z["dd"]=(z["peak"]-z.equity)/z["peak"]
                 ti=int(z.dd.idxmax());tr=z.loc[ti];peak_eq=float(tr["peak"])
                 pi=int(z.loc[:ti][z.loc[:ti].equity>=peak_eq-1e-12].index[-1]);pr=z.loc[pi]
@@ -304,7 +305,7 @@ def main():
                     cash_change_peak_to_trough=float(tr.cash-pr.cash),
                     core_unrealized_at_trough=float(tr.core_unrealized),
                     pd_unrealized_at_trough=float(tr.pd_unrealized),open_pd_at_trough=int(tr.open_pd))])
-                diag.to_csv(O/f"worst_dd_{bps}bp_risk080.csv",index=False)
+                diag.to_csv(O/f"worst_dd_{bps}bp_{rlab}.csv",index=False)
                 q=cf.copy();q["year"]=q.time.dt.year;q["quarter"]=q.time.dt.to_period("Q")
                 yr=[];qr=[]
                 for k,g in q.groupby("year"):
@@ -315,13 +316,13 @@ def main():
                     gg=g.set_index("seq").equity;pk=gg.cummax()
                     qr.append(dict(cost_bps=bps,quarter=str(k),start_equity=float(gg.iloc[0]),end_equity=float(gg.iloc[-1]),
                                    return_pct=(float(gg.iloc[-1])/float(gg.iloc[0])-1)*100,mdd_pct=float(((pk-gg)/pk).max()*100)))
-                pd.DataFrame(yr).to_csv(O/f"yearly_{bps}bp_risk080.csv",index=False)
-                pd.DataFrame(qr).to_csv(O/f"quarterly_{bps}bp_risk080.csv",index=False)
+                pd.DataFrame(yr).to_csv(O/f"yearly_{bps}bp_{rlab}.csv",index=False)
+                pd.DataFrame(qr).to_csv(O/f"quarterly_{bps}bp_{rlab}.csv",index=False)
                 print("DIAG",diag.to_dict("records")[0])
                 print("YEARLY",pd.DataFrame(yr).to_dict("records"))
                 print("QUARTERLY",pd.DataFrame(qr).to_dict("records"))
             return cash,bm,mm,len(acc),len(set(p["entry_time"] for p in acc))
-        for RF in [.005,.0075,.008,.0085,.009,.0095,.01,.0125,.015]:
+        for RF in [0.,.005,.0075,.008,.0085,.009,.0095,.01,.0125,.015]:
             cash,bm,mm,n,ne=sim_with_markpid()
             rows.append(dict(cost_bps=bps,risk=RF,final_equity=cash,booked_mdd=bm,mtm_mdd=mm,pd_trades=n,pd_events=ne))
 
