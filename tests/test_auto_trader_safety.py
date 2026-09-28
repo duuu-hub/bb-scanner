@@ -107,6 +107,17 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
             )],
         )
 
+    def test_contract_config_marks_removed_demo_symbol_unsupported(self):
+        class FakeClient:
+            def private_get(self, path, params):
+                raise RuntimeError(
+                    "/api/v2/mix/market/contracts failed: "
+                    "HTTP=400 code=40309 msg=The symbol has been removed"
+                )
+
+        with self.assertRaises(DemoSymbolUnsupported):
+            contract_config(FakeClient(), "ICPUSDT")
+
     def test_contract_config_marks_demo_unsupported_symbol(self):
         class FakeClient:
             def private_get(self, path, params):
