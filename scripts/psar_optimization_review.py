@@ -66,7 +66,7 @@ def static_checks(src):
         "maker_fill_sl_direct": src.count("fill_sl=(l[fs]<=sl) if b else (h[fs]>=sl)") == 2,
         "maker_1m_resolution": src.count("_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill") == 2,
         "established_collision_1m": src.count("_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None") == 2,
-        "data_gap_accounted": '"data_gap"]+q["unresolved_eod"]' in src,
+        "data_gap_accounted": '"data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]' in src,
         "same_open_timing": 'order_live":"same strategy-TF bar open"' in src,
         "no_horizon_cut": '"horizon_bars":None' in src,
         "no_period_split": "entry_year" not in src and "year_shard" not in src,
