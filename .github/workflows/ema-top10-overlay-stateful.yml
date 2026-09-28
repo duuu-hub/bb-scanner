@@ -1,0 +1,47 @@
+name: EMA600 Top10 Stateful Overlay
+on:
+  push:
+    branches: [research/pd-4h-binance-universe]
+    paths: ['.research/ema_top10_overlay_stateful_once']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests pyarrow
+      - run: |
+          python -m py_compile research/ema_top10_overlay_stateful.py research/ema_stage5_pd_combo.py
+          python research/ema_top10_overlay_stateful.py --self-test
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests pyarrow
+      - name: Fetch EMA funding
+        run: |
+          git fetch --depth=1 origin research-btc-strategy-lab-replication
+          mkdir -p ema_source
+          git show FETCH_HEAD:research/btc_strategy_lab_replication/source_data/funding.feather > ema_source/funding.feather
+          test -s ema_source/funding.feather
+      - name: Download final Top10 curve
+        run: |
+          mkdir -p base
+          gh run download 36428561256 --repo duuu-hub/bb-scanner --name pd-short-top10-final-curve-VERIFIED -D base
+          test -s base/equity_curve_24bp_top10_final.csv
+        env: {GH_TOKEN: '${{ github.token }}'}
+      - run: python research/ema_top10_overlay_stateful.py --combo-script research/ema_stage5_pd_combo.py --funding ema_source/funding.feather --base24 base/equity_curve_24bp_top10_final.csv --out out --cache spotcache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ema-top10-stateful-overlay-VERIFIED
+          path: out/
+          if-no-files-found: error
