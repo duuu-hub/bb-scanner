@@ -1071,12 +1071,9 @@ def manage_signal_shadows(
         notify(
             cfg,
             f"📊 {shadow_side} 가상포지션 종료\n"
-            f"{shadow.get('strategy')} {shadow.get('symbol')} {shadow_side} | {close_reason}\n"
-            f"entry={entry} exit={exit_text} return={ret_text}\n"
-            f"실제 Demo={shadow.get('actual_execution')}\n"
-            f"누적: closed={stats['closed']} W/L={stats['wins']}/{stats['losses']} "
-            f"win={wr_text} avg={avg_text} PF={pf_text}\n"
-            f"30% 단순복리≈{stats['weighted_compounded_pct']:+.2f}%",
+            f"{shadow.get('strategy')} {shadow.get('symbol')} · {close_reason}\n"
+            f"이번 {ret_text}\n"
+            f"{shadow_side} 누적 {stats['weighted_compounded_pct']:+.2f}%",
         )
 
     state["signal_shadow_open"] = kept
