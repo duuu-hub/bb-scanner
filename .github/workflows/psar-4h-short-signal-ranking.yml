@@ -1,0 +1,30 @@
+name: PSAR 4H SHORT Signal Ranking
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_ranking_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  rank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download feature and sizing ledgers
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p features sizing
+          gh run download 36431639340 -R ${{ github.repository }} -p 'psar-4h-short-features-*' -D features
+          gh run download 36437560302 -R ${{ github.repository }} -p 'psar-4h-short-sizing-*' -D sizing
+          echo FEATURES && find features -type f | sort | head -40
+          echo SIZING && find sizing -type f | sort | head -40
+      - name: Run train-validation ranking study
+        run: python scripts/psar_4h_short_signal_ranking.py --features features --sizing sizing --out psar_4h_short_signal_ranking.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-signal-ranking
+          path: psar_4h_short_signal_ranking.json
