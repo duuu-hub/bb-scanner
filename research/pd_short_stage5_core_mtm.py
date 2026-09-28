@@ -220,7 +220,7 @@ def main():
             hmap=H.set_index("held_day");am=hmap.core_long.to_dict()
             cm={d:g.set_index("mark_time").gross.to_dict() for d,g in core_marks.groupby("day")}
             pm={pid:g.set_index("mark_time").mark_r.to_dict() for pid,g in PM.groupby("pid")}
-            cash=1.;bp=1.;bm=0.;mp=1.;mm=0.;openp=[];acc=[];core_day=None;core_stake=0.;core_gross=0.;prev=0
+            cash=1.;bp=1.;bm=0.;mp=1.;mm=0.;openp=[];acc=[];core_day=None;core_stake=0.;core_gross=0.;prev=int(H.attrs.get("initial_prev_state",0))
             ent={et:g for et,g in S2.groupby("entry_time",sort=True)}
             def rex(t):
                 nonlocal cash,bp,bm,openp
