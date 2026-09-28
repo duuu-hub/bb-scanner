@@ -1,0 +1,39 @@
+name: EMA600 Idle Overlay Sweep
+on:
+  push:
+    paths: [".research/ema_idle_overlay_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy requests pyarrow
+      - name: Syntax check
+        run: |
+          python -m py_compile research/ema_stage5_pd_combo.py
+          python -m py_compile research/ema_idle_overlay_sweep.py
+      - name: Fetch EMA funding
+        run: |
+          git fetch --depth=1 origin research-btc-strategy-lab-replication
+          mkdir -p ema_source
+          git show FETCH_HEAD:research/btc_strategy_lab_replication/source_data/funding.feather > ema_source/funding.feather
+          test -s ema_source/funding.feather
+      - name: Download Stage5 PD curves
+        run: |
+          mkdir -p stage5pd
+          gh run download 36380760550 --repo duuu-hub/bb-scanner --name pd-short-stage5-core-15m-mtm -D stage5pd
+          test -s stage5pd/equity_curve_8bp_risk080.csv
+          test -s stage5pd/equity_curve_24bp_risk080.csv
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Run overlay sweep
+        run: |
+          python research/ema_idle_overlay_sweep.py             --combo-script research/ema_stage5_pd_combo.py             --funding ema_source/funding.feather             --stage5pd8 stage5pd/equity_curve_8bp_risk080.csv             --stage5pd24 stage5pd/equity_curve_24bp_risk080.csv             --out out --cache spotcache
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ema-idle-overlay-sweep
+          path: out/
+          if-no-files-found: error
