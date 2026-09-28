@@ -51,6 +51,21 @@ def build_idle(base):
 
 def sim(mode,w,idx,base_ret,idle,b15,hour,orig_open,orig_trail):
     px=b15.set_index("dt").sort_index()
+    want=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
+    px=px.reindex(want)
+    miss=px.close.isna()
+    # Small official-archive gaps: represent the missing interval as a flat bar at previous close.
+    # Abort on larger uncertainty rather than silently fabricating a path.
+    runs=(miss.astype(int).groupby((~miss).cumsum()).sum() if miss.any() else pd.Series([0]))
+    max_run=int(runs.max()) if len(runs) else 0
+    nmiss=int(miss.sum())
+    if max_run>4 or nmiss>100:
+        raise AssertionError(("BTC15 gap too large",nmiss,max_run))
+    prev=px.close.ffill()
+    for col in ["open","high","low","close"]:
+        px[col]=px[col].where(~miss,prev)
+    if px[["open","high","low","close"]].isna().any().any():
+        raise AssertionError("cannot fill BTC15 leading gap")
     E=1.;pos=False;stake=0.;ep=0.;peak=0.;pending=None;curve=[(START,E)]
     trades=0
     for mt in idx[1:]:
@@ -129,6 +144,12 @@ def main():
     a=ap.parse_args();O=Path(a.out);O.mkdir(parents=True,exist_ok=True);mod=load_mod(a.combo_script)
     h=mod.dl_spot("BTCUSDT","1h",pd.Timestamp("2019-01-01",tz="UTC"),END,a.cache)
     b15=mod.dl_spot("BTCUSDT","15m",START,END,a.cache);hour=prep_hourly(mod,h,a.funding);orig_open,orig_trail=original_active(hour,b15)
+    full_open_idx=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
+    raw_idx=b15.set_index("dt").sort_index().reindex(full_open_idx)
+    miss=raw_idx.close.isna()
+    runs=(miss.astype(int).groupby((~miss).cumsum()).sum() if miss.any() else pd.Series([0]))
+    print("BTC15_GAPS",{"missing":int(miss.sum()),"max_run":int(runs.max()) if len(runs) else 0})
+    orig_open=orig_open.reindex(full_open_idx).ffill().fillna(False).astype(bool)
 
     allrows=[]
     for bps,base in [(8,a.base8),(24,a.base24)]:
