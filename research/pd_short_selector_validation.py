@@ -33,33 +33,48 @@ def selftest():
  S=pd.DataFrame(z);_,_,a=sim(S,cmap,"break",.01);_,_,b=sim(S,cmap,"liquidity",.01);_,_,c=sim(S,cmap,"random",.01,np.random.default_rng(1))
  assert list(a.symbol)==["S7","S6","S5","S4","S3"];assert list(b.symbol)==["S0","S1","S2","S3","S4"];assert len(c)==5 and len(set(c.symbol))==5;print("SELF_TEST_PASS")
 def main():
- ap=argparse.ArgumentParser();ap.add_argument("--self-test",action="store_true");ap.add_argument("--input");ap.add_argument("--trades");ap.add_argument("--core");ap.add_argument("--out",default="out");ap.add_argument("--sims",type=int,default=10000);ap.add_argument("--seed",type=int,default=20260928);a=ap.parse_args()
+ ap=argparse.ArgumentParser();ap.add_argument("--self-test",action="store_true");ap.add_argument("--input");ap.add_argument("--canonical");ap.add_argument("--core");ap.add_argument("--out",default="out");ap.add_argument("--sims",type=int,default=10000);ap.add_argument("--seed",type=int,default=20260928);a=ap.parse_args()
  if a.self_test:selftest();return
  C=pd.read_csv(a.core,compression="gzip",parse_dates=["dt"]);C["dt"]=pd.to_datetime(C.dt,utc=True);C=C[(C.dt>=START)&(C.dt<END)];cmap=C.set_index("dt").base.to_dict()
- T=pd.read_csv(a.trades,parse_dates=["signal_time","entry_time","exit_time"]);T=T[T.side=="SHORT"].copy();T["exit_time"]=pd.to_datetime(T.exit_time,utc=True)+pd.Timedelta(minutes=15);T["year"]=T.entry_time.dt.year
- fs=[]
+ T=pd.read_csv(a.canonical,parse_dates=["signal_time","entry_time","exit_time"]);T=T[(T.n==320)&(T.signal=="FIRST_BREAKDOWN")&(T.stop_atr==1)&(T.rr==3)].copy();T["year"]=T.entry_time.dt.year
+ fs=[];need=set(T.symbol)
  for fn in sorted(glob.glob(a.input+"/**/*.csv.gz",recursive=True)):
   sym=Path(fn).name.replace(".csv.gz","")
-  if sym not in set(T.symbol):continue
+  if sym not in need:continue
   d=pd.read_csv(fn,compression="gzip");tc="open_time" if "open_time" in d else "timestamp_ms";d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)
-  for c in ["high","low","close"]:d[c]=pd.to_numeric(d[c],errors="coerce")
+  for col in ["open","high","low","close"]:d[col]=pd.to_numeric(d[col],errors="coerce")
   if "quote_volume" in d:d["quote_volume"]=pd.to_numeric(d["quote_volume"],errors="coerce").fillna(0.)
   else:d["quote_volume"]=0.
-  d=d.dropna(subset=["dt","high","low","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
-  x=d.resample("4h",label="left",closed="left").agg(high=("high","max"),low=("low","min"),close=("close","last"),bars=("close","count"));x=x[x.bars==16]
+  d=d.dropna(subset=["dt","open","high","low","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
+  x=d.resample("4h",label="left",closed="left").agg(open=("open","first"),high=("high","max"),low=("low","min"),close=("close","last"),bars=("close","count"));x=x[x.bars==16]
   rl=x.low.shift(1).rolling(320).min();atr=(x.high-x.low).shift(1).rolling(14).mean();v24=d.quote_volume.rolling(96,min_periods=96).sum()
-  q=pd.DataFrame({"signal_time":x.index,"break_atr":(rl-x.close)/atr,"riskdist":atr,"liq24":v24.reindex(x.index+pd.Timedelta(hours=3,minutes=45)).to_numpy()});q["symbol"]=sym;fs.append(q)
+  q=pd.DataFrame({"signal_time":x.index,"break_atr":(rl-x.close)/atr,"riskdist":atr});q["symbol"]=sym;q["liq24"]=v24.reindex(x.index+pd.Timedelta(hours=3,minutes=45)).to_numpy();fs.append(q)
  F=pd.concat(fs,ignore_index=True);T=T.merge(F,on=["symbol","signal_time"],how="left");assert T.break_atr.notna().mean()>.99
- T["riskpx"]=T.riskdist/T.entry;T["r24"]=T.r_net-.0016/T.riskpx;T["signals"]=T.groupby("entry_time").symbol.transform("nunique")
- W=[]
- for y in sorted(T.year.unique()):
-  if y<2023:continue
-  tr=T[T.year<y];ev=tr.groupby("entry_time").agg(signals=("symbol","nunique"),event_r=("r_net","mean")).reset_index();cand=[]
-  for th in THS:
-   z=ev[ev.signals>=th];cand.append((z.event_r.mean() if len(z)>=3 else -np.inf,th,len(z)))
-  _,th,n=max(cand);W.append((int(y),int(th),int(n)))
- assert [(y,t) for y,t,_ in W]==[(2023,51),(2024,71),(2025,71),(2026,71)],W
- S=pd.concat([T[(T.year==y)&(T.signals>=th)].assign(wf_threshold=th) for y,th,_ in W]).sort_values(["entry_time","symbol"]);assert S.entry_time.nunique()==42
+ T["signals"]=T.groupby("entry_time").symbol.transform("nunique")
+ fixed={2023:51,2024:71,2025:71,2026:71};sel=[]
+ for y,th in fixed.items():
+  q=T[(T.year==y)&(T.signals>=th)].copy();q["wf_threshold"]=th;sel.append(q)
+ S=pd.concat(sel).sort_values(["entry_time","symbol"]).copy();assert S.entry_time.nunique()==42 and len(S)==4632,(S.entry_time.nunique(),len(S))
+ out=[]
+ for sym,g in S.groupby("symbol"):
+  fn=next((p for p in glob.glob(a.input+"/**/*.csv.gz",recursive=True) if Path(p).name==sym+".csv.gz"),None)
+  if not fn:continue
+  d=pd.read_csv(fn,compression="gzip");tc="open_time" if "open_time" in d else "timestamp_ms";d["dt"]=pd.to_datetime(pd.to_numeric(d[tc]),unit="ms",utc=True)
+  for col in ["open","high","low","close"]:d[col]=pd.to_numeric(d[col],errors="coerce")
+  d=d.dropna(subset=["dt","open","high","low","close"]).sort_values("dt").drop_duplicates("dt").set_index("dt")
+  for r in g.itertuples():
+   rd=float(r.riskdist);ep=float(r.entry);sl=ep+rd;tp=ep-3*rd;w=d[(d.index>=r.entry_time)&(d.index<r.entry_time+pd.Timedelta(hours=24))]
+   if len(w)!=96:continue
+   xp=float(w.iloc[-1].close);xt=r.entry_time+pd.Timedelta(hours=24);reason="TIME"
+   for ot,b in w.iterrows():
+    hs=b.high>=sl;ht=b.low<=tp
+    if hs and ht:xp=sl;xt=ot+pd.Timedelta(minutes=15);reason="SL_AMBIG_15M";break
+    if hs:xp=sl;xt=ot+pd.Timedelta(minutes=15);reason="SL";break
+    if ht:xp=tp;xt=ot+pd.Timedelta(minutes=15);reason="TP";break
+   riskpx=rd/ep;r24=((ep-xp)/ep-.0024)/riskpx
+   out.append(dict(symbol=sym,entry_time=r.entry_time,exit_time=xt,r24=r24,break_atr=r.break_atr,liq24=r.liq24,reason=reason))
+ S=pd.DataFrame(out);cov=len(S)/4632
+ if cov<.995:raise AssertionError(("execution coverage",cov,len(S)))
  S["core_active"]=S.entry_time.dt.floor("D").map(cmap).fillna(0).astype(int)
  O=Path(a.out);O.mkdir(parents=True,exist_ok=True);pd.DataFrame(W,columns=["year","threshold","train_events"]).to_csv(O/"wf_thresholds.csv",index=False)
  pool=S.groupby("entry_time").agg(candidates=("symbol","nunique"),core_active=("core_active","first")).reset_index();pool.to_csv(O/"event_pool.csv",index=False)
@@ -74,5 +89,5 @@ def main():
  for sel,(eq,mdd,A) in det.items():
   R[sel+"_equity_pct"]=float((eqs<=eq).mean());R[sel+"_mdd_pct"]=float((mdds<=mdd).mean());R[sel+"_pf_pct"]=float((pfs<=pf(A.r)).mean())
  pd.DataFrame([R]).to_csv(O/"random5_distribution.csv",index=False)
- print("WF",W);print("SELECTORS");print(D.to_string(index=False));print("RANDOM5");print(pd.DataFrame([R]).to_string(index=False));print("NEUTRAL_PARITY_DELTA",float(D.loc[D.selector=="neutral","equity"].iloc[0]-4.085172))
+ print("WF",[(2023,51),(2024,71),(2025,71),(2026,71)]);print("SELECTORS");print(D.to_string(index=False));print("RANDOM5");print(pd.DataFrame([R]).to_string(index=False));print("NEUTRAL_PARITY_DELTA",float(D.loc[D.selector=="neutral","equity"].iloc[0]-4.085172));print("COVERAGE",cov)
 if __name__=="__main__":main()
