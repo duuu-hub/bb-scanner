@@ -1,0 +1,43 @@
+name: PSAR 4H SHORT Portfolio Sizing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_portfolio_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download sizing ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source
+          gh run download 36437560302 -R ${{ github.repository }} -D source
+          find source -maxdepth 3 -type f | sort
+      - name: Validate source artifacts
+        run: |
+          python - <<'PY'
+          import glob,json
+          e=glob.glob("source/**/events_*.csv.gz",recursive=True)
+          m=glob.glob("source/**/meta_*.json",recursive=True)
+          assert len(e)==8,(len(e),e)
+          good=0
+          for p in m:
+              try:d=json.load(open(p))
+              except:continue
+              if d.get("definition",{}).get("source_fixed_engine_blob")=="834d5e34ea4253951d42d5a083ad494ce2d498e4":good+=1
+          assert good>=8,good
+          print("SOURCE_PASS",len(e),good)
+          PY
+      - name: Run portfolio sizing
+        run: python scripts/psar_4h_short_portfolio_sim.py --source source --out psar_4h_short_portfolio_analysis.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-portfolio-analysis
+          path: psar_4h_short_portfolio_analysis.json
