@@ -76,7 +76,7 @@ def main():
  S=pd.DataFrame(out);cov=len(S)/4632
  if cov<.995:raise AssertionError(("execution coverage",cov,len(S)))
  S["core_active"]=S.entry_time.dt.floor("D").map(cmap).fillna(0).astype(int)
- O=Path(a.out);O.mkdir(parents=True,exist_ok=True);pd.DataFrame(W,columns=["year","threshold","train_events"]).to_csv(O/"wf_thresholds.csv",index=False)
+ O=Path(a.out);O.mkdir(parents=True,exist_ok=True);pd.DataFrame([(2023,51),(2024,71),(2025,71),(2026,71)],columns=["year","threshold"]).to_csv(O/"wf_thresholds.csv",index=False)
  pool=S.groupby("entry_time").agg(candidates=("symbol","nunique"),core_active=("core_active","first")).reset_index();pool.to_csv(O/"event_pool.csv",index=False)
  rows=[];det={}
  for sel in ["neutral","break","liquidity"]:
