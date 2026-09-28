@@ -134,6 +134,7 @@ For timeframe TF (currently compare 1H and 4H):
 - Freeze the open-time PSAR as `PSAR_ref` for the trade. SL is anchored to `PSAR_ref`: at buffer 0, `SL = PSAR_ref`; ATR buffer variants move SL only by the configured buffer from that frozen PSAR.
 - After the actual fill is known (OPEN taker or target-limit fill), define `actual_risk = abs(actual_fill - SL)`.
 - TP uses the actual fill and that PSAR-anchored actual risk: LONG `TP = actual_fill + R*actual_risk`; SHORT `TP = actual_fill - R*actual_risk`. Never anchor TP to the designed entry target, and never recompute SL from the actual fill.
+- Any PSAR result that anchors TP to the designed entry target is non-canonical and must not be used. GitHub Actions run `36403136426` is explicitly INVALID/REJECTED for this reason.
 - Every large PSAR backtest must first pass a small timestamp audit proving: input-data cutoff < order-live timestamp, and sampled trades reproduce the intended open-time PSAR/ATR without lookahead.
 - Results from implementations that violate this timing definition must be labeled invalid and must not be used for strategy selection or sizing.
 
