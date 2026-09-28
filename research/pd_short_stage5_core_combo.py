@@ -67,10 +67,10 @@ def short_only(rf,bps,gated):
 def combo(rf,bps):
     cash=1.;peak=1.;mdd=0.;active=[];n=0
     # event timeline includes day boundaries and PD entry/exit times.
-    days=list(pd.date_range(START,END,freq="D",inclusive="left"))
+    days=list(pd.date_range(START,END,freq="D",inclusive="both"))
     entries={k:g for k,g in S.groupby("entry_time",sort=True)}
     alltimes=set(days)|set(entries.keys())|set(S.exit_time.tolist())
-    for t in sorted(x for x in alltimes if START<=x<END+pd.Timedelta(days=1)):
+    for t in sorted(x for x in alltimes if START<=x<=END):
         # Realize PD exits first.
         done=[p for p in active if p["exit_time"]<=t]
         for p in sorted(done,key=lambda x:x["exit_time"]):
