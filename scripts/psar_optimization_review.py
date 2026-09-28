@@ -70,6 +70,11 @@ def static_checks(src):
         "same_open_timing": 'order_live":"same strategy-TF bar open"' in src,
         "no_horizon_cut": '"horizon_bars":None' in src,
         "no_period_split": "entry_year" not in src and "year_shard" not in src,
+        "entry_mismatch_explicit": 'return "continue" if entry_seen else "entry_mismatch"' in src,
+        "exit_mismatch_explicit": 'return "exit_mismatch"' in src,
+        "entry_mismatch_excluded_from_fill": src.count('q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1') == 2,
+        "exit_mismatch_excluded_from_metrics": src.count('q["exit_mismatch"]+=1') == 2,
+        "no_integrity_hard_fail": 'if rr=="data_error"' not in src,
     }
     bad = [k for k, v in checks.items() if not v]
     if bad:
