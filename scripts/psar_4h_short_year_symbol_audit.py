@@ -369,6 +369,6 @@ res={"definition":{
     "statistics_scope":"focused year-symbol attribution audit for P4/T26 and P9/T27; overlaps allowed; no portfolio/MDD yet",
     "year_group":"entry fill UTC year",
     "cost_model":"flat roundtrip bps deducted from equal-notional gross percent return; fee/funding decomposition not yet modeled"
-},"files":len(files),"summary":agg["summary"],"by_order":agg["by_order"],"by_year":agg["by_year"],"by_symbol":agg["by_symbol"]}
+},"files":len(files),"summary":agg["summary"],"by_order":agg["by_order"],"by_year":agg["by_year"],"by_symbol":agg["by_symbol"],"by_year_symbol":agg["by_year_symbol"]}
 open(a.out,"w").write(json.dumps(res,separators=(",",":")))
 print("YEAR_SYMBOL_PASS",len(files),len(agg["summary"]),len(agg["by_order"]),len(agg["by_year"]),len(agg["by_symbol"]),len(agg["by_year_symbol"]),flush=True)
