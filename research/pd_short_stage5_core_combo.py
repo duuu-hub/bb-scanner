@@ -123,3 +123,30 @@ def combo(rf,bps):
         cash+=p["stake"]*p["r"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
     return cash,mdd,accepted,len(accepted_events),overlap_days
 
+
+ce,cm=core_only()
+rows=[]
+for bps in [8,24]:
+    for rf in [.005,.0075,.01,.0125,.015]:
+        ue,um,un,uve=short_only(rf,bps,False)
+        ge,gm,gn,gve=short_only(rf,bps,True)
+        xe,xm,xn,xve,od=combo(rf,bps)
+        rows.append(dict(cost_bps=bps,risk=rf,core_equity=ce,core_mdd=cm,
+                         pd_ungated_equity=ue,pd_ungated_mdd=um,pd_ungated_trades=un,pd_ungated_events=uve,
+                         pd_coreoff_equity=ge,pd_coreoff_mdd=gm,pd_coreoff_trades=gn,pd_coreoff_events=gve,
+                         combo_equity=xe,combo_booked_mdd=xm,combo_pd_trades=xn,combo_pd_events=xve,
+                         core_start_with_open_pd_days=od))
+R=pd.DataFrame(rows)
+R.to_csv(O/"combo.csv",index=False)
+H[["held_day","core_long","core_long_net_pct"]].to_csv(O/"core_long_held_daily.csv",index=False)
+EV.to_csv(O/"event_overlap.csv",index=False)
+
+# Final MTM engine run 36377034059 is the independent parity reference.
+ref=float(R[(R.cost_bps==8)&(R.risk==0.01)].combo_equity.iloc[0])
+assert abs(ref-14.627315)<5e-6, f"booked/MTM final equity parity failed: {ref}"
+
+print("OVERLAP",{"events":len(EV),"core_off":int((EV.core_active==0).sum()),
+                 "core_on":int((EV.core_active==1).sum()),
+                 "off_mean_r":float(EV.loc[EV.core_active==0,"mean_r"].mean()),
+                 "on_mean_r":float(EV.loc[EV.core_active==1,"mean_r"].mean())})
+print(R.to_string(index=False))
