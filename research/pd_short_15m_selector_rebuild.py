@@ -29,7 +29,7 @@ sel=[]
 for y,th,n in W:
  q=T[(T.year==y)&(T.signals>=th)].copy();q["wf_threshold"]=th
  q=q.sort_values(["entry_time","break_atr","symbol"],ascending=[True,False,True]).groupby("entry_time",group_keys=False).head(10);sel.append(q)
-S=pd.concat(sel).sort_values(["entry_time","symbol"]);S.to_csv(O/"selected_candidates.csv",index=False)
+S=pd.concat(sel).sort_values(["entry_time","break_atr","symbol"],ascending=[True,False,True]);\nS["event_rank"]=S.groupby("entry_time").cumcount()+1\nassert S.event_rank.max()<=10\nS.to_csv(O/"selected_candidates.csv",index=False)
 # event stats before slot admission
 ev=S.groupby("entry_time").r_net.mean();gp=ev[ev>0].sum();gl=-ev[ev<0].sum()
 # exact actual-exit slot admission + realized and 15m MTM
