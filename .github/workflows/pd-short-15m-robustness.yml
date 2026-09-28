@@ -1,0 +1,22 @@
+name: PD Short 15m Robustness
+on:
+  push:
+    paths: [".research/pd_short_15m_robustness_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Syntax check
+        run: python -m py_compile research/pd_short_15m_robustness.py
+      - name: Download verified selector rebuild
+        run: gh run download 36366055432 -n pd-short-15m-selector-rebuild -D src
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Robustness battery
+        run: python research/pd_short_15m_robustness.py --selected src/selected_candidates.csv --accepted src/accepted_risk1.csv --out out
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-short-15m-robustness, path: out/}
