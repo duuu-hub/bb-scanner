@@ -41,7 +41,7 @@ def orig(hour,b):
 
 def base(path):
  idx=pd.date_range(START,END,freq="15min",inclusive="both")
- d=pd.read_csv(path,parse_dates=["time"]).sort_values("time").drop_duplicates("time").set_index("time").reindex(idx).ffill();d.loc[START,"equity"]=1.
+ d=pd.read_csv(path,parse_dates=["time"]).sort_values("time").drop_duplicates("time",keep="last").set_index("time").reindex(idx).ffill();d.loc[START,"equity"]=1.
  ret=d.equity.astype(float).pct_change().fillna(0.);c=d.core_active.fillna(0).astype(int);p=d.open_pd.fillna(0).astype(int)
  idle=(c.eq(0)&c.shift(1).fillna(c.iloc[0]).eq(0)&p.eq(0)&p.shift(1).fillna(p.iloc[0]).eq(0)&ret.abs().le(2e-9))
  return idx,ret,idle
