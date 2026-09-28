@@ -38,9 +38,14 @@ def fill_b15(mod,b15,cache):
                 for col in ["open","high","low","close","volume"]:
                     px.at[t,col]=float(agg.at[t,col])
     rem=px.close.isna()
+    px["gap"]=rem
     if rem.any():
-        raise AssertionError(("BTC15 gap unresolved from 1m",int(rem.sum()),list(px.index[rem][:10])))
-    return px,nmiss,0
+        prev=px.close.ffill()
+        for col in ["open","high","low","close"]:
+            px[col]=px[col].where(~rem,prev)
+        if px[["open","high","low","close"]].isna().any().any():
+            raise AssertionError(("BTC15 leading gap",list(px.index[px.close.isna()][:10])))
+    return px,nmiss,int(rem.sum())
 
 def original_active(hour,px):
     pos=False;peak=0.;pending=None;active={};trail_exit={}
@@ -82,6 +87,16 @@ def sim(mode,w,idx,base_ret,idle,px,hour,orig_open,orig_trail):
         t=mt-pd.Timedelta(minutes=15)
         r=px.loc[t]
         can_idle=bool(idle.loc[mt])
+        is_gap=bool(r.get("gap",False))
+        if is_gap:
+            if pos:
+                ratio=float(r.open)/ep
+                E+=stake*(ratio-1)-stake*ratio*COST
+                pos=False;stake=0.;ep=0.;peak=0.
+            pending=None
+            br=float(base_ret.loc[mt]);E*=1+br
+            curve.append((mt,E))
+            continue
 
         if pos and not can_idle:
             ratio=float(r.open)/ep
