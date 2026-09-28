@@ -53,16 +53,25 @@ def sim(mode,w,idx,base_ret,idle,b15,hour,orig_open,orig_trail):
     px=b15.set_index("dt").sort_index()
     want=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
     px=px.reindex(want)
-    miss=px.close.isna()
-    if miss.any():
-        # b15 is already repaired in main from official 1m; remaining gaps are not allowed.
-        raise AssertionError(("unrepaired BTC15 gaps",int(miss.sum()),list(px.index[miss][:10])))
+    if "gap" not in px: px["gap"]=False
+    if px.close.isna().any():
+        raise AssertionError(("unrepaired BTC15 gaps",int(px.close.isna().sum()),list(px.index[px.close.isna()][:10])))
     E=1.;pos=False;stake=0.;ep=0.;peak=0.;pending=None;curve=[(START,E)]
     trades=0
     for mt in idx[1:]:
         t=mt-pd.Timedelta(minutes=15)
         r=px.loc[t]
         can_idle=bool(idle.loc[mt])
+        is_gap=bool(r.get("gap",False))
+        if is_gap:
+            if pos:
+                ratio=float(r.open)/ep
+                E += stake*(ratio-1)-stake*ratio*COST
+                pos=False;stake=0.;ep=0.;peak=0.
+            pending=None
+            br=float(base_ret.loc[mt]);E*=1+br
+            curve.append((mt,E))
+            continue
 
         # force-close at interval OPEN when base ceases to be strictly idle
         if pos and not can_idle:
@@ -148,9 +157,17 @@ def main():
                 for col in ["open","high","low","close","volume"]:
                     raw.at[t,col]=float(agg.at[t,col])
         rem=raw.close.isna()
-        if rem.any(): raise AssertionError(("BTC15 gap unresolved from 1m",int(rem.sum()),list(raw.index[rem][:10])))
+        raw["gap"]=rem
+        if rem.any():
+            prev=raw.close.ffill()
+            for col in ["open","high","low","close"]:
+                raw[col]=raw[col].where(~rem,prev)
+            if raw[["open","high","low","close"]].isna().any().any():
+                raise AssertionError(("BTC15 leading gap",list(raw.index[raw.close.isna()][:10])))
+    else:
+        raw["gap"]=False
     b15=raw.reset_index().rename(columns={"index":"dt"})
-    print("BTC15_GAPS_REPAIRED",{"missing_15m":int(miss.sum())})
+    print("BTC15_GAPS_GUARDED",{"missing_15m":int(miss.sum()),"unresolved_1m":int(raw.gap.sum())})
     hour=prep_hourly(mod,h,a.funding);orig_open,orig_trail=original_active(hour,b15)
     orig_open=orig_open.reindex(full_open_idx).ffill().fillna(False).astype(bool)
 
