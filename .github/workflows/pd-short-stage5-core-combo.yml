@@ -1,0 +1,25 @@
+name: PD Short Stage5 Core Combo
+on:
+  push:
+    paths: [".research/pd_short_stage5_core_combo_once"]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research/pd-4h-binance-universe}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pandas numpy
+      - name: Syntax check
+        run: python -m py_compile research/pd_short_stage5_core_combo.py
+      - name: Download Stage5 and PD selector
+        run: |
+          mkdir -p core pd
+          gh run download 35952730823 --repo duuu-hub/bb-scanner --name btc-eth-regime-stage5-long-history -D core
+          gh run download 36366055432 --repo duuu-hub/bb-scanner --name pd-short-15m-selector-rebuild -D pd
+        env: {GH_TOKEN: "${{ github.token }}"}
+      - name: Run exact combo
+        run: python research/pd_short_stage5_core_combo.py --core core/binance_daily_strategy.csv --selected pd/selected_candidates.csv --out out
+      - uses: actions/upload-artifact@v4
+        with: {name: pd-short-stage5-core-combo, path: out/}
