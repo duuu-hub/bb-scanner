@@ -24,20 +24,23 @@ def prep_hourly(mod,hourly,funding):
     d["xit"]=(d.close<d.ema*.98)&(d.close.shift(1)>=d.ema.shift(1)*.98)
     return d
 
-def fill_b15(b15):
+def fill_b15(mod,b15,cache):
     want=pd.date_range(START,END-pd.Timedelta(minutes=15),freq="15min",tz="UTC")
     px=b15.set_index("dt").sort_index().reindex(want)
-    miss=px.close.isna()
-    runs=(miss.astype(int).groupby((~miss).cumsum()).sum() if miss.any() else pd.Series([0]))
-    max_run=int(runs.max()) if len(runs) else 0;nmiss=int(miss.sum())
-    if max_run>4 or nmiss>100:
-        raise AssertionError(("BTC15 gap too large",nmiss,max_run))
-    prev=px.close.ffill()
-    for c in ["open","high","low","close"]:
-        px[c]=px[c].where(~miss,prev)
-    if px[["open","high","low","close"]].isna().any().any():
-        raise AssertionError("cannot fill leading BTC15 gap")
-    return px,nmiss,max_run
+    miss=px.close.isna();nmiss=int(miss.sum())
+    if miss.any():
+        ms=px.index[miss]
+        one=mod.dl_spot("BTCUSDT","1m",ms.min(),ms.max()+pd.Timedelta(minutes=15),cache)
+        agg=one.set_index("dt").resample("15min",label="left",closed="left").agg(
+            open=("open","first"),high=("high","max"),low=("low","min"),close=("close","last"),volume=("volume","sum"),bars=("close","count"))
+        for t in ms:
+            if t in agg.index and int(agg.at[t,"bars"])==15:
+                for col in ["open","high","low","close","volume"]:
+                    px.at[t,col]=float(agg.at[t,col])
+    rem=px.close.isna()
+    if rem.any():
+        raise AssertionError(("BTC15 gap unresolved from 1m",int(rem.sum()),list(px.index[rem][:10])))
+    return px,nmiss,0
 
 def original_active(hour,px):
     pos=False;peak=0.;pending=None;active={};trail_exit={}
@@ -156,7 +159,7 @@ def main():
     mod=load_mod(a.combo_script)
     h=mod.dl_spot("BTCUSDT","1h",pd.Timestamp("2019-01-01",tz="UTC"),END,a.cache)
     b15=mod.dl_spot("BTCUSDT","15m",START,END,a.cache)
-    px,nmiss,maxrun=fill_b15(b15)
+    px,nmiss,maxrun=fill_b15(mod,b15,a.cache)
     hour=prep_hourly(mod,h,a.funding)
     orig_open,orig_trail=original_active(hour,px)
 
