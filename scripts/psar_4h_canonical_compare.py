@@ -80,22 +80,6 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
         return "continue" if entry_seen else "entry_mismatch"
     return "exit_mismatch"
 
-def _design_tp(entry_target,sl,r,long):
-    """TP stays anchored to the designed entry target even after a favorable OPEN fill."""
-    design_risk=abs(entry_target-sl)
-    return entry_target+r*design_risk if long else entry_target-r*design_risk
-
-def _book_resolved(q,outcome,fill,tp,sl,design_risk):
-    """Book realized P/L in units of the original designed risk."""
-    if outcome=="win":
-        q["win"]+=1
-        q["gross_profit_design_R"]+=abs(tp-fill)/design_risk
-    elif outcome=="loss":
-        q["loss"]+=1
-        q["gross_loss_design_R"]+=abs(fill-sl)/design_risk
-    else:
-        raise RuntimeError(f"cannot book unresolved outcome {outcome}")
-
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
 ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
 SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
@@ -205,11 +189,11 @@ def evaluate(t,o,h,l,c,m,symbol=None):
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
-                design_risk=abs(e-sl)
-                if design_risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)):continue
+                risk=abs(fill-sl)
+                if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
                 for r in RS:
-                    tp=_design_tp(e,sl,r,b)
-                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0,"gross_profit_design_R":0.0,"gross_loss_design_R":0.0})
+                    tp=fill+r*risk if b else fill-r*risk
+                    k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
                     # whether an exit touch on fs happened before or after entry.
@@ -224,8 +208,8 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
                             q["resolved_1m"]+=int(rr in ("win","loss"))
                             q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
-                            if rr=="win":_book_resolved(q,"win",fill,tp,sl,design_risk);continue
-                            if rr=="loss":_book_resolved(q,"loss",fill,tp,sl,design_risk);continue
+                            if rr=="win":q["win"]+=1;continue
+                            if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="entry_mismatch":
                                 # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
@@ -243,16 +227,16 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             rr=_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None,float(h[exit_i]),float(l[exit_i]))
                             q["resolved_1m"]+=int(rr in ("win","loss"))
                             q["collision_1m_loss"]+=int(rr=="loss")
-                            if rr=="win":_book_resolved(q,"win",fill,tp,sl,design_risk)
-                            elif rr=="loss":_book_resolved(q,"loss",fill,tp,sl,design_risk)
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
                             elif rr=="data_gap":q["data_gap"]+=1
                             elif rr=="exit_mismatch":
                                 # Parent 15m exit collision is not reproducible in authoritative 1m.
                                 # Exclude the outcome rather than invent chronology.
                                 q["exit_mismatch"]+=1
                             else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
-                        elif hit_tp:_book_resolved(q,"win",fill,tp,sl,design_risk)
-                        else:_book_resolved(q,"loss",fill,tp,sl,design_risk)
+                        elif hit_tp:q["win"]+=1
+                        else:q["loss"]+=1
         # Fixed-percent distance from open-time PSAR, same execution semantics.
         for pct in ENTRY_PCT:
             e=s*(1+pct/100.0) if b else s*(1-pct/100.0)
@@ -267,11 +251,11 @@ def evaluate(t,o,h,l,c,m,symbol=None):
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
-                design_risk=abs(e-sl)
-                if design_risk<=MIN_RISK_EPS*max(1.,abs(e),abs(sl)): continue
+                risk=abs(fill-sl)
+                if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
                 for r in RS:
-                    tp=_design_tp(e,sl,r,b)
-                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0,"gross_profit_design_R":0.0,"gross_loss_design_R":0.0})
+                    tp=fill+r*risk if b else fill-r*risk
+                    k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
                     # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
                     # whether an exit touch on fs happened before or after entry.
@@ -286,8 +270,8 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
                             q["resolved_1m"]+=int(rr in ("win","loss"))
                             q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
-                            if rr=="win":_book_resolved(q,"win",fill,tp,sl,design_risk);continue
-                            if rr=="loss":_book_resolved(q,"loss",fill,tp,sl,design_risk);continue
+                            if rr=="win":q["win"]+=1;continue
+                            if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="entry_mismatch":
                                 # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
@@ -305,16 +289,16 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             rr=_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None,float(h[exit_i]),float(l[exit_i]))
                             q["resolved_1m"]+=int(rr in ("win","loss"))
                             q["collision_1m_loss"]+=int(rr=="loss")
-                            if rr=="win":_book_resolved(q,"win",fill,tp,sl,design_risk)
-                            elif rr=="loss":_book_resolved(q,"loss",fill,tp,sl,design_risk)
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
                             elif rr=="data_gap":q["data_gap"]+=1
                             elif rr=="exit_mismatch":
                                 # Parent 15m exit collision is not reproducible in authoritative 1m.
                                 # Exclude the outcome rather than invent chronology.
                                 q["exit_mismatch"]+=1
                             else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
-                        elif hit_tp:_book_resolved(q,"win",fill,tp,sl,design_risk)
-                        else:_book_resolved(q,"loss",fill,tp,sl,design_risk)
+                        elif hit_tp:q["win"]+=1
+                        else:q["loss"]+=1
     return out
 
 ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()
@@ -368,7 +352,5 @@ for k,q in agg.items():
     # expectancy in R with ambiguous conservatively loss; unresolved only means dataset ended before TP/SL
     r=float(k.split("|R")[1].split("|")[0])
     q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
-    q["gross_pf_realized_design_R"]=round(q["gross_profit_design_R"]/q["gross_loss_design_R"],5) if q["gross_loss_design_R"]>0 else None
-    q["gross_expectancy_realized_design_R"]=round((q["gross_profit_design_R"]-q["gross_loss_design_R"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; maker 1m starts only after entry touch; TP/SL stay anchored to designed target/PSAR levels after favorable OPEN fill; design risk=abs(target-SL); realized P/L also accumulated in design-R units","one_min_gap_policy":"official Binance 1m timestamp gap/duplicate affecting a required chronology window -> DATA_GAP excluded from win/loss; parent-15m maker fill not reproducible in authoritative 1m -> ENTRY_MISMATCH excluded from fills/outcomes; parent-15m exit collision not reproducible in authoritative 1m -> EXIT_MISMATCH excluded from win/loss; other 1m download/schema failures hard-fail"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":a.tf,"order_live":"same strategy-TF bar open","psar":"projected at open using closed history only; legacy initialization forced bullish; first 100 strategy bars excluded as burn-in","atr":"SMA14 of True Range through prior closed strategy-TF bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr":SL_BUFFER_ATR,"tp_R":RS,"horizon_bars":None,"exit_tracking":"from fill until TP/SL or dataset end","statistics_scope":"independent-signal gross edge scan; overlapping positions allowed; no equity curve or MDD","gap_policy":"15m gaps split a symbol into independent contiguous segments; positions never cross gaps; unresolved_eod includes segment/gap end","costs":"fees, slippage and funding excluded","ambiguous":"15m TP+SL collision -> official Binance 1m; same 1m TP+SL -> loss; maker 1m starts only after entry touch; actual risk=abs(fill-SL)","one_min_gap_policy":"official Binance 1m timestamp gap/duplicate affecting a required chronology window -> DATA_GAP excluded from win/loss; parent-15m maker fill not reproducible in authoritative 1m -> ENTRY_MISMATCH excluded from fills/outcomes; parent-15m exit collision not reproducible in authoritative 1m -> EXIT_MISMATCH excluded from win/loss; other 1m download/schema failures hard-fail"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
