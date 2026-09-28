@@ -29,7 +29,8 @@ def refine(r):
   if ht:return t,tp,"TP"
  # canonical timeout is 6 4H bars; preserve canonical exit price/R if no barrier touch
  return r.exit_time,float(r.exit),"TIME"
-rr=[refine(r) for r in S.itertuples()];S["exit15"]=[x[0] for x in rr];S["exitpx15"]=[x[1] for x in rr];S["reason15"]=[x[2] for x in rr]\nS.to_csv(O/"candidates_15m_b5.csv",index=False)
+rr=[refine(r) for r in S.itertuples()];S["exit15"]=[x[0] for x in rr];S["exitpx15"]=[x[1] for x in rr];S["reason15"]=[x[2] for x in rr]
+S.to_csv(O/"candidates_15m_b5.csv",index=False)
 # Keep canonical net R economics for TP/SL and recompute TIME from canonical r_net; only timing changes. This isolates timing/admission effect.
 # Re-run admission using refined exits, candidate order unchanged.
 out=[]
