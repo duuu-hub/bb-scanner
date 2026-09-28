@@ -1,0 +1,96 @@
+name: PSAR 4H SHORT Hold Diagnostic
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_hold_diag_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download sizing ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source
+          gh run download 36437560302 -R ${{ github.repository }} -D source
+      - name: Analyze natural holding-time buckets
+        run: |
+          python - <<'PY'
+          import glob,json
+          import numpy as np,pandas as pd
+          fs=glob.glob("source/**/events_*.csv.gz",recursive=True)
+          assert len(fs)==8,(len(fs),fs)
+          d=pd.concat([pd.read_csv(x) for x in fs],ignore_index=True)
+          assert "BTCUSDT" not in set(d.symbol)
+          d=d[d.variant.isin(["P4T26_DD8","P9T27_DD9"])].copy()
+          d=d[d.outcome.isin(["win","loss"]) & d.pnl_pct.notna() & d.exit_ts.notna()].copy()
+          d["hold_h"]=(d.exit_ts-d.fill_ts)/3600000.0
+          edges=[0,24,48,72,96,120,168,float("inf")]
+          labels=["0-24","24-48","48-72","72-96","96-120","120-168","168+"]
+          d["bucket"]=pd.cut(d.hold_h,bins=edges,labels=labels,right=False,include_lowest=True)
+          def pf(x):
+              x=np.asarray(x,float); gp=x[x>0].sum(); gl=-x[x<0].sum()
+              return float(gp/gl) if gl>0 else None
+          out={"definition":{
+              "source_sizing_run":"36437560302",
+              "btc_excluded":True,
+              "diagnostic_only":"natural exit-time buckets use future realized duration and are not an entry filter",
+              "cost_stress":"flat roundtrip bps deducted from each resolved trade",
+              "buckets_hours":labels
+          },"variants":{}}
+          for v in ["P4T26_DD8","P9T27_DD9"]:
+              x=d[d.variant==v].copy()
+              total_net20=(x.pnl_pct-0.20).sum()
+              total_gross=x.pnl_pct.sum()
+              z={"overall":{
+                    "n":int(len(x)),
+                    "gross_pf":pf(x.pnl_pct),
+                    "net20_pf":pf(x.pnl_pct-0.20),
+                    "net40_pf":pf(x.pnl_pct-0.40),
+                    "hold_mean":float(x.hold_h.mean()),
+                    "hold_p50":float(x.hold_h.quantile(.5)),
+                    "hold_p75":float(x.hold_h.quantile(.75)),
+                    "hold_p90":float(x.hold_h.quantile(.9)),
+                    "winner_hold_mean":float(x.loc[x.pnl_pct>0,"hold_h"].mean()),
+                    "loser_hold_mean":float(x.loc[x.pnl_pct<0,"hold_h"].mean()),
+                    "winner_hold_p50":float(x.loc[x.pnl_pct>0,"hold_h"].median()),
+                    "loser_hold_p50":float(x.loc[x.pnl_pct<0,"hold_h"].median()),
+                  },"buckets":[],"cumulative_closed_by":[]}
+              for b in labels:
+                  g=x[x.bucket.astype(str)==b].copy()
+                  if len(g)==0:continue
+                  z["buckets"].append({
+                    "bucket":b,"n":int(len(g)),"share_pct":float(len(g)/len(x)*100),
+                    "gross_pf":pf(g.pnl_pct),"net20_pf":pf(g.pnl_pct-0.20),"net40_pf":pf(g.pnl_pct-0.40),
+                    "mean_gross_pct":float(g.pnl_pct.mean()),"win_pct":float((g.pnl_pct>0).mean()*100),
+                    "gross_sum_pct":float(g.pnl_pct.sum()),
+                    "net20_sum_pct":float((g.pnl_pct-0.20).sum()),
+                    "gross_profit_contribution_pct":float(g.pnl_pct.sum()/total_gross*100) if total_gross else None,
+                    "net20_profit_contribution_pct":float((g.pnl_pct-0.20).sum()/total_net20*100) if total_net20 else None,
+                  })
+              for h in [24,48,72,96,120,168,240,336]:
+                  g=x[x.hold_h<=h].copy()
+                  z["cumulative_closed_by"].append({
+                    "hours":h,"n":int(len(g)),"share_pct":float(len(g)/len(x)*100),
+                    "gross_pf":pf(g.pnl_pct),"net20_pf":pf(g.pnl_pct-0.20),"net40_pf":pf(g.pnl_pct-0.40),
+                    "mean_gross_pct":float(g.pnl_pct.mean()) if len(g) else None,
+                    "net20_sum_pct":float((g.pnl_pct-0.20).sum()) if len(g) else 0.0,
+                    "net20_profit_contribution_pct":float((g.pnl_pct-0.20).sum()/total_net20*100) if total_net20 else None,
+                  })
+              out["variants"][v]=z
+          json.dump(out,open("psar_4h_short_hold_diagnostic.json","w"),indent=2)
+          print("HOLD_DIAG_PASS",len(d))
+          for v,z in out["variants"].items():
+              print("VAR",v,"OVERALL",z["overall"])
+              for b in z["buckets"]:print("BUCKET",v,b)
+              for c in z["cumulative_closed_by"]:print("CUM",v,c)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-hold-diagnostic
+          path: psar_4h_short_hold_diagnostic.json
