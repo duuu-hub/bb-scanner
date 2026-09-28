@@ -16,7 +16,7 @@ jobs:
       - run: |
           mkdir -p input
           for s in 0 1 2 3 4 5 6 7; do gh run download 36095439671 -n rank5-binance-um-15m-5y-data-shard-$s -D input/shard-$s; done
-          gh run download 36357462938 -n pd-long-short-15m-revalidation -D raw
+          gh run download 36370381449 -n pd-long-short-15m-revalidation -D raw
         env: {GH_TOKEN: "${{ github.token }}"}
       - run: python research/pd_short_15m_selector_rebuild.py --input input --trades raw/trades_15m.csv --out out
       - uses: actions/upload-artifact@v4
