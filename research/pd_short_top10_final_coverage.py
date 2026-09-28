@@ -89,14 +89,14 @@ def build_block_table(core,q,A):
         out[c0]=out[c0].fillna(0).astype(int)
     return out.sort_values("start")
 
-def simulate_calendar(core,q,core_marks,short_paths,use_core):
+def simulate_calendar(core,q,core_marks,short_paths,use_core,initial_prev_base=0):
     cdict={r.dt:r for r in core.sort_values("dt").itertuples()}
     cmaps={d:g.set_index("mark_time").gross.to_dict() for d,g in core_marks.groupby("day")}
     sp={(sym,et):g.set_index("mark_time").gross_r.to_dict() for (sym,et),g in short_paths.groupby(["symbol","entry_time"])}
     groups={et:g for et,g in q.groupby("entry_time",sort=True)}
 
     allcore=core.sort_values("dt")
-    prev=0
+    prev=int(initial_prev_base)
     cash=1.; openp=[]; core_stake=0.; current_day=None; core_gross=0.
     boundaries={START:1.0}
 
@@ -122,7 +122,7 @@ def simulate_calendar(core,q,core_marks,short_paths,use_core):
                 core_gross=cmaps[current_day][t]
                 cash+=core_stake*core_gross
             realize(t)
-            if t.year!=START.year or t==START:
+            if (t.month==1 and t.day==1) or t==START:
                 boundaries[t]=short_mark(t)
             if t>=END:
                 break
@@ -247,7 +247,8 @@ def main():
     )
 
     # Candidate-level ON/OFF diagnostic before gate.
-    evall=S.groupby("entry_time").agg(core_active=("core_active","first"),mean_r=("r_net","mean"),
+    Sall=pd.concat([q,S[S.core_active==1].copy()],ignore_index=True).sort_values(["entry_time","selector_rank","symbol"])
+    evall=Sall.groupby("entry_time").agg(core_active=("core_active","first"),mean_r=("r_net","mean"),
                                       trades=("symbol","size")).reset_index()
     state=evall.groupby("core_active").agg(events=("entry_time","size"),
         avg_event_r=("mean_r","mean"),event_pf=("mean_r",pf),
@@ -262,8 +263,10 @@ def main():
     for sym in set(q.symbol):
         d=st.load_symbol(paths[sym]);px[sym]=d[["close"]]
     sp=st.short_paths(q,px)
-    short_year,_=simulate_calendar(core,q,core_marks,sp,use_core=False)
-    combo_year,_=simulate_calendar(core,q,core_marks,sp,use_core=True)
+    short_year,short_b=simulate_calendar(core,q,core_marks,sp,use_core=False,initial_prev_base=prev)
+    combo_year,combo_b=simulate_calendar(core,q,core_marks,sp,use_core=True,initial_prev_base=prev)
+    assert abs(float(short_b.loc[END])-5.854759)<5e-5,float(short_b.loc[END])
+    assert abs(float(combo_b.loc[END])-15.935169)<5e-5,float(combo_b.loc[END])
     cal=short_year.rename(columns={"calendar_return":"short_calendar_return",
         "start_equity":"short_start_equity","end_equity":"short_end_equity"}).merge(
         combo_year.rename(columns={"calendar_return":"combo_calendar_return",
