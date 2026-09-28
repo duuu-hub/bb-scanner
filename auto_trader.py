@@ -1456,6 +1456,15 @@ def main() -> int:
     entries = 0
     for signal in fresh:
         register_signal_shadow(state, signal)
+
+        # SHORT3 is forward-tested as shadow-only. Never route it to the
+        # LONG3 Demo execution guard/order path.
+        if str(signal.portfolio).upper() == "SHORT3":
+            mark_signal_shadow_execution(state, signal.signal_id, "SHADOW_ONLY")
+            if signal.signal_id not in state["processed_signal_ids"]:
+                state["processed_signal_ids"].append(signal.signal_id)
+            continue
+
         try:
             if execute_signal(client, cfg, state, signal, now_ms()):
                 entries += 1
