@@ -191,7 +191,8 @@ def _sort_matches(values: set[str]) -> list[str]:
     )
 
 
-def choose_group(rows: list[dict], priority: list[str]) -> dict | None:
+def choose_group(rows: list[dict], priority: list[str] | None = None) -> dict | None:
+    priority = priority or LONG3_PRIORITY
     """Choose one newly-emitted strategy for one symbol/15m boundary."""
     new_matches = {
         str(row.get("strategy") or "").upper()
