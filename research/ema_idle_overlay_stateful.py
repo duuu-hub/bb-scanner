@@ -10,6 +10,21 @@ COST=.001
 def load_mod(path):
     sp=importlib.util.spec_from_file_location("combo",path);m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m);return m
 
+def repair_15m(d,start,end):
+    x=d.set_index("dt").sort_index().copy()
+    idx=pd.date_range(start,end-pd.Timedelta(minutes=15),freq="15min")
+    miss=~idx.isin(x.index)
+    # Reject large data holes; allow only bounded archive gaps and model them as zero-return candles.
+    md=pd.Series(miss,index=idx).groupby(idx.floor("D")).sum()
+    if len(md) and int(md.max())>8: raise AssertionError(f"too many missing 15m bars in a day: {int(md.max())}")
+    x=x.reindex(idx)
+    prev=x["close"].ffill()
+    for c in ["open","high","low","close"]:
+        x[c]=x[c].fillna(prev)
+    if x[["open","high","low","close"]].isna().any().any(): raise AssertionError("unfillable leading 15m gap")
+    x["dt"]=x.index
+    return x.reset_index(drop=True),int(miss.sum())
+
 def prep_hourly(mod,hourly,funding):
     d=hourly.set_index("dt").copy()
     f=pd.read_feather(funding);f["date"]=pd.to_datetime(f.date,utc=True);fr=f.set_index("date").sort_index()["funding"]
@@ -46,7 +61,7 @@ def build_idle(base):
     eq=d.equity.astype(float);ret=eq.pct_change().fillna(0.0)
     core=d.core_active.fillna(0).astype(int);opd=d.open_pd.fillna(0).astype(int)
     pc=core.shift(1).fillna(core.iloc[0]).astype(int);pp=opd.shift(1).fillna(opd.iloc[0]).astype(int)
-    idle=(core.eq(0)&pc.eq(0)&opd.eq(0)&pp.eq(0))
+    idle=(core.eq(0)&pc.eq(0)&opd.eq(0)&pp.eq(0)&(ret.abs()<=2e-9))
     return idx,d,eq,ret,idle
 
 def sim(mode,w,idx,base_ret,idle,b15,hour,orig_open,orig_trail):
