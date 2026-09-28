@@ -1,0 +1,121 @@
+name: PSAR 1H PSAR-Anchor Stats
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_psar_anchor_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Static and syntax checks
+        run: |
+          python -m py_compile scripts/psar_1h_psar_anchor_compare.py
+          python - <<'PY'
+          from pathlib import Path
+          s=Path("scripts/psar_1h_psar_anchor_compare.py").read_text()
+          assert 'tp=s+(td*a0 if b else -td*a0)' in s
+          assert 'tp=s*(1+td/100.0) if b else s*(1-td/100.0)' in s
+          assert 'sl=s-(sb*a0 if b else -sb*a0)' in s
+          assert 'tp=fill+r*risk' not in s
+          assert '_book(q,"win",fill,tp,sl,risk)' in s
+          assert 'gross_pf_actual_R' in s
+          print("STATIC_PASS")
+          PY
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke 2 files
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
+          python scripts/psar_1h_psar_anchor_compare.py --data data --tf 1h --shard 0 --shards 1 --max-files 2 --out smoke.json
+          python - <<'PY'
+          import json
+          d=json.load(open("smoke.json"))
+          assert d["files"]==2,d["files"]
+          assert d["definition"]["tf"]=="1h"
+          assert "SL and TP both fixed directly from PSAR_ref" in d["definition"]["exit_geometry"]
+          assert d["summary"],"empty smoke summary"
+          for k,q in d["summary"].items():
+              assert q["taker"]+q["maker"]==q["fills"],(k,q)
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"],(k,q)
+              assert q["gross_profit_R"]>=0 and q["gross_loss_R"]>=0,(k,q)
+          print("SMOKE_PASS",d["files"],len(d["summary"]))
+          PY
+
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run 1H PSAR-anchor statistics
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
+          python scripts/psar_1h_psar_anchor_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 8 --out psar_1h_psar_anchor_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-psar-anchor-${{ matrix.shard }}
+          path: psar_1h_psar_anchor_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-1h-psar-anchor-*
+          path: merged
+      - name: Merge and validate
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("merged/**/*.json",recursive=True)
+          assert len(fs)==8,f"expected 8 shards got {len(fs)}"
+          ds=[json.load(open(x)) for x in fs]
+          def common(d):
+              z=dict(d["definition"]);z.pop("shard_index",None);return z
+          assert all(common(d)==common(ds[0]) for d in ds),"definition mismatch"
+          assert {d["definition"]["shard_index"] for d in ds}==set(range(8))
+          assert all(not d.get("errors") for d in ds),"shard errors"
+          assert sum(d["files"] for d in ds)==ds[0]["definition"]["input_files_total"],"coverage mismatch"
+          derived={"win_pct","gross_pf_actual_R","gross_expectancy_actual_R"}
+          agg={}
+          for d in ds:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+                  for kk,vv in v.items():
+                      if kk not in derived:q[kk]+=vv
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"],(k,q)
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"],(k,q)
+              r=q["win"]+q["loss"]
+              q["win_pct"]=round(100*q["win"]/r,3) if r else None
+              q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"]>0 else None
+              q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/r,5) if r else None
+          out={"definition":common(ds[0]),"files":sum(d["files"] for d in ds),"merged_shards":8,"summary":agg}
+          json.dump(out,open("psar_1h_psar_anchor_merged.json","w"),indent=2)
+          top=sorted(((q["gross_pf_actual_R"] or -1,k,q["gross_expectancy_actual_R"],q["win_pct"],q["fills"]) for k,q in agg.items()),reverse=True)[:25]
+          print("MERGE_PASS",len(fs),out["files"],len(agg))
+          for row in top:print("TOP",row)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-psar-anchor-merged
+          path: psar_1h_psar_anchor_merged.json
