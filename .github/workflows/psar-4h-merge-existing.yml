@@ -1,0 +1,58 @@
+name: PSAR 4H Canonical Merge Existing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_merge_existing_run']
+permissions: {contents: read, actions: read}
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download completed canonical shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p merged
+          gh run download 36438323670 -R ${{ github.repository }} -p 'psar-4h-canonical-[0-7]' -D merged
+      - name: Merge counts and recompute canonical metrics
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("merged/**/*.json",recursive=True)
+          assert len(fs)==8, f"expected 8 shard jsons, got {len(fs)}"
+          docs=[json.load(open(x)) for x in fs]
+          common=lambda d:{k:v for k,v in d["definition"].items() if k!="shard_index"}
+          assert all(common(d)==common(docs[0]) for d in docs),"shard definition mismatch"
+          assert all(not d.get("errors") for d in docs),"shard contains errors"
+          assert {d["definition"]["shard_index"] for d in docs}==set(range(8))
+          assert sum(d["files"] for d in docs)==docs[0]["definition"]["input_files_total"]
+          raw={"fills","taker","maker","win","loss","collision_15m","resolved_1m","collision_1m_loss","data_gap","entry_mismatch","exit_mismatch","unresolved_eod"}
+          derived={"win_pct_amb_loss","gross_expectancy_R_amb_loss"}
+          for d in docs:
+              for k,v in d["summary"].items(): assert set(v)==raw|derived,(k,set(v))
+          agg={}
+          for d in docs:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{x:0 for x in raw})
+                  for x in raw:q[x]+=v[x]
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"],(k,q)
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"],(k,q)
+              n=q["win"]+q["loss"]; r=float(k.split("|R")[1].split("|")[0])
+              q["win_pct_amb_loss"]=round(100*q["win"]/n,3) if n else None
+              q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/n,5) if n else None
+              q["gross_pf_nominal_R"]=round((q["win"]*r)/q["loss"],5) if q["loss"] else None
+          out={"definition":common(docs[0]),"files":sum(d["files"] for d in docs),"errors":[],"summary":agg,"merged_shards":8,
+               "metric_note":"gross_pf_nominal_R=(wins*target_R)/losses; canonical outcomes are +R/-1R before costs"}
+          json.dump(out,open("psar_4h_canonical_merged.json","w"),indent=2)
+          ranked=sorted(((v["gross_pf_nominal_R"] or -1,k,v) for k,v in agg.items()),reverse=True)
+          json.dump([{"key":k,**v} for _,k,v in ranked[:200]],open("psar_4h_canonical_top200.json","w"),indent=2)
+          print("MERGE_PASS",len(fs),out["files"],len(agg))
+          for pf,k,v in ranked[:20]: print(k,"PF",pf,"N",v["win"]+v["loss"],"EXP",v["gross_expectancy_R_amb_loss"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-canonical-merged-r20
+          path: |
+            psar_4h_canonical_merged.json
+            psar_4h_canonical_top200.json
