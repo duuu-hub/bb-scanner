@@ -86,19 +86,19 @@ MIN_RISK_EPS=1e-12
 PSAR_BURNIN_BARS=100
 
 @njit(cache=True)
-def _first_hits(h,l,start,tp,sl,long):
-    """Exact first 15m TP/SL hit indices without allocating/scanning full suffix arrays."""
-    ti=-1; si=-1
+def _first_exit(h,l,start,tp,sl,long):
+    """Return the first post-start 15m exit bar and which levels it touches.
+
+    The legacy engine built full suffix boolean arrays for TP and SL, then compared
+    their first hit indices. The earliest bar touching either level is sufficient:
+    if both are touched on that same bar, the caller resolves chronology on 1m.
+    """
     for j in range(start,len(h)):
-        if ti<0:
-            if (long and h[j]>=tp) or ((not long) and l[j]<=tp): ti=j-start
-        if si<0:
-            if (long and l[j]<=sl) or ((not long) and h[j]>=sl): si=j-start
-        if ti>=0 and si>=0:
-            # Match the legacy vectorized engine exactly: preserve the first
-            # index for TP and SL independently, then let the caller compare them.
-            return ti,si
-    return ti,si
+        hit_tp=(h[j]>=tp) if long else (l[j]<=tp)
+        hit_sl=(l[j]<=sl) if long else (h[j]>=sl)
+        if hit_tp or hit_sl:
+            return j-start,hit_tp,hit_sl
+    return -1,False,False
 
 def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
     n=len(h); out=np.full(n,np.nan); bull=np.ones(n,bool)
@@ -183,7 +183,6 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
                 if not hits.size:continue
                 fs=start+int(hits[0]); fill=e
-            ph=h[fs:end];pl=l[fs:end]
             is_taker=bool(crossed)
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
@@ -192,35 +191,43 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
-                    th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
-                    _ti,_si=_first_hits(h,l,fs,tp,sl,b);it=_ti if _ti>=0 else 10**9;is_=_si if _si>=0 else 10**9
                     k=f"E{em:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
-                    # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
-                    # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
-                    # may have occurred before entry. Never credit that as a win.
+                    # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
+                    # whether an exit touch on fs happened before or after entry.
+                    # Resolve any fill-bar exit candidate on authoritative 1m first;
+                    # if no post-entry exit occurred, resume from fs+1.
+                    scan_start=fs
                     if not is_taker:
-                        fill_tp=bool(th[0]); fill_sl=bool(sh[0])
+                        fill_tp=(h[fs]>=tp) if b else (l[fs]<=tp)
+                        fill_sl=(l[fs]<=sl) if b else (h[fs]>=sl)
                         if fill_tp or fill_sl:
-                            # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
-                            # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
-                            q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
+                            q["resolved_1m"]+=int(rr in ("win","loss"))
+                            q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
-                            # entry was established but no post-entry exit occurred in the fill bar:
-                            # continue tracking from the next 15m bar instead of inventing a loss.
-                            th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
-                            ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                        th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
-                        ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b,None,float(h[fs+it]),float(l[fs+it])); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); q["data_gap"]+=int(rr=="data_gap"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss","data_gap") else None
-                    elif it<is_:q["win"]+=1
-                    elif is_<it:q["loss"]+=1
-                    else:q["unresolved_eod"]+=1
+                            if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
+                        scan_start=fs+1
+                    off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
+                    if off<0:
+                        q["unresolved_eod"]+=1
+                    else:
+                        exit_i=scan_start+int(off)
+                        if hit_tp and hit_sl:
+                            q["collision_15m"]+=1
+                            rr=_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None,float(h[exit_i]),float(l[exit_i]))
+                            q["resolved_1m"]+=int(rr in ("win","loss"))
+                            q["collision_1m_loss"]+=int(rr=="loss")
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
+                            elif rr=="data_gap":q["data_gap"]+=1
+                            else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
+                        elif hit_tp:q["win"]+=1
+                        else:q["loss"]+=1
         # Fixed-percent distance from open-time PSAR, same execution semantics.
         for pct in ENTRY_PCT:
             e=s*(1+pct/100.0) if b else s*(1-pct/100.0)
@@ -231,7 +238,6 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
                 if not hits.size: continue
                 fs=start+int(hits[0]); fill=e
-            ph=h[fs:end];pl=l[fs:end]
             is_taker=bool(crossed)
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
@@ -240,33 +246,43 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
                 for r in RS:
                     tp=fill+r*risk if b else fill-r*risk
-                    th=(ph>=tp) if b else (pl<=tp); sh=(pl<=sl) if b else (ph>=sl)
-                    _ti,_si=_first_hits(h,l,fs,tp,sl,b);it=_ti if _ti>=0 else 10**9;is_=_si if _si>=0 else 10**9
                     k=f"P{pct:g}|SB{sb:g}|R{r:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"unresolved_eod":0})
                     q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
-                    # Taker fills at strategy-TF OPEN, so the full 15m fill bar is post-entry.
-                    # Maker fills intrabar. With 15m OHLC only, a TP touch on the fill bar
-                    # may have occurred before entry. Never credit that as a win.
+                    # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
+                    # whether an exit touch on fs happened before or after entry.
+                    # Resolve any fill-bar exit candidate on authoritative 1m first;
+                    # if no post-entry exit occurred, resume from fs+1.
+                    scan_start=fs
                     if not is_taker:
-                        fill_tp=bool(th[0]); fill_sl=bool(sh[0])
+                        fill_tp=(h[fs]>=tp) if b else (l[fs]<=tp)
+                        fill_sl=(l[fs]<=sl) if b else (h[fs]>=sl)
                         if fill_tp or fill_sl:
-                            # Exact maker chronology: no fill-bar TP/SL may count before the entry touch.
-                            # Resolve every fill-bar exit candidate on official 1m data starting at entry.
                             q["collision_15m"]+=int(fill_tp and fill_sl)
                             rr=_resolve_1m(symbol,int(t[fs]),tp,sl,b,fill,float(h[fs]),float(l[fs]))
-                            q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
+                            q["resolved_1m"]+=int(rr in ("win","loss"))
+                            q["collision_1m_loss"]+=int(rr=="loss" and fill_tp and fill_sl)
                             if rr=="win":q["win"]+=1;continue
                             if rr=="loss":q["loss"]+=1;continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="data_error":raise RuntimeError(f"1m chronology mismatch {symbol} {int(t[fs])}")
-                            th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
-                            ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                        th=th.copy(); sh=sh.copy(); th[0]=False; sh[0]=False
-                        ti=np.flatnonzero(th);si=np.flatnonzero(sh);it=ti[0] if ti.size else 10**9;is_=si[0] if si.size else 10**9
-                    if it==is_ and it<10**9:q["collision_15m"]+=1; rr=_resolve_1m(symbol,int(t[fs+it]),tp,sl,b,None,float(h[fs+it]),float(l[fs+it])); q["resolved_1m"]+=int(rr in ("win","loss")); q["collision_1m_loss"]+=int(rr=="loss"); q["win"]+=int(rr=="win"); q["loss"]+=int(rr=="loss"); q["data_gap"]+=int(rr=="data_gap"); (_ for _ in ()).throw(RuntimeError(f"1m collision unresolved {symbol} {int(t[fs+it])}")) if rr not in ("win","loss","data_gap") else None
-                    elif it<is_:q["win"]+=1
-                    elif is_<it:q["loss"]+=1
-                    else:q["unresolved_eod"]+=1
+                            if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
+                        scan_start=fs+1
+                    off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
+                    if off<0:
+                        q["unresolved_eod"]+=1
+                    else:
+                        exit_i=scan_start+int(off)
+                        if hit_tp and hit_sl:
+                            q["collision_15m"]+=1
+                            rr=_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None,float(h[exit_i]),float(l[exit_i]))
+                            q["resolved_1m"]+=int(rr in ("win","loss"))
+                            q["collision_1m_loss"]+=int(rr=="loss")
+                            if rr=="win":q["win"]+=1
+                            elif rr=="loss":q["loss"]+=1
+                            elif rr=="data_gap":q["data_gap"]+=1
+                            else:raise RuntimeError(f"1m collision unresolved {symbol} {int(t[exit_i])}: {rr}")
+                        elif hit_tp:q["win"]+=1
+                        else:q["loss"]+=1
     return out
 
 ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()
