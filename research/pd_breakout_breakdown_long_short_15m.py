@@ -26,12 +26,12 @@ for fn in sorted(glob.glob(a.input+"/**/*.csv.gz",recursive=True)):
    reason="TIME";xt=None;xp=None
    for t,b in w.iterrows():
     hs=(b.low<=sl) if side=="LONG" else (b.high>=sl);ht=(b.high>=tp) if side=="LONG" else (b.low<=tp)
-    if hs and ht:reason="SL_AMBIG_15M";xt=t;xp=sl;break
-    if hs:reason="SL";xt=t;xp=sl;break
-    if ht:reason="TP";xt=t;xp=tp;break
+    if hs and ht:reason="SL_AMBIG_15M";xt=t+pd.Timedelta(minutes=15);xp=sl;break
+    if hs:reason="SL";xt=t+pd.Timedelta(minutes=15);xp=sl;break
+    if ht:reason="TP";xt=t+pd.Timedelta(minutes=15);xp=tp;break
    if xt is None:
     # canonical 24h timeout = end of sixth 4H candle; use last available 15m close before boundary
-    z=w.iloc[-1];xt=w.index[-1];xp=float(z.close)
+    z=w.iloc[-1];xt=w.index[-1]+pd.Timedelta(minutes=15);xp=float(z.close)
    gross=((xp-ep)/ep) if side=="LONG" else ((ep-xp)/ep);net=gross-FEE;rnet=net/(rd/ep)
    rows.append(dict(side=side,symbol=sym,signal_time=x.index[i],entry_time=et,exit_time=xt,entry=ep,exit=xp,reason=reason,r_net=rnet,net_return=net))
    # same-symbol non-overlap based on actual 15m exit: next 4H signal allowed only after exit
