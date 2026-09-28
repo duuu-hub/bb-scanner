@@ -1,0 +1,140 @@
+name: PSAR 4H SHORT Pre-Entry Feature Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_feature_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke
+        run: |
+          python scripts/psar_4h_short_feature_audit.py --data data --shard 0 --shards 1 --max-files 8 --out smoke.csv.gz --meta smoke.json
+          python - <<'PY'
+          import json,pandas as pd
+          m=json.load(open("smoke.json"));d=pd.read_csv("smoke.csv.gz")
+          assert m["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4"
+          assert "BTCUSDT" not in set(d["symbol"])
+          assert set(d["condition"]).issubset({"P4|T26","P9|T27"})
+          assert len(d)>0
+          assert d[["gap_pct","atr_pct","trend_age","ret24_pct","ret72_pct","bounce24_pct","bounce72_pct","dd24_pct","dd72_pct"]].notna().all().all()
+          print("SMOKE_PASS",len(d),sorted(d["condition"].unique()))
+          PY
+
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run feature audit
+        run: python scripts/psar_4h_short_feature_audit.py --data data --shard ${{ matrix.shard }} --shards 8 --out features_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-features-${{ matrix.shard }}
+          path: |
+            features_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-4h-short-features-*
+          path: merged
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Analyze pre-entry filters
+        run: |
+          python - <<'PY'
+          import glob,json,math
+          import pandas as pd,numpy as np
+          fs=glob.glob("merged/**/features_*.csv.gz",recursive=True)
+          ms=glob.glob("merged/**/meta_*.json",recursive=True)
+          assert len(fs)==8 and len(ms)==8,(len(fs),len(ms))
+          metas=[json.load(open(x)) for x in ms]
+          assert all(x["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4" for x in metas)
+          d=pd.concat([pd.read_csv(x) for x in fs],ignore_index=True)
+          assert "BTCUSDT" not in set(d.symbol)
+          FEATURES=["gap_pct","atr_pct","trend_age","ret24_pct","ret72_pct","bounce24_pct","bounce72_pct","dd24_pct","dd72_pct"]
+          CONDS=["P4|T26","P9|T27"]
+          def pf(vals):
+              vals=np.asarray(vals,float);p=vals[vals>0].sum();l=-vals[vals<0].sum()
+              return float(p/l) if l>0 else None
+          def stats(x):
+              return {"n":int(len(x)),"gross_pf":pf(x.pnl_pct),"net20_pf":pf(x.pnl_pct-0.20),"net40_pf":pf(x.pnl_pct-0.40),
+                      "mean_pct":float(x.pnl_pct.mean()) if len(x) else None}
+          base={}
+          for c in CONDS:
+              x=d[d.condition==c]
+              base[c]={"all":stats(x),"train_2021_2024":stats(x[x.year<=2024]),"valid_2025_2026":stats(x[x.year>=2025])}
+          candidates=[]
+          train_all=d[d.year<=2024]
+          for feat in FEATURES:
+              vals=train_all[feat].replace([np.inf,-np.inf],np.nan).dropna()
+              qs=sorted(set(float(v) for v in vals.quantile([.1,.2,.3,.4,.5,.6,.7,.8,.9]).values))
+              for thr in qs:
+                  for direction in ("le","ge"):
+                      rec={"feature":feat,"direction":direction,"threshold":thr,"conditions":{}}
+                      ok=True;robust=[]
+                      for c in CONDS:
+                          cx=d[d.condition==c]
+                          tr=cx[cx.year<=2024];va=cx[cx.year>=2025]
+                          trf=tr[tr[feat]<=thr] if direction=="le" else tr[tr[feat]>=thr]
+                          vaf=va[va[feat]<=thr] if direction=="le" else va[va[feat]>=thr]
+                          tc=len(trf)/len(tr) if len(tr) else 0;vc=len(vaf)/len(va) if len(va) else 0
+                          st,sv=stats(trf),stats(vaf)
+                          rec["conditions"][c]={"train":st,"valid":sv,"train_coverage":tc,"valid_coverage":vc}
+                          if tc<.30 or vc<.30 or st["net20_pf"] is None or sv["net20_pf"] is None:ok=False
+                          else:robust.extend([st["net20_pf"],sv["net20_pf"]])
+                      if ok:
+                          rec["robust_net20_pf"]=min(robust)
+                          candidates.append(rec)
+          candidates.sort(key=lambda x:(x["robust_net20_pf"],sum(z["valid"]["net20_pf"] for z in x["conditions"].values())),reverse=True)
+          deciles={}
+          for feat in FEATURES:
+              deciles[feat]={}
+              for c in CONDS:
+                  x=d[d.condition==c].copy()
+                  try:x["bin"]=pd.qcut(x[feat],10,duplicates="drop")
+                  except Exception:continue
+                  rows=[]
+                  for b,g in x.groupby("bin",observed=True):
+                      st=stats(g);rows.append({"range":str(b),"feature_mean":float(g[feat].mean()),**st})
+                  deciles[feat][c]=rows
+          out={"definition":{"btc_hard_excluded":True,"selection_train":"2021-2024","validation":"2025-2026","filter_features":"signal-open only","min_coverage_each_split":0.30},
+               "rows":int(len(d)),"base":base,"top_candidates":candidates[:40],"deciles":deciles}
+          json.dump(out,open("psar_4h_short_feature_analysis.json","w"),indent=2)
+          print("FEATURE_MERGE_PASS",len(d),len(candidates))
+          for x in candidates[:15]:
+              print("CAND",x["feature"],x["direction"],round(x["threshold"],5),"robust20",round(x["robust_net20_pf"],5),
+                    {c:(round(x["conditions"][c]["train"]["net20_pf"],4),round(x["conditions"][c]["valid"]["net20_pf"],4),
+                         round(x["conditions"][c]["train_coverage"],3),round(x["conditions"][c]["valid_coverage"],3)) for c in CONDS})
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-feature-analysis
+          path: psar_4h_short_feature_analysis.json
