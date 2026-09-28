@@ -19,11 +19,11 @@ C["held_day"]=C.datetime_utc.dt.floor("D")+pd.Timedelta(days=1)
 C["core_long"]=(C.position>0).astype(int)
 gross=C.core_long*(C.BTCUSDT_fwd.fillna(0)+C.ETHUSDT_fwd.fillna(0))/2.0
 chg=C.core_long.diff().abs().fillna(C.core_long.abs())
-C["core_long_net_pct"]=gross-chg*(0.25/2.0)
+C["core_gross_pct"]=gross\nC["core_long_net_pct"]=gross-chg*(0.25/2.0)
 H=C[(C.held_day>=START)&(C.held_day<END)].copy()
 assert H.held_day.is_unique
 active_map=H.set_index("held_day").core_long.to_dict()
-ret_map=H.set_index("held_day").core_long_net_pct.to_dict()
+ret_map=H.set_index("held_day").core_long_net_pct.to_dict()\ngross_map=H.set_index("held_day").core_gross_pct.to_dict()\n_before=C[C.held_day<START]\ninitial_prev_state=int(_before.core_long.iloc[-1]) if len(_before) else 0
 
 S=pd.read_csv(a.selected,parse_dates=["entry_time","exit_time"])
 S=S[(S.entry_time>=START)&(S.entry_time<END)].copy()
@@ -70,27 +70,39 @@ def short_only(rf,bps,gated):
     return cash,mdd,accepted,len(accepted_events)
 
 def combo(rf,bps):
-    cash=1.;peak=1.;mdd=0.;active=[];accepted=0;accepted_events=set();core_stake=0.;prev_day=None;overlap_days=0
+    cash=1.;peak=1.;mdd=0.;active=[];accepted=0;accepted_events=set()
+    core_stake=0.;prev_day=None;prev_state=initial_prev_state;overlap_days=0
     entries={et:g for et,g in S.groupby("entry_time",sort=True)}
     days=list(pd.date_range(START,END,freq="D",inclusive="both"))
     alltimes=set(days)|set(entries.keys())|set(S.exit_time.tolist())
 
-    for t in sorted(x for x in alltimes if START<=x<=END):
-        # settle PD exits already due before this timestamp
+    def realize_exits(t):
+        nonlocal cash,peak,mdd,active
         done=[p for p in active if p["exit_time"]<=t]
         for p in sorted(done,key=lambda x:x["exit_time"]):
-            cash+=p["stake"]*p["r"];active.remove(p);peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+            cash+=p["stake"]*p["r"];active.remove(p)
+            peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
 
+    for t in sorted(x for x in alltimes if START<=x<=END):
         if t.floor("D")==t:
-            # book prior held day's Stage5 return using stake fixed at that day's open
+            # Book prior Core day's gross PnL first, then process PD exits at this boundary.
             if prev_day is not None and core_stake:
-                cash+=core_stake*(float(ret_map.get(prev_day,0.0))/100.0)
+                cash+=core_stake*(float(gross_map.get(prev_day,0.0))/100.0)
                 peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+            realize_exits(t)
             if t>=END: break
+
             state=int(active_map.get(t,0))
-            core_stake=cash if state else 0.0
-            prev_day=t
+            base=cash
+            fee=abs(state-prev_state)*0.00125
+            if fee:
+                cash-=base*fee
+                peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
+            core_stake=base if state else 0.0
+            prev_day=t;prev_state=state
             if state and active: overlap_days+=1
+        else:
+            realize_exits(t)
 
         if t in entries and int(active_map.get(t.floor("D"),0))==0:
             g=entries[t];free=10-len(active);base=cash;new=[]
@@ -100,26 +112,10 @@ def combo(rf,bps):
             if new: accepted_events.add(t)
             instant=[p for p in new if p["exit_time"]<=t]
             for p in instant:
-                cash+=p["stake"]*p["r"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak);active.remove(p)
+                cash+=p["stake"]*p["r"];active.remove(p)
+                peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
 
     for p in sorted(active,key=lambda x:x["exit_time"]):
         cash+=p["stake"]*p["r"];peak=max(peak,cash);mdd=max(mdd,(peak-cash)/peak)
     return cash,mdd,accepted,len(accepted_events),overlap_days
 
-ce,cm=core_only()
-rows=[]
-for bps in [8,24]:
-    for rf in [.005,.0075,.01,.0125,.015]:
-        ue,um,un,uve=short_only(rf,bps,False)
-        ge,gm,gn,gve=short_only(rf,bps,True)
-        xe,xm,xn,xve,od=combo(rf,bps)
-        rows.append(dict(cost_bps=bps,risk=rf,core_equity=ce,core_mdd=cm,
-                         pd_ungated_equity=ue,pd_ungated_mdd=um,pd_ungated_trades=un,pd_ungated_events=uve,
-                         pd_coreoff_equity=ge,pd_coreoff_mdd=gm,pd_coreoff_trades=gn,pd_coreoff_events=gve,
-                         combo_equity=xe,combo_booked_mdd=xm,combo_pd_trades=xn,combo_pd_events=xve,core_start_with_open_pd_days=od))
-R=pd.DataFrame(rows);R.to_csv(O/"combo.csv",index=False)
-H[["held_day","core_long","core_long_net_pct"]].to_csv(O/"core_long_held_daily.csv",index=False)
-EV.to_csv(O/"event_overlap.csv",index=False)
-print("OVERLAP",{"events":len(EV),"core_off":int((EV.core_active==0).sum()),"core_on":int((EV.core_active==1).sum()),
-                 "off_mean_r":float(EV.loc[EV.core_active==0,"mean_r"].mean()),"on_mean_r":float(EV.loc[EV.core_active==1,"mean_r"].mean())})
-print(R.to_string(index=False))
