@@ -1,0 +1,203 @@
+name: PSAR 4H SHORT Sizing Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_sizing_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke
+        run: |
+          python scripts/psar_4h_short_sizing_ledger.py --data data --shard 0 --shards 1 --max-files 8 --setups smoke_setups.csv.gz --events smoke_events.csv.gz --meta smoke_meta.json
+          python - <<'PY'
+          import json,pandas as pd
+          m=json.load(open("smoke_meta.json"));s=pd.read_csv("smoke_setups.csv.gz");e=pd.read_csv("smoke_events.csv.gz")
+          assert m["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4"
+          assert "BTCUSDT" not in set(e.symbol)
+          assert set(s.variant).issubset({"P4T26_BASE","P4T26_DD8","P9T27_BASE","P9T27_DD9"})
+          assert len(s)>0 and len(e)>0
+          assert (e.fill_ts<=e.exit_ts.fillna(e.fill_ts)).all()
+          print("SMOKE_PASS",len(s),len(e),sorted(s.variant.unique()))
+          PY
+
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run sizing ledger
+        run: python scripts/psar_4h_short_sizing_ledger.py --data data --shard ${{ matrix.shard }} --shards 8 --setups setups_${{ matrix.shard }}.csv.gz --events events_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-sizing-${{ matrix.shard }}
+          path: |
+            setups_${{ matrix.shard }}.csv.gz
+            events_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-4h-short-sizing-*
+          path: merged
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Analyze concurrency and sizing
+        run: |
+          python - <<'PY'
+          import glob,json,math
+          import pandas as pd,numpy as np
+          sfs=glob.glob("merged/**/setups_*.csv.gz",recursive=True)
+          efs=glob.glob("merged/**/events_*.csv.gz",recursive=True)
+          mfs=glob.glob("merged/**/meta_*.json",recursive=True)
+          assert len(sfs)==len(efs)==len(mfs)==8,(len(sfs),len(efs),len(mfs))
+          S=pd.concat([pd.read_csv(x) for x in sfs],ignore_index=True)
+          E=pd.concat([pd.read_csv(x) for x in efs],ignore_index=True)
+          metas=[json.load(open(x)) for x in mfs]
+          assert all(x["definition"]["source_fixed_engine_blob"]=="834d5e34ea4253951d42d5a083ad494ce2d498e4" for x in metas)
+          assert "BTCUSDT" not in set(E.symbol)
+          variants=["P4T26_BASE","P4T26_DD8","P9T27_BASE","P9T27_DD9"]
+
+          def simple_q(x):
+              x=np.asarray(x,float)
+              if len(x)==0:return {}
+              return {"mean":float(np.mean(x)),"p50":float(np.quantile(x,.5)),"p90":float(np.quantile(x,.9)),
+                      "p95":float(np.quantile(x,.95)),"p99":float(np.quantile(x,.99)),"max":float(np.max(x))}
+
+          def time_weighted(events,value_col=None):
+              pts={}
+              for r in events.itertuples():
+                  if pd.isna(r.exit_ts):continue
+                  a=int(r.fill_ts);b=int(r.exit_ts)
+                  if b<a:continue
+                  w=1.0 if value_col is None else float(getattr(r,value_col))
+                  pts[a]=pts.get(a,0.0)+w;pts[b]=pts.get(b,0.0)-w
+              if not pts:return {"mean":0,"p50":0,"p90":0,"p95":0,"p99":0,"max":0}
+              cur=0.0;prev=None;vals=[];durs=[];mx=0.0
+              for ts in sorted(pts):
+                  if prev is not None and ts>prev:
+                      vals.append(cur);durs.append(ts-prev)
+                  cur+=pts[ts];mx=max(mx,cur);prev=ts
+              if not durs:return {"mean":0,"p50":0,"p90":0,"p95":0,"p99":0,"max":mx}
+              vals=np.asarray(vals,float);durs=np.asarray(durs,float);order=np.argsort(vals);v=vals[order];w=durs[order]
+              cw=np.cumsum(w)/w.sum()
+              def wq(q):
+                  return float(v[min(np.searchsorted(cw,q,side="left"),len(v)-1)])
+              return {"mean":float(np.average(vals,weights=durs)),"p50":wq(.5),"p90":wq(.9),"p95":wq(.95),"p99":wq(.99),"max":float(mx)}
+
+          def dedup_symbol(x):
+              x=x[x.outcome.isin(["win","loss","unresolved_eod"]) & x.exit_ts.notna()].copy()
+              x=x.sort_values(["fill_ts","signal_ts","symbol"])
+              last={}
+              keep=[]
+              blocked=0
+              for idx,r in x.iterrows():
+                  prev=last.get(r.symbol,-1)
+                  if int(r.fill_ts)<prev:
+                      blocked+=1;continue
+                  keep.append(idx);last[r.symbol]=int(r.exit_ts)
+              return x.loc[keep].copy(),blocked
+
+          def cluster_stats(sx,ex,accepted):
+              sg=sx.groupby("signal_ts").agg(setups=("setup","sum"),taker=("taker_fill","sum"),fills=("filled","sum"))
+              ae=accepted.groupby("signal_ts").size().rename("accepted")
+              sg=sg.join(ae,how="left").fillna({"accepted":0})
+              return {c:simple_q(sg[c].to_numpy()) for c in ("setups","taker","fills","accepted")}
+
+          def exceed_time(events,threshold):
+              pts={}
+              for r in events.itertuples():
+                  if pd.isna(r.exit_ts):continue
+                  pts[int(r.fill_ts)]=pts.get(int(r.fill_ts),0)+1
+                  pts[int(r.exit_ts)]=pts.get(int(r.exit_ts),0)-1
+              cur=0;prev=None;tot=0;exc=0
+              for ts in sorted(pts):
+                  if prev is not None and ts>prev:
+                      dt=ts-prev;tot+=dt
+                      if cur>threshold:exc+=dt
+                  cur+=pts[ts];prev=ts
+              return float(exc/tot) if tot else 0.0
+
+          def pf(vals):
+              x=np.asarray(vals,float);p=x[x>0].sum();l=-x[x<0].sum()
+              return float(p/l) if l>0 else None
+
+          out={"definition":{"btc_excluded":True,"same_symbol_rule":"new fill blocked while prior same-symbol position open",
+                             "concurrency":"time-weighted from fill to conservative 15m-bar-end exit",
+                             "cost_stress":"20bp and 40bp roundtrip deducted from each resolved trade",
+                             "position_fraction_grid":[.05,.10,.15,.20,.25,.30]},"variants":{}}
+          for v in variants:
+              sx=S[S.variant==v].copy()
+              ex=E[E.variant==v].copy()
+              invalid=ex[~ex.outcome.isin(["win","loss","unresolved_eod"]) | ex.exit_ts.isna()]
+              raw=ex[ex.outcome.isin(["win","loss","unresolved_eod"]) & ex.exit_ts.notna()].copy()
+              acc,blocked=dedup_symbol(ex)
+              cc_raw=time_weighted(raw)
+              cc_acc=time_weighted(acc)
+              risk=acc.copy();risk["risk_factor"]=risk.stop_pct/100.0
+              riskq=time_weighted(risk,"risk_factor")
+              clusters=cluster_stats(sx,ex,acc)
+              resolved=acc[acc.outcome.isin(["win","loss"]) & acc.pnl_pct.notna()].copy()
+              perf={"n":int(len(resolved)),"gross_pf":pf(resolved.pnl_pct),"net20_pf":pf(resolved.pnl_pct-0.20),"net40_pf":pf(resolved.pnl_pct-0.40),
+                    "mean_gross_pct":float(resolved.pnl_pct.mean()) if len(resolved) else None}
+              sizing={}
+              for frac in (.05,.10,.15,.20,.25,.30):
+                  sizing[str(int(frac*100))+"pct"]={
+                    "p95_exposure_pct":cc_acc["p95"]*frac*100,
+                    "p99_exposure_pct":cc_acc["p99"]*frac*100,
+                    "max_exposure_pct":cc_acc["max"]*frac*100,
+                    "p95_stop_risk_equity_pct":riskq["p95"]*frac*100,
+                    "p99_stop_risk_equity_pct":riskq["p99"]*frac*100,
+                    "max_stop_risk_equity_pct":riskq["max"]*frac*100,
+                  }
+              caps={}
+              for cap in (1.0,1.5,2.0):
+                  caps[str(int(cap*100))+"pct_total_exposure"]={
+                    "per_position_from_p95_pct":(cap/cc_acc["p95"]*100) if cc_acc["p95"]>0 else None,
+                    "per_position_from_p99_pct":(cap/cc_acc["p99"]*100) if cc_acc["p99"]>0 else None,
+                    "per_position_from_max_pct":(cap/cc_acc["max"]*100) if cc_acc["max"]>0 else None,
+                  }
+              out["variants"][v]={
+                "setup_rows":int(len(sx)),"event_rows":int(len(ex)),"invalid_exit_rows":int(len(invalid)),
+                "same_symbol_blocked":int(blocked),"same_symbol_blocked_pct":float(blocked/len(raw)*100) if len(raw) else 0,
+                "signal_cluster":clusters,"concurrent_raw":cc_raw,"concurrent_same_symbol_dedup":cc_acc,
+                "time_share_open_gt":{"4":exceed_time(acc,4),"6":exceed_time(acc,6),"8":exceed_time(acc,8),"10":exceed_time(acc,10),"12":exceed_time(acc,12)},
+                "concurrent_stop_risk_factor":riskq,"resolved_performance_after_dedup":perf,
+                "sizing_grid":sizing,"exposure_cap_implied_per_position":caps,
+              }
+          json.dump(out,open("psar_4h_short_sizing_analysis.json","w"),indent=2)
+          print("SIZING_MERGE_PASS",len(S),len(E))
+          for v,z in out["variants"].items():
+              print("VAR",v,"cluster",z["signal_cluster"],"open",z["concurrent_same_symbol_dedup"],
+                    "blocked",z["same_symbol_blocked_pct"],"perf",z["resolved_performance_after_dedup"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-sizing-analysis
+          path: psar_4h_short_sizing_analysis.json
