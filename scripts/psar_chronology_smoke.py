@@ -94,6 +94,14 @@ assert '1m archive month mismatch' in src
 assert 'input_files_total' in src
 assert 'shard_index' in src and 'shard_count' in src
 assert 'maker_fillbar_amb' not in src
+assert 'def _first_exit(' in src
+assert '_first_hits(' not in src
+assert 'ph=h[fs:end]' not in src
+assert 'th=(ph>=tp)' not in src
+assert 'th=th.copy()' not in src and 'sh=sh.copy()' not in src
+assert src.count('scan_start=fs+1')==2
+assert src.count('fill_tp=(h[fs]>=tp) if b else (l[fs]<=tp)')==2
+assert src.count('_resolve_1m(symbol,int(t[exit_i]),tp,sl,b,None')==2
 # Execute resample, not just static-string check.
 resample=ns["resample"]
 tt=np.arange(0,8*900000,900000,dtype=np.int64)
