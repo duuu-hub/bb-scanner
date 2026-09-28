@@ -1,4 +1,4 @@
-import argparse,glob,json,math,os
+import argparse,glob,json
 import numpy as np,pandas as pd
 
 VARIANTS=("P4T26_DD8","P9T27_DD9")
@@ -10,114 +10,111 @@ RANKINGS=("DD72_HIGH","LOW_STOP_RISK","SYMBOL")
 def qstats(x):
     x=np.asarray(x,float)
     if len(x)==0:return {"mean":0.0,"p50":0.0,"p90":0.0,"p95":0.0,"p99":0.0,"max":0.0}
-    return {k:float(v) for k,v in {
-      "mean":np.mean(x),"p50":np.quantile(x,.5),"p90":np.quantile(x,.9),
-      "p95":np.quantile(x,.95),"p99":np.quantile(x,.99),"max":np.max(x)}.items()}
+    return {
+      "mean":float(np.mean(x)),"p50":float(np.quantile(x,.5)),
+      "p90":float(np.quantile(x,.9)),"p95":float(np.quantile(x,.95)),
+      "p99":float(np.quantile(x,.99)),"max":float(np.max(x))
+    }
 
 def sort_group(g,ranking):
     if ranking=="DD72_HIGH":
-        return g.sort_values(["dd72_pct","stop_pct","symbol"],ascending=[False,True,True])
+        return g.sort_values(["dd72_pct","stop_pct","symbol"],ascending=[False,True,True],kind="mergesort")
     if ranking=="LOW_STOP_RISK":
-        return g.sort_values(["stop_pct","dd72_pct","symbol"],ascending=[True,False,True])
-    return g.sort_values(["symbol"])
+        return g.sort_values(["stop_pct","dd72_pct","symbol"],ascending=[True,False,True],kind="mergesort")
+    return g.sort_values(["symbol"],kind="mergesort")
 
-def simulate(d,cap,total_exposure,cost_bp,ranking):
+def select_all_caps(x,ranking):
+    # Acceptance depends only on fill/exit chronology, symbol occupancy, ranking and cap.
+    # It does NOT depend on position size or trading costs, so compute it once for all 9 size/cost replays.
+    states={cap:{"open":{},"accepted":[],"skip_symbol":0,"skip_cap":0} for cap in CAPS}
+    for ts,g in x.groupby("fill_ts",sort=True):
+        ts=int(ts); sg=sort_group(g,ranking)
+        rows=list(sg[["symbol","exit_ts"]].itertuples())
+        idxs=list(sg.index)
+        for cap,st in states.items():
+            op=st["open"]
+            for sym,et in list(op.items()):
+                if et<=ts: del op[sym]
+            for idx,r in zip(idxs,rows):
+                sym=str(r.symbol); et=int(r.exit_ts)
+                if sym in op:
+                    st["skip_symbol"]+=1;continue
+                if len(op)>=cap:
+                    st["skip_cap"]+=1;continue
+                st["accepted"].append(idx);op[sym]=et
+    return states
+
+def replay(acc,cap,total_exposure,cost_bp):
     frac=total_exposure/cap
-    d=d.copy()
-    d=d[d.outcome.isin(["win","loss","unresolved_eod"]) & d.exit_ts.notna()].copy()
-    d["exit_ts"]=d.exit_ts.astype(np.int64)
-    d["fill_ts"]=d.fill_ts.astype(np.int64)
-    d=d.sort_values(["fill_ts","symbol"]).reset_index(drop=True)
-
-    equity=1.0
-    peak=1.0
-    max_dd=0.0
+    acc=acc.sort_values(["fill_ts","symbol"],kind="mergesort")
+    equity=1.0;peak=1.0;max_dd=0.0
     open_pos={}
-    exit_heap=[]  # list of (exit_ts, unique_id)
-    uid=0
-    realized_points=[]
-    open_counts=[]
-    exposure_samples=[]
-    stoprisk_samples=[]
-    accepted=0;skip_symbol=0;skip_cap=0;unresolved=0
-    gross_wins=0;gross_losses=0
-    start_ts=None;end_ts=None
+    open_counts=[];exposure_samples=[];stoprisk_samples=[]
+    realized_wins=0;realized_losses=0
+    start_ts=None;end_ts=None;unresolved=0
 
-    def snapshot(ts):
-        nonlocal max_dd,peak
+    def snap():
+        nonlocal peak,max_dd
         n=len(open_pos)
         notion=sum(p["notional"] for p in open_pos.values())
         sr=sum(p["notional"]*p["stop_pct"]/100.0 for p in open_pos.values())
         denom=max(equity,1e-12)
-        open_counts.append(n)
-        exposure_samples.append(notion/denom*100.0)
-        stoprisk_samples.append(sr/denom*100.0)
+        open_counts.append(n);exposure_samples.append(notion/denom*100.0);stoprisk_samples.append(sr/denom*100.0)
         peak=max(peak,equity)
         if peak>0:max_dd=max(max_dd,(peak-equity)/peak*100.0)
-        realized_points.append((int(ts),float(equity),n))
 
     def close_through(ts):
-        nonlocal equity,peak,max_dd,end_ts,gross_wins,gross_losses
-        due=sorted([(p["exit_ts"],k) for k,p in open_pos.items() if p["exit_ts"]<=ts])
-        for et,k in due:
-            p=open_pos.pop(k,None)
-            if p is None:continue
-            rp=p["pnl_pct"]
-            if rp is None or not np.isfinite(rp):
-                net=0.0
-            else:
-                net=(float(rp)-cost_bp/100.0)/100.0
-                if rp>0:gross_wins+=1
-                elif rp<0:gross_losses+=1
-            equity += p["notional"]*net
-            end_ts=max(end_ts or et,et)
-            snapshot(et)
+        nonlocal equity,end_ts,realized_wins,realized_losses
+        due={}
+        for k,p in list(open_pos.items()):
+            if p["exit_ts"]<=ts:
+                due.setdefault(p["exit_ts"],[]).append((k,p))
+        for et in sorted(due):
+            delta=0.0
+            for k,p in due[et]:
+                open_pos.pop(k,None)
+                rp=p["pnl_pct"]
+                if rp is None or not np.isfinite(rp):
+                    net=0.0
+                else:
+                    net=(float(rp)-cost_bp/100.0)/100.0
+                    if rp>0:realized_wins+=1
+                    elif rp<0:realized_losses+=1
+                delta += p["notional"]*net
+            equity += delta
+            end_ts=max(end_ts or int(et),int(et));snap()
 
-    for ts,g in d.groupby("fill_ts",sort=True):
+    for ts,g in acc.groupby("fill_ts",sort=True):
         ts=int(ts)
         if start_ts is None:start_ts=ts
         close_through(ts)
-        g=sort_group(g,ranking)
+        base_equity=equity
         for r in g.itertuples(index=False):
-            if r.symbol in open_pos:
-                skip_symbol+=1;continue
-            if len(open_pos)>=cap:
-                skip_cap+=1;continue
-            notional=equity*frac
-            p={
+            notional=base_equity*frac
+            rp=None if pd.isna(r.pnl_pct) else float(r.pnl_pct)
+            if rp is None:unresolved+=1
+            open_pos[str(r.symbol)]={
               "exit_ts":int(r.exit_ts),"notional":float(notional),
-              "pnl_pct":None if pd.isna(r.pnl_pct) else float(r.pnl_pct),
-              "stop_pct":float(r.stop_pct),"symbol":r.symbol
+              "pnl_pct":rp,"stop_pct":float(r.stop_pct)
             }
-            open_pos[r.symbol]=p
-            accepted+=1
-            if pd.isna(r.pnl_pct):unresolved+=1
-        snapshot(ts)
-
+        snap()
     close_through(10**19)
-    # any remaining pathological positions close flat
-    for k,p in list(open_pos.items()):
-        open_pos.pop(k)
-        snapshot(p["exit_ts"])
-
-    dur_years=((end_ts-start_ts)/1000/86400/365.25) if (start_ts and end_ts and end_ts>start_ts) else None
-    if equity>0 and dur_years and dur_years>0:
-        cagr=(equity**(1.0/dur_years)-1.0)*100.0
-    else:cagr=None
+    if open_pos:
+        open_pos.clear();snap()
+    years=((end_ts-start_ts)/1000/86400/365.25) if start_ts and end_ts and end_ts>start_ts else None
+    cagr=((equity**(1.0/years)-1.0)*100.0) if equity>0 and years and years>0 else None
     return {
       "cap":cap,"total_exposure_pct":total_exposure*100.0,
-      "per_position_pct":frac*100.0,"cost_bp":cost_bp,"ranking":ranking,
-      "accepted":accepted,"skipped_same_symbol":skip_symbol,"skipped_cap":skip_cap,
-      "unresolved_flat_at_eod":unresolved,
-      "final_equity_multiple":float(equity),
-      "total_return_pct":float((equity-1.0)*100.0),
+      "per_position_pct":frac*100.0,"cost_bp":cost_bp,
+      "accepted":int(len(acc)),"unresolved_flat_at_eod":int(unresolved),
+      "final_equity_multiple":float(equity),"total_return_pct":float((equity-1.0)*100.0),
       "cagr_pct":None if cagr is None else float(cagr),
       "realized_equity_mdd_pct":float(max_dd),
       "open_positions_event_sample":qstats(open_counts),
       "gross_exposure_pct_event_sample":qstats(exposure_samples),
       "all_stops_risk_pct_event_sample":qstats(stoprisk_samples),
-      "realized_win_count":gross_wins,"realized_loss_count":gross_losses,
-      "period_years":dur_years,
+      "realized_win_count":int(realized_wins),"realized_loss_count":int(realized_losses),
+      "period_years":years
     }
 
 def main():
@@ -128,55 +125,68 @@ def main():
     efs=glob.glob(a.source+"/**/events_*.csv.gz",recursive=True)
     mfs=glob.glob(a.source+"/**/meta_*.json",recursive=True)
     assert len(efs)==8,(len(efs),efs)
-    assert len(mfs)>=8,len(mfs)
-    metas=[json.load(open(x)) for x in mfs if "sizing-analysis" not in x]
+    metas=[]
+    for p in mfs:
+        try: metas.append(json.load(open(p)))
+        except: pass
     good=[m for m in metas if m.get("definition",{}).get("source_fixed_engine_blob")=="834d5e34ea4253951d42d5a083ad494ce2d498e4"]
     assert len(good)>=8,len(good)
     d=pd.concat([pd.read_csv(x) for x in efs],ignore_index=True)
     assert "BTCUSDT" not in set(d.symbol)
+    d=d[d.variant.isin(VARIANTS) & d.outcome.isin(["win","loss","unresolved_eod"]) & d.exit_ts.notna()].copy()
+    d["fill_ts"]=d.fill_ts.astype(np.int64);d["exit_ts"]=d.exit_ts.astype(np.int64)
+
     out={"definition":{
       "source_sizing_run":"36437560302",
       "source_fixed_engine_blob":"834d5e34ea4253951d42d5a083ad494ce2d498e4",
-      "stop_policy":"FIXED entry-time PSAR stop; no ratchet",
-      "btc_excluded":True,
+      "stop_policy":"FIXED entry-time PSAR stop; no ratchet","btc_excluded":True,
       "variants":VARIANTS,
-      "capacity_rule":"one open position per symbol; close positions with exit_ts <= new fill_ts before admitting new fills",
-      "position_size":"entry notional = current realized equity * (total exposure / position cap)",
+      "capacity_rule":"one open position per symbol; exits at/before fill timestamp free capacity first",
+      "position_size":"entry notional = realized equity at timestamp * (total exposure / position cap)",
       "rankings":{
-        "DD72_HIGH":"for fills at same timestamp, less-oversold (higher dd72) first; validated pre-entry feature",
-        "LOW_STOP_RISK":"for fills at same timestamp, smaller initial stop distance first",
-        "SYMBOL":"neutral deterministic lexical tie-break baseline"
+        "DD72_HIGH":"less-oversold (higher dd72) first",
+        "LOW_STOP_RISK":"smaller initial stop distance first",
+        "SYMBOL":"deterministic lexical baseline"
       },
-      "mdd":"realized-equity MDD only; does not include intra-trade mark-to-market drawdown",
-      "unresolved":"positions unresolved at dataset end occupy capacity through EOD and are closed flat for account PnL",
+      "optimization":"acceptance state computed once per variant/ranking for all caps in one pass; exposure/cost replay uses accepted ledger only",
+      "mdd":"realized-equity MDD only; no intra-trade mark-to-market drawdown",
+      "unresolved":"occupy capacity through EOD and close flat for PnL",
       "cost_model":"flat roundtrip bps deducted at exit"
     },"source_rows":int(len(d)),"results":[]}
+
     for v in VARIANTS:
-        x=d[d.variant==v].copy()
-        assert len(x)>0,v
+        x=d[d.variant==v].copy().sort_values(["fill_ts","symbol"],kind="mergesort")
+        print("VARIANT",v,"rows",len(x),flush=True)
         for ranking in RANKINGS:
-          for cap in CAPS:
-            for expo in TOTAL_EXPOSURES:
-              for bp in COST_BPS:
-                out["results"].append({"variant":v,**simulate(x,cap,expo,bp,ranking)})
-    # compact leaderboards under 20bp, plus risk-constrained views
+            states=select_all_caps(x,ranking)
+            print("SELECT",v,ranking,{c:len(states[c]["accepted"]) for c in CAPS},flush=True)
+            for cap in CAPS:
+                st=states[cap]
+                acc=x.loc[st["accepted"]].copy()
+                for expo in TOTAL_EXPOSURES:
+                    for bp in COST_BPS:
+                        z=replay(acc,cap,expo,bp)
+                        z.update({
+                          "variant":v,"ranking":ranking,
+                          "skipped_same_symbol":int(st["skip_symbol"]),
+                          "skipped_cap":int(st["skip_cap"])
+                        })
+                        out["results"].append(z)
+
     r=pd.DataFrame(out["results"])
     r20=r[r.cost_bp==20].copy()
-    leaders={}
+    out["leaders_20bp"]={}
     for v in VARIANTS:
-      z=r20[r20.variant==v].copy()
-      z=z.sort_values(["final_equity_multiple","realized_equity_mdd_pct"],ascending=[False,True])
-      leaders[v]=z.head(20).to_dict("records")
-    out["leaders_20bp"]=leaders
+        z=r20[r20.variant==v].sort_values(["final_equity_multiple","realized_equity_mdd_pct"],ascending=[False,True])
+        out["leaders_20bp"][v]=z.head(20).to_dict("records")
     json.dump(out,open(a.out,"w"),indent=2)
-    print("PORTFOLIO_PASS",len(d),len(out["results"]))
+    print("PORTFOLIO_FAST_PASS",len(d),len(out["results"]),flush=True)
     for v in VARIANTS:
-      z=r20[(r20.variant==v)&(r20.ranking=="DD72_HIGH")].sort_values("final_equity_multiple",ascending=False)
-      print("VAR",v)
-      for rr in z.head(12).itertuples():
-        print("TOP20BP","cap",rr.cap,"expo",rr.total_exposure_pct,"per",round(rr.per_position_pct,3),
-              "mult",round(rr.final_equity_multiple,4),"MDD",round(rr.realized_equity_mdd_pct,3),
-              "CAGR",None if pd.isna(rr.cagr_pct) else round(rr.cagr_pct,3),
-              "taken",rr.accepted,"skipcap",rr.skipped_cap,
-              "stopRiskP99",round(rr.all_stops_risk_pct_event_sample["p99"],3))
+        z=r20[(r20.variant==v)&(r20.ranking=="DD72_HIGH")].sort_values("final_equity_multiple",ascending=False)
+        for rr in z.head(12).itertuples():
+            print("TOP20BP",v,"cap",rr.cap,"expo",rr.total_exposure_pct,"per",round(rr.per_position_pct,3),
+                  "mult",round(rr.final_equity_multiple,4),"MDD",round(rr.realized_equity_mdd_pct,3),
+                  "CAGR",None if pd.isna(rr.cagr_pct) else round(rr.cagr_pct,3),
+                  "taken",rr.accepted,"skipcap",rr.skipped_cap,
+                  "stopRiskP99",round(rr.all_stops_risk_pct_event_sample["p99"],3),flush=True)
 if __name__=="__main__":main()
