@@ -36,46 +36,43 @@ jobs:
           assert len(docs)==8
           events=sum((d["events"] for d in docs),[])
           out={}
-          for cand in "ABCD":
-            ev=sorted([x for x in events if x["candidate"]==cand],key=lambda x:(x["entry_ts"],x["symbol"],x["exit_ts"]))
-            for risk_frac in (0.0025,0.005,0.01):
-              eq=1.0; peak=1.0; mdd=0.; active=[]; used=0.; accepted=0; wins=0; losses=0; skipped_symbol=0; skipped_cap=0
-              conc_sum=0.; maxconc=0; exposure_sum=0.; maxexp=0.; points=0; streak=0; maxstreak=0
-              for e in ev:
-                # exits at/before this entry release capacity first
-                keep=[]
-                for p in active:
-                  if p["exit_ts"]<=e["entry_ts"]:
-                    pnl=p["notional"]*p["stop_pct"]*p["result_R"]; eq+=pnl
-                    if p["result_R"]>0: wins+=1; streak=0
-                    else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
-                    peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak if peak>0 else 1)
-                  else: keep.append(p)
-                active=keep
-                if any(p["symbol"]==e["symbol"] for p in active): skipped_symbol+=1; continue
-                if len(active)>=6: skipped_cap+=1; continue
-                desired=(eq*risk_frac)/e["stop_pct"]
-                notional=min(desired,eq*0.30)
-                exposure=sum(p["notional"] for p in active)
-                if exposure+notional>eq*2.0:
-                  notional=max(0.,eq*2.0-exposure)
-                if notional<=0: skipped_cap+=1; continue
-                active.append({**e,"notional":notional}); accepted+=1
-                conc_sum+=len(active); maxconc=max(maxconc,len(active)); exposure_sum+=(exposure+notional)/eq; maxexp=max(maxexp,(exposure+notional)/eq); points+=1
-              for p in sorted(active,key=lambda x:x["exit_ts"]):
-                eq+=p["notional"]*p["stop_pct"]*p["result_R"]
-                if p["result_R"]>0: wins+=1; streak=0
-                else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
-                peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak if peak>0 else 1)
-              years=(max(x["exit_ts"] for x in ev)-min(x["entry_ts"] for x in ev))/31557600000 if ev else 0
-              cagr=eq**(1/years)-1 if years>0 and eq>0 else None
-              key=f"{cand}_risk{risk_frac*100:g}pct"
-              out[key]={"candidate":cand,"risk_pct":risk_frac*100,"raw_events":len(ev),"executed":accepted,"wins":wins,"losses":losses,
-                "win_pct":100*wins/(wins+losses) if wins+losses else None,"ending_equity":eq,"total_return_pct":(eq-1)*100,
-                "cagr_pct":100*cagr if cagr is not None else None,"mdd_pct":100*mdd,"max_losing_streak":maxstreak,
-                "avg_concurrent_at_entry":conc_sum/points if points else 0,"max_concurrent":maxconc,
-                "avg_exposure_at_entry_pct":100*exposure_sum/points if points else 0,"max_exposure_pct":100*maxexp,
-                "skipped_same_symbol":skipped_symbol,"skipped_capacity":skipped_cap}
+          for cand in "C":
+            base=sorted([x for x in events if x["candidate"]==cand],key=lambda x:(x["entry_ts"],x["symbol"],x["exit_ts"]))
+            for td in (1,2,3,5,7,None):
+              ev=[]
+              for x in base:
+                y=dict(x); y["timeout"]=False
+                if td is not None and x["exit_ts"]>x["entry_ts"]+td*86400000 and str(td) in x.get("timeout_marks",{}):
+                  y["exit_ts"]=x["entry_ts"]+td*86400000; y["result_R"]=x["timeout_marks"][str(td)]; y["timeout"]=True
+                ev.append(y)
+              for risk_frac in (0.0025,0.005):
+                eq=1.; peak=1.; mdd=0.; active=[]; accepted=wins=losses=skipped_symbol=skipped_cap=timeouts=0
+                conc_sum=maxconc=exposure_sum=maxexp=points=streak=maxstreak=0
+                for x in ev:
+                  keep=[]
+                  for p in active:
+                    if p["exit_ts"]<=x["entry_ts"]:
+                      eq+=p["notional"]*p["stop_pct"]*p["result_R"]; timeouts+=int(p["timeout"])
+                      if p["result_R"]>0: wins+=1; streak=0
+                      else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                      peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak)
+                    else: keep.append(p)
+                  active=keep
+                  if any(p["symbol"]==x["symbol"] for p in active): skipped_symbol+=1; continue
+                  if len(active)>=6: skipped_cap+=1; continue
+                  notional=min((eq*risk_frac)/x["stop_pct"],eq*.30); exposure=sum(p["notional"] for p in active)
+                  notional=min(notional,max(0.,eq*2-exposure))
+                  if notional<=0: skipped_cap+=1; continue
+                  active.append({**x,"notional":notional}); accepted+=1
+                  conc_sum+=len(active); maxconc=max(maxconc,len(active)); exposure_sum+=(exposure+notional)/eq; maxexp=max(maxexp,(exposure+notional)/eq); points+=1
+                for p in sorted(active,key=lambda x:x["exit_ts"]):
+                  eq+=p["notional"]*p["stop_pct"]*p["result_R"]; timeouts+=int(p["timeout"])
+                  if p["result_R"]>0: wins+=1; streak=0
+                  else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                  peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak)
+                years=(max(x["exit_ts"] for x in base)-min(x["entry_ts"] for x in base))/31557600000
+                key=f"{cand}_T{td if td is not None else 'INF'}_risk{risk_frac*100:g}pct"
+                out[key]={"candidate":cand,"timeout_days":td,"risk_pct":risk_frac*100,"raw_events":len(base),"executed":accepted,"timeouts":timeouts,"wins":wins,"losses":losses,"win_pct":100*wins/(wins+losses),"ending_equity":eq,"total_return_pct":(eq-1)*100,"cagr_pct":100*(eq**(1/years)-1) if eq>0 else None,"mdd_pct":100*mdd,"max_losing_streak":maxstreak,"avg_concurrent_at_entry":conc_sum/points,"max_concurrent":maxconc,"avg_exposure_at_entry_pct":100*exposure_sum/points,"max_exposure_pct":100*maxexp,"skipped_same_symbol":skipped_symbol,"skipped_capacity":skipped_cap}
           json.dump({"constraints":{"same_symbol_overlap":False,"max_positions":6,"max_position_notional_pct_equity":30,"max_total_exposure_pct_equity":200,
             "risk_pct_equity_scenarios":[0.25,0.5,1.0],"costs":"gross first-pass; cost stress follows survivors","exit_before_entry_same_timestamp":True},
             "results":out},open("portfolio.json","w"),indent=2)
