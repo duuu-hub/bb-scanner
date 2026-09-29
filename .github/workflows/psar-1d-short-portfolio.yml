@@ -1,0 +1,28 @@
+name: PSAR 1D SHORT Portfolio Sizing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_portfolio_run']
+permissions: {contents: read, actions: read}
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download final 125 ledgers
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source
+          gh run download 36581640029 -R ${{ github.repository }} -p 'psar-1d-short-opt-*' -D source
+      - name: Portfolio sizing
+        run: python scripts/psar_1d_short_portfolio_sim.py --source source
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-short-portfolio-sizing
+          path: |
+            psar_1d_short_portfolio.json
+            psar_1d_short_portfolio.csv
