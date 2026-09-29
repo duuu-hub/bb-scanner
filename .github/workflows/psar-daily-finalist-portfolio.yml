@@ -1,0 +1,85 @@
+name: PSAR Daily Finalist Portfolio Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_daily_portfolio_run']
+permissions: {contents: read, actions: read}
+jobs:
+  ledger:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_daily_candidate_ledger.py --data data --shard ${{ matrix.shard }} --shards 8 --out ledger_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with: {name: 'psar-daily-ledger-${{ matrix.shard }}', path: 'ledger_${{ matrix.shard }}.json'}
+  portfolio:
+    needs: ledger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'psar-daily-ledger-*', path: ledgers}
+      - name: Simulate identical account constraints
+        run: |
+          python - <<'PY'
+          import glob,json,math
+          docs=[json.load(open(x)) for x in glob.glob("ledgers/**/*.json",recursive=True)]
+          assert len(docs)==8
+          events=sum((d["events"] for d in docs),[])
+          out={}
+          for cand in "ABCD":
+            ev=sorted([x for x in events if x["candidate"]==cand],key=lambda x:(x["entry_ts"],x["symbol"],x["exit_ts"]))
+            for risk_frac in (0.0025,0.005,0.01):
+              eq=1.0; peak=1.0; mdd=0.; active=[]; used=0.; accepted=0; wins=0; losses=0; skipped_symbol=0; skipped_cap=0
+              conc_sum=0.; maxconc=0; exposure_sum=0.; maxexp=0.; points=0; streak=0; maxstreak=0
+              for e in ev:
+                # exits at/before this entry release capacity first
+                keep=[]
+                for p in active:
+                  if p["exit_ts"]<=e["entry_ts"]:
+                    pnl=p["notional"]*p["stop_pct"]*p["result_R"]; eq+=pnl
+                    if p["result_R"]>0: wins+=1; streak=0
+                    else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                    peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak if peak>0 else 1)
+                  else: keep.append(p)
+                active=keep
+                if any(p["symbol"]==e["symbol"] for p in active): skipped_symbol+=1; continue
+                if len(active)>=6: skipped_cap+=1; continue
+                desired=(eq*risk_frac)/e["stop_pct"]
+                notional=min(desired,eq*0.30)
+                exposure=sum(p["notional"] for p in active)
+                if exposure+notional>eq*2.0:
+                  notional=max(0.,eq*2.0-exposure)
+                if notional<=0: skipped_cap+=1; continue
+                active.append({**e,"notional":notional}); accepted+=1
+                conc_sum+=len(active); maxconc=max(maxconc,len(active)); exposure_sum+=(exposure+notional)/eq; maxexp=max(maxexp,(exposure+notional)/eq); points+=1
+              for p in sorted(active,key=lambda x:x["exit_ts"]):
+                eq+=p["notional"]*p["stop_pct"]*p["result_R"]
+                if p["result_R"]>0: wins+=1; streak=0
+                else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak if peak>0 else 1)
+              years=(max(x["exit_ts"] for x in ev)-min(x["entry_ts"] for x in ev))/31557600000 if ev else 0
+              cagr=eq**(1/years)-1 if years>0 and eq>0 else None
+              key=f"{cand}_risk{risk_frac*100:g}pct"
+              out[key]={"candidate":cand,"risk_pct":risk_frac*100,"raw_events":len(ev),"executed":accepted,"wins":wins,"losses":losses,
+                "win_pct":100*wins/(wins+losses) if wins+losses else None,"ending_equity":eq,"total_return_pct":(eq-1)*100,
+                "cagr_pct":100*cagr if cagr is not None else None,"mdd_pct":100*mdd,"max_losing_streak":maxstreak,
+                "avg_concurrent_at_entry":conc_sum/points if points else 0,"max_concurrent":maxconc,
+                "avg_exposure_at_entry_pct":100*exposure_sum/points if points else 0,"max_exposure_pct":100*maxexp,
+                "skipped_same_symbol":skipped_symbol,"skipped_capacity":skipped_cap}
+          json.dump({"constraints":{"same_symbol_overlap":False,"max_positions":6,"max_position_notional_pct_equity":30,"max_total_exposure_pct_equity":200,
+            "risk_pct_equity_scenarios":[0.25,0.5,1.0],"costs":"gross first-pass; cost stress follows survivors","exit_before_entry_same_timestamp":True},
+            "results":out},open("portfolio.json","w"),indent=2)
+          for k,v in out.items(): print(k,"RET",round(v["total_return_pct"],2),"CAGR",None if v["cagr_pct"] is None else round(v["cagr_pct"],2),"MDD",round(v["mdd_pct"],2),"N",v["executed"],"WR",round(v["win_pct"],2),"MAXCONC",v["max_concurrent"],"AVGEXP",round(v["avg_exposure_at_entry_pct"],1),"MAXLS",v["max_losing_streak"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-daily-finalist-portfolio, path: portfolio.json}
