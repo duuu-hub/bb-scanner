@@ -7,7 +7,7 @@ permissions: {contents: read, actions: read}
 jobs:
   opt:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p data
           gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-3' -D data
-      - name: Optimize fast grid
+      - name: Fast optimize bull-regime portfolio
         run: python scripts/psar_4h_canonical_bull_portfolio_fast.py --ledger ledger --sizing sizing --data data --out bull_portfolio_fast.json
       - uses: actions/upload-artifact@v4
         with:
