@@ -1,0 +1,151 @@
+name: PSAR 1H Canonical Heavy-File Signal Split
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_canonical_heavy233_signal_split_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  part:
+    strategy:
+      fail-fast: false
+      matrix: {part: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Build partition-only temporary engine
+        run: |
+          export ORIGINAL_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_open_canonical_compare.py)
+          python - <<'PY'
+          p="scripts/psar_open_canonical_compare.py"
+          s=open(p).read()
+          s=s.replace("def evaluate(t,o,h,l,c,m,symbol=None):",
+                      "def evaluate(t,o,h,l,c,m,symbol=None,signal_part=0,signal_parts=1):")
+          s=s.replace("    for i in range(max(15,PSAR_BURNIN_BARS),n):\n",
+                      "    for i in range(max(15,PSAR_BURNIN_BARS),n):\n        if (i-max(15,PSAR_BURNIN_BARS))%signal_parts!=signal_part:continue\n",1)
+          s=s.replace('ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()',
+                      'ap.add_argument("--shards",type=int,default=1);ap.add_argument("--signal-part",type=int,default=0);ap.add_argument("--signal-parts",type=int,default=1);a=ap.parse_args()')
+          s=s.replace('if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")',
+                      'if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")\nif a.signal_parts<1 or a.signal_part<0 or a.signal_part>=a.signal_parts:raise RuntimeError("invalid signal partition")')
+          s=s.replace("seg=evaluate(*part,m,sym)","seg=evaluate(*part,m,sym,a.signal_part,a.signal_parts)")
+          open("/tmp/psar_open_signal_split.py","w").write(s)
+          PY
+          echo "$ORIGINAL_ENGINE_BLOB_SHA" > /tmp/original_engine_sha
+      - name: Run exact signal partition
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(cat /tmp/original_engine_sha)
+          python /tmp/psar_open_signal_split.py --data data --tf 1h --shard 233 --shards 1024 --signal-part ${{ matrix.part }} --signal-parts 8 --out part_${{ matrix.part }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-canonical-heavy233-part-${{ matrix.part }}
+          path: part_${{ matrix.part }}.json
+
+  combine-heavy:
+    needs: part
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-1h-canonical-heavy233-part-*
+          path: parts
+      - name: Combine 8 disjoint signal partitions into one logical file component
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=sorted(glob.glob("parts/**/*.json",recursive=True)); assert len(fs)==8,fs
+          ds=[json.load(open(x)) for x in fs]
+          assert all(d["files"]==1 and not d.get("errors") for d in ds)
+          # Same original engine + same one-file shard; each signal bar belongs to exactly one modulo-8 partition.
+          defs=[d["definition"] for d in ds]
+          semdrop={"workflow_commit_sha"}
+          def sem(d): return {k:v for k,v in d.items() if k not in semdrop}
+          assert all(sem(d)==sem(defs[0]) for d in defs)
+          derived={"win_pct_amb_loss","gross_expectancy_R_amb_loss"}
+          agg={}
+          for d in ds:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+                  for kk,vv in v.items():
+                      if kk not in derived:q[kk]+=vv
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"]
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"]
+              resolved=q["win"]+q["loss"]; r=float(k.split("|R")[1].split("|")[0])
+              q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
+              q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
+          out={"definition":defs[0],"files":1,"errors":[],"summary":agg,"signal_partition_proof":"8 disjoint strategy-bar residues modulo 8 over full original file; indicators/exits computed on full file"}
+          json.dump(out,open("heavy233_combined.json","w"),indent=2)
+          print("HEAVY233_COMBINE_PASS",len(agg))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-canonical-heavy233-combined
+          path: heavy233_combined.json
+
+  final-merge:
+    needs: combine-heavy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download preserved successful components
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p old prior quarter subquarter finalsplit heavy
+          for s in 0 2 5 6 7; do gh run download 36387193831 -R ${{ github.repository }} -n psar-1h-stats-$s -D old/$s; done
+          for s in 1 3 4 11; do gh run download 36470583311 -R ${{ github.repository }} -n psar-1h-canonical-recovery-$s -D prior/$s; done
+          for s in 9 25 57 12 28 44 60; do gh run download 36507299281 -R ${{ github.repository }} -n psar-1h-canonical-quarter-$s -D quarter/$s; done
+          for s in 41 105 169; do gh run download 36537297145 -R ${{ github.repository }} -n psar-1h-canonical-subquarter-$s -D subquarter/$s; done
+          for s in 489 745 1001; do gh run download 36579388518 -R ${{ github.repository }} -n psar-1h-canonical-finalsplit-$s -D finalsplit/$s; done
+      - uses: actions/download-artifact@v4
+        with:
+          name: psar-1h-canonical-heavy233-combined
+          path: heavy
+      - name: Final exact coverage merge
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("old/**/*.json",recursive=True)+glob.glob("prior/**/*.json",recursive=True)+glob.glob("quarter/**/*.json",recursive=True)+glob.glob("subquarter/**/*.json",recursive=True)+glob.glob("finalsplit/**/*.json",recursive=True)+glob.glob("heavy/**/*.json",recursive=True)
+          assert len(fs)==23,(len(fs),fs)
+          ds=[json.load(open(x)) for x in fs]
+          assert all(not d.get("errors") for d in ds)
+          expected={d["definition"]["input_files_total"] for d in ds}; assert len(expected)==1,expected
+          assert sum(d["files"] for d in ds)==next(iter(expected)),(sum(d["files"] for d in ds),expected)
+          semantic_drop={"shard_index","shard_count","workflow_commit_sha"}
+          def sem(d): return {k:v for k,v in d["definition"].items() if k not in semantic_drop}
+          assert all(sem(d)==sem(ds[0]) for d in ds),"semantic definition mismatch"
+          derived={"win_pct_amb_loss","gross_expectancy_R_amb_loss"}
+          agg={}
+          for d in ds:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+                  for kk,vv in v.items():
+                      if kk not in derived:q[kk]+=vv
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"]
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"]
+              resolved=q["win"]+q["loss"]; r=float(k.split("|R")[1].split("|")[0])
+              q["win_pct_amb_loss"]=round(100*q["win"]/resolved,3) if resolved else None
+              q["gross_expectancy_R_amb_loss"]=round((q["win"]*r-q["loss"])/resolved,5) if resolved else None
+          out={"definition":sem(ds[0]),"files":sum(d["files"] for d in ds),"errors":[],"summary":agg,"coverage":"exact all input files; final heavy file 233/1024 signal-partitioned 8 ways"}
+          json.dump(out,open("psar_1h_canonical_FINAL.json","w"),indent=2)
+          print("CANONICAL_FINAL_PASS",out["files"],len(agg))
+          top=[]
+          for k,q in agg.items():
+              if not q["loss"]:continue
+              r=float(k.split("|R")[1].split("|")[0]); pf=q["win"]*r/q["loss"]
+              top.append((pf,k,q["win_pct_amb_loss"],q["gross_expectancy_R_amb_loss"],q["fills"],q["taker"],q["maker"]))
+          for row in sorted(top,reverse=True)[:30]:print("TOP",row)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-canonical-FINAL
+          path: psar_1h_canonical_FINAL.json
