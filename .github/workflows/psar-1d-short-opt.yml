@@ -1,0 +1,54 @@
+name: PSAR 1D SHORT Optimization Ledger
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_opt_run']
+permissions: {contents: read, actions: read}
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Canonical smoke
+        run: |
+          python scripts/psar_1d_short_opt_ledger.py --data data --shard 0 --shards 1 --max-files 4 --setups smoke_setups.csv.gz --events smoke_events.csv.gz --meta smoke_meta.json
+          python - <<'PY'
+          import json,pandas as pd
+          m=json.load(open("smoke_meta.json"));e=pd.read_csv("smoke_events.csv.gz")
+          assert m["definition"]["tf"]=="1d"
+          assert "actual_fill-R*actual_risk" in m["definition"]["execution"]
+          assert len(e)>0 and (e.fill_ts<=e.exit_ts.fillna(e.fill_ts)).all()
+          assert e.variant.nunique()>=20
+          print("SMOKE_PASS",len(e),e.variant.nunique())
+          PY
+  stats:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Generate canonical 1D ledger
+        run: python scripts/psar_1d_short_opt_ledger.py --data data --shard ${{ matrix.shard }} --shards 8 --setups setups_${{ matrix.shard }}.csv.gz --events events_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-short-opt-${{ matrix.shard }}
+          path: |
+            setups_${{ matrix.shard }}.csv.gz
+            events_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
