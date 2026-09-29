@@ -13,7 +13,7 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p merged
-          gh run download 36438323670 -R ${{ github.repository }} -p 'psar-4h-canonical-[0-7]' -D merged
+          gh run download 36490081273 -R ${{ github.repository }} -p 'psar-4h-canonical-[0-7]' -D merged
       - name: Merge counts and recompute canonical metrics
         run: |
           python - <<'PY'
@@ -52,7 +52,7 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: psar-4h-canonical-merged-r20
+          name: psar-4h-canonical-merged-r30
           path: |
             psar_4h_canonical_merged.json
             psar_4h_canonical_top200.json
