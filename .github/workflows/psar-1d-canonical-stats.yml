@@ -21,8 +21,8 @@ jobs:
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Run 1D canonical statistics
         run: |
-          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1d_canonical_compare.py)
-          python scripts/psar_1d_canonical_compare.py --data data --tf 1d --shard ${{ matrix.shard }} --shards 8 --out psar_1d_canonical_${{ matrix.shard }}.json
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_4h_canonical_compare.py)
+          python scripts/psar_4h_canonical_compare.py --data data --tf 1d --shard ${{ matrix.shard }} --shards 8 --out psar_1d_canonical_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
         with:
           name: psar-1d-canonical-${{ matrix.shard }}
