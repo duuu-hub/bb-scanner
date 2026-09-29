@@ -14,7 +14,10 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - name: Download ledgers
         env: {GH_TOKEN: '${{ github.token }}'}
-        run: mkdir in && gh run download 36537552195 -R ${{ github.repository }} -p 'psar-1d-short-opt-*' -D in
+        run: |
+          mkdir -p in/base in/recovery
+          gh run download 36546777975 -R ${{ github.repository }} -p 'psar-1d-short-opt-*' -D in/base || true
+          gh run download 36569631661 -R ${{ github.repository }} -p 'psar-1d-short-opt-3-part-*' -D in/recovery
       - name: Summarize
         run: python scripts/psar_1d_short_opt_summarize.py
       - uses: actions/upload-artifact@v4
