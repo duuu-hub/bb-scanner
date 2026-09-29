@@ -1,0 +1,26 @@
+name: PSAR 4H Canonical Stack Diagnostic
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_canonical_stack_diag_run']
+permissions: {contents: read, actions: read}
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download canonical finalist ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p ledger
+          gh run download 36519239563 -R ${{ github.repository }} -p 'psar-4h-canonical-finalist-ledger-*' -D ledger
+      - name: Diagnose same-symbol stacking
+        run: python scripts/psar_4h_canonical_stack_diag.py --root ledger --out stack_diag.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-canonical-stack-diag
+          path: stack_diag.json
