@@ -1,7 +1,6 @@
 import glob,pandas as pd,numpy as np,re,json
 files=glob.glob("in/**/events_*.csv.gz",recursive=True)
-files=[f for f in files if not re.search(r"events_3\\.csv\\.gz$",f)]
-assert len(files)==12,files
+assert len(files)==8,files
 parts=[]
 for f in files:
  d=pd.read_csv(f,usecols=["variant","outcome","pnl_pct","R","entry_atr","sb_atr"])
