@@ -4,7 +4,7 @@ import numpy as np,pandas as pd
 # Reuse canonical helpers without executing its CLI. This keeps PSAR/ATR/resample/1m
 # chronology semantics tied to the validated canonical engine.
 src=open("scripts/psar_4h_canonical_compare.py").read()
-prefix=src.split("ap=argparse.ArgumentParser()",1)[0]
+prefix=src.split("ap=argparse.ArgumentParser()",1)[0].replace("@njit(cache=True)","@njit(cache=False)")
 ns={}
 exec(compile(prefix,"canonical_prefix","exec"),ns)
 load=ns["load"]; contiguous_segments=ns["contiguous_segments"]; resample=ns["resample"]
