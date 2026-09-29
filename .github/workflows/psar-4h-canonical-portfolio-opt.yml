@@ -1,0 +1,30 @@
+name: PSAR 4H Canonical Portfolio Opt
+on:
+  workflow_run:
+    workflows: ["PSAR 4H Canonical Finalist Ledger"]
+    types: [completed]
+    branches: [research-rank5-binance-15m-5y]
+permissions: {contents: read, actions: read}
+jobs:
+  optimize:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download canonical finalist ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p ledger
+          gh run download ${{ github.event.workflow_run.id }} -R ${{ github.repository }} -p 'psar-4h-canonical-finalist-ledger-*' -D ledger
+      - name: Optimize account-level return versus risk
+        run: python scripts/psar_4h_canonical_portfolio_opt.py --root ledger --out psar_4h_canonical_portfolio_opt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-canonical-portfolio-opt
+          path: psar_4h_canonical_portfolio_opt.json
