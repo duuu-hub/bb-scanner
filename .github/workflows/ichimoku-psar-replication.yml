@@ -1,0 +1,18 @@
+name: Ichimoku PSAR Replication
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'research/ichimoku_psar/**'
+      - '.github/workflows/ichimoku-psar-replication.yml'
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy requests
+      - name: Run independent BTC 4H replication
+        run: python research/ichimoku_psar/run.py
