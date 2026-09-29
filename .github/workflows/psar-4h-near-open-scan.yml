@@ -1,0 +1,52 @@
+name: PSAR 4H Near-Open Actual Distance Scan
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_near_open_scan_run']
+permissions: {contents: read, actions: read}
+jobs:
+  scan:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download source shard
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D data
+      - name: Run near-open scan
+        run: |
+          python scripts/psar_4h_near_open_scan.py --data data             --setups setups_${{ matrix.shard }}.csv.gz             --events events_${{ matrix.shard }}.csv.gz             --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-near-open-${{ matrix.shard }}
+          path: |
+            setups_${{ matrix.shard }}.csv.gz
+            events_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
+  analyze:
+    needs: scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-4h-near-open-*
+          path: near
+      - name: Analyze
+        run: python scripts/psar_4h_near_open_analyze.py --root near --out near_analysis.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-near-open-analysis
+          path: near_analysis.json
