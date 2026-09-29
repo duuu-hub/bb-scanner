@@ -1,0 +1,27 @@
+name: PSAR 4H SHORT Dynamic Sizing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_dynamic_sizing_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download sizing ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source
+          gh run download 36437560302 -R ${{ github.repository }} -p 'psar-4h-short-sizing-*' -D source
+      - name: Dynamic sizing simulation
+        run: python scripts/psar_4h_short_crowding_dynamic_sizing.py --source source --out psar_4h_short_dynamic_sizing.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-dynamic-sizing
+          path: psar_4h_short_dynamic_sizing.json
