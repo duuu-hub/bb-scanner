@@ -1,4 +1,4 @@
-name: PSAR 4H Canonical Stats
+name: PSAR 4H Canonical Stats (1D temporary run)
 on:
   push:
     branches: [research-rank5-binance-15m-5y]
@@ -19,10 +19,10 @@ jobs:
       - name: Download 5Y
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
-      - name: Run 4H canonical statistics
+      - name: Run 1D canonical statistics
         run: |
           export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_4h_canonical_compare.py)
-          python scripts/psar_4h_canonical_compare.py --data data --tf 4h --shard ${{ matrix.shard }} --shards 8 --out psar_4h_canonical_${{ matrix.shard }}.json
+          python scripts/psar_4h_canonical_compare.py --data data --tf 1d --shard ${{ matrix.shard }} --shards 8 --out psar_4h_canonical_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
         with:
           name: psar-4h-canonical-${{ matrix.shard }}
@@ -46,7 +46,7 @@ jobs:
           assert len(fs)==8, f"expected 8 shard jsons, got {len(fs)}"
           docs=[json.load(open(x)) for x in fs]
           base=docs[0]["definition"]
-          assert base["tf"]=="4h",base
+          assert base["tf"]=="1d",base
           common=lambda d:{k:v for k,v in d["definition"].items() if k!="shard_index"}
           assert all(common(d)==common(docs[0]) for d in docs),"shard definition mismatch"
           assert all(not d.get("errors") for d in docs),"shard contains errors"
