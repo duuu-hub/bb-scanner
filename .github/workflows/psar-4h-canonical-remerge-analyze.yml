@@ -1,0 +1,101 @@
+name: PSAR 4H Canonical Remerge Analyze
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_canonical_remerge_analyze_run']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download completed canonical 4H shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p merged
+          gh run download 36490081273 -R ${{ github.repository }} -p 'psar-4h-canonical-*' -D merged
+      - name: Merge and rank robust SHORT region
+        run: |
+          python - <<'PY'
+          import glob,json,math,re
+          import pandas as pd
+          fs=glob.glob("merged/**/*.json",recursive=True)
+          assert len(fs)==8,(len(fs),fs)
+          docs=[json.load(open(x)) for x in fs]
+          common=lambda d:{k:v for k,v in d["definition"].items() if k!="shard_index"}
+          assert all(common(d)==common(docs[0]) for d in docs)
+          assert docs[0]["definition"]["tf"]=="4h",docs[0]["definition"]
+          assert {d["definition"]["shard_index"] for d in docs}==set(range(8))
+          assert sum(d["files"] for d in docs)==docs[0]["definition"]["input_files_total"]
+          raw=("fills","taker","maker","win","loss","collision_15m","resolved_1m","collision_1m_loss","data_gap","entry_mismatch","exit_mismatch","unresolved_eod")
+          agg={}
+          for d in docs:
+            for k,v in d["summary"].items():
+              q=agg.setdefault(k,{x:0 for x in raw})
+              for x in raw:q[x]+=int(v.get(x,0))
+          rows=[]
+          for k,q in agg.items():
+            m=re.match(r"([EP])([^|]+)\|SB([^|]+)\|R([^|]+)\|(LONG|SHORT)",k);assert m,k
+            typ,entry,sb,r,side=m.groups();entry=float(entry);sb=float(sb);r=float(r)
+            n=q["win"]+q["loss"]
+            wr=q["win"]/n if n else None
+            exp=(q["win"]*r-q["loss"])/n if n else None
+            pf=(q["win"]*r/q["loss"]) if q["loss"] else None
+            rows.append({"key":k,"type":typ,"entry":entry,"sb":sb,"r":r,"side":side,
+                         "resolved":n,"fills":q["fills"],"win_pct":None if wr is None else wr*100,
+                         "gross_exp_R":exp,"gross_pf_R":pf,
+                         "taker_pct":100*q["taker"]/q["fills"] if q["fills"] else None,
+                         "data_gap":q["data_gap"],"entry_mismatch":q["entry_mismatch"],"exit_mismatch":q["exit_mismatch"]})
+          df=pd.DataFrame(rows)
+          sh=df[df.side.eq("SHORT")].copy()
+          sh["score"]=sh["gross_exp_R"]*sh["resolved"].pow(.15)
+          # top by expectancy, PF and rough opportunity-adjusted score
+          tops={}
+          for typ in ["P","E"]:
+            z=sh[sh.type.eq(typ)].copy()
+            tops[typ]={
+              "top_expectancy":z.sort_values(["gross_exp_R","resolved"],ascending=[False,False]).head(30).to_dict("records"),
+              "top_pf":z.sort_values(["gross_pf_R","resolved"],ascending=[False,False]).head(30).to_dict("records"),
+              "top_score":z.sort_values(["score","gross_exp_R"],ascending=[False,False]).head(50).to_dict("records"),
+            }
+          # summarize best R for every entry/sb and count robust neighborhoods
+          best=[]
+          for (typ,e,sb),g in sh.groupby(["type","entry","sb"]):
+            x=g.sort_values("gross_exp_R",ascending=False).iloc[0]
+            best.append(x.to_dict())
+          bestdf=pd.DataFrame(best).sort_values(["gross_exp_R","resolved"],ascending=[False,False])
+          # neighbor robustness: same type/sb, entry adjacent in sorted grid and R within +/-2
+          robust=[]
+          for _,r0 in sh.iterrows():
+            g=sh[(sh.type==r0.type)&(sh.sb==r0.sb)&(sh.r.between(r0.r-2,r0.r+2))]
+            entries=sorted(sh[(sh.type==r0.type)&(sh.sb==r0.sb)].entry.unique())
+            i=entries.index(r0.entry); near=entries[max(0,i-1):min(len(entries),i+2)]
+            g=g[g.entry.isin(near)]
+            pos=g[g.gross_exp_R>0]
+            robust.append({"key":r0.key,"neighbors":int(len(g)),"positive_neighbors":int(len(pos)),
+                           "median_neighbor_exp_R":float(g.gross_exp_R.median()) if len(g) else None,
+                           "min_neighbor_exp_R":float(g.gross_exp_R.min()) if len(g) else None})
+          rob=pd.DataFrame(robust)
+          sh=sh.merge(rob,on="key")
+          robust_top=sh[sh.neighbors>=6].sort_values(["median_neighbor_exp_R","gross_exp_R"],ascending=[False,False]).head(80).to_dict("records")
+          out={"definition":common(docs[0]),"merged_shards":8,"rows":len(df),
+               "short_rows":len(sh),"tops":tops,"best_per_entry_sb":bestdf.head(100).to_dict("records"),
+               "robust_top":robust_top,
+               "r_boundary":{"max_r":float(sh.r.max()),
+                 "top20_expectancy_at_max_r":int((sh.sort_values("gross_exp_R",ascending=False).head(20).r==sh.r.max()).sum()),
+                 "top20_score_at_max_r":int((sh.sort_values("score",ascending=False).head(20).r==sh.r.max()).sum())}}
+          json.dump(out,open("canonical_4h_remerge_analysis.json","w"),indent=2)
+          print("REMARGE_PASS",len(df),"SHORT",len(sh))
+          print("R_BOUNDARY",out["r_boundary"])
+          print("TOP ROBUST")
+          for x in robust_top[:20]:
+            print(x["key"],"n",x["resolved"],"wr",round(x["win_pct"],2),"PF",round(x["gross_pf_R"],3),
+                  "expR",round(x["gross_exp_R"],4),"medNbr",round(x["median_neighbor_exp_R"],4),
+                  "minNbr",round(x["min_neighbor_exp_R"],4),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canonical-4h-remerge-analysis
+          path: canonical_4h_remerge_analysis.json
