@@ -1,0 +1,29 @@
+name: PSAR 1H PSAR-Anchor Recovery Ultra Split
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_psar_anchor_recovery_ultrasplit_run']
+permissions: {contents: read, actions: read}
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [233,1257,2281,3305,716,1740,2764,3788]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run ultra-split PSAR-anchor statistics
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
+          python scripts/psar_1h_psar_anchor_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 4096 --out psar_1h_anchor_ultrasplit_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-psar-anchor-ultrasplit-${{ matrix.shard }}
+          path: psar_1h_anchor_ultrasplit_${{ matrix.shard }}.json
