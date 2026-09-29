@@ -62,7 +62,7 @@ def eval_candidate(t,o,h,l,c,m,symbol,label,p):
             else:
                 outcome="win" if hit_tp else "loss"; reason="15m"
         rows.append({"candidate":label,"symbol":symbol,"entry_ts":int(t[fs]),"exit_ts":int(t[exit_i]),
-                     "fill":float(fill),"sl":float(sl),"tp":float(tp),"risk_px":float(risk),
+                     "fill":float(fill),"atr_pct":float(a0/fill),"sl":float(sl),"tp":float(tp),"risk_px":float(risk),
                      "stop_pct":float(risk/fill),"r_target":p["r"],"outcome":outcome,
                      "result_R":p["r"] if outcome=="win" else -1.0,
                      "timeout_marks":{str(dd): float((fill-c[min(len(c)-1,fs+dd*96-1)])/risk) for dd in (1,2,3,5,7) if fs+dd*96-1 < len(c)},
