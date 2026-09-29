@@ -1,0 +1,31 @@
+name: PSAR 4H Canonical Feature Salvage
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_canonical_feature_salvage_run']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download canonical preentry features
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p features
+          gh run download 36536529423 -R ${{ github.repository }} -p 'psar-4h-canonical-preentry-features-*' -D features
+      - name: Download canonical finalist ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p ledger
+          gh run download 36519239563 -R ${{ github.repository }} -p 'psar-4h-canonical-finalist-ledger-*' -D ledger
+      - name: Train-only feature salvage scan
+        run: python scripts/psar_4h_canonical_feature_salvage.py --features features --ledger ledger --out feature_salvage.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-canonical-feature-salvage
+          path: feature_salvage.json
