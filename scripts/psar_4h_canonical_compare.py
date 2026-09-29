@@ -301,9 +301,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                         else:q["loss"]+=1
     return out
 
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--out",default="psar_open_spider_grid.json");ap.add_argument("--tf",choices=("1h","4h","1d"),default="4h");ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1);a=ap.parse_args()
 if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")
-m={"1h":4,"4h":16}[a.tf]
+m={"1h":4,"4h":16,"1d":96}[a.tf]
 all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
 seen_ranges={}
 for p in all_files:
