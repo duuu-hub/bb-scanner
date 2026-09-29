@@ -22,6 +22,7 @@ def prepare(features_dir,sizing_dir):
         f=F[(F.condition==cond)&(F.dd72_pct>=ddmin)].copy()
         e=E[E.variant==v].copy()
         # feature audit has resolved rows only; unresolved-at-dataset-end are omitted from ranking study.
+        e=e.drop(columns=[col for col in FEATURES if col in e.columns],errors="ignore")
         j=e.merge(f[["symbol","signal_ts","fill_ts",*FEATURES]],
                   on=["symbol","signal_ts","fill_ts"],how="inner",validate="many_to_one")
         j=j[j.outcome.isin(["win","loss"]) & j.pnl_pct.notna() & j.exit_ts.notna()].copy()
