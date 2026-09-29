@@ -225,7 +225,7 @@ def evaluate(t,o,h,l,c,m,symbol):
             if crossed:
                 filled=True;order="TAKER";fs=start;fill=float(ro[i])
             else:
-                hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
+                hits=np.flatnonzero(h[start:min(start+m,len(t))]>=e)
                 if hits.size:
                     filled=True;order="MAKER";fs=start+int(hits[0]);fill=float(e)
             setups.append({"variant":name,"signal_ts":signal_ts,"setup":1,"taker_fill":int(filled and order=="TAKER"),"maker_fill":int(filled and order=="MAKER"),"filled":int(filled)})
