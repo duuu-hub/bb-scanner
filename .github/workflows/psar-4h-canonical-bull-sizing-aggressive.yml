@@ -1,0 +1,41 @@
+name: PSAR 4H Canonical Bull Sizing Aggressive
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_canonical_bull_sizing_aggressive_run']
+permissions: {contents: read, actions: read}
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download canonical ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p ledger
+          for i in 0 1 2 3 4 5 6 7; do
+            for try in 1 2 3 4; do
+              gh run download 36519239563 -R ${{ github.repository }} -n "psar-4h-canonical-finalist-ledger-$i" -D ledger && break
+              sleep $((try*10))
+            done
+          done
+      - name: Download setup-count shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p sizing
+          gh run download 36437560302 -R ${{ github.repository }} -p 'psar-4h-short-sizing-*' -D sizing
+      - name: Download BTC source shard
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-3' -D data
+      - name: Extend aggressive sizing boundary
+        run: python scripts/psar_4h_canonical_bull_sizing_aggressive.py --ledger ledger --sizing sizing --data data --out bull_sizing_aggressive.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-canonical-bull-sizing-aggressive
+          path: bull_sizing_aggressive.json
