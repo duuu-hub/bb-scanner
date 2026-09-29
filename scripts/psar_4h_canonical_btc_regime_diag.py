@@ -93,6 +93,11 @@ def main():
       "RET90_GTE0":lambda x:x.ret90>=0,
       "SMA200_SLOPE30_GTE0":lambda x:x.sma200_slope30>=0,
       "BTC_GTE_SMA100":lambda x:x.prev_close>=x.sma100,
+      "BULL200_MOM30":lambda x:(x.prev_close>=x.sma200)&(x.sma50>=x.sma200)&(x.ret30>=0),
+      "BULL200_MOM90":lambda x:(x.prev_close>=x.sma200)&(x.sma50>=x.sma200)&(x.ret90>=0),
+      "BTC200_MOM30":lambda x:(x.prev_close>=x.sma200)&(x.ret30>=0),
+      "BTC100_MOM30":lambda x:(x.prev_close>=x.sma100)&(x.ret30>=0),
+      "MOM30_AND90":lambda x:(x.ret30>=0)&(x.ret90>=0),
     }
     out={"definition":{"variant":VARIANT,"crowding":[CROWD_LO,CROWD_HI],"same_symbol_max":SAME_MAX,
                        "btc_daily_features":"prior completed UTC daily bars only","train":"signal<2025-01-01 and exit<2025-01-01","validation":"signal>=2025-01-01","costs_pct":COSTS},"gates":{}}
