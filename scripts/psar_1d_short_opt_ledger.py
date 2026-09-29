@@ -256,7 +256,7 @@ ap.add_argument("--events",default="events.csv.gz")
 ap.add_argument("--meta",default="meta.json")
 ap.add_argument("--shard",type=int,default=0)
 ap.add_argument("--shards",type=int,default=1)
-ap.add_argument("--max-files",type=int,default=0)
+ap.add_argument("--max-files",type=int,default=0)\nap.add_argument("--file-slice",default="",help="optional start:end slice after normal shard selection")
 a=ap.parse_args()
 all_files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert all_files
 files=[p for j,p in enumerate(all_files) if j%a.shards==a.shard]
