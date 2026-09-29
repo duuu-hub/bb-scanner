@@ -264,9 +264,7 @@ if a.max_files>0:files=files[:a.max_files]
 ss=[];ee=[];started=time.time()
 for z,p in enumerate(files,1):
     sym=_symbol(p)
-    if sym in BTC_BLACKLIST:
-        print("SKIP_BLACKLIST",sym,flush=True);continue
-    data=load(p);srows=[];erows=[]
+data=load(p);srows=[];erows=[]
     for aa,bb in contiguous_segments(data[0]):
         if bb-aa<96*(PSAR_BURNIN_BARS+1):continue
         part=tuple(x[aa:bb] for x in data)
