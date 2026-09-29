@@ -1,0 +1,25 @@
+name: PSAR 1D SHORT Optimization Summary
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_opt_summary_run']
+permissions: {contents: read, actions: read}
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download ledgers
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir in && gh run download 36526190019 -R ${{ github.repository }} -p 'psar-1d-short-opt-*' -D in
+      - name: Summarize
+        run: python scripts/psar_1d_short_opt_summarize.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-short-opt-summary
+          path: |
+            summary.csv
+            meta.json
