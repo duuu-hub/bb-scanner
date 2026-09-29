@@ -1,0 +1,30 @@
+name: PSAR 1H Canonical Final Split
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_canonical_finalsplit_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [233,489,745,1001]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run only missing canonical residue
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_open_canonical_compare.py)
+          python scripts/psar_open_canonical_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 1024 --out canonical_finalsplit_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-canonical-finalsplit-${{ matrix.shard }}
+          path: canonical_finalsplit_${{ matrix.shard }}.json
