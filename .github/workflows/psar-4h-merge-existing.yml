@@ -49,6 +49,19 @@ jobs:
           json.dump([{"key":k,**v} for _,k,v in ranked[:200]],open("psar_4h_canonical_top200.json","w"),indent=2)
           print("MERGE_PASS",len(fs),out["files"],len(agg))
           for pf,k,v in ranked[:20]: print(k,"PF",pf,"N",v["win"]+v["loss"],"EXP",v["gross_expectancy_R_amb_loss"])
+          eligible=[]
+          for k,v in agg.items():
+              n=v["win"]+v["loss"]
+              wr=100*v["win"]/n if n else 0
+              if wr>=20 and v["gross_pf_nominal_R"] is not None:
+                  eligible.append((v["gross_pf_nominal_R"],v["gross_expectancy_R_amb_loss"],wr,k,n))
+          eligible.sort(reverse=True)
+          print("WINRATE_GE20_COUNT",len(eligible))
+          print("TOP_WINRATE_GE20_BY_PF")
+          for pf,ex,wr,k,n in eligible[:30]: print(k,"PF",pf,"EXP",ex,"WR",round(wr,3),"N",n)
+          eligible_exp=sorted(eligible,key=lambda x:(x[1],x[0]),reverse=True)
+          print("TOP_WINRATE_GE20_BY_EXPECTANCY")
+          for pf,ex,wr,k,n in eligible_exp[:30]: print(k,"PF",pf,"EXP",ex,"WR",round(wr,3),"N",n)
           PY
       - uses: actions/upload-artifact@v4
         with:
