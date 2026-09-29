@@ -1,0 +1,73 @@
+name: PSAR Daily Volatility Portfolio Merge Only
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.research/psar_daily_vol_merge_run']
+jobs:
+  portfolio:
+    runs-on: ubuntu-latest
+    permissions: {actions: read, contents: read}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download successful ledgers
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: |
+          mkdir -p ledgers
+          gh run download 36574988061 -R duuu-hub/bb-scanner -p 'psar-daily-ledger-*' -D ledgers
+      - name: Simulate identical account constraints
+        run: |
+          python - <<'PY'
+          import glob,json,math
+          docs=[json.load(open(x)) for x in glob.glob("ledgers/**/*.json",recursive=True)]
+          assert len(docs)==8
+          events=sum((d["events"] for d in docs),[])
+          out={}
+          for cand in "C":
+            base0=sorted([x for x in events if x["candidate"]==cand],key=lambda x:(x["entry_ts"],x["symbol"],x["exit_ts"]))
+            vals=sorted(x["atr_pct"] for x in base0)
+            for top_pct in (30,20,10,5):
+              cut=vals[int(len(vals)*(1-top_pct/100))]
+              base=[x for x in base0 if x["atr_pct"]>=cut]
+              for td in (1,2,3,5,7):
+                ev=[]
+                for x in base:
+                  y=dict(x); y["timeout"]=False
+                  if td is not None and x["exit_ts"]>x["entry_ts"]+td*86400000 and str(td) in x.get("timeout_marks",{}):
+                    y["exit_ts"]=x["entry_ts"]+td*86400000; y["result_R"]=x["timeout_marks"][str(td)]; y["timeout"]=True
+                  ev.append(y)
+                for risk_frac in (0.0025,0.005):
+                  eq=1.; peak=1.; mdd=0.; active=[]; accepted=wins=losses=skipped_symbol=skipped_cap=timeouts=0
+                  conc_sum=maxconc=exposure_sum=maxexp=points=streak=maxstreak=0
+                  for x in ev:
+                    keep=[]
+                    for p in active:
+                      if p["exit_ts"]<=x["entry_ts"]:
+                        eq+=p["notional"]*p["stop_pct"]*p["result_R"]; timeouts+=int(p["timeout"])
+                        if p["result_R"]>0: wins+=1; streak=0
+                        else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                        peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak)
+                      else: keep.append(p)
+                    active=keep
+                    if any(p["symbol"]==x["symbol"] for p in active): skipped_symbol+=1; continue
+                    if len(active)>=6: skipped_cap+=1; continue
+                    notional=min((eq*risk_frac)/x["stop_pct"],eq*.30); exposure=sum(p["notional"] for p in active)
+                    notional=min(notional,max(0.,eq*2-exposure))
+                    if notional<=0: skipped_cap+=1; continue
+                    active.append({**x,"notional":notional}); accepted+=1
+                    conc_sum+=len(active); maxconc=max(maxconc,len(active)); exposure_sum+=(exposure+notional)/eq; maxexp=max(maxexp,(exposure+notional)/eq); points+=1
+                  for p in sorted(active,key=lambda x:x["exit_ts"]):
+                    eq+=p["notional"]*p["stop_pct"]*p["result_R"]; timeouts+=int(p["timeout"])
+                    if p["result_R"]>0: wins+=1; streak=0
+                    else: losses+=1; streak+=1; maxstreak=max(maxstreak,streak)
+                    peak=max(peak,eq); mdd=max(mdd,(peak-eq)/peak)
+                  years=(max(x["exit_ts"] for x in base)-min(x["entry_ts"] for x in base))/31557600000
+                  key=f"{cand}_VOLTOP{top_pct}_T{td}_risk{risk_frac*100:g}pct"
+                  out[key]={"candidate":cand,"vol_top_pct":top_pct,"atr_cut_pct":cut*100,"timeout_days":td,"risk_pct":risk_frac*100,"raw_events":len(base),"executed":accepted,"timeouts":timeouts,"wins":wins,"losses":losses,"win_pct":100*wins/(wins+losses),"ending_equity":eq,"total_return_pct":(eq-1)*100,"cagr_pct":100*(eq**(1/years)-1) if eq>0 else None,"mdd_pct":100*mdd,"max_losing_streak":maxstreak,"avg_concurrent_at_entry":conc_sum/points,"max_concurrent":maxconc,"avg_exposure_at_entry_pct":100*exposure_sum/points,"max_exposure_pct":100*maxexp,"skipped_same_symbol":skipped_symbol,"skipped_capacity":skipped_cap}
+            json.dump({"constraints":{"same_symbol_overlap":False,"max_positions":6,"max_position_notional_pct_equity":30,"max_total_exposure_pct_equity":200,
+            "risk_pct_equity_scenarios":[0.25,0.5,1.0],"costs":"gross first-pass; cost stress follows survivors","exit_before_entry_same_timestamp":True},
+            "results":out},open("portfolio.json","w"),indent=2)
+          for k,v in out.items(): print(k,"RET",round(v["total_return_pct"],2),"CAGR",None if v["cagr_pct"] is None else round(v["cagr_pct"],2),"MDD",round(v["mdd_pct"],2),"N",v["executed"],"WR",round(v["win_pct"],2),"MAXCONC",v["max_concurrent"],"AVGEXP",round(v["avg_exposure_at_entry_pct"],1),"MAXLS",v["max_losing_streak"])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-daily-volatility-portfolio, path: portfolio.json}
