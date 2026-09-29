@@ -1,0 +1,36 @@
+name: PSAR 1D SHORT Shard3 Recovery
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_shard3_recovery']
+permissions: {contents: read, actions: read}
+jobs:
+  recover:
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0,1,2,3,4]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run shard3 slice
+        shell: bash
+        run: |
+          starts=(0 22 44 66 87)
+          ends=(22 44 66 87 107)
+          p=${{ matrix.part }}
+          python scripts/psar_1d_short_opt_ledger.py --data data --shard 3 --shards 8 --file-slice "${starts[$p]}:${ends[$p]}" --setups setups_3_${p}.csv.gz --events events_3_${p}.csv.gz --meta meta_3_${p}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-short-opt-3-part-${{ matrix.part }}
+          path: |
+            setups_3_*.csv.gz
+            events_3_*.csv.gz
+            meta_3_*.json
