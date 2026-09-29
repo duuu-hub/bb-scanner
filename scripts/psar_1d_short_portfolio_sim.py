@@ -61,13 +61,14 @@ def main():
         parts.append(d)
     d=pd.concat(parts,ignore_index=True);d.fill_ts=d.fill_ts.astype("int64");d.exit_ts=d.exit_ts.astype("int64")
     out=[]
-    for v in VARIANTS:
-        x=d[d.variant==v].sort_values(["fill_ts","symbol"],kind="mergesort")
-        print("VARIANT",v,"raw",len(x),flush=True)
+    for uname,syms in UNIVERSES.items():
+      for v in VARIANTS:
+        x=d[(d.variant==v)&d.symbol.isin(syms)].sort_values(["fill_ts","symbol"],kind="mergesort")
+        print("UNIVERSE",uname,"VARIANT",v,"raw",len(x),flush=True)
         for s in SIZES:
             for bp in COST_BPS:
-                z=replay(x,s,bp);z["variant"]=v;out.append(z)
-                if bp==20: print("SIZE20",v,s,z["final_multiple"],z["cagr_pct"],z["mdd_pct"],z["accepted"],z["avg_positions"],z["avg_gross_exposure_pct"],flush=True)
+                z=replay(x,s,bp);z["variant"]=v;z["universe"]=uname;out.append(z)
+                if bp==20: print("SIZE20",uname,v,s,z["final_multiple"],z["cagr_pct"],z["mdd_pct"],z["accepted"],z["avg_positions"],z["avg_gross_exposure_pct"],flush=True)
     r=pd.DataFrame(out);r.to_csv("psar_1d_short_portfolio.csv",index=False)
     json.dump({"definition":{"max_positions":MAX_POS,"max_gross_exposure_pct":200,"same_symbol_overlap":False,"ranking":"lower stop_pct then symbol","universes":UNIVERSES,"position_size":"fixed fraction of realized equity at fill","mdd":"realized-equity only","cost_bps":COST_BPS},"results":out},open(a.out,"w"),indent=2)
     for bp in COST_BPS:
