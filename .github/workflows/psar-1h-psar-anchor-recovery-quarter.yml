@@ -1,0 +1,88 @@
+name: PSAR 1H PSAR-Anchor Recovery Quarter
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_psar_anchor_recovery_quarter_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [3,19,35,51,9,25,41,57,12,28,44,60]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run quarter PSAR-anchor statistics
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
+          python scripts/psar_1h_psar_anchor_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 64 --out psar_1h_anchor_quarter_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-psar-anchor-quarter-${{ matrix.shard }}
+          path: psar_1h_anchor_quarter_${{ matrix.shard }}.json
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download preserved original and prior-recovery shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p old prior
+          for s in 0 2 5 6 7; do
+            gh run download 36423641305 -R ${{ github.repository }} -n psar-1h-psar-anchor-$s -D old/$s
+          done
+          for s in 1 4 11; do
+            gh run download 36470586800 -R ${{ github.repository }} -n psar-1h-psar-anchor-recovery-$s -D prior/$s
+          done
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-1h-psar-anchor-quarter-*
+          path: new
+      - name: Merge exact coverage and validate
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("old/**/*.json",recursive=True)+glob.glob("prior/**/*.json",recursive=True)+glob.glob("new/**/*.json",recursive=True)
+          assert len(fs)==20,f"expected 20 component jsons got {len(fs)}"
+          ds=[json.load(open(x)) for x in fs]
+          assert all(not d.get("errors") for d in ds),"component errors"
+          expected={d["definition"]["input_files_total"] for d in ds}
+          assert len(expected)==1,expected
+          assert sum(d["files"] for d in ds)==next(iter(expected)),(sum(d["files"] for d in ds),expected)
+          semantic_drop={"shard_index","shard_count","workflow_commit_sha"}
+          def sem(d):return {k:v for k,v in d["definition"].items() if k not in semantic_drop}
+          assert all(sem(d)==sem(ds[0]) for d in ds),"semantic definition mismatch"
+          derived={"win_pct","gross_pf_actual_R","gross_expectancy_actual_R"}
+          agg={}
+          for d in ds:
+              for k,v in d["summary"].items():
+                  q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+                  for kk,vv in v.items():
+                      if kk not in derived:q[kk]+=vv
+          for k,q in agg.items():
+              assert q["taker"]+q["maker"]==q["fills"],(k,q)
+              assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"],(k,q)
+              r=q["win"]+q["loss"]
+              q["win_pct"]=round(100*q["win"]/r,3) if r else None
+              q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"]>0 else None
+              q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/r,5) if r else None
+          out={"definition":sem(ds[0]),"files":sum(d["files"] for d in ds),"summary":agg,
+               "coverage":"old mod8 0,2,5,6,7 + mod16 1,4,11 + mod64 quarters of residues 3,9,12"}
+          json.dump(out,open("psar_1h_psar_anchor_recovered_final.json","w"),indent=2)
+          print("FINAL_MERGE_PASS",out["files"],len(agg))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-psar-anchor-recovered-final
+          path: psar_1h_psar_anchor_recovered_final.json
