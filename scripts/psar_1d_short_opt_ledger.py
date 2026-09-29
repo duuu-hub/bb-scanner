@@ -264,7 +264,7 @@ if a.max_files>0:files=files[:a.max_files]
 ss=[];ee=[];started=time.time()
 for z,p in enumerate(files,1):
     sym=_symbol(p)
-data=load(p);srows=[];erows=[]
+    data=load(p);srows=[];erows=[]
     for aa,bb in contiguous_segments(data[0]):
         if bb-aa<96*(PSAR_BURNIN_BARS+1):continue
         part=tuple(x[aa:bb] for x in data)
@@ -275,13 +275,11 @@ data=load(p);srows=[];erows=[]
 pd.DataFrame(ss).to_csv(a.setups,index=False,compression="gzip")
 pd.DataFrame(ee).to_csv(a.events,index=False,compression="gzip")
 meta={"definition":{
- "source_fixed_engine_commit":"59e4a691c49860c262b4bb2f152483101d79bd66",
- "source_fixed_engine_blob":"834d5e34ea4253951d42d5a083ad494ce2d498e4",
- "source_data_run":"36095439671","tf":"4h","side":"SHORT","variants":VARIANTS,
- "btc_blacklist":["BTCUSDT"],
- "execution":"canonical favorable-open taker else same-4H target maker; fixed PSAR stop/TP geometry",
+ "source_data_run":"36095439671","tf":"1d","side":"SHORT","variants":VARIANTS,
+ "execution":"canonical open-time PSAR/ATR; favorable OPEN taker else same-1D target maker; SL=PSAR_ref+SB*ATR; TP=actual_fill-R*actual_risk",
  "exit_ts_policy":"15m bar end for conservative capital reuse; unresolved held through data segment end",
- "statistics_scope":"independent signals; overlap measured later; no portfolio cap applied in shard"
+ "statistics_scope":"independent signals ledger; portfolio constraints applied downstream",
+ "research_rules":"RESEARCH_RULES.md account-level optimization"
  },"files":len(files),"setups":len(ss),"events":len(ee)}
 json.dump(meta,open(a.meta,"w"),indent=2)
 print("SIZING_LEDGER_PASS",len(files),len(ss),len(ee),flush=True)
