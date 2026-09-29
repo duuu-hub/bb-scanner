@@ -1,7 +1,7 @@
 import argparse,glob,json
 import numpy as np,pandas as pd
 
-VARIANTS=("E2.75_SB1_R1","E2.75_SB1.2_R1","E2.75_SB0.8_R1")
+VARIANTS=("E2.75_SB1_R1","E2.75_SB1.2_R1")\nUNIVERSES={"LIQ4":("BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT"),"LIQ10":("BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT","DOGEUSDT","BNBUSDT","ADAUSDT","LINKUSDT","LTCUSDT","BCHUSDT")}
 SIZES=(.05,.075,.10,.125,.15,.175,.20,.225,.25,.275,.30,.333333,.40,.50,.60,.75,1.0)
 COST_BPS=(0,20,40)
 MAX_POS=6
@@ -69,8 +69,8 @@ def main():
                 z=replay(x,s,bp);z["variant"]=v;out.append(z)
                 if bp==20: print("SIZE20",v,s,z["final_multiple"],z["cagr_pct"],z["mdd_pct"],z["accepted"],z["avg_positions"],z["avg_gross_exposure_pct"],flush=True)
     r=pd.DataFrame(out);r.to_csv("psar_1d_short_portfolio.csv",index=False)
-    json.dump({"definition":{"max_positions":MAX_POS,"max_gross_exposure_pct":200,"same_symbol_overlap":False,"ranking":"lower stop_pct then symbol","position_size":"fixed fraction of realized equity at fill","mdd":"realized-equity only","cost_bps":COST_BPS},"results":out},open(a.out,"w"),indent=2)
+    json.dump({"definition":{"max_positions":MAX_POS,"max_gross_exposure_pct":200,"same_symbol_overlap":False,"ranking":"lower stop_pct then symbol","universes":UNIVERSES,"position_size":"fixed fraction of realized equity at fill","mdd":"realized-equity only","cost_bps":COST_BPS},"results":out},open(a.out,"w"),indent=2)
     for bp in COST_BPS:
         print("LEADERS",bp,flush=True)
-        print(r[r.cost_bp==bp].sort_values(["final_multiple","mdd_pct"],ascending=[False,True]).head(12).to_string(index=False),flush=True)
+        print(r[r.cost_bp==bp].sort_values(["final_multiple","mdd_pct"],ascending=[False,True]).head(20).to_string(index=False),flush=True)
 if __name__=="__main__":main()
