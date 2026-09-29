@@ -1,0 +1,91 @@
+name: PSAR 4H SHORT Crowding Diagnostic
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_short_crowding_run']
+permissions: {contents: read, actions: read}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download sizing ledger
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p source
+          gh run download 36437560302 -R ${{ github.repository }} -p 'psar-4h-short-sizing-*' -D source
+      - name: Analyze crowding vs performance
+        run: |
+          python - <<'PY'
+          import glob,json
+          import numpy as np,pandas as pd
+          sfs=glob.glob("source/**/setups_*.csv.gz",recursive=True)
+          efs=glob.glob("source/**/events_*.csv.gz",recursive=True)
+          assert len(sfs)==8 and len(efs)==8,(len(sfs),len(efs))
+          S=pd.concat([pd.read_csv(x) for x in sfs],ignore_index=True)
+          E=pd.concat([pd.read_csv(x) for x in efs],ignore_index=True)
+          variants=["P4T26_DD8","P9T27_DD9"]
+          S=S[S.variant.isin(variants)].copy()
+          E=E[E.variant.isin(variants)].copy()
+          E=E[E.outcome.isin(["win","loss"]) & E.pnl_pct.notna()].copy()
+          # universe-wide cluster size at the signal timestamp
+          C=S.groupby(["variant","signal_ts"],as_index=False).agg(
+              setups=("setup","sum"),fills=("filled","sum"),takers=("taker_fill","sum"))
+          E=E.merge(C,on=["variant","signal_ts"],how="left",validate="many_to_one")
+          bins=[0,3,6,10,20,40,80,10**9]
+          labels=["1-3","4-6","7-10","11-20","21-40","41-80","81+"]
+          def pf(x):
+              x=np.asarray(x,float);gp=x[x>0].sum();gl=-x[x<0].sum()
+              return float(gp/gl) if gl>0 else None
+          out={"definition":{
+             "source_sizing_run":"36437560302","btc_excluded":True,
+             "cluster_metric":"all universe signals/fills sharing the same 4H signal timestamp",
+             "bins":labels,
+             "cost_stress":"flat 20bp and 40bp roundtrip deducted per resolved trade",
+             "note":"diagnostic only; cluster size is known at 4H scan time for setup count, while fill count is known only after the 4H window completes"
+          },"variants":{}}
+          for v in variants:
+              x=E[E.variant==v].copy()
+              z={"overall":{},"by_setup_cluster":[],"by_fill_cluster":[],"thresholds":[]}
+              z["overall"]={
+                "n":int(len(x)),"win_pct":float((x.pnl_pct>0).mean()*100),
+                "gross_pf":pf(x.pnl_pct),"net20_pf":pf(x.pnl_pct-.20),"net40_pf":pf(x.pnl_pct-.40),
+                "mean_gross_pct":float(x.pnl_pct.mean())
+              }
+              for metric,key in [("setups","by_setup_cluster"),("fills","by_fill_cluster")]:
+                  x["bucket"]=pd.cut(x[metric],bins=bins,labels=labels,right=True,include_lowest=True)
+                  for b,g in x.groupby("bucket",observed=True):
+                      z[key].append({
+                        "bucket":str(b),"n":int(len(g)),"cluster_mean":float(g[metric].mean()),
+                        "win_pct":float((g.pnl_pct>0).mean()*100),
+                        "gross_pf":pf(g.pnl_pct),"net20_pf":pf(g.pnl_pct-.20),"net40_pf":pf(g.pnl_pct-.40),
+                        "mean_gross_pct":float(g.pnl_pct.mean()),
+                        "gross_sum_pct":float(g.pnl_pct.sum())
+                      })
+              # directly compare calm vs crowded thresholds known at signal scan
+              for th in [3,6,10,20,40]:
+                  for side,mask in [("LE",x.setups<=th),("GT",x.setups>th)]:
+                      g=x[mask]
+                      z["thresholds"].append({
+                        "threshold":th,"side":side,"n":int(len(g)),
+                        "win_pct":float((g.pnl_pct>0).mean()*100) if len(g) else None,
+                        "gross_pf":pf(g.pnl_pct) if len(g) else None,
+                        "net20_pf":pf(g.pnl_pct-.20) if len(g) else None,
+                        "mean_gross_pct":float(g.pnl_pct.mean()) if len(g) else None
+                      })
+              out["variants"][v]=z
+          json.dump(out,open("psar_4h_short_crowding_diagnostic.json","w"),indent=2)
+          print("CROWDING_PASS",len(E))
+          for v,z in out["variants"].items():
+              print("VAR",v,"OVERALL",z["overall"])
+              for b in z["by_setup_cluster"]: print("SETUP_BUCKET",v,b)
+              for q in z["thresholds"]: print("THRESH",v,q)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-4h-short-crowding-diagnostic
+          path: psar_4h_short_crowding_diagnostic.json
