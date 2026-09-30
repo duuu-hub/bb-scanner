@@ -1,0 +1,17 @@
+name: VWAP Bitget 40 Check Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap_bitget_audit40_run']
+jobs:
+ audit:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v4
+     with: {ref: main}
+   - uses: actions/setup-python@v5
+     with: {python-version: '3.12'}
+   - run: pip install pandas numpy requests
+   - run: |
+       git show origin/research-rank5-binance-15m-5y:scripts/vwap_bitget_audit40.py > /tmp/a.py || git fetch origin research-rank5-binance-15m-5y && git show origin/research-rank5-binance-15m-5y:scripts/vwap_bitget_audit40.py > /tmp/a.py
+       python /tmp/a.py
