@@ -1,25 +1,27 @@
-import ast
+import ast, numpy as np
 from pathlib import Path
-P=Path("scripts/psar_4h_approach_long.py"); C=Path("scripts/psar_4h_canonical_compare.py")
-s=P.read_text(); c=C.read_text()
-checks=[]
-def ck(name,x): checks.append((name,bool(x)))
-ast.parse(s); ck("syntax",True)
-for i in range(30):
- ck(f"check_{i+1:02d}",[
- "psar_open_projection" in s,
- "atr_open" in s,
- "m=16" in s,
- "used={d:False" in s,
- "bull[i]!=prevbull" in s,
- "_resolve_1m" in s,
- "entry_mismatch" in s,
- "data_gap" in s,
- "timeout" in s,
- "target=ps+tpbuf*atr" in s,
- "stop=entry-slatr*atr" in s,
- "trigger=ps-d*atr" in s,
- ][i%12])
-bad=[n for n,v in checks if not v]
-print("VALIDATION",len(checks)-len(bad),"/",len(checks),"PASS");print("BAD",bad)
-if bad: raise SystemExit(1)
+s=Path("scripts/psar_4h_approach_long.py").read_text()
+ast.parse(s)
+ns={"np":np}
+a=s.index("def psar_open_projection"); b=s.index("def main():",a)
+exec(s[a:b],ns)
+fn=ns["psar_open_projection"]
+passed=[]
+def ok(name,cond):
+ if not cond: raise AssertionError(name)
+ passed.append(name)
+# 10 independent synthetic histories x 3 invariants = exactly 30 checks.
+for k in range(10):
+ rng=np.random.default_rng(1000+k); n=180
+ base=100+np.cumsum(rng.normal(0,.5,n)); h=base+rng.uniform(.1,1,n); l=base-rng.uniform(.1,1,n)
+ sar,bull=fn(h,l)
+ cut=120
+ # 1: changing CURRENT/FUTURE bars cannot change PSAR at cut OPEN
+ h2=h.copy();l2=l.copy();h2[cut:]*=1+rng.uniform(.2,.8);l2[cut:]*=rng.uniform(.2,.8)
+ s2,b2=fn(h2,l2)
+ ok(f"{k+1:02d}-no-lookahead-psar",np.isclose(sar[cut],s2[cut],equal_nan=True))
+ ok(f"{k+1:02d}-no-lookahead-side",bool(bull[cut])==bool(b2[cut]))
+ # 2: previous history perturbation SHOULD be allowed to affect current projection;
+ # invariant here is finite/open-time state after burn-in.
+ ok(f"{k+1:02d}-finite-open-state",np.isfinite(sar[cut]) and isinstance(bool(bull[cut]),bool))
+print(f"VALIDATION {len(passed)}/30 PASS")
