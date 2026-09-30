@@ -252,7 +252,9 @@ for z,p in enumerate(files,1):
     data=load(p);rr=[];cc=None
     for aa,bb in contiguous_segments(data[0]):
         if bb-aa<4*(PSAR_BURNIN_BARS+1):continue
-        part=tuple(x[aa:bb] for x in data)\n        if len(resample(*part,4)[0])<=PSAR_BURNIN_BARS:continue\n        x,cnt=evaluate_ledger(*part,4,sym);rr.extend(x)
+        part=tuple(x[aa:bb] for x in data)
+        if len(resample(*part,4)[0])<=PSAR_BURNIN_BARS:continue
+        x,cnt=evaluate_ledger(*part,4,sym);rr.extend(x)
         for k,v in cnt.items():
             for kk,vv in v.items():agg[k][kk]+=vv
     _ONE_MIN_CACHE.clear();events.extend(rr)
