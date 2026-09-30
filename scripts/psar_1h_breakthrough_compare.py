@@ -180,12 +180,18 @@ def evaluate(t,o,h,l,c,m,symbol=None):
     pos=np.searchsorted(t,rt)
     if len(pos) and (np.any(pos>=len(t)) or np.any(t[pos]!=rt)):raise RuntimeError("strategy-bar to 15m timestamp mapping mismatch")
     out={}
+    last_regime=None; entered_atr=set(); entered_pct=set()
     for i in range(max(15,PSAR_BURNIN_BARS),n):
         s=sar[i];a0=atr_open[i]
         if not np.isfinite(s) or not np.isfinite(a0) or a0<=0:continue
         regime_bull=bool(bull[i]); b=not regime_bull;side="LONG" if b else "SHORT"; start=pos[i]; end=len(t)
-        # spider is live immediately from this bar open
+        if last_regime is None or regime_bull!=last_regime:
+            entered_atr.clear(); entered_pct.clear(); last_regime=regime_bull
+        # Pre-break only: at bar open price must still be on the pre-break side of PSAR.
+        if (b and ro[i]>=s) or ((not b) and ro[i]<=s): continue
+        # One fill per entry-distance per continuous PSAR regime.
         for em in ENTRY_ATR:
+            if em in entered_atr: continue
             e=s-(em*a0 if b else -em*a0)
             # Canonical open-time execution: favorable crossed target becomes taker at OPEN.
             # Buy limit must be below open; sell limit must be above open.
@@ -197,6 +203,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if not hits.size:continue
                 fs=start+int(hits[0]); fill=e
             is_taker=bool(crossed)
+            entered_atr.add(em)
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
@@ -251,8 +258,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                         else:_book(q,"loss",fill,tp,sl,risk)
         # Fixed-percent distance from open-time PSAR, same execution semantics.
         for pct in ENTRY_PCT:
+            if pct in entered_pct: continue
             e=s*(1-pct/100.0) if b else s*(1+pct/100.0)
-            crossed=(b and ro[i]<=e) or ((not b) and ro[i]>=e)
+            crossed=(b and ro[i]>=e) or ((not b) and ro[i]<=e)
             if crossed:
                 fs=start; fill=ro[i]
             else:
@@ -260,6 +268,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                 if not hits.size: continue
                 fs=start+int(hits[0]); fill=e
             is_taker=bool(crossed)
+            entered_pct.add(pct)
             for sb in SL_BUFFER_ATR:
                 sl=s-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
