@@ -6,6 +6,7 @@ on:
 permissions: {contents: read, actions: read}
 jobs:
   merge:
+    strategy: {fail-fast: false, matrix: {tf: [1h, 4h, 1d]}}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     steps:
@@ -13,9 +14,9 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas numpy
-      - name: Download corrected artifacts
+      - name: Download corrected TF artifacts
         env: {GH_TOKEN: '${{ github.token }}'}
-        run: mkdir artifacts && gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-*' -D artifacts
-      - run: python scripts/psar_distance_age_merge.py
+        run: mkdir artifacts && gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-${{ matrix.tf }}-*' -D artifacts
+      - run: python scripts/psar_distance_age_merge.py --tf ${{ matrix.tf }}
       - uses: actions/upload-artifact@v4
-        with: {name: psar-distance-age-summary, path: summary.json}
+        with: {name: 'psar-distance-age-summary-${{ matrix.tf }}', path: 'summary-${{ matrix.tf }}.json'}
