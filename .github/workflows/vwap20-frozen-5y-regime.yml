@@ -1,0 +1,98 @@
+name: VWAP20 Frozen 5Y Long Short Regime
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap20_frozen_5y_regime_run']
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  regime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-rank5-binance-15m-5y
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - name: Download BTC shard from canonical 5Y dataset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p btc
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-3 -D btc
+      - name: Build prior-only BTC regime map
+        run: python scripts/vwap20_frozen_5y_regime.py regime --data btc --out btc_regime.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vwap20-btc-regime
+          path: btc_regime.csv
+          if-no-files-found: error
+
+  backtest:
+    needs: regime
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-rank5-binance-15m-5y
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - name: Download canonical 5Y shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+      - uses: actions/download-artifact@v4
+        with:
+          name: vwap20-btc-regime
+          path: regime
+      - name: Frozen exact VWAP20 backtest
+        run: |
+          python scripts/vwap20_frozen_5y_regime.py backtest             --data data             --regime regime/btc_regime.csv             --out events_${{ matrix.shard }}.csv             --shard ${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vwap20-frozen-shard-${{ matrix.shard }}
+          path: events_${{ matrix.shard }}.csv
+          if-no-files-found: error
+
+  summary:
+    needs: backtest
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-rank5-binance-15m-5y
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vwap20-frozen-shard-*
+          path: in
+          merge-multiple: true
+      - name: Summarize and run 30+10 audit
+        run: |
+          mkdir -p out
+          python scripts/vwap20_frozen_5y_regime.py summarize --in in --outdir out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vwap20-frozen-5y-regime-results
+          path: out/*
+          if-no-files-found: error
