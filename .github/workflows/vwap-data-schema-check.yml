@@ -1,0 +1,28 @@
+name: VWAP Data Schema Check
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap_schema_check_run']
+permissions: {contents: read, actions: read}
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3
+      - name: Download one 5Y shard
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-0' -D data
+      - name: Inspect schema
+        run: |
+          python - <<'PY'
+          import glob,pandas as pd
+          fs=glob.glob("data/**/*.csv.gz",recursive=True)
+          assert fs
+          d=pd.read_csv(fs[0],nrows=3)
+          print("FILE",fs[0])
+          print("COLUMNS",list(d.columns))
+          print(d.to_string(index=False))
+          PY
