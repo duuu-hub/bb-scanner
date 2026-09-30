@@ -1,0 +1,79 @@
+name: PSAR 1H Canonical Heavy Signal Split
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_canonical_heavy_signal_split_run']
+permissions: {contents: read, actions: read}
+jobs:
+  part:
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Build partition-only temporary engine
+        run: |
+          export ORIGINAL_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_open_canonical_compare.py)
+          python - <<'PY'
+          p="scripts/psar_open_canonical_compare.py";s=open(p).read()
+          old="def evaluate(t,o,h,l,c,m,symbol=None):"; new="def evaluate(t,o,h,l,c,m,symbol=None,signal_part=0,signal_parts=1):"
+          assert s.count(old)==1;s=s.replace(old,new,1)
+          old="    for i in range(max(15,PSAR_BURNIN_BARS),n):\n"
+          new=old+"        if (i-max(15,PSAR_BURNIN_BARS))%signal_parts!=signal_part:continue\n"
+          assert s.count(old)>=1;s=s.replace(old,new,1)
+          old='ap.add_argument("--max-files",type=int,default=0);a=ap.parse_args()'
+          new='ap.add_argument("--max-files",type=int,default=0);ap.add_argument("--signal-part",type=int,default=0);ap.add_argument("--signal-parts",type=int,default=1);a=ap.parse_args()'
+          assert s.count(old)==1;s=s.replace(old,new,1)
+          old='if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")'
+          new=old+'\nif a.signal_parts<1 or a.signal_part<0 or a.signal_part>=a.signal_parts:raise RuntimeError("invalid signal partition")'
+          assert s.count(old)==1;s=s.replace(old,new,1)
+          old="seg=evaluate(*part,m,sym)";new="seg=evaluate(*part,m,sym,a.signal_part,a.signal_parts)"
+          assert s.count(old)==1;s=s.replace(old,new,1)
+          open("/tmp/psar_canonical_signal_split.py","w").write(s)
+          PY
+          echo "$ORIGINAL_ENGINE_BLOB_SHA" > /tmp/original_engine_sha
+      - name: Run exact signal partition
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(cat /tmp/original_engine_sha)
+          python /tmp/psar_canonical_signal_split.py --data data --tf 1h --shard 233 --shards 1024 --signal-part ${{ matrix.part }} --signal-parts 8 --out part_${{ matrix.part }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-canonical-heavy-233-part-${{ matrix.part }}
+          path: part_${{ matrix.part }}.json
+  combine:
+    needs: part
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'psar-1h-canonical-heavy-233-part-*', path: parts}
+      - run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("parts/**/*.json",recursive=True);assert len(fs)==8
+          ds=[json.load(open(x)) for x in fs];assert all(d["files"]==1 and not d.get("errors") for d in ds)
+          derived={"win_pct","gross_pf_actual_R","gross_expectancy_actual_R"};agg={}
+          for d in ds:
+            for k,v in d["summary"].items():
+              q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+              for kk,vv in v.items():
+                if kk not in derived:q[kk]+=vv
+          for q in agg.values():
+            assert q["taker"]+q["maker"]==q["fills"]
+            assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"]
+            r=q["win"]+q["loss"];q["win_pct"]=round(100*q["win"]/r,3) if r else None
+            q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"] else None
+            q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/r,5) if r else None
+          json.dump({"definition":ds[0]["definition"],"files":1,"errors":[],"summary":agg},open("canonical_233_combined.json","w"),indent=2)
+          print("CANONICAL_233_COMBINE_PASS",len(agg))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1h-canonical-heavy-233-combined, path: canonical_233_combined.json}
