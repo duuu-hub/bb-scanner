@@ -16,6 +16,8 @@ jobs:
       - name: Download 5Y
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: 30-check validation gate
+        run: python scripts/validate_psar_approach_30.py
       - run: python scripts/psar_4h_approach_long.py --data data --shard ${{ matrix.shard }} --shards 8 --out long_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
         with: {name: 'psar-4h-intrabar-long-${{ matrix.shard }}', path: 'long_${{ matrix.shard }}.json'}
