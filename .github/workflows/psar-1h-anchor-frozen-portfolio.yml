@@ -22,15 +22,37 @@ jobs:
       - run: |
           export PSAR_SOURCE_BLOB=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
           python scripts/psar_1h_anchor_finalist_ledger.py --data data --shard ${{ matrix.shard }} --shards 16 --events events_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+          test -s events_${{ matrix.shard }}.csv.gz
+          test -s meta_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
-        with: {name: 'psar-1h-anchor-frozen-ledger-${{ matrix.shard }}', path: 'events_*.csv.gz\nmeta_*.json'}
+        with:
+          name: psar-1h-anchor-frozen-ledger-${{ matrix.shard }}
+          path: |
+            events_*.csv.gz
+            meta_*.json
+          if-no-files-found: error
   portfolio:
     needs: ledger
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
-        with: {pattern: 'psar-1h-anchor-frozen-ledger-*', path: ledger}
+        with:
+          pattern: psar-1h-anchor-frozen-ledger-*
+          path: ledger
+      - name: Verify ledger artifacts
+        run: |
+          test "$(find ledger -name 'events_*.csv.gz' | wc -l)" -eq 16
+          test "$(find ledger -name 'meta_*.json' | wc -l)" -eq 16
+          find ledger -name 'events_*.csv.gz' -exec test -s {} \;
+          find ledger -name 'meta_*.json' -exec test -s {} \;
       - run: python scripts/psar_1h_anchor_finalist_portfolio.py --root ledger --out psar_1h_anchor_frozen_portfolio.json
+      - run: test -s psar_1h_anchor_frozen_portfolio.json
       - uses: actions/upload-artifact@v4
-        with: {name: psar-1h-anchor-frozen-portfolio, path: psar_1h_anchor_frozen_portfolio.json}
+        with:
+          name: psar-1h-anchor-frozen-portfolio
+          path: psar_1h_anchor_frozen_portfolio.json
+          if-no-files-found: error
