@@ -1,0 +1,52 @@
+name: PSAR 1D Volatility BOTH Ledger
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_vol_both_run']
+permissions: {contents: read, actions: read}
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Smoke
+        run: |
+          python -m py_compile scripts/psar_1d_vol_both_ledger.py
+          python scripts/psar_1d_vol_both_ledger.py --data data --shard 0 --shards 1 --max-files 4 --events e.csv.gz --setups s.csv.gz --meta m.json
+          python - <<'PY'
+          import pandas as pd,json
+          e=pd.read_csv("e.csv.gz");m=json.load(open("m.json"))
+          assert m["definition"]["side"]=="BOTH"
+          assert {"LONG","SHORT"}.issubset(set(e.side))
+          assert e.atr_pct.notna().all() and (e.atr_pct>0).all()
+          print("SMOKE_PASS",len(e),e.groupby("side").size().to_dict())
+          PY
+  ledger:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_1d_vol_both_ledger.py --data data --shard ${{ matrix.shard }} --shards 8 --events events_${{ matrix.shard }}.csv.gz --setups setups_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-vol-both-${{ matrix.shard }}
+          path: |
+            events_${{ matrix.shard }}.csv.gz
+            meta_${{ matrix.shard }}.json
