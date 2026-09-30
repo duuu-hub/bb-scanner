@@ -1,0 +1,23 @@
+name: Bitget VWAP20 Corrected OOS
+on:
+ push:
+  branches: [research-rank5-binance-15m-5y]
+  paths: ['.research/bitget_vwap20_corrected_run']
+jobs:
+ test:
+  runs-on: ubuntu-latest
+  timeout-minutes: 45
+  steps:
+   - uses: actions/checkout@v4
+     with: {ref: main, fetch-depth: 0}
+   - uses: actions/setup-python@v5
+     with: {python-version: '3.12'}
+   - run: pip install pandas numpy requests
+   - run: |
+       git fetch origin research-rank5-binance-15m-5y
+       git show origin/research-rank5-binance-15m-5y:scripts/bitget_vwap20_corrected.py > /tmp/run.py
+       python /tmp/run.py
+   - uses: actions/upload-artifact@v4
+     with:
+      name: bitget-vwap20-corrected-oos
+      path: bitget_vwap20_corrected_*.csv
