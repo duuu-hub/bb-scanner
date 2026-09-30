@@ -1,0 +1,32 @@
+name: Cross Sectional Relative Strength 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/cross_sectional_relative_strength_run']
+permissions: {contents: read, actions: read}
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download all 5Y 15m shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p data
+          for s in 0 1 2 3 4 5 6 7; do
+            mkdir -p data/$s
+            gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-$s" -D data/$s
+          done
+      - name: Broad cross-sectional scan
+        run: python scripts/cross_sectional_relative_strength_scan.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-relative-strength-results
+          path: |
+            cross_sectional_cells.csv
+            cross_sectional_spreads.csv
+            cross_sectional_summary.json
