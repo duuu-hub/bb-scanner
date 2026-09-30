@@ -65,18 +65,18 @@ for p in files:
   if bb-aa<m*(BURN+max(H)+2):continue
   rt,ro,rh,rl,rc=rs(*(v[aa:bb] for v in data),m);n=len(rt)
   if n<=BURN+max(H)+1:continue
-  sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));atr=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy()
+  sar,bull=psar(rh,rl);prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));atr_closed=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();atr=np.r_[np.nan,atr_closed[:-1]]
   flip=np.r_[False,bull[1:]!=bull[:-1]];last=-1;d0=np.nan;eid=-1
   for i in range(BURN,n-max(H)):
    if not np.isfinite(sar[i]) or not np.isfinite(atr[i]) or atr[i]<=0:continue
-   if flip[i]:last=i;eid=flipn;flipn+=1;d0=abs(rc[i]-sar[i])/atr[i]
+   if flip[i]:last=i;eid=flipn;flipn+=1;d0=abs(rc[i-1]-sar[i])/atr[i]
    if last<0:continue
-   side=1 if bull[i] else -1;dt=abs(rc[i]-sar[i])/atr[i];row={"symbol":symbol,"ts":int(rt[i]),"side":"BULL" if side==1 else "BEAR","event":eid,"age":i-last,"age_bin":abin(i-last),"d0":float(d0),"dt":float(dt)}
+   side=1 if bull[i] else -1;dt=abs(ro[i]-sar[i])/atr[i];row={"symbol":symbol,"ts":int(rt[i]),"side":"BULL" if side==1 else "BEAR","event":eid,"age":i-last,"age_bin":abin(i-last),"d0":float(d0),"dt":float(dt)}
    for z in H:
-    row[f"ret{z}"]=float(side*(rc[i+z]/rc[i]-1)*100)
-    row[f"mfe{z}"]=float((rh[i+1:i+z+1].max()/rc[i]-1)*100 if side==1 else (1-rl[i+1:i+z+1].min()/rc[i])*100)
-    row[f"mae{z}"]=float((1-rl[i+1:i+z+1].min()/rc[i])*100 if side==1 else (rh[i+1:i+z+1].max()/rc[i]-1)*100)
+    row[f"ret{z}"]=float(side*(ro[i+z]/ro[i]-1)*100)
+    row[f"mfe{z}"]=float((rh[i:i+z].max()/ro[i]-1)*100 if side==1 else (1-rl[i:i+z].min()/ro[i])*100)
+    row[f"mae{z}"]=float((1-rl[i:i+z].min()/ro[i])*100 if side==1 else (rh[i:i+z].max()/ro[i]-1)*100)
    obs.append(row)
 df=pd.DataFrame(obs)
-out={"definition":{"tf":a.tf,"shard":a.shard,"shards":a.shards,"audits_initial":30,"clean_streak":10,"distance":"abs(close-PSAR)/ATR14","flip":"change in open-projected PSAR side, observable at bar open from closed history","horizons":H,"scope":"descriptive candle study; no entry/TP/SL strategy"},"files":len(files),"flips":int(flipn),"observations":len(df),"rows":obs}
+out={"definition":{"tf":a.tf,"shard":a.shard,"shards":a.shards,"audits_initial":30,"clean_streak":10,"distance":"D0=abs(prev_confirmed_close-new_PSAR)/ATR14_confirmed; Dt=abs(current_open-PSAR)/ATR14_confirmed","flip":"change in open-projected PSAR side, observable at bar open from closed history","horizons":H,"scope":"descriptive candle study; no entry/TP/SL strategy"},"files":len(files),"flips":int(flipn),"observations":len(df),"rows":obs}
 open(a.out,"w").write(json.dumps(out));print(json.dumps({k:v for k,v in out.items() if k!="rows"},indent=2))
