@@ -16,15 +16,15 @@ jobs:
       - name: Download 5Y
         env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
-      - run: python scripts/psar_daily_approach_long.py --data data --shard ${{ matrix.shard }} --shards 8 --out long_${{ matrix.shard }}.json
+      - run: python scripts/psar_4h_approach_long.py --data data --shard ${{ matrix.shard }} --shards 8 --out long_${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v4
-        with: {name: 'psar-daily-approach-long-${{ matrix.shard }}', path: 'long_${{ matrix.shard }}.json'}
+        with: {name: 'psar-4h-approach-long-${{ matrix.shard }}', path: 'long_${{ matrix.shard }}.json'}
   merge:
     needs: scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
-        with: {pattern: 'psar-daily-approach-long-*', path: x}
+        with: {pattern: 'psar-4h-approach-long-*', path: x}
       - run: |
           python - <<'PY'
           import glob,json
@@ -38,8 +38,8 @@ jobs:
             n=q['n']; ev=q['sumR']/n if n else 0; wr=100*q['win']/n if n else 0
             rows.append((ev,k,n,wr,q['win'],q['loss'],q['timeout']))
           rows.sort(reverse=True)
-          json.dump(rows,open('approach_long_summary.json','w'),indent=2)
+          json.dump(rows,open('approach_4h_long_summary.json','w'),indent=2)
           for r in rows[:80]:print('TOP',r)
           PY
       - uses: actions/upload-artifact@v4
-        with: {name: psar-daily-approach-long-summary, path: approach_long_summary.json}
+        with: {name: psar-4h-approach-long-summary, path: approach_4h_long_summary.json}
