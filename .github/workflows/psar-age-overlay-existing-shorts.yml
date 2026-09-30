@@ -12,7 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: pip install pandas==2.3.3 numpy==2.3.3\n      - run: python -m py_compile scripts/psar_age_overlay_existing_shorts.py
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/psar_age_overlay_existing_shorts.py
       - uses: actions/checkout@v4
         with: {ref: research-continuation-mining, path: continuation_src}
       - name: Download existing short ledgers
