@@ -30,29 +30,38 @@ def main():
  for p in sorted(glob.glob(a.data+'/**/*.csv.gz',recursive=True))[a.shard::a.shards]:
   t,o,h,l,c=load(p);rt,ro,rh,rl,rc,st=resample(t,o,h,l,c);sar,bull=psar(rh,rl)
   prev=np.r_[np.nan,rc[:-1]];tr=np.maximum(rh-rl,np.maximum(abs(rh-prev),abs(rl-prev)));ac=pd.Series(tr).rolling(14,min_periods=14).mean().to_numpy();ao=np.r_[np.nan,ac[:-1]]
-  prev_near={d:False for d in DIST}
+  used={d:False for d in DIST}; prevbull=None
   for i in range(100,len(rt)):
    valid=(not bull[i]) and np.isfinite(sar[i]) and np.isfinite(ao[i]) and ao[i]>0
-   dist=(sar[i]-ro[i])/ao[i] if valid else 999.
+   if prevbull is None or bull[i]!=prevbull:
+    used={d:False for d in DIST}
+   prevbull=bull[i]
+   if not valid: continue
+   base=st[i]; atr=ao[i]; ps=sar[i]
    for d in DIST:
-    near=valid and 0<=dist<=d
-    first=near and not prev_near[d];prev_near[d]=near
-    if not first:continue
-    start=st[i];entry=ro[i];atr=ao[i]
+    if used[d]: continue
+    trigger=ps-d*atr
+    hitj=None; entry=None
+    for j in range(base,min(base+16,len(t))):
+     if o[j]>=ps: break
+     if o[j]>=trigger: hitj=j;entry=o[j];break
+     if h[j]>=trigger: hitj=j;entry=trigger;break
+    if hitj is None: continue
+    used[d]=True
     for tpbuf in TP:
-     target=sar[i]+tpbuf*atr
-     if target<=entry:continue
+     target=ps+tpbuf*atr
+     if target<=entry: continue
      for slatr in SL:
       stop=entry-slatr*atr
       for hh in HOURS:
-       end=min(len(t),start+hh*4);res=None;exitp=None
-       for j in range(start,end):
+       endj=min(len(t),hitj+hh*4);res=None;exitp=None
+       for j in range(hitj,endj):
         ht=h[j]>=target;hs=l[j]<=stop
         if ht and hs:res='loss';exitp=stop;break
         if hs:res='loss';exitp=stop;break
         if ht:res='win';exitp=target;break
        if res is None:
-        res='timeout';exitp=c[end-1] if end>start else entry
+        res='timeout';exitp=c[endj-1] if endj>hitj else entry
        r=(exitp-entry)/(entry-stop)
        k=f'D{d:g}|TP{tpbuf:g}|SL{slatr:g}|T{hh}h';q=out.setdefault(k,{'n':0,'win':0,'loss':0,'timeout':0,'sumR':0.})
        q['n']+=1;q[res]+=1;q['sumR']+=r
