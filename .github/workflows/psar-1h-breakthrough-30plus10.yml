@@ -33,14 +33,14 @@ jobs:
             lambda:'q["taker"]+q["maker"]!=q["fills"]' in s,
             lambda:'q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]!=q["fills"]' in s,
             lambda:"entry_mismatch" in s, lambda:"exit_mismatch" in s, lambda:"data_gap" in s,
-            lambda:"contiguous_segments" in s, lambda:"positions never cross gaps" not in s or True,
+            lambda:"contiguous_segments" in s, lambda:"last_regime=None; entered_atr=set(); entered_pct=set()" in s,
             lambda:"psar_open_projection" in s, lambda:"_resolve_1m" in s, lambda:"_first_exit" in s,
             lambda:"official Binance 1m" in s, lambda:"source_data_run" in s,
-            lambda:'"tf":"1h"' in s, lambda:"overlapping positions" in s or "overlaps allowed" in s,
+            lambda:'"tf":"1h"' in s, lambda:"one entry per distance per PSAR regime" in s,
             lambda:"fees/slippage/funding excluded" in s,
             lambda:"PRE-BREAK:" in s,
-            lambda:s.count("b=not regime_bull")==1,
-            lambda:"regime_bull=bool(bull[i])" in s,
+            lambda:'touched=(h[j]>=entry) if long else (l[j]<=entry)' in s,
+            lambda:"entered_atr.add(em)" in s and "entered_pct.add(pct)" in s,
           ]
           assert len(checks)==30
           for i,c in enumerate(checks,1): assert c(),f"CHECK_{i}_FAIL"
