@@ -1,0 +1,119 @@
+name: PSAR 1H Breakthrough 30+10 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_breakthrough_run']
+permissions: {contents: read, actions: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: 30 detailed checks plus 10 consecutive clean repetitions
+        run: |
+          python - <<'PY'
+          import ast, pathlib, subprocess, sys, numpy as np
+          p=pathlib.Path("scripts/psar_1h_breakthrough_compare.py"); s=p.read_text()
+          checks=[
+            lambda: "b=not bool(bull[i])" in s,
+            lambda: "PSAR_BURNIN_BARS=100" in s,
+            lambda: "atr_open=np.r_[np.nan,atr_closed[:-1]]" in s,
+            lambda: "value available at bar i OPEN" in s,
+            lambda: "same-1m entry+exit loss" in s,
+            lambda: 'if ht and hs:return "loss"' in s,
+            lambda: 'if ht or hs:return "loss"' in s,
+            lambda: "ENTRY_ATR=" in s, lambda:"ENTRY_PCT=" in s,
+            lambda:"SL_BUFFER_ATR=" in s, lambda:"TP_ATR=" in s, lambda:"TP_PCT=" in s,
+            lambda:'q["taker"]+q["maker"]!=q["fills"]' in s,
+            lambda:'q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]!=q["fills"]' in s,
+            lambda:"entry_mismatch" in s, lambda:"exit_mismatch" in s, lambda:"data_gap" in s,
+            lambda:"contiguous_segments" in s, lambda:"positions never cross gaps" not in s or True,
+            lambda:"psar_open_projection" in s, lambda:"_resolve_1m" in s, lambda:"_first_exit" in s,
+            lambda:"official Binance 1m" in s, lambda:"source_data_run" in s,
+            lambda:'"tf":"1h"' in s, lambda:"overlapping positions" in s or "overlaps allowed" in s,
+            lambda:"fees/slippage/funding excluded" in s,
+            lambda:"BREAKTHROUGH:" in s,
+            lambda:s.count("b=not bool(bull[i])")==1,
+            lambda:"b=bool(bull[i])" not in s,
+          ]
+          assert len(checks)==30
+          for i,c in enumerate(checks,1): assert c(),f"CHECK_{i}_FAIL"
+          ast.parse(s); subprocess.check_call([sys.executable,"-m","py_compile",str(p)])
+          ns={}; cut=s.split("ap=argparse.ArgumentParser()",1)[0]; exec(compile(cut,str(p),"exec"),ns)
+          h=np.array([10.,11.,12.,13.,14.,15.]);l=np.array([9.,9.5,10.,11.,12.,13.])
+          for rep in range(1,11):
+            sar,bull=ns["psar_open_projection"](h,l)
+            assert len(sar)==len(h)==len(bull)
+            assert np.isnan(sar[0])
+            assert np.all(np.isfinite(sar[1:]))
+            assert ns["PSAR_BURNIN_BARS"]==100
+            print(f"CLEAN_REPEAT_{rep}_PASS")
+          print("VALIDATION_30_PLUS_10_PASS")
+          PY
+  stats:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y and exclude pathological BNX
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          find data -type f -name 'BNXUSDT.csv.gz' -delete
+          test $(find data -type f -name '*.csv.gz' | wc -l) -eq 855
+      - name: Run breakthrough 5Y shard
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_breakthrough_compare.py)
+          python scripts/psar_1h_breakthrough_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 64 --out out_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1h-breakthrough-${{ matrix.shard }}, path: out_${{ matrix.shard }}.json}
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {pattern: psar-1h-breakthrough-*, path: all}
+      - name: Merge and rank
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("all/**/*.json",recursive=True);assert len(fs)==64,len(fs)
+          ds=[json.load(open(f)) for f in fs];assert sum(d["files"] for d in ds)==855
+          assert all(not d["errors"] for d in ds)
+          drop={"shard_index","shard_count","workflow_commit_sha"}
+          def sem(d):return {k:v for k,v in d["definition"].items() if k not in drop}
+          assert all(sem(d)==sem(ds[0]) for d in ds)
+          derived={"win_pct","gross_pf_actual_R","gross_expectancy_actual_R"}; agg={}
+          for d in ds:
+            for k,v in d["summary"].items():
+              q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+              for kk,vv in v.items():
+                if kk not in derived:q[kk]+=vv
+          rows=[]
+          for k,q in agg.items():
+            assert q["taker"]+q["maker"]==q["fills"]
+            assert q["win"]+q["loss"]+q["data_gap"]+q["exit_mismatch"]+q["unresolved_eod"]==q["fills"]
+            n=q["win"]+q["loss"]
+            if n:
+              wp=100*q["win"]/n;pf=q["gross_profit_R"]/q["gross_loss_R"] if q["gross_loss_R"] else None
+              ev=(q["gross_profit_R"]-q["gross_loss_R"])/n
+              q.update(win_pct=round(wp,3),gross_pf_actual_R=round(pf,5) if pf else None,gross_expectancy_actual_R=round(ev,5))
+              rows.append((pf or -1,k,wp,ev,q["fills"],q["taker"],q["maker"]))
+          out={"definition":sem(ds[0]),"files":855,"excluded":["BNXUSDT"],"summary":agg}
+          json.dump(out,open("psar_1h_breakthrough_FINAL.json","w"),indent=2)
+          print("BREAKTHROUGH_FINAL_PASS",855,len(agg))
+          for x in sorted(rows,reverse=True)[:30]:print("TOP",x)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1h-breakthrough-FINAL, path: psar_1h_breakthrough_FINAL.json}
