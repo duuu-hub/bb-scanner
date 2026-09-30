@@ -3,7 +3,8 @@ from pathlib import Path
 import numpy as np,pandas as pd
 
 BAR15=15*60_000
-BAR4H=4*60*60_000\nBAR1D=24*60*60_000
+BAR4H=4*60*60_000
+BAR1D=24*60*60_000
 BURN=100
 
 def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
