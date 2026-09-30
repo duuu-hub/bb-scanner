@@ -23,6 +23,12 @@ jobs:
           gh run download 36217987507 -R ${{ github.repository }} -n continuation-fast-corrected-audit -D input/cont
           gh run download 35932941270 -R ${{ github.repository }} -n l3-cross-universe-results -D input/l3
       - run: python scripts/psar_age_overlay_existing_shorts.py --raw-root continuation_src/market_data_store/bitget/research_auto100_15m --cont-root input/cont --l3-root input/l3 --out psar_age_overlay.json
+      - name: Validate outputs
+        run: |
+          test -s psar_age_overlay.json
+          test -s psar_overlay_summary.csv
+          grep -q BASE psar_overlay_summary.csv
+          grep -q PSAR_1D_BEAR_AGE3_8 psar_overlay_summary.csv
       - uses: actions/upload-artifact@v4
         if: always()
         with:
