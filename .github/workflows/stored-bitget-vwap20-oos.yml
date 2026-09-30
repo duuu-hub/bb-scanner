@@ -1,0 +1,17 @@
+name: Stored Bitget VWAP20 OOS
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/stored_bitget_vwap20_run']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python scripts/stored_bitget_vwap20_oos.py
+      - uses: actions/upload-artifact@v4
+        with: {name: stored-bitget-vwap20-oos, path: 'stored_bitget_vwap20_*.csv'}
