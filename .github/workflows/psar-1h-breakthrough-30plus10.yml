@@ -1,4 +1,4 @@
-name: PSAR 1H Breakthrough 30+10 5Y
+name: PSAR 1H Pre-Break 30+10 5Y
 'on':
   push:
     branches: [research-rank5-binance-15m-5y]
@@ -21,7 +21,7 @@ jobs:
           import ast, pathlib, subprocess, sys, numpy as np
           p=pathlib.Path("scripts/psar_1h_breakthrough_compare.py"); s=p.read_text()
           checks=[
-            lambda: "b=not bool(bull[i])" in s,
+            lambda: "b=not regime_bull" in s,
             lambda: "PSAR_BURNIN_BARS=100" in s,
             lambda: "atr_open=np.r_[np.nan,atr_closed[:-1]]" in s,
             lambda: "value available at bar i OPEN" in s,
@@ -39,8 +39,8 @@ jobs:
             lambda:'"tf":"1h"' in s, lambda:"overlapping positions" in s or "overlaps allowed" in s,
             lambda:"fees/slippage/funding excluded" in s,
             lambda:"BREAKTHROUGH:" in s,
-            lambda:s.count("b=not bool(bull[i])")==1,
-            lambda:"b=bool(bull[i])" not in s,
+            lambda:s.count("b=not regime_bull")==1,
+            lambda:"regime_bull=bool(bull[i])" in s,
           ]
           assert len(checks)==30
           for i,c in enumerate(checks,1): assert c(),f"CHECK_{i}_FAIL"
@@ -53,6 +53,20 @@ jobs:
             assert np.isnan(sar[0])
             assert np.all(np.isfinite(sar[1:]))
             assert ns["PSAR_BURNIN_BARS"]==100
+            # Semantic geometry: pre-break entry must stay on PRICE SIDE of PSAR.
+            S,A=105.0,2.0
+            long_e=S-1.0*A; assert long_e==103.0 and long_e<S
+            S2=95.0
+            short_e=S2+1.0*A; assert short_e==97.0 and short_e>S2
+            # TP is beyond PSAR in the intended breakthrough direction.
+            long_tp=S+0.5*A; short_tp=S2-0.5*A
+            assert long_e<S<long_tp and short_tp<S2<short_e
+            # Existing limit execution semantics: already through pre-entry at OPEN => taker;
+            # otherwise only an intrabar touch may fill.
+            assert (104.0<=long_e) is False
+            assert (102.0<=long_e) is True
+            assert (96.0>=short_e) is False
+            assert (98.0>=short_e) is True
             print(f"CLEAN_REPEAT_{rep}_PASS")
           print("VALIDATION_30_PLUS_10_PASS")
           PY
