@@ -1,6 +1,6 @@
 import argparse,glob,json,os
 import numpy as np,pandas as pd
-DIST=(.02,.03,.05,.075,.1,.15,.2,.3,.5); TP=(0,.1,.25,.5); SL=(.25,.5,.75,1.,1.5,2.); HOURS=(6,12,24,48)
+DIST=(.02,.03,.05,.075,.1,.15,.2,.3,.5,.75,1.,1.25,1.5); TP=(0,.1,.25,.5); SL=(.25,.5,.75,1.,1.5,2.); HOURS=(6,12,24,48)
 def load(p):
  d=pd.read_csv(p,compression='gzip',usecols=['open_time','open','high','low','close']).sort_values('open_time')
  return tuple(d[x].to_numpy(np.int64 if x=='open_time' else float) for x in ['open_time','open','high','low','close'])
@@ -55,7 +55,7 @@ def main():
       stop=entry-slatr*atr
       for hh in HOURS:
        endj=min(len(t),hitj+hh*4);res=None;exitp=None
-       for j in range(hitj+1,endj):
+       for j in range(hitj,endj):
         ht=h[j]>=target;hs=l[j]<=stop
         if ht and hs:res='loss';exitp=stop;break
         if hs:res='loss';exitp=stop;break
