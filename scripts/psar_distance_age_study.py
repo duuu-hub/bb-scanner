@@ -41,13 +41,13 @@ def audit():
  h2=h.copy();l2=l.copy();h2[-1]=99;l2[-1]=.1;s2,b2=psar(h2,l2);assert np.allclose(s[:-1],s2[:-1],equal_nan=True) and np.array_equal(b[:-1],b2[:-1])
  assert [abin(x) for x in [0,1,3,5,9,17]]==["0","1-2","3-4","5-8","9-16","17+"]
  return True
-ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--tf",choices=("1h","4h"),required=True);ap.add_argument("--shard",type=int,required=True);ap.add_argument("--shards",type=int,default=8);ap.add_argument("--out",required=True);a=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument("--data",default="data");ap.add_argument("--tf",choices=("1h","4h","1d"),required=True);ap.add_argument("--shard",type=int,required=True);ap.add_argument("--shards",type=int,default=8);ap.add_argument("--out",required=True);a=ap.parse_args()
 for _ in range(30):assert audit()
 streak=0
 while streak<10:
  try:assert audit();streak+=1
  except Exception:streak=0;raise
-m={"1h":4,"4h":16}[a.tf];files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files
+m={"1h":4,"4h":16,"1d":96}[a.tf];files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files
 # global overlap audit before sharding
 seen={}
 for p in files:
