@@ -1,0 +1,36 @@
+name: PSAR 1H Anchor Frozen Portfolio Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_anchor_frozen_portfolio_run']
+permissions: {contents: read, actions: read}
+jobs:
+  ledger:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: |
+          export PSAR_SOURCE_BLOB=$(git hash-object scripts/psar_1h_psar_anchor_compare.py)
+          python scripts/psar_1h_anchor_finalist_ledger.py --data data --shard ${{ matrix.shard }} --shards 16 --events events_${{ matrix.shard }}.csv.gz --meta meta_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with: {name: 'psar-1h-anchor-frozen-ledger-${{ matrix.shard }}', path: 'events_*.csv.gz\nmeta_*.json'}
+  portfolio:
+    needs: ledger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'psar-1h-anchor-frozen-ledger-*', path: ledger}
+      - run: python scripts/psar_1h_anchor_finalist_portfolio.py --root ledger --out psar_1h_anchor_frozen_portfolio.json
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1h-anchor-frozen-portfolio, path: psar_1h_anchor_frozen_portfolio.json}
