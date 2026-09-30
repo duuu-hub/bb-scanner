@@ -1,0 +1,30 @@
+name: VWAP20 Cap6 Train-Rank Holdout
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap20_cap6_train_rank_run']
+permissions: {contents: read, actions: read}
+jobs:
+  rank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: research-rank5-binance-15m-5y}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download strict intersection events
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p in
+          gh run download 36735084022 -R ${{ github.repository }} -n vwap20-btc-bull-alt-down-5y-results -D in
+      - name: Train-only ranking selection and frozen holdout
+        run: |
+          mkdir -p out
+          python scripts/vwap20_cap6_train_rank.py --events in/events_all.csv --outdir out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vwap20-cap6-train-rank-results
+          path: out/*
+          if-no-files-found: error
