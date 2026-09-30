@@ -61,12 +61,16 @@ jobs:
             # TP is beyond PSAR in the intended breakthrough direction.
             long_tp=S+0.5*A; short_tp=S2-0.5*A
             assert long_e<S<long_tp and short_tp<S2<short_e
-            # Existing limit execution semantics: already through pre-entry at OPEN => taker;
-            # otherwise only an intrabar touch may fill.
-            assert (104.0<=long_e) is False
-            assert (102.0<=long_e) is True
-            assert (96.0>=short_e) is False
-            assert (98.0>=short_e) is True
+            # Approach-trigger semantics: price must move TOWARD PSAR.
+            assert (104.0>=long_e) is True
+            assert (102.0>=long_e) is False
+            assert (96.0<=short_e) is True
+            assert (98.0<=short_e) is False
+            # Already beyond PSAR is not a pre-break entry.
+            assert 106.0>=S and 94.0<=S2
+            # Source must contain the explicit pre-break-side guard and regime de-duplication.
+            assert 'if (b and ro[i]>=s) or ((not b) and ro[i]<=s): continue' in s
+            assert "entered_atr.add(em)" in s and "entered_pct.add(pct)" in s
             print(f"CLEAN_REPEAT_{rep}_PASS")
           print("VALIDATION_30_PLUS_10_PASS")
           PY
