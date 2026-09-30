@@ -1,0 +1,16 @@
+name: Bitget Recent VWAP20 OOS
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/bitget_recent_vwap20_run']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy requests
+      - run: python scripts/bitget_recent_vwap20_oos.py
+      - uses: actions/upload-artifact@v4
+        with: {name: bitget-recent-vwap20-oos, path: 'bitget_vwap20_recent_*.csv'}
