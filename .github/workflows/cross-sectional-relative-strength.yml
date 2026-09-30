@@ -5,24 +5,41 @@ on:
     paths: ['.research/cross_sectional_relative_strength_run']
 permissions: {contents: read, actions: read}
 jobs:
-  scan:
+  prepare:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas==2.3.3 numpy==2.3.3
-      - name: Download all 5Y 15m shards
+      - name: Download source shard
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p data
-          for s in 0 1 2 3 4 5 6 7; do
-            mkdir -p data/$s
-            gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-$s" -D data/$s
-          done
-      - name: Broad cross-sectional scan
-        run: python scripts/cross_sectional_relative_strength_scan.py
+          gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D data
+      - run: python scripts/cross_sectional_prepare_shard.py --data data --out part_${{ matrix.shard }}.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-part-${{ matrix.shard }}
+          path: part_${{ matrix.shard }}.csv.gz
+  merge:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cross-sectional-part-*
+          path: parts
+      - run: python scripts/cross_sectional_merge_scan.py
       - uses: actions/upload-artifact@v4
         with:
           name: cross-sectional-relative-strength-results
