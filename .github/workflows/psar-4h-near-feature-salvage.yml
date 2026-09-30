@@ -1,0 +1,28 @@
+name: PSAR 4H Near Feature Salvage
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_4h_near_feature_salvage_run']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download near-open shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p near features
+          gh run download 36646094822 -R ${{ github.repository }} -p 'psar-4h-near-open-[0-7]' -D near
+          gh run download 36536529423 -R ${{ github.repository }} -p 'psar-4h-canonical-preentry-features-*' -D features
+      - name: Analyze preentry feature salvage
+        run: python scripts/psar_4h_near_feature_salvage.py --near near --features features --out near_feature_salvage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-4h-near-feature-salvage
+          path: near_feature_salvage.json
