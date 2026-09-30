@@ -1,0 +1,22 @@
+name: PSAR Age Practical Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_age_practical_run']
+permissions: {contents: read, actions: read}
+jobs:
+  validate:
+    strategy: {fail-fast: false, matrix: {tf: [4h, 1d]}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download corrected raw study
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir artifacts && gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-${{ matrix.tf }}-*' -D artifacts
+      - run: python scripts/psar_age_practical_validation.py --tf ${{ matrix.tf }} --out practical-${{ matrix.tf }}.json
+      - uses: actions/upload-artifact@v4
+        with: {name: 'psar-age-practical-${{ matrix.tf }}', path: 'practical-${{ matrix.tf }}.json'}
