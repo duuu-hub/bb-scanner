@@ -10,18 +10,17 @@ jobs:
       fail-fast: false
       matrix: {shard: [0,1,2,3,4,5,6,7]}
     runs-on: ubuntu-latest
-    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
-      - name: Download 5Y
+      - name: Reuse successful volatility ledger
         env: {GH_TOKEN: '${{ github.token }}'}
-        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
-      - run: python scripts/psar_daily_candidate_ledger.py --data data --shard ${{ matrix.shard }} --shards 8 --out ledger_${{ matrix.shard }}.json
+        run: |
+          mkdir -p old
+          gh run download 36574988061 -R ${{ github.repository }} -p "psar-daily-ledger-${{ matrix.shard }}" -D old
+          find old -name '*.json' -exec cp {} ledger_${{ matrix.shard }}.json \;
       - uses: actions/upload-artifact@v4
         with: {name: 'psar-daily-ledger-${{ matrix.shard }}', path: 'ledger_${{ matrix.shard }}.json'}
+
   portfolio:
     needs: ledger
     runs-on: ubuntu-latest
