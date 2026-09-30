@@ -1,0 +1,22 @@
+name: PSAR 1D Regime Diagnose
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_regime_run']
+permissions: {contents: read, actions: read}
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/psar_1d_regime_diagnose.py
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-1d-*' -D artifacts
+      - run: python scripts/psar_1d_regime_diagnose.py --data artifacts --out psar_1d_regime.json
+      - run: test -s psar_1d_regime.json
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1d-regime-diagnose, path: psar_1d_regime.json}
