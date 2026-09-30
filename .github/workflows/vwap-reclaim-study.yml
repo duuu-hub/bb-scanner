@@ -1,0 +1,22 @@
+name: VWAP 3S Reclaim
+on:
+  push:
+    branches: [research-vwap-ema9-5y]
+    paths: ['.research/vwap_reclaim_run']
+permissions: {contents: read, actions: read}
+jobs:
+  test:
+    strategy: {fail-fast: false, matrix: {shard: [0,1,2,3,4,5,6,7]}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - name: Download frozen 5Y
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/vwap_reclaim_study.py --data data --shard ${{ matrix.shard }} --shards 8 --out reclaim_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with: {name: 'vwap-reclaim-${{ matrix.shard }}', path: 'reclaim_${{ matrix.shard }}.json'}
