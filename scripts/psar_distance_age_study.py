@@ -47,6 +47,9 @@ streak=0
 while streak<10:
  try:assert audit();streak+=1
  except Exception:streak=0;raise
+print("AUDIT_PASS initial=30 consecutive_clean=10",flush=True)
+if a.audit_only: raise SystemExit(0)
+if a.tf is None or a.shard is None or not a.out: raise RuntimeError("tf/shard/out required")
 m={"1h":4,"4h":16,"1d":96}[a.tf];files=sorted(glob.glob(a.data+"/**/*.csv.gz",recursive=True));assert files
 # global overlap audit before sharding
 seen={}
