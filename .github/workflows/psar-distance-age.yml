@@ -1,11 +1,20 @@
 name: PSAR Distance Age Study
-'on':
+on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths: ['.research/psar_distance_age_run']
 permissions: {contents: read, actions: read}
 jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - run: python scripts/psar_distance_age_study.py --audit-only
   study:
+    needs: audit:
     strategy:
       fail-fast: false
       matrix:
