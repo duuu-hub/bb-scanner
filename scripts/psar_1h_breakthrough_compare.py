@@ -63,7 +63,7 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
     entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
-            touched=(l[j]<=entry) if long else (h[j]>=entry)
+            touched=(h[j]>=entry) if long else (l[j]<=entry)
             if not touched:continue
             # Entry first appears inside this 1m candle. OHLC cannot prove whether
             # TP/SL in the same candle happened before or after the maker fill.
@@ -189,7 +189,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
             e=s-(em*a0 if b else -em*a0)
             # Canonical open-time execution: favorable crossed target becomes taker at OPEN.
             # Buy limit must be below open; sell limit must be above open.
-            crossed=(b and ro[i]<=e) or ((not b) and ro[i]>=e)
+            crossed=(b and ro[i]>=e) or ((not b) and ro[i]<=e)
             if crossed:
                 fs=start; fill=ro[i]
             else:
@@ -365,5 +365,5 @@ for k,q in agg.items():
     q["win_pct"]=round(100*q["win"]/resolved,3) if resolved else None
     q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"]>0 else None
     q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"same 1h bar open","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr_from_psar":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL and TP both fixed directly from PSAR_ref; actual fill never moves exit levels","statistics_scope":"PSAR breakthrough-direction independent-signal gross edge scan; overlaps allowed; no equity curve/MDD","costs":"fees/slippage/funding excluded","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"pre-break approach trigger; one fill per entry-distance per PSAR regime","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr_from_psar":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL and TP both fixed directly from PSAR_ref; actual fill never moves exit levels","statistics_scope":"PSAR pre-break gross edge scan; one entry per distance per PSAR regime; exits may overlap across regimes; no equity curve/MDD","costs":"fees/slippage/funding excluded","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
