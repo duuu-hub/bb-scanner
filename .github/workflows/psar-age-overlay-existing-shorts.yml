@@ -1,0 +1,33 @@
+name: PSAR Age Overlay Existing Shorts
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_age_overlay_existing_shorts_run']
+permissions: {contents: read, actions: read}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/checkout@v4
+        with: {ref: research-continuation-mining, path: continuation_src}
+      - name: Download existing short ledgers
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p input/cont input/l3
+          gh run download 36217987507 -R ${{ github.repository }} -n continuation-fast-corrected-audit -D input/cont
+          gh run download 35932941270 -R ${{ github.repository }} -n l3-cross-universe-results -D input/l3
+      - run: python scripts/psar_age_overlay_existing_shorts.py --raw-root continuation_src/market_data_store/bitget/research_auto100_15m --cont-root input/cont --l3-root input/l3 --out psar_age_overlay.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-age-overlay-existing-shorts
+          path: |
+            psar_age_overlay.json
+            psar_overlay_summary.csv
+            continuation_psar_overlay.csv.gz
+            l3_psar_overlay.csv.gz
