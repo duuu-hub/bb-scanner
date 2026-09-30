@@ -1,0 +1,19 @@
+name: VWAP Sweep Summary
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap_sweep_summary_run']
+permissions: {contents: read, actions: read}
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir in && gh run download 36715397985 -R ${{ github.repository }} -p 'vwap-sweep-*' -D in
+      - run: python scripts/vwap_sweep_summary.py
+      - uses: actions/upload-artifact@v4
+        with: {name: vwap-sweep-summary, path: '*.csv'}
