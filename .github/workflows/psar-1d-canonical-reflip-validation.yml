@@ -1,0 +1,30 @@
+name: PSAR 1D Canonical Reflip Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_canonical_reflip_validate_trigger_*']
+permissions: {contents: read, actions: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/reconcile_psar_1d.py scripts/audit_psar_1d.py scripts/validate_psar_1d_canonical.py
+      - name: Download original 5Y and pinned reconciliation/reflip references
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36816705084 -R ${{ github.repository }} -n psar-1d-exact-reconciliation -D reconciliation
+          gh run download 36814819579 -R ${{ github.repository }} -n psar-1d-reflip-exit -D reference-reflip
+      - name: Full raw-data audit, TRAIN freeze and annual rolling validation
+        run: python scripts/validate_psar_1d_canonical.py --data data --reconciliation reconciliation --reference-reflip reference-reflip/result.json --out psar-1d-canonical-validation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-canonical-reflip-validation
+          path: psar-1d-canonical-validation
+          retention-days: 90
