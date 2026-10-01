@@ -1,0 +1,364 @@
+﻿2026-10-01T21:43:21.4779483Z Current runner version: '2.337.0'
+2026-10-01T21:43:21.4800334Z ##[group]Runner Image Provisioner
+2026-10-01T21:43:21.4801069Z Hosted Compute Agent
+2026-10-01T21:43:21.4801539Z Version: 20260901.588
+2026-10-01T21:43:21.4802146Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T21:43:21.4802733Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T21:43:21.4803408Z Worker ID: {923abe39-ba20-4074-ade7-bebd3adb5609}
+2026-10-01T21:43:21.4804004Z Azure Region: westus3
+2026-10-01T21:43:21.4804497Z ##[endgroup]
+2026-10-01T21:43:21.4805700Z ##[group]Operating System
+2026-10-01T21:43:21.4806210Z Ubuntu
+2026-10-01T21:43:21.4806685Z 24.04.5
+2026-10-01T21:43:21.4807347Z LTS
+2026-10-01T21:43:21.4807775Z ##[endgroup]
+2026-10-01T21:43:21.4808298Z ##[group]Runner Image
+2026-10-01T21:43:21.4808785Z Image: ubuntu-24.04
+2026-10-01T21:43:21.4809514Z Version: 20260927.320.1
+2026-10-01T21:43:21.4810589Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T21:43:21.4811871Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T21:43:21.4812648Z ##[endgroup]
+2026-10-01T21:43:21.4813662Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T21:43:21.4815349Z Actions: read
+2026-10-01T21:43:21.4815954Z Contents: write
+2026-10-01T21:43:21.4816436Z Metadata: read
+2026-10-01T21:43:21.4817139Z ##[endgroup]
+2026-10-01T21:43:21.4818875Z Secret source: Actions
+2026-10-01T21:43:21.4819651Z Cache mode: write
+2026-10-01T21:43:21.4820284Z Prepare workflow directory
+2026-10-01T21:43:21.5078186Z Prepare all required actions
+2026-10-01T21:43:21.5118475Z Getting action download info
+2026-10-01T21:43:21.8254877Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T21:43:21.8972896Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-01T21:43:21.9983142Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-01T21:43:22.7702590Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-01T21:43:23.0322394Z Complete job name: selection
+2026-10-01T21:43:23.0977062Z ##[group]Run actions/checkout@v4
+2026-10-01T21:43:23.0977799Z with:
+2026-10-01T21:43:23.0978165Z   repository: duuu-hub/bb-scanner
+2026-10-01T21:43:23.0981181Z   token: ***
+2026-10-01T21:43:23.0981529Z   ssh-strict: true
+2026-10-01T21:43:23.0981880Z   ssh-user: git
+2026-10-01T21:43:23.0982236Z   persist-credentials: true
+2026-10-01T21:43:23.0982621Z   clean: true
+2026-10-01T21:43:23.0982977Z   sparse-checkout-cone-mode: true
+2026-10-01T21:43:23.0983385Z   fetch-depth: 1
+2026-10-01T21:43:23.0983732Z   fetch-tags: false
+2026-10-01T21:43:23.0984086Z   show-progress: true
+2026-10-01T21:43:23.0984455Z   lfs: false
+2026-10-01T21:43:23.0984804Z   submodules: false
+2026-10-01T21:43:23.0985159Z   set-safe-directory: true
+2026-10-01T21:43:23.0985554Z   allow-unsafe-pr-checkout: false
+2026-10-01T21:43:23.0986164Z ##[endgroup]
+2026-10-01T21:43:23.1817584Z Syncing repository: duuu-hub/bb-scanner
+2026-10-01T21:43:23.1819659Z ##[group]Getting Git version info
+2026-10-01T21:43:23.1820667Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T21:43:23.1821977Z [command]/usr/bin/git version
+2026-10-01T21:43:23.1866033Z git version 2.55.0
+2026-10-01T21:43:23.1881530Z ##[endgroup]
+2026-10-01T21:43:23.1892829Z Temporarily overriding HOME='/home/runner/work/_temp/d21a77a0-85f1-4c13-a0b8-6cc5b90c0ef0' before making global git config changes
+2026-10-01T21:43:23.1894748Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T21:43:23.1896478Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T21:43:23.1934799Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T21:43:23.1941196Z ##[group]Initializing the repository
+2026-10-01T21:43:23.1943397Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T21:43:23.2012871Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T21:43:23.2014172Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T21:43:23.2015342Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T21:43:23.2016587Z hint: call:
+2026-10-01T21:43:23.2017584Z hint:
+2026-10-01T21:43:23.2018231Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T21:43:23.2018989Z hint:
+2026-10-01T21:43:23.2019689Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T21:43:23.2020839Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T21:43:23.2021761Z hint:
+2026-10-01T21:43:23.2022490Z hint: 	git branch -m <name>
+2026-10-01T21:43:23.2023120Z hint:
+2026-10-01T21:43:23.2023907Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T21:43:23.2025214Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-01T21:43:23.2027499Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-01T21:43:23.2060910Z ##[endgroup]
+2026-10-01T21:43:23.2061966Z ##[group]Disabling automatic garbage collection
+2026-10-01T21:43:23.2063433Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T21:43:23.2089850Z ##[endgroup]
+2026-10-01T21:43:23.2090704Z ##[group]Setting up auth
+2026-10-01T21:43:23.2094331Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T21:43:23.2124481Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T21:43:23.2416910Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T21:43:23.2456451Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T21:43:23.2649374Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T21:43:23.2680695Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T21:43:23.2870103Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T21:43:23.3021902Z ##[endgroup]
+2026-10-01T21:43:23.3022553Z ##[group]Fetching the repository
+2026-10-01T21:43:23.3029574Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c049138866f628bb2de891b81a77b133de13359d:refs/remotes/origin/research-premium-absorption-v8
+2026-10-01T21:43:24.9214782Z From https://github.com/duuu-hub/bb-scanner
+2026-10-01T21:43:24.9217240Z  * [new ref]         c049138866f628bb2de891b81a77b133de13359d -> origin/research-premium-absorption-v8
+2026-10-01T21:43:24.9219111Z ##[endgroup]
+2026-10-01T21:43:24.9219733Z ##[group]Determining the checkout info
+2026-10-01T21:43:24.9220362Z ##[endgroup]
+2026-10-01T21:43:24.9224938Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T21:43:24.9269220Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T21:43:24.9296896Z ##[group]Checking out the ref
+2026-10-01T21:43:24.9300304Z [command]/usr/bin/git checkout --progress --force -B research-premium-absorption-v8 refs/remotes/origin/research-premium-absorption-v8
+2026-10-01T21:43:25.1084799Z Switched to a new branch 'research-premium-absorption-v8'
+2026-10-01T21:43:25.1085751Z branch 'research-premium-absorption-v8' set up to track 'origin/research-premium-absorption-v8'.
+2026-10-01T21:43:25.1094777Z ##[endgroup]
+2026-10-01T21:43:25.1133800Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T21:43:25.1157552Z c049138866f628bb2de891b81a77b133de13359d
+2026-10-01T21:43:25.1447172Z ##[group]Run actions/setup-python@v5
+2026-10-01T21:43:25.1447492Z with:
+2026-10-01T21:43:25.1447710Z   python-version: 3.12
+2026-10-01T21:43:25.1447952Z   check-latest: false
+2026-10-01T21:43:25.1449883Z   token: ***
+2026-10-01T21:43:25.1450112Z   update-environment: true
+2026-10-01T21:43:25.1450358Z   allow-prereleases: false
+2026-10-01T21:43:25.1450593Z   freethreaded: false
+2026-10-01T21:43:25.1450821Z ##[endgroup]
+2026-10-01T21:43:25.2501934Z ##[group]Installed versions
+2026-10-01T21:43:25.2573197Z (node:2076) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T21:43:25.2573959Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T21:43:25.2574612Z Successfully set up CPython (3.12.14)
+2026-10-01T21:43:25.2575217Z ##[endgroup]
+2026-10-01T21:43:25.2719068Z ##[group]Run pip install pandas==2.3.3 numpy==2.3.3
+2026-10-01T21:43:25.2719760Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-01T21:43:25.3519457Z shell: /usr/bin/bash -e {0}
+2026-10-01T21:43:25.3519792Z env:
+2026-10-01T21:43:25.3520087Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:25.3520519Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T21:43:25.3520929Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:25.3521300Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:25.3521666Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:25.3522039Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T21:43:25.3522353Z ##[endgroup]
+2026-10-01T21:43:26.1905258Z Collecting pandas==2.3.3
+2026-10-01T21:43:26.2357431Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-01T21:43:26.4189934Z Collecting numpy==2.3.3
+2026-10-01T21:43:26.4220923Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-01T21:43:26.4426171Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-01T21:43:26.4455003Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-01T21:43:26.4706414Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-01T21:43:26.4733988Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-01T21:43:26.4873505Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-01T21:43:26.4901320Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-01T21:43:26.5009808Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-01T21:43:26.5037374Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-01T21:43:26.5098767Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-01T21:43:26.6070517Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 131.4 MB/s  0:00:00
+2026-10-01T21:43:26.6103189Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-01T21:43:26.7254838Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 144.9 MB/s  0:00:00
+2026-10-01T21:43:26.7285216Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-01T21:43:26.7345972Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-01T21:43:26.7407186Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-01T21:43:26.7448576Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-01T21:43:26.8702988Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-01T21:43:32.2946372Z 
+2026-10-01T21:43:32.2957125Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-01T21:43:32.3514761Z ##[group]Run actions/download-artifact@v4
+2026-10-01T21:43:32.3515004Z with:
+2026-10-01T21:43:32.3515190Z   pattern: premium-absorption-v8-dev-[0-7]
+2026-10-01T21:43:32.3515566Z   path: dev-parts
+2026-10-01T21:43:32.3515766Z   merge-multiple: false
+2026-10-01T21:43:32.3515960Z   repository: duuu-hub/bb-scanner
+2026-10-01T21:43:32.3516160Z   run-id: 36929463082
+2026-10-01T21:43:32.3516329Z env:
+2026-10-01T21:43:32.3516538Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:32.3517121Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T21:43:32.3517452Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:32.3517760Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:32.3518059Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:43:32.3518353Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T21:43:32.3518608Z ##[endgroup]
+2026-10-01T21:43:32.4798328Z (node:2113) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T21:43:32.4799249Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T21:43:32.7054102Z Found 9 artifact(s)
+2026-10-01T21:43:32.7055004Z Filtering artifacts by pattern 'premium-absorption-v8-dev-[0-7]'
+2026-10-01T21:43:32.7080689Z Preparing to download the following artifacts:
+2026-10-01T21:43:32.7081803Z - premium-absorption-v8-dev-6 (ID: 11196105973, Size: 217524573, Expected Digest: sha256:989b452cf6a469392ea0fffd3dc416d03b5faf05d97e31050aba52d50c090acd)
+2026-10-01T21:43:32.7082904Z - premium-absorption-v8-dev-3 (ID: 11195552901, Size: 196239748, Expected Digest: sha256:c8416e9845d915767aedb0c92dbfd32d0b158654f424e98c0ed48aec78dbc712)
+2026-10-01T21:43:32.7083712Z - premium-absorption-v8-dev-0 (ID: 11195538156, Size: 270583162, Expected Digest: sha256:47da73f7cac83bb52a8b28e9754caf45dc2d67d82f6c73e65bfc9a21f9a168e8)
+2026-10-01T21:43:32.7084559Z - premium-absorption-v8-dev-1 (ID: 11195158929, Size: 302643287, Expected Digest: sha256:07e6b923ecd9f7d41c9cb7766e037f90365ce0f792c1c6ed0c84dfa788ac5ec5)
+2026-10-01T21:43:32.7085629Z - premium-absorption-v8-dev-5 (ID: 11195114143, Size: 353288055, Expected Digest: sha256:8c4d5cde2d8ee626851df9e2be4864e22147aec23f7ba4bf503ceb5c0e37dd57)
+2026-10-01T21:43:32.7086536Z - premium-absorption-v8-dev-7 (ID: 11195063890, Size: 194965610, Expected Digest: sha256:4839c2145dc88fc830b85e9322c708a47e651d16f70ce973c1f362e9f11f06fa)
+2026-10-01T21:43:32.7087834Z - premium-absorption-v8-dev-2 (ID: 11195019196, Size: 276357799, Expected Digest: sha256:ac6e64e7166c31c321915250649da8e4c9ea142c9b9d757554f5f0d23bbd7211)
+2026-10-01T21:43:32.7089164Z - premium-absorption-v8-dev-4 (ID: 11194998825, Size: 198193762, Expected Digest: sha256:d0c39709e15751dc8c5646c0f5d25ce976735377f0ea82b9abb3733e20027bc3)
+2026-10-01T21:43:32.9313376Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-62682c9d-0eef-580e-8c21-c2d1224c4ede/artifacts/7e850d1258ff5340f1962ea32f0dae7d9713ac6d6cd3ce49008cd6ca8ff4a836.zip
+2026-10-01T21:43:32.9314503Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-3
+2026-10-01T21:43:33.0378076Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-4ba6c175-1bb9-52e7-b792-fbcd1b0cb018/artifacts/8da15bf1d073474a3dc3ca0bcb2449c79684288816db221c55505b399c0dd128.zip
+2026-10-01T21:43:33.0379935Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-5
+2026-10-01T21:43:33.0471603Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-00915142-0c32-5983-8d9f-0d372b736d8b/artifacts/acc2bb07f467e47088f2d4df6089cfbc6b4266054021fc2353bf992bbdce2848.zip
+2026-10-01T21:43:33.0473560Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-4
+2026-10-01T21:43:33.0489803Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-f5c73a6e-2c6e-5ccc-84bb-f6886bcdffe4/artifacts/71d2b53076754f57b24820348041bfaad8d16e3be3f63ae191ab3386f8c2a002.zip
+2026-10-01T21:43:33.0491732Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-2
+2026-10-01T21:43:33.0539257Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-8fc4ac47-2280-56c5-98d2-f15b657c761d/artifacts/3fd4f19404a1a1c71cef179472cd08a91cb9e25c3ae8f65248c90e7f2415ab03.zip
+2026-10-01T21:43:33.0540878Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-7
+2026-10-01T21:43:33.0596404Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-a2dcaddb-8d24-5668-8afa-ff73a786c290/artifacts/0418872c6fb2322931cffbf9a3ddc84230986b204affbd55ee6cf713f491eaa0.zip
+2026-10-01T21:43:33.0597781Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-0
+2026-10-01T21:43:33.0654783Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-80688a58-b3fc-512a-aace-30d630754c54/artifacts/a06e1ed67d2405c43b42678b37a8a648a6e6a64b2e1daf2dee680cf2dc29739d.zip
+2026-10-01T21:43:33.0656609Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-1
+2026-10-01T21:43:33.1123954Z Redirecting to blob download url: https://productionresultssa2.blob.core.windows.net/actions-results/2379ff51-4767-8d92-8cb9-5b9fc769bac2/workflow-job-run-7151e87b-68ce-533b-98b4-5ceb0c5858ff/artifacts/db14a51ac0cd4fc6032803af8a4988f045bb15fe1f8061e0732355ba8c3ddb26.zip
+2026-10-01T21:43:33.1125132Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/premium-absorption-v8-dev-6
+2026-10-01T21:43:33.2204962Z (node:2113) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-01T21:43:40.6168183Z SHA256 digest of downloaded artifact is d0c39709e15751dc8c5646c0f5d25ce976735377f0ea82b9abb3733e20027bc3
+2026-10-01T21:43:40.6169157Z Artifact download completed successfully.
+2026-10-01T21:43:41.0425953Z SHA256 digest of downloaded artifact is 47da73f7cac83bb52a8b28e9754caf45dc2d67d82f6c73e65bfc9a21f9a168e8
+2026-10-01T21:43:41.0426649Z Artifact download completed successfully.
+2026-10-01T21:43:41.9592162Z SHA256 digest of downloaded artifact is c8416e9845d915767aedb0c92dbfd32d0b158654f424e98c0ed48aec78dbc712
+2026-10-01T21:43:41.9606234Z Artifact download completed successfully.
+2026-10-01T21:43:42.1638705Z SHA256 digest of downloaded artifact is 07e6b923ecd9f7d41c9cb7766e037f90365ce0f792c1c6ed0c84dfa788ac5ec5
+2026-10-01T21:43:42.1639527Z Artifact download completed successfully.
+2026-10-01T21:43:42.6903334Z SHA256 digest of downloaded artifact is ac6e64e7166c31c321915250649da8e4c9ea142c9b9d757554f5f0d23bbd7211
+2026-10-01T21:43:42.6923721Z Artifact download completed successfully.
+2026-10-01T21:43:44.0572232Z SHA256 digest of downloaded artifact is 989b452cf6a469392ea0fffd3dc416d03b5faf05d97e31050aba52d50c090acd
+2026-10-01T21:43:44.0582555Z Artifact download completed successfully.
+2026-10-01T21:43:53.9850591Z SHA256 digest of downloaded artifact is 4839c2145dc88fc830b85e9322c708a47e651d16f70ce973c1f362e9f11f06fa
+2026-10-01T21:43:53.9851237Z Artifact download completed successfully.
+2026-10-01T21:44:03.7643186Z SHA256 digest of downloaded artifact is 8c4d5cde2d8ee626851df9e2be4864e22147aec23f7ba4bf503ceb5c0e37dd57
+2026-10-01T21:44:03.7644002Z Artifact download completed successfully.
+2026-10-01T21:44:03.7644662Z Total of 8 artifact(s) downloaded
+2026-10-01T21:44:03.7649360Z Download artifact has finished successfully
+2026-10-01T21:44:03.7900982Z ##[group]Run python scripts/premium_absorption_v8.py select --parts dev-parts --out selected-input
+2026-10-01T21:44:03.7901647Z [36;1mpython scripts/premium_absorption_v8.py select --parts dev-parts --out selected-input[0m
+2026-10-01T21:44:03.7902054Z [36;1mpython - <<'PY'[0m
+2026-10-01T21:44:03.7902290Z [36;1mimport json,os[0m
+2026-10-01T21:44:03.7902620Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-01T21:44:03.7903099Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-01T21:44:03.7903473Z [36;1mPY[0m
+2026-10-01T21:44:03.7960070Z shell: /usr/bin/bash -e {0}
+2026-10-01T21:44:03.7960316Z env:
+2026-10-01T21:44:03.7960578Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:03.7960980Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T21:44:03.7961379Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:03.7961764Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:03.7962120Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:03.7962461Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T21:44:03.7962758Z ##[endgroup]
+2026-10-01T21:44:09.0338311Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 1043507, "known": 1043507, "unavailable": 0, "fraction": 1.0}, "2022": {"eligible": 3315216, "known": 3311382, "unavailable": 3834, "fraction": 0.9988435142687535}, "2023": {"eligible": 3547461, "known": 3539643, "unavailable": 7818, "fraction": 0.9977961702750221}}, "symbols": 256}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-01T21:44:09.1223277Z ##[group]Run python - <<'PY'
+2026-10-01T21:44:09.1223585Z [36;1mpython - <<'PY'[0m
+2026-10-01T21:44:09.1223837Z [36;1mfrom pathlib import Path[0m
+2026-10-01T21:44:09.1224123Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-01T21:44:09.1224578Z [36;1mdest=Path('research/premium-absorption-v8')/('run-'+os.environ['GITHUB_RUN_ID'])/'development'[0m
+2026-10-01T21:44:09.1225034Z [36;1mshutil.copytree('selected-input',dest)[0m
+2026-10-01T21:44:09.1225428Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('scan_meta.json'))):[0m
+2026-10-01T21:44:09.1225875Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_meta.json')[0m
+2026-10-01T21:44:09.1226291Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('exclusions.csv'))):[0m
+2026-10-01T21:44:09.1226719Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_exclusions.csv')[0m
+2026-10-01T21:44:09.1227341Z [36;1m(dest/'provenance.json').write_text(json.dumps(dict([0m
+2026-10-01T21:44:09.1227818Z [36;1m  run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-01T21:44:09.1228233Z [36;1m  source_data_run=36095439671,policy_trials=96,[0m
+2026-10-01T21:44:09.1228625Z [36;1m  sha256={str(p.relative_to(dest)):hashlib.sha256(p.read_bytes()).hexdigest()[0m
+2026-10-01T21:44:09.1229037Z [36;1m          for p in dest.rglob('*') if p.is_file()}),indent=2))[0m
+2026-10-01T21:44:09.1229348Z [36;1mPY[0m
+2026-10-01T21:44:09.1229594Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-01T21:44:09.1229994Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-01T21:44:09.1230371Z [36;1mgit checkout -b "$RESULT_BRANCH"[0m
+2026-10-01T21:44:09.1230718Z [36;1mgit add "research/premium-absorption-v8/run-36929463082"[0m
+2026-10-01T21:44:09.1231133Z [36;1mgit commit -m "Preserve V8 development selection and all policy diagnostics"[0m
+2026-10-01T21:44:09.1231509Z [36;1mgit push origin "$RESULT_BRANCH"[0m
+2026-10-01T21:44:09.1287384Z shell: /usr/bin/bash -e {0}
+2026-10-01T21:44:09.1287642Z env:
+2026-10-01T21:44:09.1287910Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:09.1288317Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T21:44:09.1288712Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:09.1289079Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:09.1289422Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:09.1289770Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T21:44:09.1290152Z   RESULT_BRANCH: research-premium-absorption-v8-dev-36929463082
+2026-10-01T21:44:09.1290481Z ##[endgroup]
+2026-10-01T21:44:09.2321860Z Switched to a new branch 'research-premium-absorption-v8-dev-36929463082'
+2026-10-01T21:44:09.3359922Z [research-premium-absorption-v8-dev-36929463082 b05d753] Preserve V8 development selection and all policy diagnostics
+2026-10-01T21:44:09.3360846Z  35 files changed, 20522 insertions(+)
+2026-10-01T21:44:09.3361381Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-0/independent_candidates.csv.gz
+2026-10-01T21:44:09.3362004Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-0/scan_meta.json
+2026-10-01T21:44:09.3363146Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-1/independent_candidates.csv.gz
+2026-10-01T21:44:09.3364083Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-1/scan_meta.json
+2026-10-01T21:44:09.3365151Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-2/independent_candidates.csv.gz
+2026-10-01T21:44:09.3366242Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-2/scan_meta.json
+2026-10-01T21:44:09.3367623Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-3/independent_candidates.csv.gz
+2026-10-01T21:44:09.3368921Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-3/scan_meta.json
+2026-10-01T21:44:09.3369957Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-4/independent_candidates.csv.gz
+2026-10-01T21:44:09.3370995Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-4/scan_meta.json
+2026-10-01T21:44:09.3372018Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-5/independent_candidates.csv.gz
+2026-10-01T21:44:09.3373055Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-5/scan_meta.json
+2026-10-01T21:44:09.3374082Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-6/independent_candidates.csv.gz
+2026-10-01T21:44:09.3374990Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-6/scan_meta.json
+2026-10-01T21:44:09.3375636Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-7/independent_candidates.csv.gz
+2026-10-01T21:44:09.3376283Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/dev-7/scan_meta.json
+2026-10-01T21:44:09.3377181Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/development_policy_cells.csv
+2026-10-01T21:44:09.3378185Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_0_exclusions.csv
+2026-10-01T21:44:09.3378995Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_0_meta.json
+2026-10-01T21:44:09.3379580Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_1_exclusions.csv
+2026-10-01T21:44:09.3380170Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_1_meta.json
+2026-10-01T21:44:09.3380751Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_2_exclusions.csv
+2026-10-01T21:44:09.3381634Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_2_meta.json
+2026-10-01T21:44:09.3382600Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_3_exclusions.csv
+2026-10-01T21:44:09.3383580Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_3_meta.json
+2026-10-01T21:44:09.3384554Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_4_exclusions.csv
+2026-10-01T21:44:09.3385636Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_4_meta.json
+2026-10-01T21:44:09.3386642Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_5_exclusions.csv
+2026-10-01T21:44:09.3387988Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_5_meta.json
+2026-10-01T21:44:09.3388999Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_6_exclusions.csv
+2026-10-01T21:44:09.3389959Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_6_meta.json
+2026-10-01T21:44:09.3390936Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_7_exclusions.csv
+2026-10-01T21:44:09.3391884Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/full_dev_shard_7_meta.json
+2026-10-01T21:44:09.3392769Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/provenance.json
+2026-10-01T21:44:09.3393633Z  create mode 100644 research/premium-absorption-v8/run-36929463082/development/selection.json
+2026-10-01T21:44:11.8275732Z remote: 
+2026-10-01T21:44:11.8276526Z remote: Create a pull request for 'research-premium-absorption-v8-dev-36929463082' on GitHub by visiting:        
+2026-10-01T21:44:11.8278290Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-premium-absorption-v8-dev-36929463082        
+2026-10-01T21:44:11.8279080Z remote: 
+2026-10-01T21:44:11.8285533Z To https://github.com/duuu-hub/bb-scanner
+2026-10-01T21:44:11.8286361Z  * [new branch]      research-premium-absorption-v8-dev-36929463082 -> research-premium-absorption-v8-dev-36929463082
+2026-10-01T21:44:11.8370218Z ##[group]Run actions/upload-artifact@v4
+2026-10-01T21:44:11.8370496Z with:
+2026-10-01T21:44:11.8370729Z   name: premium-absorption-v8-selected
+2026-10-01T21:44:11.8370999Z   path: selected-input/
+2026-10-01T21:44:11.8371238Z   retention-days: 30
+2026-10-01T21:44:11.8371457Z   compression-level: 0
+2026-10-01T21:44:11.8371681Z   if-no-files-found: warn
+2026-10-01T21:44:11.8371915Z   overwrite: false
+2026-10-01T21:44:11.8372132Z   include-hidden-files: false
+2026-10-01T21:44:11.8372363Z env:
+2026-10-01T21:44:11.8372606Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:11.8372991Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T21:44:11.8373382Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:11.8373729Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:11.8374086Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T21:44:11.8374472Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T21:44:11.8374778Z ##[endgroup]
+2026-10-01T21:44:11.9657925Z (node:2157) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T21:44:11.9658711Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T21:44:11.9777489Z With the provided path, there will be 18 files uploaded
+2026-10-01T21:44:11.9797763Z Artifact name is valid!
+2026-10-01T21:44:11.9798127Z Root directory input is valid!
+2026-10-01T21:44:12.3098852Z Beginning upload of artifact content to blob storage
+2026-10-01T21:44:12.3377575Z (node:2157) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-01T21:44:12.7637828Z Uploaded bytes 264950
+2026-10-01T21:44:12.8268091Z Finished uploading artifact content to blob storage!
+2026-10-01T21:44:12.8268815Z SHA256 digest of uploaded artifact zip is 762b4b28a769ca6b15e98deffbf5d03e813fa35667e33d5c087ed9c0ca59434c
+2026-10-01T21:44:12.8270760Z Finalizing artifact upload
+2026-10-01T21:44:13.1069701Z Artifact premium-absorption-v8-selected.zip successfully finalized. Artifact ID 11195353986
+2026-10-01T21:44:13.1070574Z Artifact premium-absorption-v8-selected has been successfully uploaded! Final size is 264950 bytes. Artifact ID is 11195353986
+2026-10-01T21:44:13.1076230Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36929463082/artifacts/11195353986
+2026-10-01T21:44:13.1217348Z Post job cleanup.
+2026-10-01T21:44:13.2176518Z (node:2170) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T21:44:13.2177391Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T21:44:13.2355902Z Post job cleanup.
+2026-10-01T21:44:13.3071867Z [command]/usr/bin/git version
+2026-10-01T21:44:13.3105785Z git version 2.55.0
+2026-10-01T21:44:13.3132788Z Temporarily overriding HOME='/home/runner/work/_temp/36fa470d-73e5-4801-bab4-3fc77a618bba' before making global git config changes
+2026-10-01T21:44:13.3133975Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T21:44:13.3136701Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T21:44:13.3235575Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T21:44:13.3274979Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T21:44:13.3477665Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T21:44:13.3757338Z http.https://github.com/.extraheader
+2026-10-01T21:44:13.3768722Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T21:44:13.4256476Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T21:44:13.4471879Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T21:44:13.4504279Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T21:44:13.4853898Z Evaluate and set job outputs
+2026-10-01T21:44:13.4858874Z Set output 'selected_count'
+2026-10-01T21:44:13.4860415Z Cleaning up orphan processes
+2026-10-01T21:44:13.5140828Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
