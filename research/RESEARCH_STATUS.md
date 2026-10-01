@@ -7,54 +7,43 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V6 actual run36906530309/code65095198c689b09a3028ec460db8198f819b0bcc completed
-ALL20jobs successfully,130tests plus chronology/invariant smoke.96DEV policies,
-549129original outcomes audited; one frozen candidate, eightaccounts, ZEROstrict
-survivors. Saved8trade/daily/curve accounts independently reconciled. No duplicate.
+V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 completed
+ALL20jobs successfully:158tests/canonical smoke,eightDEV shards,selection,eightGATE
+shards,24accounts and full preservation.96cells/271514resolved outcomes;two frozen
+LONG candidates;ZERO strict survivors. All24saved accounts independently audited.
+Full rejection numbers and evidence are in the completed section below.
 
-V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 started
-onresearch-funding-crowding-v7 after PLAN17e019d3980c4a03cd9f2aa00ebc824c937751ee.
-PhaseV7_VALIDATION_SOURCE_AUDITED_DEV_RUNNING. Actual validatejob110573194084
-PASSED158tests,ALL_CHRONOLOGY_SMOKE_PASS andALL_CANONICAL_INVARIANTS_PASS,
-all confirmed by direct log read. OriginalBTCUSDT2022-01paidfunding archive
-probe PASSED:93records, supplied8hintervals, expected3columns. Downloaded
-actual validation artifact11192687469(18441bytes) SHA matchesActionsdigest;
-raw ZIP/CHECKSUM/parsedNPZ/arrayhashes independently reconciled. OriginalZIP
-SHA22ee19079b620f5c6d820e7d7f8bafa7fde866d89bd664863b8bd527749c12cb.
-Settlement timestamps can be milliseconds offboundary, so laggedasof bar waits
-an additionalbar as preregistered. No schema repair or strategy retuning.
-Auditcommitfd74b9fa8685b2335ed7e27ddbf42efb697ad310, path
-research/funding-crowding-v7/ACTUAL_VALIDATION_AUDIT.json. Marker unchanged;
-researchrun pinnedto4db8code. All8DEVjobs in_progress inactualActions state.
-No completedV7 market-profit result yet;96cell completion not claimed.
-Local fullsmoke had lackednumba; actualCI nowpassed, originalhistory preserved.
-New external observable: unusually signed paid funding plus opposing closed
-price/flow confirmation, inventory-unwind conjecture.16entries/96policies6h/24h.
-Past settled rates available after15min; historical intervals normalized; no
-future/current imputation and no future credit added to comparable PnL.
-Preserve rawfundingZIP/CHECKSUM, parsedarrays/hashes and actuallyused original
-1mZIP/CHECKSUM plus exactslices. Fundingcoverage>=95% separately2022/2023
-required, otherwise SOURCE_COVERAGE_INSUFFICIENT. Same account/cost/risk gates.
-Expected durable branches research-funding-crowding-v7-dev-36922945306,
-research-funding-crowding-v7-results-36922945306(ifselected),
-research-funding-crowding-v7-evidence-36922945306;
-root research/funding-crowding-v7/run-36922945306/. Not yet result claims.
-Cumulative/adaptive search caveats retained; no user daily-goal success.
-
-Calendar reporting audit found older daily files count only completeKSTdates,
-omitting both partialUTC-boundary dates. Original files/history remain intact.
-V6 explicitly counts ALL intersectedKSTdates and flags partial hours; default
-legacy mode retained for reproduction. No fill/risk/cash changes.853DEV dates
-(851full+2partial),367GATE dates(365full+2partial). Old V3 goal rates851/365 are
-complete-only. Reporting-only saved-curve audit now preserved on
-research-calendar-audit-v3, commitd67a388872b0b7b66d69f63d261f1db249e21c3c,
-path research/calendar-audit/v3-36866930929. All8scenario daily products/complete
-old dates match; original30file SHA/bytes match prior durable archive. No market
-rerun or trade/risk/PNL change. Corrected DEV20goal13/853=1.5240%;GATE20goal
-10/367=2.7248%, with both partial dates flagged. V3 remains rejected. V1/V2
-saved-curve corrections pending; do not relabel original complete-only rates.
+V8 premium-basis absorption preregistered BEFORE implementation/outcomes on
+research-premium-absorption-v8, PLAN commitd4ec06ebc2633062535bd5ec418a8470a7b1d8e8.
+PhaseV8_PREREGISTERED_IMPLEMENTING;no V8 code/run/market outcome exists. New
+observable is the CLOSED15m premium-index path and active normalization toward
+zero after an extreme signed dislocation,with price/taker-flow absorption.
+16entries/96policies,6h/24h. This is not a V7 funding threshold adjustment.
+Official monthly premiumIndexKlines ZIP/CHECKSUM path/schema must pass an actual
+source probe. Exact timestamp,no unfinished/current substitution,no missing-month
+carry. Coverage>=95% separately partial2021/2022/2023. The partial2021 price/R/
+date-R selection gate is explicitly adaptive after V7's early-path collapse.
+Implement,test and ACTUALLY execute;no success or daily-goal claim.
 
 ## Completed failures and durable assets
+- V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:
+  all20jobsSUCCESS,158tests/canonical smoke,16entries/96DEVcells/271514resolved
+  outcomes,twofrozenLONG candidates,24accounts,ZEROstrictsurvivors. Funding
+  coverage2022 98.6088%,2023 99.9477% across256symbols. Required DEVunion20
+  guarded111trades,-13.2144%,CAGR-5.8950%,MDD15.0270%,PF.5284,DDhalt;
+  +.7%5/853days. UnguardedDEV20+64.7880% butMDD32.8711%/PF1.1051;40bp
+  -10.3300%,MDD43.6053%. Already-seen2024 least-badALIGN20 guarded-6.7238%,
+  PF.8920,DDhalt;diagnostic20-1.9948%,MDD22.2977%,PF.9822;diagnostic40
+  -13.1389%. Removing guards therefore does not rescue2024. Full24saved
+  fee/funding/PnL/cash/MDD/PF/risk/cap/hold/calendar auditsPASS. Two DEV
+  DATA_GAPpolicy outcomes explicitly excluded;gatechronology exclusionszero.
+  Fullarchive32837files/912814457bytes, evidence branch
+  research-funding-crowding-v7-evidence-36922945306 commit
+  47917fd464cc7be06f90b50c70edab956b7aebb9. DEV/account branches retained.
+  Failure audit/SAVED_ACCOUNT_AUDIT onV8PLANcommit
+  d4ec06ebc2633062535bd5ec418a8470a7b1d8e8,path research/funding-crowding-v7/.
+  Daily target unmet;no2024retuning/no profit claim.
+
 
 - V6 actual run36906530309/code65095198c689b09a3028ec460db8198f819b0bcc:
   16entries/96DEVcells/549129overlapping original outcomes;onecandidate frozen,
