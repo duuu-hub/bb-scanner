@@ -1,0 +1,34 @@
+name: PSAR Pre-Break Death Merge Only
+
+on:
+  push:
+    branches: ['research-rank5-binance-15m-5y']
+    paths: ['.research/psar_prebreak_death_merge_only']
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download completed shard artifacts from source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 36843459000 -R ${{ github.repository }} -p 'psar-prebreak-death-*' -D all
+      - name: Strict merge only
+        run: |
+          python scripts/psar_prebreak_death_merge.py --data all --out psar_prebreak_death_merged.json
+          cat psar_prebreak_death_merged.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-merged
+          path: |
+            psar_prebreak_death_merged.json
+            psar_prebreak_death_merged.csv
+            psar_prebreak_death_merged.md
