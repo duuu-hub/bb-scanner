@@ -135,6 +135,9 @@ def one(t, o, h, l, c, symbol, diagnostics=None):
             diagnostics["invalid_risk"] += 1
             continue
         tp = fill-V[2]*risk
+        if not np.isfinite(tp) or tp <= 0:
+            diagnostics["nonpositive_tp"] += 1
+            continue
         exits = resolve_limits(t, h, l, c, fs, fill, tp, sl,
                                symbol, taker, diagnostics=diagnostics)
         for days, (outcome, price, exit_ts) in exits.items():
@@ -171,6 +174,7 @@ def validate(z, require_all_limits=True):
     assert (time.exit_ts-time.fill_ts == time.limit_days*DAY).all()
     assert (z[["fill", "sl", "exit_price", "atr_open", "signal_open"]]>0).all().all()
     assert (z.sl > z.fill).all()
+    assert (z.tp > 0).all(), "non-orderable TP"
     assert np.allclose(z.sl, z.psar_ref+V[1]*z.atr_open)
     assert np.allclose(z.entry_target, z.psar_ref-V[0]*z.atr_open)
     assert np.allclose(z.tp, z.fill-V[2]*(z.sl-z.fill))

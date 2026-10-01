@@ -1,0 +1,61 @@
+name: PSAR 1D SHORT Time Limit Final Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_timelimit_finalize_run']
+permissions: {contents: read, actions: read}
+defaults:
+  run: {shell: bash}
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Independent execution and portfolio checks
+        run: |
+          python scripts/psar_1d_timelimit_extra_audit.py
+          python scripts/psar_1d_timelimit_portfolio_smoke.py
+      - name: Wait for the existing eight source jobs; no duplicate backtest
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          ready=0
+          for attempt in {1..80}; do
+            gh api repos/${{ github.repository }}/actions/runs/36817548101/jobs?per_page=100 > source_jobs.json
+            state=$(python - <<'PY'
+          import json
+          jobs=json.load(open('source_jobs.json'))['jobs']
+          selected=[j for j in jobs if j['name'].startswith('run (')]
+          if any(j['conclusion'] in ('failure','cancelled','timed_out') for j in selected):print('failed')
+          elif len(selected)==8 and all(j['conclusion']=='success' for j in selected):print('ready')
+          else:print('waiting')
+          PY
+          )
+            echo "source eight-job state: $state"
+            if [ "$state" = ready ]; then ready=1; break; fi
+            if [ "$state" = failed ]; then exit 1; fi
+            sleep 30
+          done
+          test "$ready" = 1
+      - name: Reuse audited source ledgers, prices and historical reference
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p in data baseline
+          gh run download 36817548101 -R ${{ github.repository }} -p 'psar-1d-short-timelimit-[0-7]' -D in
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36710246395 -R ${{ github.repository }} -p 'psar-1d-vol-both-*' -D baseline
+      - name: Remove non-orderable TP and recompute frozen results
+        run: python scripts/psar_1d_timelimit_analyze.py --input in --data data --baseline baseline --out summary | tee result.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-short-timelimit-final-audit
+          if-no-files-found: error
+          path: |
+            summary/
+            result.txt
+            source_jobs.json
