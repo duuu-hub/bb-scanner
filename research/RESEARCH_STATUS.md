@@ -30,17 +30,20 @@ Completed:
   independent MDD reconciliation. New regression passed.
 
 Current:
-- Branch research-shock-confirmation-v3, based on 72b6bfae05d53d147bfe3f618fe0ec4203f2073c.
-- Frozen V3 plan research/shock-confirmation-v3/PLAN.md.
-- 16 confirmed-shock/flow entry hypotheses x 2 holds x 3 exits = 96
-  canonical DEVELOPMENT policy diagnostics, then <=6 selected policies
-  + predeclared union on actual constrained DEV/2024 accounts.
-- Workflow Shock Confirmation V3 Research Cycle triggers only the explicit
-  .research/shock-confirmation-v3-run file on this branch.
-- Look up the branch's workflow run; don't duplicate an active run.
-  Validation must succeed before outcomes can be trusted.
-- Every completed selection/account stage preserves data on a dedicated
-  result branch whose name includes the run ID.
+- V3 completed actual run 36866930929 at 2026-10-01 13:18 UTC; calculations succeeded,
+  ZERO strict account survivors. All eight account arithmetic audits passed;
+  selected-account chronology exclusions: zero.
+- DEV 20bp guarded +0.3490% total over 851 KST days, CAGR 0.1495%, MDD 7.0656%,
+  213 executed trades; 85.90% days had no entry. DEV 40bp -3.2785%.
+- 2024 historical GATE 20bp -2.1032%, PF 0.9050, MDD 5.8065%, 138 trades;
+  40bp -4.3870%, PF 0.8036. Only 10/365 full calendar days reached +0.7%.
+- Full immutable results: research-shock-confirm-v3-results-36866930929,
+  research/shock-confirmation-v3/run-36866930929/accounts.
+- Preserve code 84fe6a116dd21fec405120cfe2c4ad38cf04a65a, all 96 DEV cells on
+  research-shock-confirm-v3-dev-36866930929, source hashes and rejected outcomes.
+- Next economic mechanism under design: compression-to-expansion trend continuation,
+  rather than immediate/confirmed shock fading. Not yet executed or selected.
+- Current chat is actively implementing; obey the central interactive lease.
 
 Data boundaries: DEV 2021-09 through 2023; 2024 historically seen selection/
 gate, 2025-2026 previously seen comparison ONLY, not clean holdout. Reserved
