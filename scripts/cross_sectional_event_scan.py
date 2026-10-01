@@ -14,7 +14,7 @@ for lb in LBS:
     # de-cluster: after accepted event, block same symbol for full holding window
     gap=CDS[hold]*15*60*1000; keep=[]; last={}
     for i,(s,t) in enumerate(zip(a.symbol.values,a.ts.values)):
-     if t-last.get(s,-10**30)>=gap: keep.append(i); last[s]=t
+     if t-last.get(s, t-gap-1)>=gap: keep.append(i); last[s]=t
     b=a.iloc[keep]
     for split in ("TRAIN","HOLDOUT"):
      v=b.loc[b.split==split,"f_"+hold].dropna()
