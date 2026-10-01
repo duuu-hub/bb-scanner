@@ -338,10 +338,16 @@ def main():
     ap.add_argument("--raw", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--restrict-to-raw-symbols", action="store_true")
+    ap.add_argument("--events-in", default="")
     a = ap.parse_args()
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
 
-    events, data_meta = build_signal_events(a.parts)
+    if a.events_in:
+        events=pd.read_csv(a.events_in,compression="infer")
+        events["ts"]=events["ts"].astype("int64"); events["entry_ts"]=events["entry_ts"].astype("int64")
+        data_meta={"source":"prebuilt_events","path":a.events_in}
+    else:
+        events, data_meta = build_signal_events(a.parts)
     print("EVENT_BASE_ALL", len(events), "unique", len(events[["symbol","entry_ts"]].drop_duplicates()), flush=True)
     if a.restrict_to_raw_symbols:
         raw_syms={sym_from_path(p) for p in glob.glob(os.path.join(a.raw, "**", "*USDT.csv.gz"), recursive=True)}
