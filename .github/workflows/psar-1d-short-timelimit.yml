@@ -5,7 +5,28 @@ on:
     paths: ['.research/psar_1d_short_timelimit_run']
 permissions: {contents: read, actions: read}
 jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: |
+          python -m py_compile scripts/psar_1d_short_timelimit.py
+          python scripts/psar_1d_short_timelimit.py --data data --shard 0 --shards 64 --out smoke.csv.gz
+          python - <<'PY'
+          import pandas as pd
+          x=pd.read_csv('smoke.csv.gz')
+          assert set(x.limit_days)=={1,3,7,14}
+          assert (x.exit_ts>x.fill_ts).all()
+          print('SMOKE_OK',len(x))
+          PY
   run:
+    needs: smoke
     strategy:
       fail-fast: false
       matrix: {shard: [0,1,2,3,4,5,6,7]}
