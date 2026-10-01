@@ -1,6 +1,6 @@
 import argparse,glob,json,os,re
 import numpy as np,pandas as pd
-BURN=100; H=(1,2,3,4,6,8,12)
+BURN=100; H=(1,2,3,4,5,6,7,8,12)
 def sym(p):
  b=os.path.basename(p); s=b[:-7].upper()
  if not b.endswith(".csv.gz") or not re.fullmatch(r"[A-Z0-9]+USDT",s): raise RuntimeError("filename")
