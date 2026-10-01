@@ -7,31 +7,20 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V5 run36902157396 actually completed eightDEVshards/96cells with ZERO seeds.
-Original99,382 saved observations audited; full minute/data/validation evidence
-preserved. No GATE/accounts ran. No active V5 execution to duplicate.
+V6 actual run36906530309/code65095198c689b09a3028ec460db8198f819b0bcc completed
+ALL20jobs successfully,130tests plus chronology/invariant smoke.96DEV policies,
+549129original outcomes audited; one frozen candidate, eightaccounts, ZEROstrict
+survivors. Saved8trade/daily/curve accounts independently reconciled. No duplicate.
 
-V6 preregistered on research-btc-factor-lag-v6, PLAN commit23589bd985b56934b4698710896f610be168740c.
-Actual code65095198c689b09a3028ec460db8198f819b0bcc; run36906530309:
-https://github.com/duuu-hub/bb-scanner/actions/runs/36906530309
-Phase V6_ACCOUNT_VALIDATION_RUNNING. Actual validate job110518359010 SUCCESS:
-130CItests, ALL_CHRONOLOGY_SMOKE_PASS and ALL_CANONICAL_INVARIANTS_PASS verified
-from actual logs. All8DEV and8GATE shards succeeded.96DEV cells read;549,129overlapping
-outcomes,12net40PRICE-positive and15R-positive cells. One candidate frozen before
-GATE: FACTOR_S+1_L4_G2_PRICE_ONLY__H96__TP2 (long,1hBTC impulse,2%loglag,24h,TP2).
-Raw5342N/219coins,mean net40+13.6047bp/PF1.0860; worst-year equal-active-date R
--0.33153. Dependence concern retained, not hidden/tuned away. Actual account job
-110522130326 is running; all8risk/cost scenarios and full calendar dates pending.
-No account/daily-target success claim.
-Actual sampled logs: shard6=63,210outcomes, shard4=52,764outcomes/6exclusions.
-Source catalogue and previous CSV hashes verified in actual DEV job logs.
-These overlapping policy observations are not account trades/profit. No duplicate.
-New conjecture: BTC-factor-sensitive coins underreacting to a BTC impulse may
-catch up after their own closed15m direction/volume confirmation.672 matched
-prior returns estimate beta/R2 ending BEFORE the1h/4h impulse.16entry settings,
-96policycells,6h/24hhold. Adaptive hypothesis, not independent discovery.
-Implement/test then trigger only its own workflow marker. Never claim execution
-without actual Actions logs, never silently retune after results.
+V7 preregistered onresearch-funding-crowding-v7, PLAN commit17e019d3980c4a03cd9f2aa00ebc824c937751ee.
+Current phaseV7_PREREGISTERED_IMPLEMENTING; no V7 run or market outcome exists.
+New external observable: unusually signed paid funding plus opposing closed
+price/flow confirmation, inventory-unwind hypothesis.16entries/96policies6h/24h.
+Funding is a conjectural crowding proxy, not proof of liquidation or OI. Past
+settled rates available only after15min; historical intervals normalized; no
+future/current imputation and no future credit added to comparable PnL. Verify
+original monthly ZIP/CHECKSUM, preserve rawbytes andsource coverage before DEV.
+Cumulative/adaptive search caveats retained. Implement/test/ACTUALLYexecute.
 
 Calendar reporting audit found older daily files count only completeKSTdates,
 omitting both partialUTC-boundary dates. Original files/history remain intact.
@@ -48,6 +37,25 @@ saved-curve corrections pending; do not relabel original complete-only rates.
 
 ## Completed failures and durable assets
 
+- V6 actual run36906530309/code65095198c689b09a3028ec460db8198f819b0bcc:
+  16entries/96DEVcells/549129overlapping original outcomes;onecandidate frozen,
+  eightactualaccounts;ZEROstrictsurvivors.130tests/canonical smoke and20jobsSUCCESS.
+  DEV20guarded1278fills,+10.2064%total,CAGR4.2543%,MDD10.6651%,PF1.0536;
+  DEV40guarded-10.8515%,DD15halt. Seen2024gate20-12.9077%,MDD15.0191%,PF.7856;
+  gate40-13.6266%,DD15halt. Goal+.7%64/853DEV(7.5029%),15/367GATE(4.0872%);
+  +2%15/853 and2/367. Allinactive/posthalt/partialedgeKSTdates count. Targetunmet.
+  All8savedPnL/fees/funding/cash/DD/PF/risk/hold/calendar products checked.
+  Max114signals/same timestamp;tradeR+.05274 butequal-active-dateR-.21406.
+  Only23.92%DEV20rawintents executed. Disablingguards still2024lossandDD>20%.
+  Fullarchive2238files/70,349,092bytes;manifestgit sizesmatch;1888downloadedoriginal
+  DEV/accountfiles SHAverified;1809DEVminute slices/1354official ZIP checksums.
+  Selectedchronologyexclusionszero. Full2028minute slices retainedDEV+GATE.
+  DEVbranch research-factor-lag-v6-dev-36906530309;
+  accounts research-factor-lag-v6-results-36906530309;
+  complete research-factor-lag-v6-evidence-36906530309,
+  root research/btc-factor-lag-v6/run-36906530309/.
+  Failure/audits preservedonV7plancommit17e019d3980c4a03cd9f2aa00ebc824c937751ee,
+  path research/btc-factor-lag-v6/. No marketrerun, no2024retune, no successclaim.
 - V5 actual run36902157396/code5b26f467543d6724461e8f10557c1e8839075f02:
   16entries/96cells,99tests plus canonical smoke succeeded;ZEROseeds,gate/accounts
   skipped.99,382overlapping outcomes read/reconciled to all96original cell means.
@@ -142,7 +150,7 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Implement/test frozen V6 then execute its actual workflow and inspect logs/results.
+Implement/test frozen V7 funding source and causal rules, execute actual workflow, inspect logs/results.
 If failed, diagnose numerically and preregister/implement/validate/execute the next
 economic mechanism. If provisional survivor, freeze before neighbours/stress and
 fresh forward validation; report target attainment on ALL calendar dates.
