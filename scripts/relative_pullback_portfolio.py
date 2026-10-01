@@ -136,6 +136,7 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
             tr = active[sym]["trade"]
             close(sym, xt, tr["exit"], tr["reason"])
         eq = equity(ts)
+        pre_entry_eq = eq
         today = korea_day(ts)
         if today != day:
             if ts - day_begin == DAY and (day_begin + KOREA_OFFSET) % DAY == 0:
@@ -220,7 +221,7 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
             concurrent_sum += len(active)
             exposure_sum += exposure
         day_active |= bool(active)
-        curve.append({"time": ts, "equity": eq, "positions": len(active), "gross_pct": exposure * 100,
+        curve.append({"time": ts, "equity": eq, "equity_pre_entry": pre_entry_eq, "positions": len(active), "gross_pct": exposure * 100,
                       "reduced": reduced, "halted": halted})
     if active:
         raise ValueError("unclosed position at split end")

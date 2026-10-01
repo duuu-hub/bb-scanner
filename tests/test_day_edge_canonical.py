@@ -99,4 +99,18 @@ class CanonicalTests(unittest.TestCase):
                 s.accounts(Path(d),Path(d),Path(d)/'out',Path(d)/'selection.json',
                            ('DEV','GATE'),8)
 
+    def test_curve_preserves_peak_before_new_entry_cost(self):
+        p=raw(n=10)
+        r1=dict(symbol='A',entry_time=0,exit_time=s.BAR,entry=100.,exit=110.,sl=98.,
+                tp=110.,side=1,score=1.,reason='TP')
+        r2=dict(symbol='B',entry_time=s.BAR,exit_time=4*s.BAR,entry=100.,exit=100.,sl=98.,
+                tp=110.,side=1,score=1.,reason='TIME')
+        market=a.Market({'A':p,'B':raw(n=10)})
+        result,_,_,curve=a.simulate(pd.DataFrame([r1,r2]),market,0,5*s.BAR,20,False)
+        boundary=curve[curve.time==s.BAR].iloc[0]
+        self.assertGreater(boundary.equity_pre_entry,boundary.equity)
+        observed=np.r_[1.,np.column_stack([curve.equity_pre_entry,curve.equity]).ravel()]
+        peak=np.maximum.accumulate(observed)
+        self.assertAlmostEqual(((peak-observed)/peak).max()*100,result['mdd_15m_pct'])
+
 if __name__=='__main__':unittest.main()

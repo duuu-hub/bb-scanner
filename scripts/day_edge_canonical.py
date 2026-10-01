@@ -215,8 +215,9 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
                     curve.to_csv(folder/'curve.csv.gz',index=False,compression='gzip')
                     pn=tr.net_pnl.to_numpy() if len(tr) else np.array([])
                     assert np.isclose(pn.sum(),r['net_return_pct']/100,atol=1e-10)
-                    peak=curve.equity.cummax().clip(lower=1.)
-                    assert np.isclose(((peak-curve.equity)/peak).max()*100,r['mdd_15m_pct'])
+                    observed=np.r_[1.,np.column_stack([curve.equity_pre_entry,curve.equity]).ravel()]
+                    peak=np.maximum.accumulate(observed)
+                    assert np.isclose(((peak-observed)/peak).max()*100,r['mdd_15m_pct'])
                     if len(tr):
                         assert (tr.hold_min<=1440).all()
                         assert (tr.notional/tr.entry_equity<=.300000001).all()
