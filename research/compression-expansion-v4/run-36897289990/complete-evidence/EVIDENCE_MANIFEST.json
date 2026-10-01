@@ -6,8 +6,8 @@
     {
       "original_path": "DIAGNOSTIC_FAILURE_DECOMPOSITION.csv",
       "file": "files/DIAGNOSTIC_FAILURE_DECOMPOSITION.csv",
-      "bytes": 14663,
-      "sha256": "375823224c139f304e59f29adc7277e8ffcaafa361b51971d6dfcc37e9d22f0e"
+      "bytes": 15902,
+      "sha256": "c4cd64bc9300d014f5369503fc7c1c514c7435dcdae19d2ed44d7fcc27e4e370"
     },
     {
       "original_path": "DIAGNOSTIC_SCOPE.json",
@@ -532,5 +532,18 @@
       "sha256": "0476ccad6ce43f94a10e23b0dd49225407287fc1ce3b7918a7b720f3eea80c82"
     }
   ],
-  "note": "Concatenate listed chunks in order if split; verify full original SHA256. No failed outcomes removed."
+  "note": "Concatenate listed chunks in order if split; verify full original SHA256. No failed outcomes removed.",
+  "metric_correction": {
+    "original_run": 36897289990,
+    "original_evidence_commit": "5d35f102a63a152a318501a83cb61c2a94c836ae",
+    "original_diagnostic_sha256": "375823224c139f304e59f29adc7277e8ffcaafa361b51971d6dfcc37e9d22f0e",
+    "corrected_diagnostic_sha256": "c4cd64bc9300d014f5369503fc7c1c514c7435dcdae19d2ed44d7fcc27e4e370",
+    "corrected_field": "timeout_pct",
+    "original_error": "The derived diagnostic checked reason TIMEOUT, while the frozen canonical engine records TIME or SPLIT_END.",
+    "correction": "100 - TP_pct - SL_pct. Resolved original canonical reasons are exactly TP, SL, TIME, SPLIT_END; all 96 rows checked in [0,100].",
+    "market_data_or_outcomes_rerun": false,
+    "raw_ledgers_modified": false,
+    "conclusion_changed": false,
+    "corrected_at": "2026-10-01T17:46:12.039Z"
+  }
 }
