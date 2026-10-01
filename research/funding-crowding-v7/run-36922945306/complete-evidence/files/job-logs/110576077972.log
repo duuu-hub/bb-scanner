@@ -1,0 +1,364 @@
+﻿2026-10-01T20:44:47.3918027Z Current runner version: '2.337.0'
+2026-10-01T20:44:47.3954907Z ##[group]Runner Image Provisioner
+2026-10-01T20:44:47.3956477Z Hosted Compute Agent
+2026-10-01T20:44:47.3957652Z Version: 20260901.588
+2026-10-01T20:44:47.3958810Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T20:44:47.3960389Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T20:44:47.3961703Z Worker ID: {e845b3c6-c605-4b1e-825a-11ddb901c7a5}
+2026-10-01T20:44:47.3963100Z Azure Region: eastus2
+2026-10-01T20:44:47.3964449Z ##[endgroup]
+2026-10-01T20:44:47.3967223Z ##[group]Operating System
+2026-10-01T20:44:47.3968454Z Ubuntu
+2026-10-01T20:44:47.3969427Z 24.04.5
+2026-10-01T20:44:47.3970377Z LTS
+2026-10-01T20:44:47.3971592Z ##[endgroup]
+2026-10-01T20:44:47.3972578Z ##[group]Runner Image
+2026-10-01T20:44:47.3974623Z Image: ubuntu-24.04
+2026-10-01T20:44:47.3975728Z Version: 20260927.320.1
+2026-10-01T20:44:47.3978129Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T20:44:47.3981045Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T20:44:47.3982907Z ##[endgroup]
+2026-10-01T20:44:47.3985310Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T20:44:47.3988758Z Actions: read
+2026-10-01T20:44:47.3989835Z Contents: write
+2026-10-01T20:44:47.3990926Z Metadata: read
+2026-10-01T20:44:47.3992100Z ##[endgroup]
+2026-10-01T20:44:47.3995365Z Secret source: Actions
+2026-10-01T20:44:47.3997100Z Cache mode: write
+2026-10-01T20:44:47.3998872Z Prepare workflow directory
+2026-10-01T20:44:47.4477904Z Prepare all required actions
+2026-10-01T20:44:47.4530292Z Getting action download info
+2026-10-01T20:44:47.7011068Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T20:44:47.7931669Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-01T20:44:47.8728461Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-01T20:44:48.0776598Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-01T20:44:48.2968199Z Complete job name: selection
+2026-10-01T20:44:48.3870631Z ##[group]Run actions/checkout@v4
+2026-10-01T20:44:48.3871530Z with:
+2026-10-01T20:44:48.3871981Z   repository: duuu-hub/bb-scanner
+2026-10-01T20:44:48.3876134Z   token: ***
+2026-10-01T20:44:48.3876583Z   ssh-strict: true
+2026-10-01T20:44:48.3877022Z   ssh-user: git
+2026-10-01T20:44:48.3877479Z   persist-credentials: true
+2026-10-01T20:44:48.3877972Z   clean: true
+2026-10-01T20:44:48.3878419Z   sparse-checkout-cone-mode: true
+2026-10-01T20:44:48.3878954Z   fetch-depth: 1
+2026-10-01T20:44:48.3879397Z   fetch-tags: false
+2026-10-01T20:44:48.3879848Z   show-progress: true
+2026-10-01T20:44:48.3880303Z   lfs: false
+2026-10-01T20:44:48.3880711Z   submodules: false
+2026-10-01T20:44:48.3881159Z   set-safe-directory: true
+2026-10-01T20:44:48.3881672Z   allow-unsafe-pr-checkout: false
+2026-10-01T20:44:48.3882553Z ##[endgroup]
+2026-10-01T20:44:48.5032041Z Syncing repository: duuu-hub/bb-scanner
+2026-10-01T20:44:48.5035218Z ##[group]Getting Git version info
+2026-10-01T20:44:48.5036625Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T20:44:48.5038624Z [command]/usr/bin/git version
+2026-10-01T20:44:48.5185293Z git version 2.55.0
+2026-10-01T20:44:48.5188901Z ##[endgroup]
+2026-10-01T20:44:48.5211608Z Temporarily overriding HOME='/home/runner/work/_temp/6775ebdd-c054-4f65-a095-e6fcfcf17250' before making global git config changes
+2026-10-01T20:44:48.5214248Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T20:44:48.5216171Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T20:44:48.5263124Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T20:44:48.5269161Z ##[group]Initializing the repository
+2026-10-01T20:44:48.5274645Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T20:44:48.5406432Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T20:44:48.5408004Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T20:44:48.5409405Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T20:44:48.5410552Z hint: call:
+2026-10-01T20:44:48.5411641Z hint:
+2026-10-01T20:44:48.5412455Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T20:44:48.5413575Z hint:
+2026-10-01T20:44:48.5414992Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T20:44:48.5416466Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T20:44:48.5417399Z hint:
+2026-10-01T20:44:48.5417900Z hint: 	git branch -m <name>
+2026-10-01T20:44:48.5418513Z hint:
+2026-10-01T20:44:48.5419280Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T20:44:48.5420576Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-01T20:44:48.5424222Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-01T20:44:48.5478519Z ##[endgroup]
+2026-10-01T20:44:48.5479695Z ##[group]Disabling automatic garbage collection
+2026-10-01T20:44:48.5482532Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T20:44:48.5517187Z ##[endgroup]
+2026-10-01T20:44:48.5518064Z ##[group]Setting up auth
+2026-10-01T20:44:48.5526364Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T20:44:48.5561441Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T20:44:48.5964991Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T20:44:48.6006923Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T20:44:48.6251487Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T20:44:48.6288872Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T20:44:48.6521033Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T20:44:48.6561413Z ##[endgroup]
+2026-10-01T20:44:48.6562282Z ##[group]Fetching the repository
+2026-10-01T20:44:48.6572002Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:refs/remotes/origin/research-funding-crowding-v7
+2026-10-01T20:44:49.5199720Z From https://github.com/duuu-hub/bb-scanner
+2026-10-01T20:44:49.5201445Z  * [new ref]         4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 -> origin/research-funding-crowding-v7
+2026-10-01T20:44:49.5210339Z ##[endgroup]
+2026-10-01T20:44:49.5211498Z ##[group]Determining the checkout info
+2026-10-01T20:44:49.5213345Z ##[endgroup]
+2026-10-01T20:44:49.5219632Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T20:44:49.5274661Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T20:44:49.5311293Z ##[group]Checking out the ref
+2026-10-01T20:44:49.5316994Z [command]/usr/bin/git checkout --progress --force -B research-funding-crowding-v7 refs/remotes/origin/research-funding-crowding-v7
+2026-10-01T20:44:49.7470254Z Switched to a new branch 'research-funding-crowding-v7'
+2026-10-01T20:44:49.7475593Z branch 'research-funding-crowding-v7' set up to track 'origin/research-funding-crowding-v7'.
+2026-10-01T20:44:49.7488465Z ##[endgroup]
+2026-10-01T20:44:49.7542432Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T20:44:49.7570147Z 4db8b13a5ea64f3aef610609c994b2fe2cd0fc18
+2026-10-01T20:44:49.7929320Z ##[group]Run actions/setup-python@v5
+2026-10-01T20:44:49.7929895Z with:
+2026-10-01T20:44:49.7930300Z   python-version: 3.12
+2026-10-01T20:44:49.7930740Z   check-latest: false
+2026-10-01T20:44:49.7934010Z   token: ***
+2026-10-01T20:44:49.7934488Z   update-environment: true
+2026-10-01T20:44:49.7934954Z   allow-prereleases: false
+2026-10-01T20:44:49.7935394Z   freethreaded: false
+2026-10-01T20:44:49.7935821Z ##[endgroup]
+2026-10-01T20:44:49.9262527Z ##[group]Installed versions
+2026-10-01T20:44:49.9347529Z (node:2299) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T20:44:49.9349047Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T20:44:49.9365646Z Successfully set up CPython (3.12.14)
+2026-10-01T20:44:49.9366934Z ##[endgroup]
+2026-10-01T20:44:49.9562282Z ##[group]Run pip install pandas==2.3.3 numpy==2.3.3
+2026-10-01T20:44:49.9563010Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-01T20:44:49.9878346Z shell: /usr/bin/bash -e {0}
+2026-10-01T20:44:49.9878888Z env:
+2026-10-01T20:44:49.9879369Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:49.9880050Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T20:44:49.9880737Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:49.9881361Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:49.9881962Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:49.9882558Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T20:44:49.9883087Z ##[endgroup]
+2026-10-01T20:44:51.0080247Z Collecting pandas==2.3.3
+2026-10-01T20:44:51.0730752Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-01T20:44:51.3365881Z Collecting numpy==2.3.3
+2026-10-01T20:44:51.3458040Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-01T20:44:51.3791876Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-01T20:44:51.3867101Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-01T20:44:51.4268647Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-01T20:44:51.4344862Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-01T20:44:51.4611463Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-01T20:44:51.4686082Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-01T20:44:51.5006787Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-01T20:44:51.5083640Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-01T20:44:51.5356958Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-01T20:44:51.8038615Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 48.9 MB/s  0:00:00
+2026-10-01T20:44:51.8157530Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-01T20:44:51.9231461Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 156.5 MB/s  0:00:00
+2026-10-01T20:44:51.9315823Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-01T20:44:51.9410736Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-01T20:44:51.9511265Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-01T20:44:51.9606110Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-01T20:44:52.1248424Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-01T20:44:59.1910336Z 
+2026-10-01T20:44:59.1934883Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-01T20:44:59.2595271Z ##[group]Run actions/download-artifact@v4
+2026-10-01T20:44:59.2595606Z with:
+2026-10-01T20:44:59.2595834Z   pattern: funding-crowding-v7-dev-[0-7]
+2026-10-01T20:44:59.2596361Z   path: dev-parts
+2026-10-01T20:44:59.2596588Z   merge-multiple: false
+2026-10-01T20:44:59.2596829Z   repository: duuu-hub/bb-scanner
+2026-10-01T20:44:59.2597101Z   run-id: 36922945306
+2026-10-01T20:44:59.2597308Z env:
+2026-10-01T20:44:59.2597595Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:59.2598033Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T20:44:59.2598470Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:59.2598854Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:59.2599243Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:44:59.2599650Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T20:44:59.2599981Z ##[endgroup]
+2026-10-01T20:44:59.4231545Z (node:2334) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T20:44:59.4232439Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T20:44:59.5213278Z Found 9 artifact(s)
+2026-10-01T20:44:59.5214942Z Filtering artifacts by pattern 'funding-crowding-v7-dev-[0-7]'
+2026-10-01T20:44:59.5242377Z Preparing to download the following artifacts:
+2026-10-01T20:44:59.5244011Z - funding-crowding-v7-dev-2 (ID: 11193146099, Size: 94197108, Expected Digest: sha256:aaa23ee0d20f71f07d839322f2c44f3460197fa1ee32546e36cab4cd3a409d5e)
+2026-10-01T20:44:59.5245987Z - funding-crowding-v7-dev-7 (ID: 11193067048, Size: 80177368, Expected Digest: sha256:36a78a67576651732a62e8d604836f2972a31f9e9ce758e8b4127104812c7058)
+2026-10-01T20:44:59.5247949Z - funding-crowding-v7-dev-1 (ID: 11193042278, Size: 130528900, Expected Digest: sha256:9f84a1966d51cc91ec9e25a65679d009428b05652a612e34e786217e9e8c3a02)
+2026-10-01T20:44:59.5250231Z - funding-crowding-v7-dev-6 (ID: 11192827877, Size: 107956800, Expected Digest: sha256:884e9199daf7a09745b25ff9c1350de078d9e23ec772d37d5f56a1a444286ab2)
+2026-10-01T20:44:59.5252561Z - funding-crowding-v7-dev-4 (ID: 11192707915, Size: 91387494, Expected Digest: sha256:fc8312e4d6a13d83bd263bfe1c65410e28f72e52565ef6022fc7f832794cdf00)
+2026-10-01T20:44:59.5255170Z - funding-crowding-v7-dev-5 (ID: 11192283927, Size: 176969354, Expected Digest: sha256:79fe591badd73477805f9652caabda023505e9c620f7a5b04afd67dcf35919ae)
+2026-10-01T20:44:59.5257521Z - funding-crowding-v7-dev-3 (ID: 11192104616, Size: 78678580, Expected Digest: sha256:15ada2488cc1ec895a2385634fed6bbafc073e669cfec2a130bf23f2dda8e4e0)
+2026-10-01T20:44:59.5261638Z - funding-crowding-v7-dev-0 (ID: 11191774891, Size: 96572456, Expected Digest: sha256:c097aa7ce6dbb78b88c156b7221f7a508cb5d858ce1363d55408b8b4b5ce05ed)
+2026-10-01T20:44:59.6608086Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-5c461d68-2cb3-5107-834c-73441597a492/artifacts/8a2a6ee4cca814264df7b15526c58453feda68c7f021ab4343a266f85eb9dca8.zip
+2026-10-01T20:44:59.6610002Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-2
+2026-10-01T20:44:59.6947719Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-e96ea99a-a711-5e7d-a16a-bc975be82c9a/artifacts/368c3c7b485185d12e5fbeb76c1ed00e8422c54d375d634ff45d4821a4cde552.zip
+2026-10-01T20:44:59.6949228Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-6
+2026-10-01T20:44:59.7141468Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-68d18f80-8950-51a7-be90-ad004069df5f/artifacts/8aaba35a8aad004990baf11ef39a59d1f8c872a17425f56594ce06726daa9bcc.zip
+2026-10-01T20:44:59.7144745Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-1
+2026-10-01T20:44:59.7171982Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-e09435c9-2e62-57f2-9350-4c0361e63ff8/artifacts/101b842054ced32f544279a7732a56cabbd97eed8ac01e81ddd0ed4a99dfaf2f.zip
+2026-10-01T20:44:59.7175386Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-3
+2026-10-01T20:44:59.7217906Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-01850f83-b262-500e-8b30-72025d5c2188/artifacts/8aca69e302f1911d86d42efbffd2a191b3e8c1ac18335bacfe305ca803f37014.zip
+2026-10-01T20:44:59.7220739Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-5
+2026-10-01T20:44:59.7240503Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-5d465262-f761-58d3-b5ce-9752d05d46cf/artifacts/b21d3772f1db0ca8d7889513dabb39ac4eb48c504cc41dd7173cbda587891f91.zip
+2026-10-01T20:44:59.7243916Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-0
+2026-10-01T20:44:59.7465360Z (node:2334) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-01T20:45:01.6574096Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-774054aa-a7cb-5721-88da-4bcefad9ecea/artifacts/d7558b79135596bd962f0bd38521d33b0df3276c412b7287107be41c8d01f0c9.zip
+2026-10-01T20:45:01.6576699Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-7
+2026-10-01T20:45:01.6587768Z Redirecting to blob download url: https://productionresultssa11.blob.core.windows.net/actions-results/4927ab7e-fabf-8c9c-8a25-16dcd9e789e5/workflow-job-run-d9585763-2331-58b9-8609-2963f29bc8ac/artifacts/f8a283a0d61eb4caa5666eabd5d997692d524c8ddd7a846010aa64cf6b597010.zip
+2026-10-01T20:45:01.6590410Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/funding-crowding-v7-dev-4
+2026-10-01T20:45:05.2407267Z SHA256 digest of downloaded artifact is 15ada2488cc1ec895a2385634fed6bbafc073e669cfec2a130bf23f2dda8e4e0
+2026-10-01T20:45:05.2408832Z Artifact download completed successfully.
+2026-10-01T20:45:05.4054450Z SHA256 digest of downloaded artifact is 36a78a67576651732a62e8d604836f2972a31f9e9ce758e8b4127104812c7058
+2026-10-01T20:45:05.4056170Z Artifact download completed successfully.
+2026-10-01T20:45:05.8175065Z SHA256 digest of downloaded artifact is fc8312e4d6a13d83bd263bfe1c65410e28f72e52565ef6022fc7f832794cdf00
+2026-10-01T20:45:05.8176170Z Artifact download completed successfully.
+2026-10-01T20:45:05.8189016Z SHA256 digest of downloaded artifact is aaa23ee0d20f71f07d839322f2c44f3460197fa1ee32546e36cab4cd3a409d5e
+2026-10-01T20:45:05.8190049Z Artifact download completed successfully.
+2026-10-01T20:45:05.8870059Z SHA256 digest of downloaded artifact is c097aa7ce6dbb78b88c156b7221f7a508cb5d858ce1363d55408b8b4b5ce05ed
+2026-10-01T20:45:05.8871493Z Artifact download completed successfully.
+2026-10-01T20:45:06.0504596Z SHA256 digest of downloaded artifact is 884e9199daf7a09745b25ff9c1350de078d9e23ec772d37d5f56a1a444286ab2
+2026-10-01T20:45:06.0506088Z Artifact download completed successfully.
+2026-10-01T20:45:06.3848622Z SHA256 digest of downloaded artifact is 9f84a1966d51cc91ec9e25a65679d009428b05652a612e34e786217e9e8c3a02
+2026-10-01T20:45:06.3849660Z Artifact download completed successfully.
+2026-10-01T20:45:07.9225795Z SHA256 digest of downloaded artifact is 79fe591badd73477805f9652caabda023505e9c620f7a5b04afd67dcf35919ae
+2026-10-01T20:45:07.9227093Z Artifact download completed successfully.
+2026-10-01T20:45:07.9227772Z Total of 8 artifact(s) downloaded
+2026-10-01T20:45:07.9233793Z Download artifact has finished successfully
+2026-10-01T20:45:07.9634926Z ##[group]Run python scripts/funding_crowding_v7.py select --parts dev-parts --out selected-input
+2026-10-01T20:45:07.9635799Z [36;1mpython scripts/funding_crowding_v7.py select --parts dev-parts --out selected-input[0m
+2026-10-01T20:45:07.9636328Z [36;1mpython - <<'PY'[0m
+2026-10-01T20:45:07.9636609Z [36;1mimport json,os[0m
+2026-10-01T20:45:07.9637014Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-01T20:45:07.9637628Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-01T20:45:07.9638101Z [36;1mPY[0m
+2026-10-01T20:45:07.9704350Z shell: /usr/bin/bash -e {0}
+2026-10-01T20:45:07.9704663Z env:
+2026-10-01T20:45:07.9704995Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:07.9705515Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T20:45:07.9706011Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:07.9706496Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:07.9706939Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:07.9707426Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T20:45:07.9707811Z ##[endgroup]
+2026-10-01T20:45:12.4249895Z FUNDING_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "FUNDING_S+1_F10_FLOW_ALIGN4H", "side": 1, "threshold": 0.001, "confirmation": "FLOW", "btc": "ALIGN4H", "hold": 96, "exit_type": "TRAIL", "policy": "FUNDING_S+1_F10_FLOW_ALIGN4H__H96__TRAIL", "development_net40_R": 0.0696407946748117, "development_worst_year_day_R": 0.047077732333408506}, {"key": "FUNDING_S+1_F10_FLOW_ANY", "side": 1, "threshold": 0.001, "confirmation": "FLOW", "btc": "ANY", "hold": 96, "exit_type": "TRAIL", "policy": "FUNDING_S+1_F10_FLOW_ANY__H96__TRAIL", "development_net40_R": 0.1070650566851145, "development_worst_year_day_R": -0.046136389352525536}], "policies": [{"key": "FUNDING_S+1_F10_FLOW_ALIGN4H", "side": 1, "threshold": 0.001, "confirmation": "FLOW", "btc": "ALIGN4H", "hold": 96, "exit_type": "TRAIL", "policy": "FUNDING_S+1_F10_FLOW_ALIGN4H__H96__TRAIL", "development_net40_R": 0.0696407946748117, "development_worst_year_day_R": 0.047077732333408506}, {"key": "FUNDING_S+1_F10_FLOW_ANY", "side": 1, "threshold": 0.001, "confirmation": "FLOW", "btc": "ANY", "hold": 96, "exit_type": "TRAIL", "policy": "FUNDING_S+1_F10_FLOW_ANY__H96__TRAIL", "development_net40_R": 0.1070650566851145, "development_worst_year_day_R": -0.046136389352525536}], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 3315216, "known": 3269096, "unavailable": 46120, "fraction": 0.986088387604307}, "2023": {"eligible": 3547461, "known": 3545606, "unavailable": 1855, "fraction": 0.9994770907981794}}, "symbols": 256}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-01T20:45:12.5313241Z ##[group]Run python - <<'PY'
+2026-10-01T20:45:12.5313941Z [36;1mpython - <<'PY'[0m
+2026-10-01T20:45:12.5314258Z [36;1mfrom pathlib import Path[0m
+2026-10-01T20:45:12.5314596Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-01T20:45:12.5315153Z [36;1mdest=Path('research/funding-crowding-v7')/('run-'+os.environ['GITHUB_RUN_ID'])/'development'[0m
+2026-10-01T20:45:12.5315752Z [36;1mshutil.copytree('selected-input',dest)[0m
+2026-10-01T20:45:12.5316255Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('scan_meta.json'))):[0m
+2026-10-01T20:45:12.5316807Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_meta.json')[0m
+2026-10-01T20:45:12.5317336Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('exclusions.csv'))):[0m
+2026-10-01T20:45:12.5317888Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_exclusions.csv')[0m
+2026-10-01T20:45:12.5318376Z [36;1m(dest/'provenance.json').write_text(json.dumps(dict([0m
+2026-10-01T20:45:12.5319156Z [36;1m  run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-01T20:45:12.5319682Z [36;1m  source_data_run=36095439671,policy_trials=96,[0m
+2026-10-01T20:45:12.5320183Z [36;1m  sha256={str(p.relative_to(dest)):hashlib.sha256(p.read_bytes()).hexdigest()[0m
+2026-10-01T20:45:12.5320726Z [36;1m          for p in dest.rglob('*') if p.is_file()}),indent=2))[0m
+2026-10-01T20:45:12.5321109Z [36;1mPY[0m
+2026-10-01T20:45:12.5321397Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-01T20:45:12.5321896Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-01T20:45:12.5322393Z [36;1mgit checkout -b "$RESULT_BRANCH"[0m
+2026-10-01T20:45:12.5322803Z [36;1mgit add "research/funding-crowding-v7/run-36922945306"[0m
+2026-10-01T20:45:12.5323337Z [36;1mgit commit -m "Preserve V7 development selection and all policy diagnostics"[0m
+2026-10-01T20:45:12.5324096Z [36;1mgit push origin "$RESULT_BRANCH"[0m
+2026-10-01T20:45:12.5389201Z shell: /usr/bin/bash -e {0}
+2026-10-01T20:45:12.5389511Z env:
+2026-10-01T20:45:12.5389833Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:12.5390342Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T20:45:12.5390865Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:12.5391328Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:12.5391763Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:12.5392206Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T20:45:12.5392686Z   RESULT_BRANCH: research-funding-crowding-v7-dev-36922945306
+2026-10-01T20:45:12.5393078Z ##[endgroup]
+2026-10-01T20:45:12.6615575Z Switched to a new branch 'research-funding-crowding-v7-dev-36922945306'
+2026-10-01T20:45:12.8460117Z [research-funding-crowding-v7-dev-36922945306 b50bf03] Preserve V7 development selection and all policy diagnostics
+2026-10-01T20:45:12.8461482Z  35 files changed, 20144 insertions(+)
+2026-10-01T20:45:12.8462786Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-0/independent_candidates.csv.gz
+2026-10-01T20:45:12.8464865Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-0/scan_meta.json
+2026-10-01T20:45:12.8466398Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-1/independent_candidates.csv.gz
+2026-10-01T20:45:12.8467990Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-1/scan_meta.json
+2026-10-01T20:45:12.8469513Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-2/independent_candidates.csv.gz
+2026-10-01T20:45:12.8470883Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-2/scan_meta.json
+2026-10-01T20:45:12.8471783Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-3/independent_candidates.csv.gz
+2026-10-01T20:45:12.8472900Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-3/scan_meta.json
+2026-10-01T20:45:12.8474119Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-4/independent_candidates.csv.gz
+2026-10-01T20:45:12.8474968Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-4/scan_meta.json
+2026-10-01T20:45:12.8475791Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-5/independent_candidates.csv.gz
+2026-10-01T20:45:12.8476595Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-5/scan_meta.json
+2026-10-01T20:45:12.8477397Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-6/independent_candidates.csv.gz
+2026-10-01T20:45:12.8478194Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-6/scan_meta.json
+2026-10-01T20:45:12.8479411Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-7/independent_candidates.csv.gz
+2026-10-01T20:45:12.8481112Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/dev-7/scan_meta.json
+2026-10-01T20:45:12.8481944Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/development_policy_cells.csv
+2026-10-01T20:45:12.8482820Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_0_exclusions.csv
+2026-10-01T20:45:12.8484108Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_0_meta.json
+2026-10-01T20:45:12.8485464Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_1_exclusions.csv
+2026-10-01T20:45:12.8486778Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_1_meta.json
+2026-10-01T20:45:12.8488023Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_2_exclusions.csv
+2026-10-01T20:45:12.8488786Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_2_meta.json
+2026-10-01T20:45:12.8489531Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_3_exclusions.csv
+2026-10-01T20:45:12.8490280Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_3_meta.json
+2026-10-01T20:45:12.8491015Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_4_exclusions.csv
+2026-10-01T20:45:12.8491743Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_4_meta.json
+2026-10-01T20:45:12.8492484Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_5_exclusions.csv
+2026-10-01T20:45:12.8493210Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_5_meta.json
+2026-10-01T20:45:12.8494235Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_6_exclusions.csv
+2026-10-01T20:45:12.8495006Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_6_meta.json
+2026-10-01T20:45:12.8495773Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_7_exclusions.csv
+2026-10-01T20:45:12.8496527Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/full_dev_shard_7_meta.json
+2026-10-01T20:45:12.8497235Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/provenance.json
+2026-10-01T20:45:12.8497911Z  create mode 100644 research/funding-crowding-v7/run-36922945306/development/selection.json
+2026-10-01T20:45:16.6611796Z remote: 
+2026-10-01T20:45:16.6612999Z remote: Create a pull request for 'research-funding-crowding-v7-dev-36922945306' on GitHub by visiting:        
+2026-10-01T20:45:16.6615180Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-funding-crowding-v7-dev-36922945306        
+2026-10-01T20:45:16.6616553Z remote: 
+2026-10-01T20:45:16.6625177Z To https://github.com/duuu-hub/bb-scanner
+2026-10-01T20:45:16.6626284Z  * [new branch]      research-funding-crowding-v7-dev-36922945306 -> research-funding-crowding-v7-dev-36922945306
+2026-10-01T20:45:16.6727258Z ##[group]Run actions/upload-artifact@v4
+2026-10-01T20:45:16.6727622Z with:
+2026-10-01T20:45:16.6727884Z   name: funding-crowding-v7-selected
+2026-10-01T20:45:16.6728217Z   path: selected-input/
+2026-10-01T20:45:16.6728495Z   retention-days: 30
+2026-10-01T20:45:16.6728764Z   compression-level: 0
+2026-10-01T20:45:16.6729043Z   if-no-files-found: warn
+2026-10-01T20:45:16.6729318Z   overwrite: false
+2026-10-01T20:45:16.6729584Z   include-hidden-files: false
+2026-10-01T20:45:16.6729865Z env:
+2026-10-01T20:45:16.6730178Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:16.6730674Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T20:45:16.6731151Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:16.6731779Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:16.6732212Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T20:45:16.6732681Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T20:45:16.6733063Z ##[endgroup]
+2026-10-01T20:45:16.8412994Z (node:2381) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T20:45:16.8414483Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T20:45:16.8542414Z With the provided path, there will be 18 files uploaded
+2026-10-01T20:45:16.8549487Z Artifact name is valid!
+2026-10-01T20:45:16.8550106Z Root directory input is valid!
+2026-10-01T20:45:17.0881670Z Beginning upload of artifact content to blob storage
+2026-10-01T20:45:17.1328772Z (node:2381) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-01T20:45:17.2271422Z Uploaded bytes 628216
+2026-10-01T20:45:17.2469828Z Finished uploading artifact content to blob storage!
+2026-10-01T20:45:17.2471850Z SHA256 digest of uploaded artifact zip is 4c53aa1cabff4ef37a7149d3794054731c51707a43cc4eec78ac03dc4b0f0bc3
+2026-10-01T20:45:17.2473727Z Finalizing artifact upload
+2026-10-01T20:45:17.4745207Z Artifact funding-crowding-v7-selected.zip successfully finalized. Artifact ID 11193107587
+2026-10-01T20:45:17.4746638Z Artifact funding-crowding-v7-selected has been successfully uploaded! Final size is 628216 bytes. Artifact ID is 11193107587
+2026-10-01T20:45:17.4747798Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36922945306/artifacts/11193107587
+2026-10-01T20:45:17.4930020Z Post job cleanup.
+2026-10-01T20:45:17.6162016Z (node:2393) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T20:45:17.6163651Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T20:45:17.6367753Z Post job cleanup.
+2026-10-01T20:45:17.7294305Z [command]/usr/bin/git version
+2026-10-01T20:45:17.7342859Z git version 2.55.0
+2026-10-01T20:45:17.7387679Z Temporarily overriding HOME='/home/runner/work/_temp/4ef37031-4de7-41b4-91dc-b964da5f1538' before making global git config changes
+2026-10-01T20:45:17.7389194Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T20:45:17.7393892Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T20:45:17.7434746Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T20:45:17.7471914Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T20:45:17.7726010Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T20:45:17.7755834Z http.https://github.com/.extraheader
+2026-10-01T20:45:17.7772563Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T20:45:17.7818622Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T20:45:17.8100792Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T20:45:17.8142839Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T20:45:17.8597057Z Evaluate and set job outputs
+2026-10-01T20:45:17.8602286Z Set output 'selected_count'
+2026-10-01T20:45:17.8605087Z Cleaning up orphan processes
+2026-10-01T20:45:17.8929936Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
