@@ -1,0 +1,89 @@
+name: V4 Evidence Recovery
+'on':
+  push:
+    branches: [research-compression-expansion-v4]
+    paths: ['.research/compression-expansion-v4-evidence-repair']
+permissions: {contents: write, actions: read}
+concurrency:
+  group: v4-evidence-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Recover original V4 trials and every completed job log
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          set -euo pipefail
+          gh run download 36897289990 -R ${{ github.repository }} -p 'compression-v4-*' -D cycle-evidence
+          gh api repos/${{ github.repository }}/actions/runs/36897289990 > cycle-evidence/actions-run.json
+          gh api repos/${{ github.repository }}/actions/runs/36897289990/artifacts > cycle-evidence/actions-artifacts.json
+          gh api 'repos/${{ github.repository }}/actions/runs/36897289990/jobs?per_page=100' > cycle-evidence/actions-jobs.json
+          mkdir -p cycle-evidence/job-logs
+          python - <<'PY' > completed-jobs.txt
+          import json
+          for j in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+              if j['status']=='completed' and j['conclusion']!='skipped': print(j['id'])
+          PY
+          while read job_id; do
+            gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
+          done < completed-jobs.txt
+          cp research/compression-expansion-v4/PLAN.md cycle-evidence/FROZEN_PLAN.md
+          cp research/compression-expansion-v4/FROZEN_INPUT_HASHES.json cycle-evidence/
+          cp research/compression-expansion-v4/FAILURE_AUDIT.json cycle-evidence/
+          cp research/compression-expansion-v4/FAILURE_AUDIT.md cycle-evidence/
+      - name: Decompose raw outcomes without promoting them to account profits
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd,numpy as np,json
+          root=Path('cycle-evidence')
+          parts=[p for p in root.rglob('independent_candidates.csv.gz') if p.parent.name.startswith('compression-v4-dev-')]
+          if len(parts)!=8: raise ValueError('original eight full DEV ledgers missing')
+          data=pd.concat([pd.read_csv(p) for p in parts],ignore_index=True)
+          if data.duplicated(['symbol','variant','entry_time']).any(): raise ValueError('duplicate original policy outcome')
+          original=pd.read_csv(root/'compression-v4-selected/development_policy_cells.csv').set_index('policy')
+          rows=[]
+          for name,g in data.groupby('variant'):
+              if name not in original.index or len(g)!=original.loc[name,'n']: raise ValueError('original N mismatch')
+              if not np.isclose(g.net40_fraction.mean()*10000,original.loc[name,'net40_mean_bp']): raise ValueError('original net-cost metric mismatch')
+              rows.append(dict(policy=name,n=len(g),symbols=g.symbol.nunique(),
+                  gross_mean_bp=g.gross_return.mean()*10000,
+                  net40_mean_bp=g.net40_fraction.mean()*10000,
+                  cost_and_stop_slip_mean_bp=(g.gross_return-g.net40_fraction).mean()*10000,
+                  tp_pct=(g.reason=='TP').mean()*100,sl_pct=(g.reason=='SL').mean()*100,
+                  timeout_pct=(g.reason=='TIMEOUT').mean()*100,holding_hours_mean=g.hold_min.mean()/60))
+          if len(rows)!=96: raise ValueError('original full 96 cells not recovered')
+          pd.DataFrame(rows).to_csv(root/'DIAGNOSTIC_FAILURE_DECOMPOSITION.csv',index=False)
+          data['kst_entry_week']=pd.to_datetime(data.entry_time,unit='ms',utc=True).dt.tz_convert('Asia/Seoul').dt.strftime('%G-W%V')
+          data.groupby(['variant','kst_entry_week']).agg(n=('net40_fraction','size'),mean_net40=('net40_fraction','mean'),
+              sum_net40=('net40_fraction','sum')).to_csv(root/'DIAGNOSTIC_WEEKLY_BLOCKS.csv')
+          (root/'DIAGNOSTIC_SCOPE.json').write_text(json.dumps(dict(source_run=36897289990,
+              original_executed_commit='e4c78b629ae0a0ff6cc4e9712385248588c89b32',cells=96,
+              raw_parameterized_outcomes=len(data),source_files=[str(p) for p in parts],
+              note='Overlapping independent outcomes; sums and active-entry weeks are not account returns or independent proof.'),indent=2))
+          print('ORIGINAL_V4_AUDIT_MATCH',len(rows),len(data),flush=True)
+          PY
+      - name: Permanently preserve original results plus the archival error
+        env: {RESULT_BRANCH: research-compression-v4-evidence-36897289990}
+        run: |
+          python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V4-original-results-and-archival-repair --out research/compression-expansion-v4/run-36897289990/complete-evidence
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add research/compression-expansion-v4/run-36897289990/complete-evidence
+          git commit -m "Recover V4 full failed trials, source checks, minute hashes and actual failure logs"
+          git push origin "$RESULT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-evidence-recovery
+          path: cycle-evidence/
+          retention-days: 30
+          compression-level: 0
+

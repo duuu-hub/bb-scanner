@@ -337,10 +337,10 @@ jobs:
           python - <<'PY' > completed-jobs.txt
           import json
           for j in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
-              if j['status']=='completed': print(j['id'])
+              if j['status']=='completed' and j['conclusion']!='skipped': print(j['id'])
           PY
           while read job_id; do
-            gh api repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
+            gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
           done < completed-jobs.txt
           cp research/compression-expansion-v4/PLAN.md cycle-evidence/FROZEN_PLAN.md
           cp research/compression-expansion-v4/FROZEN_INPUT_HASHES.json cycle-evidence/
@@ -354,4 +354,3 @@ jobs:
           git add "research/compression-expansion-v4/run-${{ github.run_id }}/complete-evidence"
           git commit -m "Preserve V4 complete original trials, account details, validation and partial failures"
           git push origin "$RESULT_BRANCH"
-
