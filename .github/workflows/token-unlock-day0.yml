@@ -1,0 +1,39 @@
+name: Token Unlock Day0 Intraday
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'research/token_unlock_intraday_day0.py'
+      - '.github/workflows/token-unlock-day0.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: pip install pandas numpy requests
+      - name: Recollect Binance raw 1h and analyze
+        run: python research/token_unlock_intraday_day0.py
+      - name: Show report
+        if: always()
+        run: |
+          test -f token_unlock_day0_result/REPORT.md && cat token_unlock_day0_result/REPORT.md || true
+          test -f token_unlock_day0_result/group_summary.csv && cat token_unlock_day0_result/group_summary.csv || true
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: token-unlock-day0-${{ github.run_id }}
+          path: token_unlock_day0_result/
+          retention-days: 30
+          if-no-files-found: warn
