@@ -1,0 +1,42 @@
+name: PSAR Pre-Break Partial Merge 63
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_prebreak_partial_merge_run']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download completed original artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p all
+          gh run download 36717739973 -R ${{ github.repository }} -p 'psar-1h-breakthrough-*' -D all
+      - name: Partial aggregate
+        run: |
+          python - <<'PY'
+          import glob,json
+          fs=glob.glob("all/**/*.json",recursive=True)
+          print("PARTIAL_FILES",len(fs)); assert len(fs)==63
+          ds=[json.load(open(f)) for f in fs]
+          derived={"win_pct","gross_pf_actual_R","gross_expectancy_actual_R"}; agg={}
+          for d in ds:
+            for k,v in d["summary"].items():
+              q=agg.setdefault(k,{kk:0 for kk in v if kk not in derived})
+              for kk,vv in v.items():
+                if kk not in derived:q[kk]+=vv
+          rows=[]
+          for k,q in agg.items():
+            n=q["win"]+q["loss"]
+            if n and q["gross_loss_R"]>0:
+              pf=q["gross_profit_R"]/q["gross_loss_R"]; wp=100*q["win"]/n
+              ev=(q["gross_profit_R"]-q["gross_loss_R"])/n
+              rows.append((pf,k,wp,ev,q["fills"],q["taker"],q["maker"]))
+          print("PARTIAL_63_TOP")
+          for x in sorted(rows,reverse=True)[:30]:print("TOP",x)
+          PY
