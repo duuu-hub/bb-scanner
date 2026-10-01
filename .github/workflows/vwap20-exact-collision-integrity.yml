@@ -1,0 +1,38 @@
+name: VWAP20 Exact Collision Integrity Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/vwap20_exact_collision_integrity_run']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/vwap20_exact_collision_integrity.py --smoke
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: '${{ github.token }}'
+          run-id: 36814221893
+          pattern: 'vwap20-bear-exact-shard-*'
+          path: in
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: '${{ github.token }}'
+          run-id: 36735084022
+          name: vwap20-btc-bull-alt-down-5y-results
+          path: bull
+      - run: cp bull/events_all.csv in/bull_events.csv
+      - run: python scripts/vwap20_exact_collision_integrity.py --in in --out out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vwap20-exact-collision-integrity-results
+          path: 'out/*'
+          if-no-files-found: warn
