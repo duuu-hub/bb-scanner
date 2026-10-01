@@ -1,6 +1,6 @@
 import argparse,glob,os,re,json
 import pandas as pd,numpy as np
-from scripts.psar_1d_vol_both_ledger import load,contiguous_segments,resample,psar_open_projection,_resolve_1m
+from psar_1d_vol_both_ledger import load,contiguous_segments,resample,psar_open_projection,_resolve_1m
 V=(2.75,1.2,.75); LIMITS=(1,3,7,14); BURN=100; CUT=1735689600000
 def sym(p): return os.path.basename(p)[:-7].upper()
 def one(t,o,h,l,c,S):
