@@ -1,0 +1,37 @@
+name: PSAR 1H Pre-Break Recovery
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1h_prebreak_recovery_run']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  stats:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [11,13,26,27,29,31,32,33,34,35,36,37,38,40,41,43,44,45,46,47,48,49,50,51,52,54,55,56,57,58,59,60,61,62,63]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download 5Y ex-BNX
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          find data -type f -name 'BNXUSDT.csv.gz' -delete
+          test $(find data -type f -name '*.csv.gz' | wc -l) -eq 855
+      - name: Run missing shard
+        run: |
+          export PSAR_ENGINE_BLOB_SHA=$(git hash-object scripts/psar_1h_breakthrough_compare.py)
+          python scripts/psar_1h_breakthrough_compare.py --data data --tf 1h --shard ${{ matrix.shard }} --shards 64 --out out_${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1h-prebreak-recovery-${{ matrix.shard }}
+          path: out_${{ matrix.shard }}.json
