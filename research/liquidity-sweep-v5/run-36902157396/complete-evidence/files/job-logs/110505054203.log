@@ -1,0 +1,364 @@
+﻿2026-10-01T17:52:11.1950362Z Current runner version: '2.337.0'
+2026-10-01T17:52:11.1972697Z ##[group]Runner Image Provisioner
+2026-10-01T17:52:11.1973525Z Hosted Compute Agent
+2026-10-01T17:52:11.1974132Z Version: 20260901.588
+2026-10-01T17:52:11.1974694Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T17:52:11.1975336Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T17:52:11.1976101Z Worker ID: {cc731122-084d-44c0-8f9d-40490977b7f5}
+2026-10-01T17:52:11.1976725Z Azure Region: eastus
+2026-10-01T17:52:11.1977299Z ##[endgroup]
+2026-10-01T17:52:11.1978561Z ##[group]Operating System
+2026-10-01T17:52:11.1979121Z Ubuntu
+2026-10-01T17:52:11.1979558Z 24.04.5
+2026-10-01T17:52:11.1979967Z LTS
+2026-10-01T17:52:11.1980487Z ##[endgroup]
+2026-10-01T17:52:11.1980981Z ##[group]Runner Image
+2026-10-01T17:52:11.1981809Z Image: ubuntu-24.04
+2026-10-01T17:52:11.1982282Z Version: 20260927.320.1
+2026-10-01T17:52:11.1983374Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T17:52:11.1984586Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T17:52:11.1985399Z ##[endgroup]
+2026-10-01T17:52:11.1986644Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T17:52:11.1988607Z Actions: read
+2026-10-01T17:52:11.1989099Z Contents: write
+2026-10-01T17:52:11.1989553Z Metadata: read
+2026-10-01T17:52:11.1990075Z ##[endgroup]
+2026-10-01T17:52:11.1991831Z Secret source: Actions
+2026-10-01T17:52:11.1992775Z Cache mode: write
+2026-10-01T17:52:11.1993347Z Prepare workflow directory
+2026-10-01T17:52:11.2253267Z Prepare all required actions
+2026-10-01T17:52:11.2294758Z Getting action download info
+2026-10-01T17:52:11.4524725Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T17:52:11.5483184Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-01T17:52:11.6411873Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-01T17:52:11.8560040Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-01T17:52:12.0814837Z Complete job name: selection
+2026-10-01T17:52:12.1406112Z ##[group]Run actions/checkout@v4
+2026-10-01T17:52:12.1406821Z with:
+2026-10-01T17:52:12.1407174Z   repository: duuu-hub/bb-scanner
+2026-10-01T17:52:12.1410401Z   token: ***
+2026-10-01T17:52:12.1410751Z   ssh-strict: true
+2026-10-01T17:52:12.1411105Z   ssh-user: git
+2026-10-01T17:52:12.1411451Z   persist-credentials: true
+2026-10-01T17:52:12.1411830Z   clean: true
+2026-10-01T17:52:12.1412179Z   sparse-checkout-cone-mode: true
+2026-10-01T17:52:12.1412589Z   fetch-depth: 1
+2026-10-01T17:52:12.1412924Z   fetch-tags: false
+2026-10-01T17:52:12.1413269Z   show-progress: true
+2026-10-01T17:52:12.1413617Z   lfs: false
+2026-10-01T17:52:12.1413939Z   submodules: false
+2026-10-01T17:52:12.1414284Z   set-safe-directory: true
+2026-10-01T17:52:12.1414673Z   allow-unsafe-pr-checkout: false
+2026-10-01T17:52:12.1415234Z ##[endgroup]
+2026-10-01T17:52:12.2245523Z Syncing repository: duuu-hub/bb-scanner
+2026-10-01T17:52:12.2247682Z ##[group]Getting Git version info
+2026-10-01T17:52:12.2248691Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T17:52:12.2249986Z [command]/usr/bin/git version
+2026-10-01T17:52:12.2376757Z git version 2.55.0
+2026-10-01T17:52:12.2430740Z ##[endgroup]
+2026-10-01T17:52:12.2436735Z Temporarily overriding HOME='/home/runner/work/_temp/9f707a0b-c20e-4737-9f52-773d054372ad' before making global git config changes
+2026-10-01T17:52:12.2442958Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T17:52:12.2444660Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:52:12.2507036Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T17:52:12.2508957Z ##[group]Initializing the repository
+2026-10-01T17:52:12.2510174Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:52:12.2560471Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T17:52:12.2566582Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T17:52:12.2567865Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T17:52:12.2568851Z hint: call:
+2026-10-01T17:52:12.2569433Z hint:
+2026-10-01T17:52:12.2570106Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T17:52:12.2570935Z hint:
+2026-10-01T17:52:12.2573882Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T17:52:12.2575297Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T17:52:12.2581482Z hint:
+2026-10-01T17:52:12.2582268Z hint: 	git branch -m <name>
+2026-10-01T17:52:12.2583190Z hint:
+2026-10-01T17:52:12.2584146Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T17:52:12.2585396Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-01T17:52:12.2590345Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:52:12.2617482Z ##[endgroup]
+2026-10-01T17:52:12.2618399Z ##[group]Disabling automatic garbage collection
+2026-10-01T17:52:12.2620567Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T17:52:12.2650121Z ##[endgroup]
+2026-10-01T17:52:12.2651031Z ##[group]Setting up auth
+2026-10-01T17:52:12.2656588Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T17:52:12.2698335Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T17:52:12.3038594Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T17:52:12.3070453Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T17:52:12.3266245Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T17:52:12.3295268Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T17:52:12.3487763Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T17:52:12.3524253Z ##[endgroup]
+2026-10-01T17:52:12.3525027Z ##[group]Fetching the repository
+2026-10-01T17:52:12.3532343Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5b26f467543d6724461e8f10557c1e8839075f02:refs/remotes/origin/research-liquidity-sweep-v5
+2026-10-01T17:52:13.2889001Z From https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:52:13.2890153Z  * [new ref]         5b26f467543d6724461e8f10557c1e8839075f02 -> origin/research-liquidity-sweep-v5
+2026-10-01T17:52:13.2892423Z ##[endgroup]
+2026-10-01T17:52:13.2893096Z ##[group]Determining the checkout info
+2026-10-01T17:52:13.2894620Z ##[endgroup]
+2026-10-01T17:52:13.2900529Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T17:52:13.2966562Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T17:52:13.3000225Z ##[group]Checking out the ref
+2026-10-01T17:52:13.3004862Z [command]/usr/bin/git checkout --progress --force -B research-liquidity-sweep-v5 refs/remotes/origin/research-liquidity-sweep-v5
+2026-10-01T17:52:13.4780430Z Switched to a new branch 'research-liquidity-sweep-v5'
+2026-10-01T17:52:13.4782530Z branch 'research-liquidity-sweep-v5' set up to track 'origin/research-liquidity-sweep-v5'.
+2026-10-01T17:52:13.4791995Z ##[endgroup]
+2026-10-01T17:52:13.4832151Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T17:52:13.4854945Z 5b26f467543d6724461e8f10557c1e8839075f02
+2026-10-01T17:52:13.5220746Z ##[group]Run actions/setup-python@v5
+2026-10-01T17:52:13.5221739Z with:
+2026-10-01T17:52:13.5222483Z   python-version: 3.12
+2026-10-01T17:52:13.5223318Z   check-latest: false
+2026-10-01T17:52:13.5230541Z   token: ***
+2026-10-01T17:52:13.5231333Z   update-environment: true
+2026-10-01T17:52:13.5232211Z   allow-prereleases: false
+2026-10-01T17:52:13.5233066Z   freethreaded: false
+2026-10-01T17:52:13.5233856Z ##[endgroup]
+2026-10-01T17:52:13.6305406Z ##[group]Installed versions
+2026-10-01T17:52:13.6367337Z (node:2212) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:52:13.6370174Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:52:13.6371921Z Successfully set up CPython (3.12.14)
+2026-10-01T17:52:13.6373878Z ##[endgroup]
+2026-10-01T17:52:13.6527697Z ##[group]Run pip install pandas==2.3.3 numpy==2.3.3
+2026-10-01T17:52:13.6528933Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-01T17:52:13.6763915Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:52:13.6764783Z env:
+2026-10-01T17:52:13.6765648Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:13.6767235Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:52:13.6768581Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:13.6769824Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:13.6771025Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:13.6772226Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:52:13.6773256Z ##[endgroup]
+2026-10-01T17:52:15.1492215Z Collecting pandas==2.3.3
+2026-10-01T17:52:15.1930880Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-01T17:52:15.3695225Z Collecting numpy==2.3.3
+2026-10-01T17:52:15.3786014Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-01T17:52:15.3978434Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-01T17:52:15.4011496Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-01T17:52:15.4285568Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-01T17:52:15.4329384Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-01T17:52:15.4458244Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-01T17:52:15.4491353Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-01T17:52:15.4600162Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-01T17:52:15.4645067Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-01T17:52:15.4708006Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-01T17:52:15.6706400Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 62.3 MB/s  0:00:00
+2026-10-01T17:52:15.6831620Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-01T17:52:15.9041163Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 74.8 MB/s  0:00:00
+2026-10-01T17:52:15.9079179Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-01T17:52:15.9141912Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-01T17:52:15.9222040Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-01T17:52:15.9277326Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-01T17:52:16.2273408Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-01T17:52:21.8872035Z 
+2026-10-01T17:52:21.8883343Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-01T17:52:21.9519647Z ##[group]Run actions/download-artifact@v4
+2026-10-01T17:52:21.9519898Z with:
+2026-10-01T17:52:21.9520079Z   pattern: liquidity-v5-dev-[0-7]
+2026-10-01T17:52:21.9520288Z   path: dev-parts
+2026-10-01T17:52:21.9520669Z   merge-multiple: false
+2026-10-01T17:52:21.9520863Z   repository: duuu-hub/bb-scanner
+2026-10-01T17:52:21.9521085Z   run-id: 36902157396
+2026-10-01T17:52:21.9521266Z env:
+2026-10-01T17:52:21.9521504Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:21.9521864Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:52:21.9522208Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:21.9522508Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:21.9522800Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:21.9523097Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:52:21.9523350Z ##[endgroup]
+2026-10-01T17:52:22.0848912Z (node:2248) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:52:22.0849911Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:52:22.1801595Z Found 9 artifact(s)
+2026-10-01T17:52:22.1802365Z Filtering artifacts by pattern 'liquidity-v5-dev-[0-7]'
+2026-10-01T17:52:22.1827261Z Preparing to download the following artifacts:
+2026-10-01T17:52:22.1828748Z - liquidity-v5-dev-0 (ID: 11182950321, Size: 856543, Expected Digest: sha256:ccfe21e1d26ee63c6258378a82c4e6352bc3d928c5039d707d847cd2d91d2198)
+2026-10-01T17:52:22.1829862Z - liquidity-v5-dev-3 (ID: 11182735432, Size: 508197, Expected Digest: sha256:6e79ecce5a7c3ffc6f74341b21d933f1b999c9b8bc628dc3c052fa83d68f5e92)
+2026-10-01T17:52:22.1830851Z - liquidity-v5-dev-5 (ID: 11182371643, Size: 858384, Expected Digest: sha256:1f136b53bfa953ecdbef3bc3d263241c61cedb8d86eae3f12de53039d2ebba04)
+2026-10-01T17:52:22.1831943Z - liquidity-v5-dev-6 (ID: 11182231546, Size: 597746, Expected Digest: sha256:cbc9c01b7e9fe46dbb44aadbfd2ff70653160af739202d29a78cccb8bb675c11)
+2026-10-01T17:52:22.1832698Z - liquidity-v5-dev-7 (ID: 11182112062, Size: 627921, Expected Digest: sha256:55be55e2466ec4da05d22fb2f37fd4d7586abd26c02708464b0ecf235b1bd8b6)
+2026-10-01T17:52:22.1833429Z - liquidity-v5-dev-1 (ID: 11182062253, Size: 930816, Expected Digest: sha256:a7e5fd4980f69ebd08696207f1b6cbe6be695996ddff21ab524c5cf50582c9ad)
+2026-10-01T17:52:22.1834175Z - liquidity-v5-dev-2 (ID: 11181698500, Size: 681471, Expected Digest: sha256:baa36871808fdf2bd7ee3d0c9f53585d989643053d2a30683da981f9b75d07c3)
+2026-10-01T17:52:22.1835322Z - liquidity-v5-dev-4 (ID: 11181528617, Size: 496889, Expected Digest: sha256:48099c74585ff92264277ac48494d33ab6f46cda2dcf027dc53762c2611c5e36)
+2026-10-01T17:52:22.3172641Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-40c94552-0c49-5c20-9365-92eaabe45a00/artifacts/88e2e3de4d2120a51ecb6fecbf95a95429056f030ec75af677a98575c95bc3d9.zip
+2026-10-01T17:52:22.3173741Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-3
+2026-10-01T17:52:22.3194538Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-ee5ef4f6-18f1-525c-8b33-22040d6aaf36/artifacts/b64d1c496a74717d19e2a7b09f4d0e856447c81959581a0712aab19ab3c8a850.zip
+2026-10-01T17:52:22.3196560Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-0
+2026-10-01T17:52:22.3291139Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-fcf776ed-25b3-56a1-ad13-c3886e807807/artifacts/534d8f90a8f7342421d6278a9f04e7528efbbedc32a915bdc64d6e54e31dbec9.zip
+2026-10-01T17:52:22.3293377Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-2
+2026-10-01T17:52:22.3337757Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-00331130-7306-58e2-9481-987953e3fc92/artifacts/0d4f41333a8a8cc5ad89635964ef763cc358ba0a590b2a2d82c1ae5b1908bb50.zip
+2026-10-01T17:52:22.3340181Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-4
+2026-10-01T17:52:22.3345806Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-d0a5973c-7361-56ba-aca6-636450e0c3e2/artifacts/ced9252cecc27809cf4818e4c92657c457e6271bc241f5eba9d3a49b85c93e71.zip
+2026-10-01T17:52:22.3347440Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-1
+2026-10-01T17:52:22.3575088Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-7048d17e-eb2b-5b94-8e0c-3662bd1ffcc1/artifacts/fc31e67d77c57c579b2dc880664c04410558400cd212d16be87f7f439b734052.zip
+2026-10-01T17:52:22.3577150Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-6
+2026-10-01T17:52:22.3733463Z (node:2248) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-01T17:52:22.3751984Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-c076ba3f-0482-5c1d-bbd1-6ab75b6b03dd/artifacts/964bb30f0e31512d97843d364c0e9de7b72eedfa75179e01e63c72d5e1b3643d.zip
+2026-10-01T17:52:22.3753844Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-5
+2026-10-01T17:52:22.4197952Z SHA256 digest of downloaded artifact is 6e79ecce5a7c3ffc6f74341b21d933f1b999c9b8bc628dc3c052fa83d68f5e92
+2026-10-01T17:52:22.4198621Z Artifact download completed successfully.
+2026-10-01T17:52:22.4327940Z SHA256 digest of downloaded artifact is ccfe21e1d26ee63c6258378a82c4e6352bc3d928c5039d707d847cd2d91d2198
+2026-10-01T17:52:22.4328754Z Artifact download completed successfully.
+2026-10-01T17:52:22.4439602Z SHA256 digest of downloaded artifact is baa36871808fdf2bd7ee3d0c9f53585d989643053d2a30683da981f9b75d07c3
+2026-10-01T17:52:22.4440522Z Artifact download completed successfully.
+2026-10-01T17:52:22.4684641Z SHA256 digest of downloaded artifact is cbc9c01b7e9fe46dbb44aadbfd2ff70653160af739202d29a78cccb8bb675c11
+2026-10-01T17:52:22.4685314Z Artifact download completed successfully.
+2026-10-01T17:52:22.4699738Z SHA256 digest of downloaded artifact is a7e5fd4980f69ebd08696207f1b6cbe6be695996ddff21ab524c5cf50582c9ad
+2026-10-01T17:52:22.4700306Z Artifact download completed successfully.
+2026-10-01T17:52:22.4780449Z Redirecting to blob download url: https://productionresultssa13.blob.core.windows.net/actions-results/82040708-4133-8468-af5b-815c667c2592/workflow-job-run-0594fc60-dbfa-50de-a9fd-569a6c3d5872/artifacts/a4aaff8f3bfc6a612ea994748d9d5dc57b10980c113fa86c28d5f0c42d2e6e04.zip
+2026-10-01T17:52:22.4782791Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/liquidity-v5-dev-7
+2026-10-01T17:52:22.4812878Z SHA256 digest of downloaded artifact is 48099c74585ff92264277ac48494d33ab6f46cda2dcf027dc53762c2611c5e36
+2026-10-01T17:52:22.4813607Z Artifact download completed successfully.
+2026-10-01T17:52:22.4953894Z SHA256 digest of downloaded artifact is 1f136b53bfa953ecdbef3bc3d263241c61cedb8d86eae3f12de53039d2ebba04
+2026-10-01T17:52:22.4954488Z Artifact download completed successfully.
+2026-10-01T17:52:22.5159306Z SHA256 digest of downloaded artifact is 55be55e2466ec4da05d22fb2f37fd4d7586abd26c02708464b0ecf235b1bd8b6
+2026-10-01T17:52:22.5159827Z Artifact download completed successfully.
+2026-10-01T17:52:22.5160391Z Total of 8 artifact(s) downloaded
+2026-10-01T17:52:22.5165513Z Download artifact has finished successfully
+2026-10-01T17:52:22.5294510Z ##[group]Run python scripts/liquidity_sweep_v5.py select --parts dev-parts --out selected-input
+2026-10-01T17:52:22.5295328Z [36;1mpython scripts/liquidity_sweep_v5.py select --parts dev-parts --out selected-input[0m
+2026-10-01T17:52:22.5295754Z [36;1mpython - <<'PY'[0m
+2026-10-01T17:52:22.5296193Z [36;1mimport json,os[0m
+2026-10-01T17:52:22.5296533Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-01T17:52:22.5297013Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-01T17:52:22.5297393Z [36;1mPY[0m
+2026-10-01T17:52:22.5358555Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:52:22.5358821Z env:
+2026-10-01T17:52:22.5359100Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:22.5359511Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:52:22.5359896Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:22.5360283Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:22.5360648Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:22.5361011Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:52:22.5361324Z ##[endgroup]
+2026-10-01T17:52:24.5861794Z SWEEP_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "SWEEP_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-01T17:52:24.6746372Z ##[group]Run python - <<'PY'
+2026-10-01T17:52:24.6746706Z [36;1mpython - <<'PY'[0m
+2026-10-01T17:52:24.6746961Z [36;1mfrom pathlib import Path[0m
+2026-10-01T17:52:24.6747246Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-01T17:52:24.6747686Z [36;1mdest=Path('research/liquidity-sweep-v5')/('run-'+os.environ['GITHUB_RUN_ID'])/'development'[0m
+2026-10-01T17:52:24.6748146Z [36;1mshutil.copytree('selected-input',dest)[0m
+2026-10-01T17:52:24.6748551Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('scan_meta.json'))):[0m
+2026-10-01T17:52:24.6748998Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_meta.json')[0m
+2026-10-01T17:52:24.6749402Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('exclusions.csv'))):[0m
+2026-10-01T17:52:24.6749821Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_exclusions.csv')[0m
+2026-10-01T17:52:24.6750214Z [36;1m(dest/'provenance.json').write_text(json.dumps(dict([0m
+2026-10-01T17:52:24.6750663Z [36;1m  run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-01T17:52:24.6751065Z [36;1m  source_data_run=36095439671,policy_trials=96,[0m
+2026-10-01T17:52:24.6751456Z [36;1m  sha256={str(p.relative_to(dest)):hashlib.sha256(p.read_bytes()).hexdigest()[0m
+2026-10-01T17:52:24.6751871Z [36;1m          for p in dest.rglob('*') if p.is_file()}),indent=2))[0m
+2026-10-01T17:52:24.6752176Z [36;1mPY[0m
+2026-10-01T17:52:24.6752420Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-01T17:52:24.6752839Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-01T17:52:24.6753229Z [36;1mgit checkout -b "$RESULT_BRANCH"[0m
+2026-10-01T17:52:24.6753574Z [36;1mgit add "research/liquidity-sweep-v5/run-36902157396"[0m
+2026-10-01T17:52:24.6753990Z [36;1mgit commit -m "Preserve V5 development selection and all policy diagnostics"[0m
+2026-10-01T17:52:24.6754372Z [36;1mgit push origin "$RESULT_BRANCH"[0m
+2026-10-01T17:52:24.6810552Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:52:24.6810819Z env:
+2026-10-01T17:52:24.6811078Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:24.6811474Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:52:24.6811857Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:24.6812203Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:24.6812538Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:24.6813047Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:52:24.6813391Z   RESULT_BRANCH: research-liquidity-v5-dev-36902157396
+2026-10-01T17:52:24.6813689Z ##[endgroup]
+2026-10-01T17:52:24.7305225Z Switched to a new branch 'research-liquidity-v5-dev-36902157396'
+2026-10-01T17:52:24.8691300Z [research-liquidity-v5-dev-36902157396 6d597fe] Preserve V5 development selection and all policy diagnostics
+2026-10-01T17:52:24.8692143Z  35 files changed, 10623 insertions(+)
+2026-10-01T17:52:24.8693091Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-0/independent_candidates.csv.gz
+2026-10-01T17:52:24.8694188Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-0/scan_meta.json
+2026-10-01T17:52:24.8695510Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-1/independent_candidates.csv.gz
+2026-10-01T17:52:24.8697019Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-1/scan_meta.json
+2026-10-01T17:52:24.8698253Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-2/independent_candidates.csv.gz
+2026-10-01T17:52:24.8699396Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-2/scan_meta.json
+2026-10-01T17:52:24.8700633Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-3/independent_candidates.csv.gz
+2026-10-01T17:52:24.8702061Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-3/scan_meta.json
+2026-10-01T17:52:24.8703288Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-4/independent_candidates.csv.gz
+2026-10-01T17:52:24.8704483Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-4/scan_meta.json
+2026-10-01T17:52:24.8705592Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-5/independent_candidates.csv.gz
+2026-10-01T17:52:24.8706924Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-5/scan_meta.json
+2026-10-01T17:52:24.8708141Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-6/independent_candidates.csv.gz
+2026-10-01T17:52:24.8709265Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-6/scan_meta.json
+2026-10-01T17:52:24.8710475Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-7/independent_candidates.csv.gz
+2026-10-01T17:52:24.8711590Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/dev-7/scan_meta.json
+2026-10-01T17:52:24.8712789Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/development_policy_cells.csv
+2026-10-01T17:52:24.8713960Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_0_exclusions.csv
+2026-10-01T17:52:24.8715199Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_0_meta.json
+2026-10-01T17:52:24.8716726Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_1_exclusions.csv
+2026-10-01T17:52:24.8717907Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_1_meta.json
+2026-10-01T17:52:24.8719098Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_2_exclusions.csv
+2026-10-01T17:52:24.8720212Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_2_meta.json
+2026-10-01T17:52:24.8721482Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_3_exclusions.csv
+2026-10-01T17:52:24.8722651Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_3_meta.json
+2026-10-01T17:52:24.8723832Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_4_exclusions.csv
+2026-10-01T17:52:24.8724961Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_4_meta.json
+2026-10-01T17:52:24.8726552Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_5_exclusions.csv
+2026-10-01T17:52:24.8727754Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_5_meta.json
+2026-10-01T17:52:24.8728878Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_6_exclusions.csv
+2026-10-01T17:52:24.8730037Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_6_meta.json
+2026-10-01T17:52:24.8731161Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_7_exclusions.csv
+2026-10-01T17:52:24.8732337Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/full_dev_shard_7_meta.json
+2026-10-01T17:52:24.8733392Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/provenance.json
+2026-10-01T17:52:24.8734440Z  create mode 100644 research/liquidity-sweep-v5/run-36902157396/development/selection.json
+2026-10-01T17:52:27.0984037Z remote: 
+2026-10-01T17:52:27.0984734Z remote: Create a pull request for 'research-liquidity-v5-dev-36902157396' on GitHub by visiting:        
+2026-10-01T17:52:27.0985397Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-liquidity-v5-dev-36902157396        
+2026-10-01T17:52:27.0985979Z remote: 
+2026-10-01T17:52:27.0992422Z To https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:52:27.0993359Z  * [new branch]      research-liquidity-v5-dev-36902157396 -> research-liquidity-v5-dev-36902157396
+2026-10-01T17:52:27.1078604Z ##[group]Run actions/upload-artifact@v4
+2026-10-01T17:52:27.1078893Z with:
+2026-10-01T17:52:27.1079114Z   name: liquidity-v5-selected
+2026-10-01T17:52:27.1079366Z   path: selected-input/
+2026-10-01T17:52:27.1079593Z   retention-days: 30
+2026-10-01T17:52:27.1079816Z   compression-level: 0
+2026-10-01T17:52:27.1080048Z   if-no-files-found: warn
+2026-10-01T17:52:27.1080277Z   overwrite: false
+2026-10-01T17:52:27.1080511Z   include-hidden-files: false
+2026-10-01T17:52:27.1080739Z env:
+2026-10-01T17:52:27.1080991Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:27.1081388Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:52:27.1081763Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:27.1082107Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:27.1082445Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:52:27.1082813Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:52:27.1083116Z ##[endgroup]
+2026-10-01T17:52:27.2460560Z (node:2283) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:52:27.2461560Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:52:27.2554471Z With the provided path, there will be 18 files uploaded
+2026-10-01T17:52:27.2558699Z Artifact name is valid!
+2026-10-01T17:52:27.2559145Z Root directory input is valid!
+2026-10-01T17:52:27.4529724Z Beginning upload of artifact content to blob storage
+2026-10-01T17:52:27.4806387Z (node:2283) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-01T17:52:27.5193926Z Uploaded bytes 107220
+2026-10-01T17:52:27.5331078Z Finished uploading artifact content to blob storage!
+2026-10-01T17:52:27.5332000Z SHA256 digest of uploaded artifact zip is f1a8b908ae94e41160a4917cbc868365a31aa6ec7cbdfa8997ecbcabf9543051
+2026-10-01T17:52:27.5332826Z Finalizing artifact upload
+2026-10-01T17:52:27.7571545Z Artifact liquidity-v5-selected.zip successfully finalized. Artifact ID 11181893349
+2026-10-01T17:52:27.7572520Z Artifact liquidity-v5-selected has been successfully uploaded! Final size is 107220 bytes. Artifact ID is 11181893349
+2026-10-01T17:52:27.7577170Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36902157396/artifacts/11181893349
+2026-10-01T17:52:27.7727029Z Post job cleanup.
+2026-10-01T17:52:27.8718814Z (node:2296) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:52:27.8719509Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:52:27.8883807Z Post job cleanup.
+2026-10-01T17:52:27.9602040Z [command]/usr/bin/git version
+2026-10-01T17:52:27.9639750Z git version 2.55.0
+2026-10-01T17:52:27.9672824Z Temporarily overriding HOME='/home/runner/work/_temp/a07f0e48-0855-43d4-9a95-7d421986bb10' before making global git config changes
+2026-10-01T17:52:27.9673987Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T17:52:27.9680026Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:52:27.9728679Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T17:52:27.9769029Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T17:52:28.0035215Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T17:52:28.0912503Z http.https://github.com/.extraheader
+2026-10-01T17:52:28.0927087Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T17:52:28.0971212Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T17:52:28.1185603Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T17:52:28.1217312Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T17:52:28.1556574Z Evaluate and set job outputs
+2026-10-01T17:52:28.1561841Z Set output 'selected_count'
+2026-10-01T17:52:28.1563720Z Cleaning up orphan processes
+2026-10-01T17:52:28.1804111Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
