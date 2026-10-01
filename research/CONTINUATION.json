@@ -1,6 +1,6 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-01T18:33:16.356Z",
+  "updated_at": "2026-10-01T18:38:49.909Z",
   "interactive_lease": null,
   "current_branch": "research-btc-factor-lag-v6",
   "current_run": 36906530309,
@@ -68,7 +68,11 @@
     "v5_account_scenarios": 0,
     "v6_entry_settings_planned": 16,
     "v6_dev_policy_cells_planned": 96,
-    "v6_execution_attempts": 1
+    "v6_execution_attempts": 1,
+    "v6_entry_settings_executed": 16,
+    "v6_canonical_dev_cells_executed": 96,
+    "v6_selected_policies": 1,
+    "v6_account_scenarios_planned": 8
   },
   "goal": {
     "max_hold_days": 7,
@@ -78,8 +82,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "V6 actual validation130 plus canonical smoke passed. Inspect remaining actual DEV shards, selection and all96 cells of run36906530309; no duplicate run. If selected, audit seen2024GATE/accounts with all853/367 covered KST dates and original minute provenance, then freeze before stress/neighbours/real delay/timeblocks/new forward. If rejected, numerically audit raw ledger costs/failures, preregister new economic hypothesis, implement/test/actually execute it. V3 all-calendar reporting correction committed without market rerun; pending V1/V2 legacy rates must not be relabelled full-all-date rates.",
-  "phase": "V6_DEVELOPMENT_RUNNING",
+  "next_action": "V6 DEV selection froze one long1h BTC-factor log-gap2%/PRICE_ONLY/H96/TP2 candidate before eight already-seen2024 GATE shards. Read actual account job110522130326 and all8 scenarios, raw trades, full853/367KST dates, DD/fees/utilization/risk rejection and arithmetic hashes; actual130tests/canonical smoke pass. Raw trade R positive but equal-active-date worst-year R negative: do not treat raw PF/EV as success. Audit full549,129 original DEV outcomes/provenance. Preserve complete raw evidence. If account rejected, numerically diagnose and preregister/implement/test/actually run next economic hypothesis. If provisional pass, freeze before neighbours/stress/actual minute delays/timeblocks/new forward; daily goal still unproven.",
+  "phase": "V6_ACCOUNT_VALIDATION_RUNNING",
   "last_failure": {
     "study": "V5",
     "audited": true,
@@ -107,7 +111,7 @@
     "development": {
       "branch": "research-factor-lag-v6-dev-36906530309",
       "path": "research/btc-factor-lag-v6/run-36906530309/development",
-      "state": "PENDING"
+      "state": "PRESERVED_AND_READ"
     },
     "accounts": {
       "branch": "research-factor-lag-v6-results-36906530309",
@@ -173,14 +177,41 @@
     "source": "Actual job log read; implementation validation is not market profit"
   },
   "current_execution_observation": {
-    "observed_at": "2026-10-01T18:33:16.356Z",
+    "observed_at": "2026-10-01T18:38:49.909Z",
     "run": 36906530309,
     "development_successful_shards": 8,
-    "expected_shards": 8,
-    "actual_logged_sample_outcomes": {
-      "shard6": 63210,
-      "shard4": 52764
-    },
-    "all_policy_results_audited": false
+    "gate_successful_shards": 8,
+    "accounts_status": "completed",
+    "accounts_conclusion": "success"
+  },
+  "selected_candidates": [
+    {
+      "key": "FACTOR_S+1_L4_G2_PRICE_ONLY",
+      "side": 1,
+      "horizon": 4,
+      "gap": 0.02,
+      "flow": "PRICE_ONLY",
+      "hold": 96,
+      "exit_type": "TP2",
+      "policy": "FACTOR_S+1_L4_G2_PRICE_ONLY__H96__TP2",
+      "development_net40_R": 0.0527431011452843,
+      "development_worst_year_day_R": -0.3315295370265784
+    }
+  ],
+  "development_audit": {
+    "all96cells_read": true,
+    "parameterized_resolved_outcomes": 549129,
+    "positive_net40_price_cells": 12,
+    "positive_net40_R_cells": 15,
+    "global_net40_mean_bp_range": [
+      -70.47877161655387,
+      39.428513361399474
+    ],
+    "selected_raw_n": 5342,
+    "selected_coins": 219,
+    "selected_mean_net40_bp": 13.604688988,
+    "selected_net40_pf": 1.0859982476,
+    "selected_worst_year_equal_active_date_R": -0.3315295370265784,
+    "note": "Independent overlapping returns not account trades/profit. Equal-date weakness retained; no retuning."
   }
 }

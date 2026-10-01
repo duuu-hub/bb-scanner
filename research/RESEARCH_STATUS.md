@@ -14,9 +14,15 @@ preserved. No GATE/accounts ran. No active V5 execution to duplicate.
 V6 preregistered on research-btc-factor-lag-v6, PLAN commit23589bd985b56934b4698710896f610be168740c.
 Actual code65095198c689b09a3028ec460db8198f819b0bcc; run36906530309:
 https://github.com/duuu-hub/bb-scanner/actions/runs/36906530309
-Phase V6_DEVELOPMENT_RUNNING. Actual validate job110518359010 SUCCESS:
+Phase V6_ACCOUNT_VALIDATION_RUNNING. Actual validate job110518359010 SUCCESS:
 130CItests, ALL_CHRONOLOGY_SMOKE_PASS and ALL_CANONICAL_INVARIANTS_PASS verified
-from actual logs. Eight DEV shards running/completing; no complete result claim.
+from actual logs. All8DEV and8GATE shards succeeded.96DEV cells read;549,129overlapping
+outcomes,12net40PRICE-positive and15R-positive cells. One candidate frozen before
+GATE: FACTOR_S+1_L4_G2_PRICE_ONLY__H96__TP2 (long,1hBTC impulse,2%loglag,24h,TP2).
+Raw5342N/219coins,mean net40+13.6047bp/PF1.0860; worst-year equal-active-date R
+-0.33153. Dependence concern retained, not hidden/tuned away. Actual account job
+110522130326 is running; all8risk/cost scenarios and full calendar dates pending.
+No account/daily-target success claim.
 Actual sampled logs: shard6=63,210outcomes, shard4=52,764outcomes/6exclusions.
 Source catalogue and previous CSV hashes verified in actual DEV job logs.
 These overlapping policy observations are not account trades/profit. No duplicate.
