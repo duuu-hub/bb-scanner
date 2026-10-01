@@ -12,7 +12,10 @@ Original99,382 saved observations audited; full minute/data/validation evidence
 preserved. No GATE/accounts ran. No active V5 execution to duplicate.
 
 V6 preregistered on research-btc-factor-lag-v6, PLAN commit23589bd985b56934b4698710896f610be168740c.
-Phase V6_PREREGISTERED_IMPLEMENTING; no V6 run or market result exists yet.
+Actual code65095198c689b09a3028ec460db8198f819b0bcc; run36906530309:
+https://github.com/duuu-hub/bb-scanner/actions/runs/36906530309
+Phase V6_VALIDATING_AND_RUNNING.130 local tests passed; actual CI validation
+and market outputs PENDING. No profit/result claim. Never duplicate this run.
 New conjecture: BTC-factor-sensitive coins underreacting to a BTC impulse may
 catch up after their own closed15m direction/volume confirmation.672 matched
 prior returns estimate beta/R2 ending BEFORE the1h/4h impulse.16entry settings,
