@@ -196,9 +196,10 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
     market=account.Market(raw)
     seeds=json.loads(selection_path.read_text())['selected']
     selection=json.loads(selection_path.read_text())
+    union_name=selection.get('union_name','CONFIRM_UNION')
     if selection.get('policies'):
         names=[s['policy'] for s in selection['policies']]
-        if len(names)>1: names.append('CONFIRM_UNION')
+        if len(names)>1: names.append(union_name)
     else:
         names=[variant(s['key'],m,e) for s in seeds for m in STOPS for e in EXITS]
         names += [variant('UNION',m,e) for m in STOPS for e in EXITS]
@@ -206,7 +207,7 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
     for split in splits:
         start,end=SPLITS[split];part=x[x.split==split]
         for name in names:
-            if name=='CONFIRM_UNION':
+            if name==union_name:
                 sel=part.copy()
                 priority={p['policy']:i for i,p in enumerate(selection['policies'])}
                 sel['priority']=sel['variant'].map(priority)

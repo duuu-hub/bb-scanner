@@ -1,0 +1,357 @@
+name: Compression Expansion V4 Research Cycle
+
+'on':
+  push:
+    branches: [research-compression-expansion-v4]
+    paths: ['.research/compression-expansion-v4-run']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: compression-expansion-v4-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Validate causal inputs, chronological exits and account observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/compression_expansion_v4.py scripts/day_edge_canonical.py scripts/research_evidence_archive.py
+          python -m unittest discover -s tests -p test_compression_expansion_v4.py -v 2>&1 | tee expansion-tests.log
+          python -m unittest discover -s tests -p test_research_evidence_archive.py -v 2>&1 | tee evidence-tests.log
+          python -m unittest discover -s tests -p test_shock_confirmation_v3.py -v 2>&1 | tee legacy-confirm-tests.log
+          python -m unittest discover -s tests -p test_day_edge_canonical.py -v 2>&1 | tee canonical-tests.log
+          python -m unittest discover -s tests -p test_day_edge_lab.py -v 2>&1 | tee scout-tests.log
+          python -m unittest discover -s tests -p test_relative_pullback_v1.py -v 2>&1 | tee account-tests.log
+          python scripts/psar_chronology_smoke.py | tee chronology-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-validation
+          path: |
+            expansion-tests.log
+            evidence-tests.log
+            legacy-confirm-tests.log
+            canonical-tests.log
+            scout-tests.log
+            account-tests.log
+            chronology-smoke.log
+            research/compression-expansion-v4/PLAN.md
+          retention-days: 30
+
+  development:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0, 1, 2, 3, 4, 5, 6, 7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        with:
+          path: cache/1m
+          key: compression-v4-dev-1m-shard-${{ matrix.shard }}
+          restore-keys: |
+            day-edge-canon-v2-source-36095439671-shard-${{ matrix.shard }}
+      - uses: actions/cache@v4
+        id: source-cache
+        with:
+          path: data
+          key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+      - name: Download immutable market shard
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+      - name: BTC context
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+      - name: Verify full frozen catalogue and previous SHA256 inputs
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/compression-expansion-v4/FROZEN_INPUT_HASHES.json --out dev-${{ matrix.shard }}/source_check.json
+      - name: All 96 preregistered V4 development policies with canonical stop/TP chronology
+        run: python scripts/compression_expansion_v4.py scan --stage DEV --data data --btc btc/BTCUSDT.csv.gz --out dev-${{ matrix.shard }} --minute-cache cache/1m
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-dev-${{ matrix.shard }}
+          path: dev-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  selection:
+    needs: development
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      selected_count: ${{ steps.pick.outputs.selected_count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'compression-v4-dev-[0-7]', path: dev-parts}
+      - name: Freeze development-only selection
+        id: pick
+        run: |
+          python scripts/compression_expansion_v4.py select --parts dev-parts --out selected-input
+          python - <<'PY'
+          import json,os
+          n=len(json.load(open('selected-input/selection.json'))['policies'])
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')
+          PY
+      - name: Preserve development evidence even when there is no survivor
+        env: {RESULT_BRANCH: 'research-compression-v4-dev-${{ github.run_id }}'}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil,json,os,hashlib
+          dest=Path('research/compression-expansion-v4')/('run-'+os.environ['GITHUB_RUN_ID'])/'development'
+          shutil.copytree('selected-input',dest)
+          for i,p in enumerate(sorted(Path('dev-parts').rglob('scan_meta.json'))):
+            shutil.copyfile(p,dest/f'full_dev_shard_{i}_meta.json')
+          for i,p in enumerate(sorted(Path('dev-parts').rglob('exclusions.csv'))):
+            shutil.copyfile(p,dest/f'full_dev_shard_{i}_exclusions.csv')
+          (dest/'provenance.json').write_text(json.dumps(dict(
+            run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],
+            source_data_run=36095439671,policy_trials=96,
+            sha256={str(p.relative_to(dest)):hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in dest.rglob('*') if p.is_file()}),indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add "research/compression-expansion-v4/run-${{ github.run_id }}"
+          git commit -m "Preserve V4 development selection and all policy diagnostics"
+          git push origin "$RESULT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-selected
+          path: selected-input/
+          retention-days: 30
+          compression-level: 0
+
+  gate:
+    needs: selection
+    if: needs.selection.outputs.selected_count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0, 1, 2, 3, 4, 5, 6, 7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        with:
+          path: cache/1m
+          key: compression-v4-gate-1m-shard-${{ matrix.shard }}
+          restore-keys: |
+            compression-v4-dev-1m-shard-${{ matrix.shard }}
+            day-edge-canon-v2-source-36095439671-shard-${{ matrix.shard }}
+      - uses: actions/cache@v4
+        id: source-cache
+        with:
+          path: data
+          key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+      - name: Frozen source and BTC
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
+            gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+          fi
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+      - uses: actions/download-artifact@v4
+        with: {name: compression-v4-selected, path: selected-input}
+      - name: Verify GATE uses the same complete original source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/compression-expansion-v4/FROZEN_INPUT_HASHES.json --out gate-${{ matrix.shard }}/source_check.json
+      - name: Frozen selected policies, 2024 historical gate
+        run: python scripts/compression_expansion_v4.py scan --stage GATE --data data --btc btc/BTCUSDT.csv.gz --selection selected-input/selection.json --out gate-${{ matrix.shard }} --minute-cache cache/1m
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-gate-${{ matrix.shard }}
+          path: gate-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  accounts:
+    needs: [selection, gate]
+    if: needs.selection.outputs.selected_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {name: compression-v4-selected, path: combined-parts}
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'compression-v4-gate-[0-7]', path: combined-parts/gate}
+      - name: Frozen account marking source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D market
+      - name: Verify all eight account marking source shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-manifest-shard-*' -D source-manifests
+          python scripts/research_evidence_archive.py verify-source --data market --manifests source-manifests --expected-shards 8 --baseline research/compression-expansion-v4/FROZEN_INPUT_HASHES.json --out expansion-account/source_check.json
+      - name: Actual account growth, daily goals and arithmetic audit
+        run: python scripts/day_edge_canonical.py accounts --data market --parts combined-parts --out expansion-account --selection combined-parts/selection.json --expected-shards 16
+      - name: Preserve complete account results on a separate result branch
+        env:
+          RESULT_BRANCH: 'research-compression-v4-results-${{ github.run_id }}'
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil,json,hashlib,os,pandas as pd
+          dest=Path('research/compression-expansion-v4')/('run-'+os.environ['GITHUB_RUN_ID'])/'accounts'
+          dest.mkdir(parents=True)
+          for name in ['summary.csv','summary.json','year_quarter.csv','audit.json',
+                       'survivors.json','independent_candidates.csv.gz']:
+            shutil.copyfile(Path('expansion-account')/name,dest/name)
+          shutil.copyfile('combined-parts/selection.json',dest/'selection.json')
+          shutil.copyfile('combined-parts/development_policy_cells.csv',dest/'development_policy_cells.csv')
+          for i,p in enumerate(sorted(Path('combined-parts').rglob('scan_meta.json'))):
+            shutil.copyfile(p,dest/f'scan_shard_{i}_meta.json')
+          for i,p in enumerate(sorted(Path('combined-parts/gate').rglob('exclusions.csv'))):
+            shutil.copyfile(p,dest/f'gate_shard_{i}_exclusions.csv')
+          rows=[]
+          for p in Path('expansion-account/details').glob('*/trades.csv.gz'):
+            try:d=pd.read_csv(p)
+            except pd.errors.EmptyDataError:continue
+            d['scenario']=p.parent.name;rows.append(d)
+          if rows:pd.concat(rows,ignore_index=True).to_csv(dest/'executed_trades.csv.gz',index=False,compression='gzip')
+          (dest/'provenance.json').write_text(json.dumps(dict(
+            run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],
+            source_data_run=36095439671,
+            sha256={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in dest.iterdir() if p.is_file()}),indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add "research/compression-expansion-v4/run-${{ github.run_id }}"
+          git commit -m "Preserve V4 constrained account results and rejected policies"
+          git push origin "$RESULT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-account-summary
+          path: research/compression-expansion-v4/run-${{ github.run_id }}/accounts/
+          retention-days: 30
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compression-v4-account-details
+          path: expansion-account/
+          retention-days: 30
+          compression-level: 0
+
+  preserve_previous:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: {contents: write, actions: read}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3
+      - name: Recover complete prior account curves, ledgers, trials and logs
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          set -euo pipefail
+          gh run download 36853787624 -R ${{ github.repository }} -n relative-pullback-v1-results -D previous/V1/accounts
+          gh run download 36853787624 -R ${{ github.repository }} -n relative-pullback-v1-validation -D previous/V1/validation
+          gh run download 36863290334 -R ${{ github.repository }} -n day-edge-v2-canonical-details -D previous/V2/accounts
+          gh run download 36863290334 -R ${{ github.repository }} -n day-edge-v2-canonical-validation -D previous/V2/validation
+          gh run download 36866930929 -R ${{ github.repository }} -n shock-confirm-v3-account-details -D previous/V3/accounts
+          gh run download 36866930929 -R ${{ github.repository }} -n shock-confirm-v3-validation -D previous/V3/validation
+          gh run download 36866930929 -R ${{ github.repository }} -p 'shock-confirm-v3-dev-[0-7]' -D previous/V3/development
+          for run_id in 36853787624 36861359640 36863290334 36866930929; do
+            gh api repos/${{ github.repository }}/actions/runs/$run_id/artifacts > previous/artifacts-$run_id.json
+            gh run view $run_id -R ${{ github.repository }} --log > previous/run-$run_id.log
+          done
+      - name: Preserve evidence permanently on its own research branch
+        env: {RESULT_BRANCH: 'research-dayedge-evidence-${{ github.run_id }}'}
+        run: |
+          python scripts/research_evidence_archive.py archive --source previous --kind V1-V2-V3-history --out research/dayedge-evidence/prior-run-${{ github.run_id }}
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add "research/dayedge-evidence/prior-run-${{ github.run_id }}"
+          git commit -m "Preserve all prior account curves, failures, V3 DEV trials and exact evidence hashes"
+          git push origin "$RESULT_BRANCH"
+
+  preserve_cycle:
+    needs: [validate, development, selection, gate, accounts, preserve_previous]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions: {contents: write, actions: read}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3
+      - name: Collect all completed and failed current-stage evidence
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          set -euo pipefail
+          gh run download ${{ github.run_id }} -R ${{ github.repository }} -p 'compression-v4-*' -D cycle-evidence
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100 > cycle-evidence/actions-jobs.json
+          mkdir -p cycle-evidence/job-logs
+          python - <<'PY' > completed-jobs.txt
+          import json
+          for j in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+              if j['status']=='completed': print(j['id'])
+          PY
+          while read job_id; do
+            gh api repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
+          done < completed-jobs.txt
+          cp research/compression-expansion-v4/PLAN.md cycle-evidence/FROZEN_PLAN.md
+          cp research/compression-expansion-v4/FROZEN_INPUT_HASHES.json cycle-evidence/
+      - name: Preserve full V4 ledgers, curves, partial failures and hashes
+        env: {RESULT_BRANCH: 'research-compression-v4-evidence-${{ github.run_id }}'}
+        run: |
+          python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V4-complete-or-partial --out research/compression-expansion-v4/run-${{ github.run_id }}/complete-evidence
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add "research/compression-expansion-v4/run-${{ github.run_id }}/complete-evidence"
+          git commit -m "Preserve V4 complete original trials, account details, validation and partial failures"
+          git push origin "$RESULT_BRANCH"
+
