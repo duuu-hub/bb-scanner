@@ -1,0 +1,103 @@
+name: Sweep Reclaim V1 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/sweep_reclaim_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Syntax and invariants
+        run: |
+          python -m py_compile scripts/sweep_reclaim_research.py scripts/sweep_reclaim_merge.py scripts/external_breakout_replay.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import numpy as np
+          import scripts.sweep_reclaim_research as s
+          assert len(s.CONFIGS)==8
+          assert {x["lookback"] for x in s.CONFIGS}=={96,192}
+          assert {x["sweep_atr"] for x in s.CONFIGS}=={0.10,0.20}
+          assert {x["tp_r"] for x in s.CONFIGS}=={1.5,2.0}
+          old=s.ex.w1m
+          try:
+            t=np.arange(15,dtype=np.int64)*60000
+            o=np.ones(15)*100;h=np.ones(15)*100;l=np.ones(15)*100
+            h[0]=103
+            s.ex.w1m=lambda symbol,ts:(t,o,h,l)
+            assert s.entrybar_exit("X",0,"long",102,98)=="loss"
+            h=np.ones(15)*100;l=np.ones(15)*100;h[1]=103
+            s.ex.w1m=lambda symbol,ts:(t,o,h,l)
+            assert s.entrybar_exit("X",0,"long",102,98)=="win"
+          finally:
+            s.ex.w1m=old
+          print("SWEEP_RECLAIM_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay shard
+        run: python scripts/sweep_reclaim_research.py --data data --shard \${{ matrix.shard }} --shards 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweep-reclaim-v1-\${{ matrix.shard }}
+          path: |
+            sweep_reclaim_raw_\${{ matrix.shard }}.csv.gz
+            sweep_reclaim_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sweep-reclaim-v1-*
+          path: artifacts
+      - name: Portfolio simulation
+        run: python scripts/sweep_reclaim_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweep-reclaim-v1-final
+          path: |
+            sweep_reclaim_summary.csv
+            sweep_reclaim_report.md
+            sweep_reclaim_all_candidates.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
