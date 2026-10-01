@@ -1,0 +1,29 @@
+name: Cross Sectional Train Structure
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/cross_sectional_train_structure_run']
+permissions: {contents: read, actions: read}
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download preserved 8 prepared shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p parts
+          for s in 0 1 2 3 4 5 6 7; do
+            gh run download 36719407689 -R ${{ github.repository }} -p "cross-sectional-part-$s" -D "parts/$s"
+          done
+      - run: python scripts/cross_sectional_train_structure.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-train-structure
+          path: |
+            cross_sectional_train_structure.csv
+            cross_sectional_train_structure.json
