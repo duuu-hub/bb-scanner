@@ -14,8 +14,12 @@ preserved. No GATE/accounts ran. No active V5 execution to duplicate.
 V6 preregistered on research-btc-factor-lag-v6, PLAN commit23589bd985b56934b4698710896f610be168740c.
 Actual code65095198c689b09a3028ec460db8198f819b0bcc; run36906530309:
 https://github.com/duuu-hub/bb-scanner/actions/runs/36906530309
-Phase V6_VALIDATING_AND_RUNNING.130 local tests passed; actual CI validation
-and market outputs PENDING. No profit/result claim. Never duplicate this run.
+Phase V6_DEVELOPMENT_RUNNING. Actual validate job110518359010 SUCCESS:
+130CItests, ALL_CHRONOLOGY_SMOKE_PASS and ALL_CANONICAL_INVARIANTS_PASS verified
+from actual logs. Eight DEV shards running/completing; no complete result claim.
+Actual sampled logs: shard6=63,210outcomes, shard4=52,764outcomes/6exclusions.
+Source catalogue and previous CSV hashes verified in actual DEV job logs.
+These overlapping policy observations are not account trades/profit. No duplicate.
 New conjecture: BTC-factor-sensitive coins underreacting to a BTC impulse may
 catch up after their own closed15m direction/volume confirmation.672 matched
 prior returns estimate beta/R2 ending BEFORE the1h/4h impulse.16entry settings,
@@ -28,7 +32,13 @@ omitting both partialUTC-boundary dates. Original files/history remain intact.
 V6 explicitly counts ALL intersectedKSTdates and flags partial hours; default
 legacy mode retained for reproduction. No fill/risk/cash changes.853DEV dates
 (851full+2partial),367GATE dates(365full+2partial). Old V3 goal rates851/365 are
-complete-only, not all-date attainment; saved-curve correction remains pending.
+complete-only. Reporting-only saved-curve audit now preserved on
+research-calendar-audit-v3, commitd67a388872b0b7b66d69f63d261f1db249e21c3c,
+path research/calendar-audit/v3-36866930929. All8scenario daily products/complete
+old dates match; original30file SHA/bytes match prior durable archive. No market
+rerun or trade/risk/PNL change. Corrected DEV20goal13/853=1.5240%;GATE20goal
+10/367=2.7248%, with both partial dates flagged. V3 remains rejected. V1/V2
+saved-curve corrections pending; do not relabel original complete-only rates.
 
 ## Completed failures and durable assets
 
