@@ -1,0 +1,36 @@
+name: Cross Sectional Event Retry
+'on':
+  push:
+    branches:
+      - research-rank5-binance-15m-5y
+    paths:
+      - .research/trigger_cross_sectional_event_retry
+permissions:
+  contents: read
+  actions: read
+jobs:
+  event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download successful prepared shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p parts
+          for i in 0 1 2 3 4 5 6 7; do
+            gh run download 36843614283 -R ${{ github.repository }} -n "cross-sectional-part-$i" -D "parts/cross-sectional-part-$i"
+          done
+      - run: python scripts/cross_sectional_event_scan.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-event-results
+          path: |
+            event_cells.csv
+            event_spreads.csv
+            event_summary.json
