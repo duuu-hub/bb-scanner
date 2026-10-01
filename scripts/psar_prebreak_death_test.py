@@ -335,7 +335,7 @@ ap=argparse.ArgumentParser()
 ap.add_argument("--data",default="data");ap.add_argument("--out",default="death.json")
 ap.add_argument("--ledger-out",default="death_ledger.csv.gz")
 ap.add_argument("--shard",type=int,default=0);ap.add_argument("--shards",type=int,default=1)
-ap.add_argument("--max-files",type=int,default=0)
+ap.add_argument("--max-files",type=int,default=0);ap.add_argument("--exclude-symbol",default="")
 a=ap.parse_args()
 if a.shards<1 or a.shard<0 or a.shard>=a.shards:raise RuntimeError(f"invalid shard selection {a.shard}/{a.shards}")
 m=4
@@ -386,7 +386,7 @@ definition={
     "workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),
     "source_engine_blob_sha":os.environ.get("PSAR_SOURCE_ENGINE_BLOB","unknown"),
     "source_data_run":"36095439671","input_files_total":len(all_files),
-    "shard_index":a.shard,"shard_count":a.shards,
+    "shard_index":a.shard,"shard_count":a.shards,"excluded_symbols":[_symbol(p) for p in excluded],"raw_input_files_total":len(all_files),
     "scope":"PSAR 1H strict pre-break SHORT death test; shortlist frozen before run",
     "candidates":[f"P{p:g}|SB{s:g}|TP{t:g}|SHORT" for p,s,t in CANDIDATES],
     "ledger_keys":sorted(LEDGER_KEYS),
