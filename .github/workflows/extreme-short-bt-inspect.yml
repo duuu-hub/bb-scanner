@@ -1,0 +1,44 @@
+name: Inspect Extreme Short Backtest
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_short_bt_inspect_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download compact backtest result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir -p inspect_result
+          gh run download 36857384059 -D inspect_result -n extreme-extension-short-bt-36857384059
+      - name: Print 30x+ trades
+        run: |
+          python - <<'PY'
+          import csv,glob,json
+          from datetime import datetime,timezone
+          p=glob.glob('inspect_result/**/trades.csv',recursive=True)[0]
+          rows=list(csv.DictReader(open(p)))
+          keep=[r for r in rows if float(r['threshold_x'])>=30]
+          keep.sort(key=lambda r:(float(r['threshold_x']),r['symbol']))
+          out=[]
+          for r in keep:
+              d={k:r[k] for k in ['symbol','threshold_x','trough','trough_ts','cross_ts','cross_high','entry_ts','entry','entry_vs_trough_x',
+                                    'd1_gross_pct','d1_mae_pct','d2_gross_pct','d2_mae_pct','d3_gross_pct','d3_mae_pct',
+                                    'd4_gross_pct','d4_mae_pct','d5_gross_pct','d5_mae_pct','d6_gross_pct','d6_mae_pct','d7_gross_pct','d7_mae_pct']}
+              for k in ['trough_ts','cross_ts','entry_ts']:
+                  ts=int(float(d[k]))
+                  d[k.replace('_ts','_utc')]=datetime.fromtimestamp(ts/1000,timezone.utc).isoformat()
+              out.append(d)
+          print('TRADES_30X_PLUS')
+          print(json.dumps(out,ensure_ascii=False))
+          print('COUNTS',json.dumps({str(t):sum(float(r['threshold_x'])==t for r in rows) for t in [10,20,30,40,50]}))
+          PY
