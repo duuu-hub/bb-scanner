@@ -1,0 +1,88 @@
+name: PSAR Pre-Break Death Test
+
+on:
+  push:
+    branches: ['research-rank5-binance-15m-5y']
+    paths: ['.research/psar_prebreak_death_test_run']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psar-prebreak-death-test
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Pin corrected source engine and compile death test
+        run: |
+          test "$(git hash-object scripts/psar_1h_breakthrough_compare.py)" = "f4b716e0ad4742c48c51f881126bbe73cf1c34b3"
+          python -m py_compile scripts/psar_prebreak_death_test.py scripts/psar_prebreak_death_merge.py
+      - name: Corrected engine actual 30 plus 10 audit
+        run: python scripts/psar_prebreak_runtime_audit.py --engine scripts/psar_1h_breakthrough_compare.py --require-trigger-fix --out death_runtime_audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-runtime-audit
+          path: death_runtime_audit.json
+
+  stats:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Download immutable 5y Binance source data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run corrected SHORT death test
+        run: |
+          export PSAR_SOURCE_ENGINE_BLOB=$(git hash-object scripts/psar_1h_breakthrough_compare.py)
+          test "$PSAR_SOURCE_ENGINE_BLOB" = "f4b716e0ad4742c48c51f881126bbe73cf1c34b3"
+          python scripts/psar_prebreak_death_test.py --data data --shard ${{ matrix.shard }} --shards 64 --out death_${{ matrix.shard }}.json --ledger-out death_ledger_${{ matrix.shard }}.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-${{ matrix.shard }}
+          path: |
+            death_${{ matrix.shard }}.json
+            death_ledger_${{ matrix.shard }}.csv.gz
+
+  merge:
+    needs: stats
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download all death-test shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: psar-prebreak-death-*
+          path: all
+      - name: Strict merge
+        run: |
+          python scripts/psar_prebreak_death_merge.py --data all --out psar_prebreak_death_merged.json
+          cat psar_prebreak_death_merged.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-merged
+          path: |
+            psar_prebreak_death_merged.json
+            psar_prebreak_death_merged.csv
+            psar_prebreak_death_merged.md
