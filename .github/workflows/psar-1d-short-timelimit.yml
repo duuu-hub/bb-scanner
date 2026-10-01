@@ -20,6 +20,7 @@ jobs:
           git rev-parse HEAD
           sha256sum scripts/psar_1d_short_timelimit.py
           grep -n -- '--out' scripts/psar_1d_short_timelimit.py
+          python -c "import sys; sys.path.insert(0,'scripts'); import psar_1d_exec_helpers; print('HELPER_IMPORT_OK')"
           python scripts/psar_1d_short_timelimit.py --help | grep -- '--out'
           python -m py_compile scripts/psar_1d_short_timelimit.py
           python scripts/psar_1d_short_timelimit.py --data data --shard 0 --shards 64 --out smoke.csv.gz
