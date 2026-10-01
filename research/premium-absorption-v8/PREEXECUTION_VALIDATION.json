@@ -1,0 +1,55 @@
+{
+  "study": "V8_PREMIUM_ABSORPTION",
+  "validated_at_utc": "2026-10-01T21:26:57Z",
+  "plan_commit": "d4ec06ebc2633062535bd5ec418a8470a7b1d8e8",
+  "market_outcomes_observed": false,
+  "official_source_probe": {
+    "status": "PENDING_ACTUAL_GITHUB_ACTIONS",
+    "required_symbol": "BTCUSDT",
+    "required_month": "2022-01",
+    "required_contract": "official ZIP plus CHECKSUM and signed 12-field premium-index OHLC"
+  },
+  "local_validation": {
+    "python_compile": "PASS",
+    "workflow_yaml_parse": "PASS",
+    "unit_tests": {
+      "status": "PASS",
+      "total": 181,
+      "suites": {
+        "premium_absorption_v8": 23,
+        "funding_crowding_v7_regression": 28,
+        "btc_factor_lag_v6_regression": 31,
+        "liquidity_sweep_v5_regression": 30,
+        "research_evidence_archive": 4,
+        "shock_confirmation_v3_regression": 8,
+        "day_edge_canonical": 14,
+        "day_edge_lab": 13,
+        "relative_pullback_v1": 30
+      }
+    },
+    "canonical_chronology_smoke": {
+      "status": "NOT_CLAIMED_LOCALLY",
+      "reason": "Local environment lacks numba; the actual workflow installs numba==0.62.1 and must pass this smoke before development jobs can start."
+    }
+  },
+  "expected_actual_sequence": [
+    "validate 181 tests",
+    "actual official premium source probe",
+    "canonical chronology smoke",
+    "eight development shards over 16 settings and 96 policies",
+    "development-only frozen selection",
+    "eight already-seen 2024 gate shards if selected",
+    "same-budget account replay if selected",
+    "complete raw evidence preservation"
+  ],
+  "sha256": {
+    "scripts/premium_absorption_v8.py": "928f19a1c824e167d1f1f3430d00caf74cc14e1d1e4d82c728640f38342f34d7",
+    "scripts/premium_index_archive.py": "897338ae736313134818aabd751e70d16d8fe032823a9b15c9851d1dd195a0b7",
+    "tests/test_premium_absorption_v8.py": "2241e85a678f9f10d5463b4c1e0e5ec8949d5296fb0f97f1dd8b08c60180d988",
+    ".github/workflows/premium-absorption-v8.yml": "52cded28acb8be80a00627b6470130f9fa46e35303b61dd7d1f3392f143ca591",
+    "research/premium-absorption-v8/PLAN.md": "0acfdeb34a2ccd266a58bb98f44aabb98a21e5b1fde3e19579e72acdfe7d4380",
+    "research/premium-absorption-v8/FROZEN_INPUT_HASHES.json": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f",
+    ".research/premium-absorption-v8-run": "597353f8d4f9f74f407491aba403a4fdb07f4d35afbf6a43e851422dfe650939"
+  },
+  "claim": "Implementation validation only. No profitability, account growth, or daily-target claim."
+}
