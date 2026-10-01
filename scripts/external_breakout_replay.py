@@ -170,7 +170,7 @@ def trade(symbol,t,o,h,l,c,j,side,fill,atr,slatr,r):
    else:xp,xb,reason=sl,k,"SL"
    break
  if xp is None:xb=end-1;xp=float(c[xb]);reason="TIME"
- gr=(xp/fill-1) if long else (fill/xp-1);rp=risk/fill
+ gr=(xp/fill-1) if long else ((fill-xp)/fill);rp=risk/fill
  out={"status":"resolved","exit_bar":int(xb),"exit":float(xp),"reason":reason,"risk_pct":float(rp),"gross_return":float(gr),"gross_r":float(gr/rp)}
  for bp in (20,40):out[f"net{bp}_return"]=float(gr-bp/10000);out[f"net{bp}_r"]=float((gr-bp/10000)/rp)
  return out
