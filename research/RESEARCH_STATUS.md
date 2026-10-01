@@ -14,11 +14,20 @@ survivors. Saved8trade/daily/curve accounts independently reconciled. No duplica
 
 V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 started
 onresearch-funding-crowding-v7 after PLAN17e019d3980c4a03cd9f2aa00ebc824c937751ee.
-PhaseV7_ACTUAL_VALIDATION_IN_PROGRESS.158local tests passed; local full
-chronology smoke lacksnumba, so NOlocal chronology pass claim. Actual Actions
-validate installs frozen packages, runs158tests/canonical smoke and an original
-BTCUSDT2022-01 fundingZIP/CHECKSUM/schema probe BEFORE permitting8DEVshards.
-No V7 market-profit result yet. Actual run confirmedin_progress; no duplicate.
+PhaseV7_VALIDATION_SOURCE_AUDITED_DEV_RUNNING. Actual validatejob110573194084
+PASSED158tests,ALL_CHRONOLOGY_SMOKE_PASS andALL_CANONICAL_INVARIANTS_PASS,
+all confirmed by direct log read. OriginalBTCUSDT2022-01paidfunding archive
+probe PASSED:93records, supplied8hintervals, expected3columns. Downloaded
+actual validation artifact11192687469(18441bytes) SHA matchesActionsdigest;
+raw ZIP/CHECKSUM/parsedNPZ/arrayhashes independently reconciled. OriginalZIP
+SHA22ee19079b620f5c6d820e7d7f8bafa7fde866d89bd664863b8bd527749c12cb.
+Settlement timestamps can be milliseconds offboundary, so laggedasof bar waits
+an additionalbar as preregistered. No schema repair or strategy retuning.
+Auditcommitfd74b9fa8685b2335ed7e27ddbf42efb697ad310, path
+research/funding-crowding-v7/ACTUAL_VALIDATION_AUDIT.json. Marker unchanged;
+researchrun pinnedto4db8code. All8DEVjobs in_progress inactualActions state.
+No completedV7 market-profit result yet;96cell completion not claimed.
+Local fullsmoke had lackednumba; actualCI nowpassed, originalhistory preserved.
 New external observable: unusually signed paid funding plus opposing closed
 price/flow confirmation, inventory-unwind conjecture.16entries/96policies6h/24h.
 Past settled rates available after15min; historical intervals normalized; no
