@@ -7,33 +7,39 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 completed
-ALL20jobs successfully:158tests/canonical smoke,eightDEV shards,selection,eightGATE
-shards,24accounts and full preservation.96cells/271514resolved outcomes;two frozen
-LONG candidates;ZERO strict survivors. All24saved accounts independently audited.
-Full rejection numbers and evidence are in the completed section below.
+V8 repaired actual run 36929463082/code
+c049138866f628bb2de891b81a77b133de13359d completed SUCCESS operationally:
+validation plus all eight DEV shards, selection and full preservation succeeded.
+Actual logs prove the frozen 256-input preflight, 181 tests, canonical chronology/
+invariants and official premium probe. The eight shards produced 531,854 resolved
+parameterized outcomes across 16 entries/96 policies. Selection returned exact
+NO_DEVELOPMENT_POLICY_SURVIVOR; 2024 gate/accounts correctly skipped. This is an
+economic rejection, not success.
 
-V8 attempt1 run36928892394/code7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0
-completed FAILURE before any market scan. Actual validation job110592960293 passed
-181tests,ALL_CHRONOLOGY_SMOKE_PASS,ALL_CANONICAL_INVARIANTS_PASS and official
-BTCUSDT2022-01 premium probe(2,976bars,range-.00392945..+.00323124). All eight
-DEV jobs then failed at frozen-source verification because
-research/premium-absorption-v8/FROZEN_INPUT_HASHES.json was absent from the
-implementation tree. Zero policy cells/market outcomes;selection/gate/accounts
-skipped. Preserve-cycle also failed on that same absent file. Durable failure
-record is research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json.
-
-V8 source-repair attempt2 run36929463082/codec049138866f628bb2de891b81a77b133de13359d
-is executing eight DEV shards. Actual validation job110594857319 passed the
-256-hash frozen-input preflight,all181tests,ALL_CHRONOLOGY_SMOKE_PASS,
-ALL_CANONICAL_INVARIANTS_PASS and the official BTCUSDT2022-01 premium probe
-(2,976bars,range-.00392945..+.00323124). All eight jobs then passed frozen-source
-catalogue verification and entered the actual canonical V8 scan step. Economic
-hypothesis,16entries/96policies,selection and execution rules remain unchanged.
-No V8 market outcome is complete yet;no profitability,account-growth or
-daily-goal claim;do not duplicate this run.
+V9 is preregistered before implementation/outcomes on branch
+research-cross-sectional-leader-v9, plan commit
+53fea7dd385bdd1ec7048f58be23087f5168158a. It changes the observable to a
+frozen prior-day global rank of coin-minus-BTC 24h performance and tests
+next-day intraday resumption. No V9 run or profitability result exists yet.
 
 ## Completed failures and durable assets
+- V8 actual run36929463082/codec049138866f628bb2de891b81a77b133de13359d:
+  workflow operationally SUCCESS;256 frozen hashes,181tests/canonical checks,
+  eightDEV shards and selection completed.16entries/96cells/531854resolved
+  outcomes;ZERO positive overall net40 price cells,ZERO positive overall R cells
+  and ZERO selected policies. Price means -62.2867 to -19.0345bp,R means
+  -.22681 to-.06066,PF.58295-.88342. Every2021 cell negative price/R;only one
+  2023 price cell positive. Premium coverage2021 100%,2022 99.8844%,2023
+  99.7796%;4626/4687 premium months validated,61 explicit gaps;868 official
+  minute months checksum-proven.160DATA_GAP+6ENTRY_MISMATCH excluded;399wide-stop
+  and2catch-up-gap intents rejected. Gate/accounts skipped,so no daily-goal
+  evidence and target unmet. Full archive21608files/2006309686bytes on
+  research-premium-absorption-v8-evidence-36929463082 commit
+  a35f285fb57926439fac98437c5d4a75f3cc52e4;DEV commit
+  b05d753bff7a8fb0f752b221e1052b7fdaf768fe. Failure audit and V9 preregistration
+  on commit53fea7dd385bdd1ec7048f58be23087f5168158a. Attempt1 packaging failure
+  remains separately recorded and is not counted as a discovery.
+
 - V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:
   all20jobsSUCCESS,158tests/canonical smoke,16entries/96DEVcells/271514resolved
   outcomes,twofrozenLONG candidates,24accounts,ZEROstrictsurvivors. Funding
@@ -166,8 +172,10 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Implement/test frozen V7 funding source and causal rules, execute actual workflow, inspect logs/results.
-If failed, diagnose numerically and preregister/implement/validate/execute the next
-economic mechanism. If provisional survivor, freeze before neighbours/stress and
-fresh forward validation; report target attainment on ALL calendar dates.
-Preserve cumulative trials, adverse results, code/input hashes and every repair.
+Implement and test the frozen V9 rank map/reduce and next-day resumption engine,
+then execute one actual Actions workflow. Verify exact prior-midnight availability,
+shard-order-invariant ranks, >=30-name universe, one/two-day persistence, all96
+cells, canonical1m exits, annual selection and account/calendar invariants. Read
+actual logs/artifacts; if rejected, preserve the numeric failure and preregister
+a genuinely new mechanism. If provisional survivor, freeze before neighbours,
+stress/delays/time blocks/seen recent comparisons and future observations.
