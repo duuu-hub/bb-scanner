@@ -1,0 +1,1033 @@
+﻿2026-10-01T17:09:51.1289435Z Current runner version: '2.337.0'
+2026-10-01T17:09:51.1316581Z ##[group]Runner Image Provisioner
+2026-10-01T17:09:51.1317479Z Hosted Compute Agent
+2026-10-01T17:09:51.1318173Z Version: 20260901.588
+2026-10-01T17:09:51.1318954Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T17:09:51.1319690Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T17:09:51.1320493Z Worker ID: {737827b2-c752-498a-af66-c515f03353fb}
+2026-10-01T17:09:51.1321403Z Azure Region: centralus
+2026-10-01T17:09:51.1322111Z ##[endgroup]
+2026-10-01T17:09:51.1323571Z ##[group]Operating System
+2026-10-01T17:09:51.1324258Z Ubuntu
+2026-10-01T17:09:51.1324882Z 24.04.5
+2026-10-01T17:09:51.1325432Z LTS
+2026-10-01T17:09:51.1325955Z ##[endgroup]
+2026-10-01T17:09:51.1326680Z ##[group]Runner Image
+2026-10-01T17:09:51.1327295Z Image: ubuntu-24.04
+2026-10-01T17:09:51.1327933Z Version: 20260927.320.1
+2026-10-01T17:09:51.1329239Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T17:09:51.1331082Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T17:09:51.1332090Z ##[endgroup]
+2026-10-01T17:09:51.1334229Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T17:09:51.1336567Z Actions: read
+2026-10-01T17:09:51.1337324Z Contents: write
+2026-10-01T17:09:51.1337928Z Metadata: read
+2026-10-01T17:09:51.1338497Z ##[endgroup]
+2026-10-01T17:09:51.1341432Z Secret source: Actions
+2026-10-01T17:09:51.1342436Z Cache mode: write
+2026-10-01T17:09:51.1343603Z Prepare workflow directory
+2026-10-01T17:09:51.1683742Z Prepare all required actions
+2026-10-01T17:09:51.1735229Z Getting action download info
+2026-10-01T17:09:51.4564184Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T17:09:51.5715423Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-01T17:09:51.7576907Z Complete job name: preserve_previous
+2026-10-01T17:09:51.8389729Z ##[group]Run actions/checkout@v4
+2026-10-01T17:09:51.8390759Z with:
+2026-10-01T17:09:51.8391214Z   repository: duuu-hub/bb-scanner
+2026-10-01T17:09:51.8395356Z   token: ***
+2026-10-01T17:09:51.8395800Z   ssh-strict: true
+2026-10-01T17:09:51.8396246Z   ssh-user: git
+2026-10-01T17:09:51.8396703Z   persist-credentials: true
+2026-10-01T17:09:51.8397201Z   clean: true
+2026-10-01T17:09:51.8397661Z   sparse-checkout-cone-mode: true
+2026-10-01T17:09:51.8398185Z   fetch-depth: 1
+2026-10-01T17:09:51.8398619Z   fetch-tags: false
+2026-10-01T17:09:51.8399064Z   show-progress: true
+2026-10-01T17:09:51.8399514Z   lfs: false
+2026-10-01T17:09:51.8399927Z   submodules: false
+2026-10-01T17:09:51.8400371Z   set-safe-directory: true
+2026-10-01T17:09:51.8401060Z   allow-unsafe-pr-checkout: false
+2026-10-01T17:09:51.8401817Z ##[endgroup]
+2026-10-01T17:09:51.9432964Z Syncing repository: duuu-hub/bb-scanner
+2026-10-01T17:09:51.9434729Z ##[group]Getting Git version info
+2026-10-01T17:09:51.9435542Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T17:09:51.9436582Z [command]/usr/bin/git version
+2026-10-01T17:09:51.9508524Z git version 2.55.0
+2026-10-01T17:09:51.9537606Z ##[endgroup]
+2026-10-01T17:09:51.9545606Z Temporarily overriding HOME='/home/runner/work/_temp/fdc54c88-1ed4-40c3-97cb-eedf3b96db70' before making global git config changes
+2026-10-01T17:09:51.9548289Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T17:09:51.9550745Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:09:51.9606099Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T17:09:51.9611437Z ##[group]Initializing the repository
+2026-10-01T17:09:51.9615959Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:09:51.9725414Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T17:09:51.9727094Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T17:09:51.9728946Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T17:09:51.9730108Z hint: call:
+2026-10-01T17:09:51.9730918Z hint:
+2026-10-01T17:09:51.9731703Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T17:09:51.9732677Z hint:
+2026-10-01T17:09:51.9733630Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T17:09:51.9735097Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T17:09:51.9736269Z hint:
+2026-10-01T17:09:51.9736900Z hint: 	git branch -m <name>
+2026-10-01T17:09:51.9737641Z hint:
+2026-10-01T17:09:51.9738673Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T17:09:51.9740299Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-01T17:09:51.9743000Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:09:51.9787869Z ##[endgroup]
+2026-10-01T17:09:51.9789080Z ##[group]Disabling automatic garbage collection
+2026-10-01T17:09:51.9792152Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T17:09:51.9826138Z ##[endgroup]
+2026-10-01T17:09:51.9827247Z ##[group]Setting up auth
+2026-10-01T17:09:51.9832645Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T17:09:51.9867671Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T17:09:52.0247268Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T17:09:52.0289017Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T17:09:52.0543517Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T17:09:52.0582489Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T17:09:52.0826303Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T17:09:52.0869263Z ##[endgroup]
+2026-10-01T17:09:52.0870162Z ##[group]Fetching the repository
+2026-10-01T17:09:52.0879603Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e4c78b629ae0a0ff6cc4e9712385248588c89b32:refs/remotes/origin/research-compression-expansion-v4
+2026-10-01T17:10:11.4703888Z From https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:10:11.4705120Z  * [new ref]         e4c78b629ae0a0ff6cc4e9712385248588c89b32 -> origin/research-compression-expansion-v4
+2026-10-01T17:10:11.4707827Z ##[endgroup]
+2026-10-01T17:10:11.4708610Z ##[group]Determining the checkout info
+2026-10-01T17:10:11.4710026Z ##[endgroup]
+2026-10-01T17:10:11.4716595Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T17:10:11.4775296Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T17:10:11.4810904Z ##[group]Checking out the ref
+2026-10-01T17:10:11.4816812Z [command]/usr/bin/git checkout --progress --force -B research-compression-expansion-v4 refs/remotes/origin/research-compression-expansion-v4
+2026-10-01T17:10:11.7088078Z Switched to a new branch 'research-compression-expansion-v4'
+2026-10-01T17:10:11.7092733Z branch 'research-compression-expansion-v4' set up to track 'origin/research-compression-expansion-v4'.
+2026-10-01T17:10:11.7106899Z ##[endgroup]
+2026-10-01T17:10:11.7158273Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T17:10:11.7188713Z e4c78b629ae0a0ff6cc4e9712385248588c89b32
+2026-10-01T17:10:11.7466823Z ##[group]Run actions/setup-python@v5
+2026-10-01T17:10:11.7467202Z with:
+2026-10-01T17:10:11.7467470Z   python-version: 3.12
+2026-10-01T17:10:11.7467756Z   check-latest: false
+2026-10-01T17:10:11.7470779Z   token: ***
+2026-10-01T17:10:11.7471058Z   update-environment: true
+2026-10-01T17:10:11.7471368Z   allow-prereleases: false
+2026-10-01T17:10:11.7471653Z   freethreaded: false
+2026-10-01T17:10:11.7471923Z ##[endgroup]
+2026-10-01T17:10:11.8804461Z ##[group]Installed versions
+2026-10-01T17:10:11.8888609Z (node:2306) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:10:11.8889737Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:10:11.8890453Z Successfully set up CPython (3.12.14)
+2026-10-01T17:10:11.8891681Z ##[endgroup]
+2026-10-01T17:10:11.9144535Z ##[group]Run pip install pandas==2.3.3
+2026-10-01T17:10:11.9145233Z [36;1mpip install pandas==2.3.3[0m
+2026-10-01T17:10:11.9443265Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:10:11.9443673Z env:
+2026-10-01T17:10:11.9444039Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:11.9444587Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:10:11.9445121Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:11.9445551Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:11.9445982Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:11.9446415Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:10:11.9446789Z ##[endgroup]
+2026-10-01T17:10:12.9769850Z Collecting pandas==2.3.3
+2026-10-01T17:10:13.0547928Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-01T17:10:13.3501777Z Collecting numpy>=1.26.0 (from pandas==2.3.3)
+2026-10-01T17:10:13.3637326Z   Downloading numpy-2.5.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+2026-10-01T17:10:13.3836671Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-01T17:10:13.3968578Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-01T17:10:13.4403065Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-01T17:10:13.4542294Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-01T17:10:13.4771841Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-01T17:10:13.4903873Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-01T17:10:13.5108586Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-01T17:10:13.5242987Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-01T17:10:13.5416401Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-01T17:10:14.0748666Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 24.5 MB/s  0:00:00
+2026-10-01T17:10:14.0883227Z Downloading numpy-2.5.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+2026-10-01T17:10:14.2947592Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 81.4 MB/s  0:00:00
+2026-10-01T17:10:14.3086709Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-01T17:10:14.3249899Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-01T17:10:14.3425453Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-01T17:10:14.3584422Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-01T17:10:14.5095193Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-01T17:10:21.8453101Z 
+2026-10-01T17:10:21.8467186Z Successfully installed numpy-2.5.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-01T17:10:21.9150040Z ##[group]Run set -euo pipefail
+2026-10-01T17:10:21.9150409Z [36;1mset -euo pipefail[0m
+2026-10-01T17:10:21.9151160Z [36;1mgh run download 36853787624 -R duuu-hub/bb-scanner -n relative-pullback-v1-results -D previous/V1/accounts[0m
+2026-10-01T17:10:21.9151978Z [36;1mgh run download 36853787624 -R duuu-hub/bb-scanner -n relative-pullback-v1-validation -D previous/V1/validation[0m
+2026-10-01T17:10:21.9153000Z [36;1mgh run download 36863290334 -R duuu-hub/bb-scanner -n day-edge-v2-canonical-details -D previous/V2/accounts[0m
+2026-10-01T17:10:21.9153756Z [36;1mgh run download 36863290334 -R duuu-hub/bb-scanner -n day-edge-v2-canonical-validation -D previous/V2/validation[0m
+2026-10-01T17:10:21.9154556Z [36;1mgh run download 36866930929 -R duuu-hub/bb-scanner -n shock-confirm-v3-account-details -D previous/V3/accounts[0m
+2026-10-01T17:10:21.9155284Z [36;1mgh run download 36866930929 -R duuu-hub/bb-scanner -n shock-confirm-v3-validation -D previous/V3/validation[0m
+2026-10-01T17:10:21.9156075Z [36;1mgh run download 36866930929 -R duuu-hub/bb-scanner -p 'shock-confirm-v3-dev-[0-7]' -D previous/V3/development[0m
+2026-10-01T17:10:21.9156655Z [36;1mfor run_id in 36853787624 36861359640 36863290334 36866930929; do[0m
+2026-10-01T17:10:21.9157216Z [36;1m  gh api repos/duuu-hub/bb-scanner/actions/runs/$run_id/artifacts > previous/artifacts-$run_id.json[0m
+2026-10-01T17:10:21.9157821Z [36;1m  gh run view $run_id -R duuu-hub/bb-scanner --log > previous/run-$run_id.log[0m
+2026-10-01T17:10:21.9158203Z [36;1mdone[0m
+2026-10-01T17:10:21.9230027Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:10:21.9230294Z env:
+2026-10-01T17:10:21.9230692Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:21.9231138Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:10:21.9231569Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:21.9231951Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:21.9232343Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:21.9232722Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:10:21.9235763Z   GH_TOKEN: ***
+2026-10-01T17:10:21.9235990Z ##[endgroup]
+2026-10-01T17:10:44.1375685Z ##[group]Run python scripts/research_evidence_archive.py archive --source previous --kind V1-V2-V3-history --out research/dayedge-evidence/prior-run-36897289990
+2026-10-01T17:10:44.1376860Z [36;1mpython scripts/research_evidence_archive.py archive --source previous --kind V1-V2-V3-history --out research/dayedge-evidence/prior-run-36897289990[0m
+2026-10-01T17:10:44.1377550Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-01T17:10:44.1378006Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-01T17:10:44.1378445Z [36;1mgit checkout -b "$RESULT_BRANCH"[0m
+2026-10-01T17:10:44.1378808Z [36;1mgit add "research/dayedge-evidence/prior-run-36897289990"[0m
+2026-10-01T17:10:44.1379368Z [36;1mgit commit -m "Preserve all prior account curves, failures, V3 DEV trials and exact evidence hashes"[0m
+2026-10-01T17:10:44.1379865Z [36;1mgit push origin "$RESULT_BRANCH"[0m
+2026-10-01T17:10:44.1448417Z shell: /usr/bin/bash -e {0}
+2026-10-01T17:10:44.1448738Z env:
+2026-10-01T17:10:44.1449024Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:44.1449498Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T17:10:44.1449955Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:44.1450341Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:44.1450906Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T17:10:44.1451298Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T17:10:44.1451684Z   RESULT_BRANCH: research-dayedge-evidence-36897289990
+2026-10-01T17:10:44.1451997Z ##[endgroup]
+2026-10-01T17:10:45.1363241Z EVIDENCE_ARCHIVED V1-V2-V3-history 808 files 155194348 bytes
+2026-10-01T17:10:45.1891526Z Switched to a new branch 'research-dayedge-evidence-36897289990'
+2026-10-01T17:10:49.9337143Z [research-dayedge-evidence-36897289990 11780e1] Preserve all prior account curves, failures, V3 DEV trials and exact evidence hashes
+2026-10-01T17:10:49.9338294Z  809 files changed, 214262 insertions(+)
+2026-10-01T17:10:49.9341249Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/EVIDENCE_MANIFEST.json
+2026-10-01T17:10:49.9343256Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/data/download_manifest.json
+2026-10-01T17:10:49.9344780Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9346498Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9348233Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9349914Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9351710Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9353492Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9355262Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9357056Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9358843Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9361172Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9363007Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9364786Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_BOTH_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9366589Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9368355Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9370011Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9372023Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9373791Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9375547Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9377332Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9379110Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9381126Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9382858Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9384869Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9386582Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_LONG_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9388311Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9390017Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9392068Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9393857Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9395657Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9397419Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9399231Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9401432Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9403211Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9404964Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9406629Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9408331Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/HOLDOUT_SHORT_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9409886Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/REPORT.md
+2026-10-01T17:10:49.9411659Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9413443Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9415137Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9416869Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9418548Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9420212Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9422170Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9423939Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9426027Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9427778Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9429496Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9431395Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_BOTH_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9433149Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9434887Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9436648Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9438406Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9440095Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9442385Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9444221Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9445998Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9447698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9449496Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9451447Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9453168Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_LONG_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9455215Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9457186Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9459029Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9461002Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9462736Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_guarded_daily.csv
+2026-10-01T17:10:49.9464494Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_20bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9466296Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_diagnostic_curve.csv.gz
+2026-10-01T17:10:49.9468298Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_diagnostic_daily.csv
+2026-10-01T17:10:49.9470127Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_diagnostic_trades.csv.gz
+2026-10-01T17:10:49.9472196Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_guarded_curve.csv.gz
+2026-10-01T17:10:49.9473933Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_guarded_daily.csv
+2026-10-01T17:10:49.9475616Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/TRAIN_SHORT_40bp_guarded_trades.csv.gz
+2026-10-01T17:10:49.9477336Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/independent_candidates.csv.gz
+2026-10-01T17:10:49.9478906Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/scan_meta.json
+2026-10-01T17:10:49.9480458Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/summary.csv
+2026-10-01T17:10:49.9482235Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/summary.json
+2026-10-01T17:10:49.9483773Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/relative-pullback-results/year_quarter.csv
+2026-10-01T17:10:49.9485531Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/accounts/research/relative-pullback-v1/PLAN.md
+2026-10-01T17:10:49.9486900Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/validation/canonical-smoke.log
+2026-10-01T17:10:49.9488199Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V1/validation/relative-pullback-tests.log
+2026-10-01T17:10:49.9489393Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/audit.json
+2026-10-01T17:10:49.9491083Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9492889Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9494649Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9496412Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9498210Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9499977Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9502019Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9503885Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9505743Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9507775Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9509573Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9511506Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9513432Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9515289Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9517058Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9518856Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9520836Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9522570Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9524606Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9526421Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9528180Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9529932Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9531926Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9533702Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9535528Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9537341Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9539146Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9541107Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9542898Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9544700Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9546527Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9548623Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9550451Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9552526Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9554266Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9556052Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9557890Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9559654Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9561665Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9563433Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9565561Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9567413Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9569256Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9571334Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9573192Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9575007Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9576760Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9578475Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9580248Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9582260Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9584031Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9585831Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9587588Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9589601Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9591604Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9593400Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9595172Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9596938Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9598691Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9600434Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9602440Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9604236Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9606302Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9608149Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9609895Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9611958Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9613701Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9615478Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9617259Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9619073Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9621091Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9622871Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9624722Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9626536Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9628648Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9630483Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9632498Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9634272Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9636127Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9637973Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9639787Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9641848Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9643604Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9645606Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9647392Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9649142Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9651099Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9652812Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9654585Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9656326Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9658082Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9659795Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9661799Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9663547Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9665257Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9666960Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9668958Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9670888Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9672679Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9674475Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9676233Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9678010Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9679777Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9681878Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9683621Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9685657Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9687383Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9689146Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9691426Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9692686Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9693755Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9694823Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9695839Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9696843Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9697857Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9698857Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9699864Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9701248Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9702231Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9703210Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9704202Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9705198Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9706251Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9707274Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9708262Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9709250Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9710678Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9711698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9712698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9713690Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9714670Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9715662Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9716678Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9717698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9718718Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9719746Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9720850Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9721883Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9722905Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9724061Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9725070Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9726076Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9727064Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9728065Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9729069Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9730069Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9731401Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9732411Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9733557Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9734559Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9735569Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9736561Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9737556Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9738552Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9739530Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9740510Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9741624Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9742616Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9743608Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9744607Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9745719Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9746699Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9747688Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9748668Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9749656Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9750897Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9752083Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9753215Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9754500Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9755803Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9757317Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9758447Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9759472Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9760474Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9761601Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9762628Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9763648Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9764661Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9765647Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9766646Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9767700Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9768704Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9769847Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9770959Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9771973Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9772988Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9774003Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9775020Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9776030Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9777035Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9778021Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9779148Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9780163Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9781423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9782440Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9783432Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9784423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9785425Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9786436Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9787453Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9788456Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9789455Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9790435Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9791580Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9792757Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9793770Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9794789Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9795799Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9796787Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9797786Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9798795Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9799793Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9800935Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9802149Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9803162Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9804159Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9805150Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9806098Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9807034Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9808745Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9810238Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9811885Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9813416Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9814994Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9816575Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9818154Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9819877Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9821583Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9823149Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9824708Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9826272Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9827842Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9829375Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9831085Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9832675Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9834231Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9836006Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9837595Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9839126Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9840818Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9842395Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9843980Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9873363Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9875136Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9876751Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9878377Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9880019Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9881857Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9883474Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9885284Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9886844Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9888453Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9890051Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9891828Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9893447Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9895032Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9896596Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9898175Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9899780Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9901751Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9903343Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9904939Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9906499Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9908043Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9909641Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9911416Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9913013Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9914602Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9916152Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9917705Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9919306Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9921058Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9922662Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9924464Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9926025Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9927566Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9929160Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9930951Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9932577Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9934203Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9935730Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9937305Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9938915Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9940881Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9942488Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9944099Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9945644Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9947225Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9948834Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9950437Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9952226Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9953837Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9955391Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9956946Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9958553Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9960148Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9962143Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9963758Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9965301Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9966944Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9968567Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9970162Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9971941Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9973536Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9975083Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9976624Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9978424Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9980015Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9981773Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9983376Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9984920Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:49.9986471Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9988058Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9989683Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:49.9991543Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:49.9993167Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:49.9994734Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:49.9996284Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:49.9997915Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:49.9999517Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0001633Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0002780Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0003794Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0004736Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/DEV__UNION__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0005777Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0006820Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0007844Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0008863Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0009867Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0011386Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0012478Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0013553Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0014599Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0015612Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0016633Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0017644Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0018658Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0019664Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0020943Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0021989Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0022996Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0024167Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0025184Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0026196Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0027204Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0028226Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0029216Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0030218Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0031466Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0032500Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0033534Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0034690Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0035702Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0036708Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0037717Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0038732Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0039745Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0040971Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0041980Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0042974Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0043983Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0044999Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0046010Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0047212Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0048202Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0049329Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0050339Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0051503Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0052547Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0053567Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0054558Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0055553Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0056718Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0057727Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0058738Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0059733Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0060939Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0061938Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0062939Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0063945Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0064942Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0065940Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0066907Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0067888Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0069059Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0070066Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0071269Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0072273Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0073261Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0074265Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0075275Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0076272Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0077274Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0078437Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0079433Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0080427Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0081669Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0082698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0083722Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0084745Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0085752Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0086742Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0087763Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0088766Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0089770Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0090888Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0092013Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0093000Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0093998Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0094996Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0096010Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0097007Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0097989Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0099007Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0100010Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0101345Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0102410Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0103455Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0104440Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0105421Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0106441Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0107469Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0108489Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0109501Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0110487Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0111789Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0112824Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0114009Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0115029Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0116037Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0117029Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0118035Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L1_T6_M-1__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0119041Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0120055Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0121281Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0122307Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0123418Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0124421Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0125438Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0126433Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0127428Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0128433Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0129424Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0130423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0131601Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0132618Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0133623Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0134642Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0135640Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0136771Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0137773Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0138767Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0139783Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0140920Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0141927Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0142916Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0143922Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0144934Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0146071Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0147094Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0148093Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0149086Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0150096Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0151344Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0152351Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0153354Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0154332Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0155316Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0156323Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0157322Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0158462Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0159465Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0160445Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0161679Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0162706Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0163719Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0164735Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0165738Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0166730Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0167857Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0168874Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0169881Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0170999Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0172024Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0173020Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0174009Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0175031Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0176028Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0177029Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0178036Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0179019Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0180009Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0181359Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0182385Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0183409Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0184428Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0185423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0186426Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0187435Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0188434Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0189446Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0190679Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0191686Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0192684Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0193693Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0194699Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0195699Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0196702Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0197695Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0198685Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0199694Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0200792Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0201806Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0202976Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0203973Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0204960Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0205956Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0206959Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0207962Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0208975Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0209960Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0211064Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0212235Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0213233Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0214233Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0215220Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0216186Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0217164Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0218162Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0219177Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0220184Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0221289Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0222282Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0223291Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0224298Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0225457Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0226478Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0227476Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0228457Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0229449Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__SHOCK_FADE_L4_T6_M-1__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0230430Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0231490Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0232444Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0233366Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0234401Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0235330Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0236274Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0237224Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0238154Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0239078Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0239989Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0241000Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0241940Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0242872Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0243788Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0244703Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0245598Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0246640Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0247559Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0248477Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0249384Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0250293Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0251303Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0252208Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0253137Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0254066Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0254998Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0256049Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0257008Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0257976Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0258925Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0259859Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0260906Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0261853Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0262764Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0263697Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR2__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0264616Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0265534Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0266457Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0267373Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0268275Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0269356Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0270280Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0271318Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0272255Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0273187Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0274104Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0275015Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0275935Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0276849Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0277763Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0278836Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0279765Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0280765Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0281687Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0282594Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0283508Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0284423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0285322Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0286219Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0287136Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0288054Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0288978Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0289928Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0291077Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0291989Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0292908Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0293827Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0294755Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0295689Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0296599Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0297506Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR3__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0298423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0299344Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0300389Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0301414Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0302323Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0303262Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0304191Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0305106Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0306027Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0306943Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0307844Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0308743Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TIME__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0309665Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0310675Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0311609Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0312659Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0313556Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0314445Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0315351Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0316265Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0317176Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0318093Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0318978Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0319868Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0320907Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0321973Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0322911Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0323847Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0324751Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0325656Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0326585Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0327505Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0328423Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0329348Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0330246Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0331280Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/details/GATE__UNION__ATR4__TRAIL__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0332125Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/independent_candidates.csv.gz
+2026-10-01T17:10:50.0332806Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/summary.csv
+2026-10-01T17:10:50.0333441Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/summary.json
+2026-10-01T17:10:50.0334223Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/survivors.json
+2026-10-01T17:10:50.0334864Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/accounts/year_quarter.csv
+2026-10-01T17:10:50.0335525Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/validation/account-tests.log
+2026-10-01T17:10:50.0336210Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/validation/canonical-tests.log
+2026-10-01T17:10:50.0336909Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/validation/chronology-smoke.log
+2026-10-01T17:10:50.0337593Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V2/validation/scout-tests.log
+2026-10-01T17:10:50.0338249Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/audit.json
+2026-10-01T17:10:50.0339095Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0340135Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0341318Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0342345Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0343499Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0344532Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0345560Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0346582Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0347603Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0348620Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0349640Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0350754Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/DEV__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0351783Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0352813Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0353840Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0354878Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0355899Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/daily.csv
+2026-10-01T17:10:50.0357056Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__20bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0358091Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/curve.csv.gz
+2026-10-01T17:10:50.0359117Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/daily.csv
+2026-10-01T17:10:50.0360149Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__diagnostic/trades.csv.gz
+2026-10-01T17:10:50.0361284Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/curve.csv.gz
+2026-10-01T17:10:50.0362324Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/daily.csv
+2026-10-01T17:10:50.0363338Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/details/GATE__CONFIRM_T6_S+1_RECLAIM_ANY__H16__TP2__40bp__guarded/trades.csv.gz
+2026-10-01T17:10:50.0364225Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/independent_candidates.csv.gz
+2026-10-01T17:10:50.0364909Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/summary.csv
+2026-10-01T17:10:50.0365646Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/summary.json
+2026-10-01T17:10:50.0366288Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/survivors.json
+2026-10-01T17:10:50.0366943Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/accounts/year_quarter.csv
+2026-10-01T17:10:50.0367686Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-0/exclusions.csv
+2026-10-01T17:10:50.0368561Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-0/independent_candidates.csv.gz
+2026-10-01T17:10:50.0369698Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-0/scan_meta.json
+2026-10-01T17:10:50.0370506Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-1/exclusions.csv
+2026-10-01T17:10:50.0371511Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-1/independent_candidates.csv.gz
+2026-10-01T17:10:50.0372386Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-1/scan_meta.json
+2026-10-01T17:10:50.0373201Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-2/exclusions.csv
+2026-10-01T17:10:50.0374047Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-2/independent_candidates.csv.gz
+2026-10-01T17:10:50.0374890Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-2/scan_meta.json
+2026-10-01T17:10:50.0375678Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-3/exclusions.csv
+2026-10-01T17:10:50.0376519Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-3/independent_candidates.csv.gz
+2026-10-01T17:10:50.0377363Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-3/scan_meta.json
+2026-10-01T17:10:50.0378312Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-4/exclusions.csv
+2026-10-01T17:10:50.0379155Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-4/independent_candidates.csv.gz
+2026-10-01T17:10:50.0379992Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-4/scan_meta.json
+2026-10-01T17:10:50.0380895Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-5/exclusions.csv
+2026-10-01T17:10:50.0381742Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-5/independent_candidates.csv.gz
+2026-10-01T17:10:50.0382589Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-5/scan_meta.json
+2026-10-01T17:10:50.0383382Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-6/exclusions.csv
+2026-10-01T17:10:50.0384232Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-6/independent_candidates.csv.gz
+2026-10-01T17:10:50.0385073Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-6/scan_meta.json
+2026-10-01T17:10:50.0385861Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-7/exclusions.csv
+2026-10-01T17:10:50.0386732Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-7/independent_candidates.csv.gz
+2026-10-01T17:10:50.0387736Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/development/shock-confirm-v3-dev-7/scan_meta.json
+2026-10-01T17:10:50.0388499Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/account-tests.log
+2026-10-01T17:10:50.0389197Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/canonical-tests.log
+2026-10-01T17:10:50.0389897Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/chronology-smoke.log
+2026-10-01T17:10:50.0390682Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/confirm-tests.log
+2026-10-01T17:10:50.0391446Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/research/shock-confirmation-v3/PLAN.md
+2026-10-01T17:10:50.0392194Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/V3/validation/scout-tests.log
+2026-10-01T17:10:50.0392849Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/artifacts-36853787624.json
+2026-10-01T17:10:50.0393480Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/artifacts-36861359640.json
+2026-10-01T17:10:50.0394098Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/artifacts-36863290334.json
+2026-10-01T17:10:50.0394717Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/artifacts-36866930929.json
+2026-10-01T17:10:50.0395316Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/run-36853787624.log
+2026-10-01T17:10:50.0395887Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/run-36861359640.log
+2026-10-01T17:10:50.0396449Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/run-36863290334.log
+2026-10-01T17:10:50.0397015Z  create mode 100644 research/dayedge-evidence/prior-run-36897289990/files/run-36866930929.log
+2026-10-01T17:11:05.3009211Z remote: 
+2026-10-01T17:11:05.3010040Z remote: Create a pull request for 'research-dayedge-evidence-36897289990' on GitHub by visiting:        
+2026-10-01T17:11:05.3011137Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-dayedge-evidence-36897289990        
+2026-10-01T17:11:05.3012029Z remote: 
+2026-10-01T17:11:05.3020503Z To https://github.com/duuu-hub/bb-scanner
+2026-10-01T17:11:05.3021133Z  * [new branch]      research-dayedge-evidence-36897289990 -> research-dayedge-evidence-36897289990
+2026-10-01T17:11:05.3171951Z Post job cleanup.
+2026-10-01T17:11:05.4416260Z (node:2484) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T17:11:05.4417496Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T17:11:05.4615100Z Post job cleanup.
+2026-10-01T17:11:05.5505444Z [command]/usr/bin/git version
+2026-10-01T17:11:05.5546052Z git version 2.55.0
+2026-10-01T17:11:05.5580325Z Temporarily overriding HOME='/home/runner/work/_temp/243c0b04-a40a-4733-a720-5e467cc49975' before making global git config changes
+2026-10-01T17:11:05.5581765Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T17:11:05.5585570Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T17:11:05.5625449Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T17:11:05.5661695Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T17:11:05.5938499Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T17:11:05.5969385Z http.https://github.com/.extraheader
+2026-10-01T17:11:05.5990410Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T17:11:05.6032404Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T17:11:05.6376023Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T17:11:05.6424566Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T17:11:05.6929430Z Cleaning up orphan processes
+2026-10-01T17:11:05.7250030Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
