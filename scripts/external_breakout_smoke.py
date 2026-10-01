@@ -1,5 +1,5 @@
 import numpy as np
-import scripts.external_breakout_replay as m
+import external_breakout_replay as m
 
 def patch(rows):
  old=m.w1m
@@ -30,6 +30,12 @@ t=np.array([0,900000,1800000,2700000],dtype=np.int64);o=np.array([110.,100.,100.
 x=m.entry("TEST",t,o,h,l,0,105.,95.)
 assert x["side"]=="long" and x["fill"]==110.
 print("PASS gap_fill")
+
+# Linear USDT-margined short return: (entry-exit)/entry, not entry/exit-1.
+t2=np.array([0,900000],dtype=np.int64);o2=np.array([100.,100.]);h2=np.array([101.,100.]);l2=np.array([99.,80.]);c2=np.array([100.,80.])
+z=m.trade("TEST",t2,o2,h2,l2,c2,0,"short",100.,10.,1.,2.)
+assert z["status"]=="resolved" and abs(z["gross_return"]-.2)<1e-12 and abs(z["gross_r"]-2.)<1e-12
+print("PASS short_linear_return")
 
 rt=np.arange(200,dtype=np.int64)*3600000;rh=np.linspace(100,200,200);rl=rh-10;rc=rh-5;atr=np.ones(200)*5;ema=np.ones(200)*120;bbw=np.ones(200)*.1
 cfg=[x for x in m.CONFIGS if x["name"]=="FORTUNE_N24"][0]
