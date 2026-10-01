@@ -348,6 +348,11 @@ for p in all_files:
             raise RuntimeError(f"overlapping symbol/time-range input {sym}: {old_p} [{old_lo},{old_hi}] vs {p} [{lo},{hi}]")
     seen_ranges.setdefault(sym,[]).append((lo,hi,p))
 files=[p for j,p in enumerate(all_files) if j%a.shards==a.shard]
+excluded=[]
+if a.exclude_symbol:
+    ex=a.exclude_symbol.upper()
+    excluded=[p for p in files if _symbol(p)==ex]
+    files=[p for p in files if _symbol(p)!=ex]
 if a.max_files>0:files=files[:a.max_files]
 agg={};_run_started=time.time()
 print(f"DEATH_START shard={a.shard}/{a.shards} files={len(files)} total_inputs={len(all_files)} candidates={len(CANDIDATES)}",flush=True)
