@@ -8,8 +8,10 @@ docs=[json.load(open(p)) for p in paths]
 idx=[d["definition"]["shard_index"] for d in docs]
 if sorted(idx)!=list(range(64)):raise RuntimeError(f"shard coverage/duplicate failure {idx}")
 if any(d["definition"]["shard_count"]!=64 for d in docs):raise RuntimeError("shard_count mismatch")
-if any(d["definition"]["input_files_total"]!=855 for d in docs):raise RuntimeError("input total mismatch")
+if any(d["definition"]["input_files_total"]!=856 for d in docs):raise RuntimeError("raw input total mismatch")
 if sum(d["files"] for d in docs)!=855:raise RuntimeError(f"processed file accounting {sum(d['files'] for d in docs)}")
+ex=[(d["definition"]["shard_index"],d["definition"].get("excluded_symbols",[])) for d in docs if d["definition"].get("excluded_symbols")]
+if ex!=[(41,["BNXUSDT"])]:raise RuntimeError(f"BNX exclusion audit failed {ex}")
 blobs={d["definition"]["source_engine_blob_sha"] for d in docs}
 if blobs!={"f4b716e0ad4742c48c51f881126bbe73cf1c34b3"}:raise RuntimeError(f"source engine blob mismatch {blobs}")
 scopes={d["definition"]["scope"] for d in docs}
@@ -36,7 +38,7 @@ for k,q in agg.items():
     p,s,t,_=k.split("|")
     rows.append({"key":k,"entry_pct":float(p[1:]),"sl_atr":float(s[2:]),"tp_pct":float(t[2:]),**q})
 rows.sort(key=lambda r:(-(r["net_pf_20bp"] if r["net_pf_20bp"] is not None else -1),-r["resolved"]))
-meta={"source_engine_blob_sha":next(iter(blobs)),"source_data_run":"36095439671","input_files_total":855,"shards":64,"scope":next(iter(scopes)),"cost_policy":docs[0]["definition"]["costs"],"ledger_keys":docs[0]["definition"]["ledger_keys"]}
+meta={"source_engine_blob_sha":next(iter(blobs)),"source_data_run":"36095439671","raw_input_files_total":856,"input_files_total":855,"excluded_symbols":["BNXUSDT"],"shards":64,"scope":next(iter(scopes)),"cost_policy":docs[0]["definition"]["costs"],"ledger_keys":docs[0]["definition"]["ledger_keys"]}
 json.dump({"definition":meta,"summary":agg,"ranking_20bp":rows},open(a.out,"w"),indent=2)
 csv_path=os.path.splitext(a.out)[0]+".csv"
 with open(csv_path,"w",newline="") as f:
