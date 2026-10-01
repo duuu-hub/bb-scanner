@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np,pandas as pd
 
 CUT=pd.Timestamp("2025-01-01T00:00:00Z")
-RISK_BUDGET=0.005; MAX_DAILY=2; MAX_OPEN=3; MAX_GROSS=2.0
+RISK_BUDGET=0.005; MAX_DAILY=None; MAX_OPEN=3; MAX_GROSS=2.0
 
 def pf(x):
  x=np.asarray(x,float);gp=x[x>0].sum();gl=-x[x<0].sum()
@@ -23,7 +23,6 @@ def select_exec(g):
   et=int(r.entry_time)
   openp=[p for p in openp if p["exit_time"]>et]
   day=pd.Timestamp(et,unit="ms",tz="UTC").strftime("%Y-%m-%d")
-  if day_counts.get(day,0)>=MAX_DAILY:continue
   if len(openp)>=MAX_OPEN:continue
   if any(p["symbol"]==r.symbol for p in openp):continue
   notional=RISK_BUDGET/float(r.risk_pct)
@@ -31,7 +30,6 @@ def select_exec(g):
   if gross+notional>MAX_GROSS+1e-12:continue
   accepted.append(r.to_dict())
   openp.append({"symbol":r.symbol,"exit_time":int(r.exit_time),"notional":notional})
-  day_counts[day]=day_counts.get(day,0)+1
   conc.append(len(openp));expo.append(gross+notional)
  out=pd.DataFrame(accepted)
  return out,conc,expo
@@ -99,7 +97,7 @@ def main():
  lines=["# Sweep → Reclaim v1","",
  "Pre-registered before viewing results. One strategy family; 8 broad robustness cells only.",
  "",
- f"Portfolio: risk/trade={RISK_BUDGET*100:.2f}%, max daily={MAX_DAILY}, max open={MAX_OPEN}, max gross={MAX_GROSS*100:.0f}%.",
+ f"Portfolio: risk/trade={RISK_BUDGET*100:.2f}%, no daily trade cap, max open={MAX_OPEN}, max gross={MAX_GROSS*100:.0f}%.",
  "Universe: fixed liquid/long-history Binance USDT perpetual basket. 15m signal, closed 4H ATR, next-15m-open entry.",
  "Canonical 1m chronology is used for ambiguous TP/SL bars. Costs: 20bp and 40bp round trip.",
  "",
