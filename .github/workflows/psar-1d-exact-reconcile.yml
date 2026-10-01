@@ -1,0 +1,29 @@
+name: PSAR 1D Exact Reconciliation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_exact_reconcile_trigger_*']
+permissions: {contents: read, actions: read}
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/reconcile_psar_1d.py
+      - name: Download original 5Y and legacy 1D study
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-1d-*' -D legacy
+      - name: Exact row reconciliation and daily export
+        run: python scripts/reconcile_psar_1d.py --data data --old-artifacts legacy --out psar-1d-reconcile
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-exact-reconciliation
+          path: psar-1d-reconcile
+          retention-days: 90
