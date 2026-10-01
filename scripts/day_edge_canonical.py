@@ -195,13 +195,23 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
     raw={sym:scout.load(files[sym])[0] for sym in sorted(x.symbol.unique())}
     market=account.Market(raw)
     seeds=json.loads(selection_path.read_text())['selected']
-    names=[variant(s['key'],m,e) for s in seeds for m in STOPS for e in EXITS]
-    names += [variant('UNION',m,e) for m in STOPS for e in EXITS]
+    selection=json.loads(selection_path.read_text())
+    if selection.get('policies'):
+        names=[s['policy'] for s in selection['policies']]
+        if len(names)>1: names.append('CONFIRM_UNION')
+    else:
+        names=[variant(s['key'],m,e) for s in seeds for m in STOPS for e in EXITS]
+        names += [variant('UNION',m,e) for m in STOPS for e in EXITS]
     results,periods,audits=[],[],[]
     for split in splits:
         start,end=SPLITS[split];part=x[x.split==split]
         for name in names:
-            if name.startswith('UNION__'):
+            if name=='CONFIRM_UNION':
+                sel=part.copy()
+                priority={p['policy']:i for i,p in enumerate(selection['policies'])}
+                sel['priority']=sel['variant'].map(priority)
+                sel=sel.sort_values(['symbol','entry_time','priority']).drop_duplicates(['symbol','entry_time']).drop(columns='priority')
+            elif name.startswith('UNION__'):
                 _,m,e=name.split('__');sel=union_ledger(part,float(m[3:]),e)
             else: sel=part[part.variant==name]
             for cost in (20,40):
