@@ -1,6 +1,7 @@
 import argparse,glob,json,os,csv
 ap=argparse.ArgumentParser();ap.add_argument("--data",default="all");ap.add_argument("--out",default="psar_prebreak_death_merged.json");a=ap.parse_args()
-paths=sorted(glob.glob(a.data+"/**/death_*.json",recursive=True))
+paths=sorted(p for p in glob.glob(a.data+"/**/death_*.json",recursive=True)
+             if __import__("re").search(r"/death_\\d+\\.json$",p.replace("\\\\","/")))
 if len(paths)!=64:raise RuntimeError(f"expected 64 shard jsons, got {len(paths)}")
 docs=[json.load(open(p)) for p in paths]
 idx=[d["definition"]["shard_index"] for d in docs]
