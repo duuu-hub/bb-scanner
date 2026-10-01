@@ -1,23 +1,30 @@
 name: Cross Sectional Relative Strength 5Y
-on:
+'on':
   push:
-    branches: [research-rank5-binance-15m-5y]
-    paths: ['.research/trigger_cross_sectional_event_v1']
-permissions: {contents: read, actions: read}
+    branches:
+      - research-rank5-binance-15m-5y
+    paths:
+      - .research/trigger_cross_sectional_event_v1
+permissions:
+  contents: read
+  actions: read
 jobs:
   prepare:
     strategy:
       fail-fast: false
-      matrix: {shard: [0,1,2,3,4,5,6,7]}
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - name: Download source shard
-        env: {GH_TOKEN: '${{ github.token }}'}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p data
           gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D data
@@ -33,17 +40,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+        with:
+          python-version: '3.12'
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
           pattern: cross-sectional-part-*
           path: parts
-      - run: python scripts/cross_sectional_merge_scan.py\n      - run: python scripts/cross_sectional_event_scan.py
+      - run: python scripts/cross_sectional_merge_scan.py
+      - run: python scripts/cross_sectional_event_scan.py
       - uses: actions/upload-artifact@v4
         with:
           name: cross-sectional-relative-strength-results
           path: |
             cross_sectional_cells.csv
             cross_sectional_spreads.csv
-            cross_sectional_summary.json\n            event_cells.csv\n            event_spreads.csv\n            event_summary.json
+            cross_sectional_summary.json
+            event_cells.csv
+            event_spreads.csv
+            event_summary.json
