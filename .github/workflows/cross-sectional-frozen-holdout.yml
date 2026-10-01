@@ -1,0 +1,28 @@
+name: Cross Sectional Frozen Holdout
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas numpy
+      - name: Fetch inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p train parts
+          gh run download 36819572760 -R ${{ github.repository }} -p cross-sectional-train-structure -D train
+          for s in 0 1 2 3 4 5 6 7; do gh run download 36719407689 -R ${{ github.repository }} -p "cross-sectional-part-$s" -D "parts/$s"; done
+      - run: python scripts/cross_sectional_frozen_holdout.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cross-sectional-frozen-holdout
+          path: frozen_holdout.json
