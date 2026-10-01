@@ -1,0 +1,88 @@
+name: Public Strategies 4-7 Replay 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/public_strategies_4_7_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Syntax and import smoke
+        run: |
+          python -m py_compile scripts/public_strategies_4_7.py scripts/public_strategies_4_7_merge.py scripts/external_breakout_replay.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import scripts.public_strategies_4_7 as x
+          assert x.SOURCE_DATA_RUN=="36095439671"
+          print("PUBLIC_4_7_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay shard
+        run: python scripts/public_strategies_4_7.py --data data --shard \${{ matrix.shard }} --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-strategies-4-7-\${{ matrix.shard }}
+          path: |
+            public_strategies_4_7_shard_\${{ matrix.shard }}.csv.gz
+            public_strategies_4_7_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: public-strategies-4-7-*
+          path: artifacts
+      - name: Merge frozen train/holdout report
+        run: python scripts/public_strategies_4_7_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-strategies-4-7-final
+          path: |
+            public_strategies_4_7_summary.csv
+            public_strategies_4_7_train_holdout.csv
+            public_strategies_4_7_report.md
+            public_strategies_4_7_all_trades.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
