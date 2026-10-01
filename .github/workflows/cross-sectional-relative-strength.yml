@@ -12,10 +12,11 @@ jobs:
   prepare:
     strategy:
       fail-fast: false
+      max-parallel: 8
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7]
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,15 +29,23 @@ jobs:
         run: |
           mkdir -p data
           gh run download 36095439671 -R ${{ github.repository }} -p "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D data
-      - run: python scripts/cross_sectional_prepare_shard.py --data data --out part_${{ matrix.shard }}.csv.gz
+      - name: Prepare legacy cross-sectional part
+        run: python scripts/cross_sectional_prepare_shard.py --data data --out part_${{ matrix.shard }}.csv.gz
+      - name: Prepare trend-continuation part
+        run: python scripts/trend_continuation_prepare.py --data data --out trend_part_${{ matrix.shard }}.csv.gz
       - uses: actions/upload-artifact@v4
         with:
           name: cross-sectional-part-${{ matrix.shard }}
           path: part_${{ matrix.shard }}.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trend-continuation-part-${{ matrix.shard }}
+          path: trend_part_${{ matrix.shard }}.csv.gz
+
   merge:
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,3 +68,36 @@ jobs:
             event_cells.csv
             event_spreads.csv
             event_summary.json
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trend-continuation-part-*
+          path: trend_parts
+      - name: Download frozen raw 5Y shards for exact first-touch replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw_data
+          gh run download 36095439671 -R ${{ github.repository }} -D raw_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+          find raw_data -name '*USDT.csv.gz' | wc -l
+      - name: Run +1pct first-touch continuation study
+        run: |
+          rm -rf trend_continuation_result
+          python scripts/trend_continuation_first_touch.py \
+            --parts trend_parts \
+            --raw raw_data \
+            --out trend_continuation_result
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trend-continuation-first-touch-${{ github.run_id }}
+          path: trend_continuation_result/
+          retention-days: 30
+          compression-level: 6
