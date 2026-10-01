@@ -1,0 +1,70 @@
+name: PSAR Pre-Break Death Recover BNX
+
+on:
+  push:
+    branches: ['research-rank5-binance-15m-5y']
+    paths: ['.research/psar_prebreak_death_recover_bnx']
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recover41:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Verify corrected source engine
+        run: |
+          test "$(git hash-object scripts/psar_1h_breakthrough_compare.py)" = "f4b716e0ad4742c48c51f881126bbe73cf1c34b3"
+          python -m py_compile scripts/psar_prebreak_death_test.py scripts/psar_prebreak_death_merge.py
+      - name: Download immutable source data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Re-run shard 41 only, excluding BNX without shifting shard assignment
+        run: |
+          export PSAR_SOURCE_ENGINE_BLOB=$(git hash-object scripts/psar_1h_breakthrough_compare.py)
+          python scripts/psar_prebreak_death_test.py --data data --shard 41 --shards 64 --exclude-symbol BNXUSDT --out death_41.json --ledger-out death_ledger_41.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-41-nobnx
+          path: |
+            death_41.json
+            death_ledger_41.csv.gz
+
+  merge:
+    needs: recover41
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download original completed shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 36843459000 -R ${{ github.repository }} -p 'psar-prebreak-death-*' -D all
+          rm -rf all/psar-prebreak-death-41
+          rm -rf all/psar-prebreak-death-runtime-audit
+      - name: Download corrected shard 41
+        uses: actions/download-artifact@v4
+        with:
+          name: psar-prebreak-death-41-nobnx
+          path: all/psar-prebreak-death-41-nobnx
+      - name: Strict merge 855 files
+        run: |
+          python scripts/psar_prebreak_death_merge.py --data all --out psar_prebreak_death_merged.json
+          cat psar_prebreak_death_merged.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-death-merged-855
+          path: |
+            psar_prebreak_death_merged.json
+            psar_prebreak_death_merged.csv
+            psar_prebreak_death_merged.md
