@@ -1,0 +1,80 @@
+{
+  "selection": 7,
+  "D0_threshold": 2.0546962455657463,
+  "TRAIN_scores": {
+    "4": {
+      "n": 4322,
+      "pf": 1.032905548705984,
+      "win": 50.85608514576585,
+      "avg": 0.1083160429305466,
+      "avg_hold_days": 3.815594632114762,
+      "early_exit_pct": 9.231837112447941
+    },
+    "5": {
+      "n": 4322,
+      "pf": 1.1041644913373605,
+      "win": 51.989819527996296,
+      "avg": 0.3824937847357828,
+      "avg_hold_days": 4.688801480795928,
+      "early_exit_pct": 12.679315131883387
+    },
+    "6": {
+      "n": 4322,
+      "pf": 1.3209642051263688,
+      "win": 53.63257751041185,
+      "avg": 1.218223817278645,
+      "avg_hold_days": 5.5349375289217955,
+      "early_exit_pct": 15.386395187413235
+    },
+    "7": {
+      "n": 4322,
+      "pf": 1.428192300806577,
+      "win": 53.07727903748265,
+      "avg": 1.8001881717418897,
+      "avg_hold_days": 6.352383155946321,
+      "early_exit_pct": 18.25543729754743
+    },
+    "8": {
+      "n": 4322,
+      "pf": 1.3909906404582164,
+      "win": 52.15178158260064,
+      "avg": 1.7731462586349833,
+      "avg_hold_days": 7.129801018047201,
+      "early_exit_pct": 22.25821378991208
+    }
+  },
+  "threshold_fit_n": 6483,
+  "selected_TRAIN_n": 4322,
+  "threshold_fit_latest_entry_utc": "2024-12-23T00:00:00+00:00",
+  "train_input_hash": "e3d1f8e10da897eda67aa2e8daa014847e8cb9fc06e43ac5cd41196ab63be1ac",
+  "protocol": {
+    "strategy": "1D SHORT, flip age=3, D0 LOW exclusion, BULL reflip OPEN exit or max horizon",
+    "age_definition": "flip OPEN age=0; entry at flip OPEN+3 calendar days (fourth OPEN including flip)",
+    "horizons": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cost_pct": [
+      0.2,
+      0.4,
+      0.8
+    ],
+    "selection_cost_pct": 0.4,
+    "selection_rule": "Highest TRAIN per-signal PF only, tie -> shortest horizon; diagnostic candidate, not portfolio optimum",
+    "burn_in_days": 100,
+    "ATR": "14 closed-bar simple mean true range, lagged one OPEN; preserves prior implementation",
+    "threshold_rule": "D0 > TRAIN tercile-1; no TRAIN minimum/maximum bounding of future D0",
+    "common_cohort": "all horizons use eight future daily OPENs; not legacy 12D/24D support",
+    "train_end_utc": "2025-01-01",
+    "purge": "TRAIN selection entries plus 8D must precede split OPEN",
+    "gap_policy": "split at missing 15m; retain complete UTC days only; reset PSAR and 100D burn-in after gaps",
+    "walk_forward": "annual test, preceding two calendar years fit, eight-day maturity purge; fit D0 and choose horizon on past only",
+    "BTC_regime": "prior closed BTC close vs close 90 days earlier; >+10% UP, <-10% DOWN, otherwise RANGE; no optimization",
+    "OOS_status": "2025-2026 repeatedly observed before this protocol; historical validation, not pristine OOS",
+    "funding": "not included; 20/40/80bp are round-trip fee/slippage assumptions, not measured funding"
+  },
+  "data_hash": "a82283ee15cb9c8cd3dc578472cbf3c25f0a5aff65ce8582e5210ee6130ee753"
+}

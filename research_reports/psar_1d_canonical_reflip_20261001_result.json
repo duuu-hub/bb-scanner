@@ -1,0 +1,899 @@
+{
+  "protocol": {
+    "strategy": "1D SHORT, flip age=3, D0 LOW exclusion, BULL reflip OPEN exit or max horizon",
+    "age_definition": "flip OPEN age=0; entry at flip OPEN+3 calendar days (fourth OPEN including flip)",
+    "horizons": [
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "cost_pct": [
+      0.2,
+      0.4,
+      0.8
+    ],
+    "selection_cost_pct": 0.4,
+    "selection_rule": "Highest TRAIN per-signal PF only, tie -> shortest horizon; diagnostic candidate, not portfolio optimum",
+    "burn_in_days": 100,
+    "ATR": "14 closed-bar simple mean true range, lagged one OPEN; preserves prior implementation",
+    "threshold_rule": "D0 > TRAIN tercile-1; no TRAIN minimum/maximum bounding of future D0",
+    "common_cohort": "all horizons use eight future daily OPENs; not legacy 12D/24D support",
+    "train_end_utc": "2025-01-01",
+    "purge": "TRAIN selection entries plus 8D must precede split OPEN",
+    "gap_policy": "split at missing 15m; retain complete UTC days only; reset PSAR and 100D burn-in after gaps",
+    "walk_forward": "annual test, preceding two calendar years fit, eight-day maturity purge; fit D0 and choose horizon on past only",
+    "BTC_regime": "prior closed BTC close vs close 90 days earlier; >+10% UP, <-10% DOWN, otherwise RANGE; no optimization",
+    "OOS_status": "2025-2026 repeatedly observed before this protocol; historical validation, not pristine OOS",
+    "funding": "not included; 20/40/80bp are round-trip fee/slippage assumptions, not measured funding"
+  },
+  "selected_horizon": 7,
+  "D0_threshold": 2.0546962455657463,
+  "files": 856,
+  "symbols": 856,
+  "all_eligible_candidates": 15296,
+  "canonical_vs_previous_12D_all_candidate_counts": {
+    "canonical": 15296,
+    "previous_12D": 15200
+  },
+  "range_utc": [
+    "2021-12-14T00:00:00+00:00",
+    "2026-08-23T00:00:00+00:00"
+  ],
+  "boundary_entries_excluded_from_train": 7,
+  "comparison": {
+    "4": {
+      "TRAIN": {
+        "0.2": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.0825522102316505,
+            "win": 52.7302174919019,
+            "avg": 0.2726860685780329,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.09651399871631,
+            "win": 51.9435446552522,
+            "avg": 0.3083160429305468,
+            "avg_hold_days": 3.815594632114762,
+            "early_exit_pct": 9.231837112447941
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.0213859230734708,
+            "win": 51.6658954187876,
+            "avg": 0.07268606857803277,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.032905548705984,
+            "win": 50.85608514576585,
+            "avg": 0.1083160429305466,
+            "avg_hold_days": 3.815594632114762,
+            "early_exit_pct": 9.231837112447941
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 0.9089902611041759,
+            "win": 49.51411383618695,
+            "avg": -0.3273139314219674,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 0.9164874511258951,
+            "win": 48.68116612679315,
+            "avg": -0.29168395706945355,
+            "avg_hold_days": 3.815594632114762,
+            "early_exit_pct": 9.231837112447941
+          }
+        }
+      },
+      "HOLDOUT": {
+        "0.2": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.3183457184466627,
+            "win": 61.159237675224446,
+            "avg": 1.1528718202792456,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.365646140491304,
+            "win": 59.930697747676795,
+            "avg": 1.2531401826480573,
+            "avg_hold_days": 3.836352181445897,
+            "early_exit_pct": 8.694282564183336
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.2575248734797444,
+            "win": 60.22995747361789,
+            "avg": 0.9528718202792456,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.3001864796069647,
+            "win": 59.03291856985352,
+            "avg": 1.053140182648057,
+            "avg_hold_days": 3.836352181445897,
+            "early_exit_pct": 8.694282564183336
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.1431396932660929,
+            "win": 58.46590014175461,
+            "avg": 0.5528718202792453,
+            "avg_hold_days": 4.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.1777063450000047,
+            "win": 57.26886123799023,
+            "avg": 0.6531401826480572,
+            "avg_hold_days": 3.836352181445897,
+            "early_exit_pct": 8.694282564183336
+          }
+        }
+      }
+    },
+    "5": {
+      "TRAIN": {
+        "0.2": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.1190530361008908,
+            "win": 54.07218880148079,
+            "avg": 0.4542840245899285,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.162853295649268,
+            "win": 52.84590467376214,
+            "avg": 0.5824937847357833,
+            "avg_hold_days": 4.688801480795928,
+            "early_exit_pct": 12.679315131883387
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.065058091328926,
+            "win": 53.262378528459045,
+            "avg": 0.2542840245899282,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.1041644913373605,
+            "win": 51.989819527996296,
+            "avg": 0.3824937847357828,
+            "avg_hold_days": 4.688801480795928,
+            "early_exit_pct": 12.679315131883387
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 0.9644512288405163,
+            "win": 51.41138361869505,
+            "avg": -0.145715975410072,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 0.995473622709195,
+            "win": 50.161962054604345,
+            "avg": -0.017506215264217154,
+            "avg_hold_days": 4.688801480795928,
+            "early_exit_pct": 12.679315131883387
+          }
+        }
+      },
+      "HOLDOUT": {
+        "0.2": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.2648771932427418,
+            "win": 58.96991652228697,
+            "avg": 1.092477526001976,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.3486918813689461,
+            "win": 57.662624035281155,
+            "avg": 1.320737196610248,
+            "avg_hold_days": 4.722003465112616,
+            "early_exit_pct": 11.434871633328084
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.2121260064018888,
+            "win": 58.05638683257206,
+            "avg": 0.8924775260019755,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.2893598073783155,
+            "win": 56.733343833674596,
+            "avg": 1.1207371966102475,
+            "avg_hold_days": 4.722003465112616,
+            "early_exit_pct": 11.434871633328084
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.112461135766354,
+            "win": 56.119073869900774,
+            "avg": 0.4924775260019757,
+            "avg_hold_days": 5.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.1779589372352866,
+            "win": 54.906284454244755,
+            "avg": 0.7207371966102474,
+            "avg_hold_days": 4.722003465112616,
+            "early_exit_pct": 11.434871633328084
+          }
+        }
+      }
+    },
+    "6": {
+      "TRAIN": {
+        "0.2": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.3230528074788275,
+            "win": 55.99259602036094,
+            "avg": 1.2905038566405227,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.3829265203654444,
+            "win": 54.4886626561777,
+            "avg": 1.418223817278645,
+            "avg_hold_days": 5.5349375289217955,
+            "early_exit_pct": 15.386395187413235
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.2670464130238221,
+            "win": 55.13651087459509,
+            "avg": 1.0905038566405223,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.3209642051263688,
+            "win": 53.63257751041185,
+            "avg": 1.218223817278645,
+            "avg_hold_days": 5.5349375289217955,
+            "early_exit_pct": 15.386395187413235
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.1618357311607541,
+            "win": 53.3780657103193,
+            "avg": 0.6905038566405225,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.2053651500135325,
+            "win": 51.96668209162425,
+            "avg": 0.8182238172786446,
+            "avg_hold_days": 5.5349375289217955,
+            "early_exit_pct": 15.386395187413235
+          }
+        }
+      },
+      "HOLDOUT": {
+        "0.2": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.1499016176648738,
+            "win": 58.35564655851315,
+            "avg": 0.7354506917628001,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.2713435063472713,
+            "win": 56.63884076232477,
+            "avg": 1.1736083818448153,
+            "avg_hold_days": 5.578043786423058,
+            "early_exit_pct": 14.395967868955742
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.1073000882389747,
+            "win": 57.52086942825642,
+            "avg": 0.5354506917627999,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.220643948242281,
+            "win": 55.819814143959675,
+            "avg": 0.9736083818448154,
+            "avg_hold_days": 5.578043786423058,
+            "early_exit_pct": 14.395967868955742
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.026230426476607,
+            "win": 55.72531107260986,
+            "avg": 0.1354506917627996,
+            "avg_hold_days": 6.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.1248931940579543,
+            "win": 54.15025988344622,
+            "avg": 0.5736083818448153,
+            "avg_hold_days": 5.578043786423058,
+            "early_exit_pct": 14.395967868955742
+          }
+        }
+      }
+    },
+    "7": {
+      "TRAIN": {
+        "0.2": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.4275659053714107,
+            "win": 55.83063396575659,
+            "avg": 1.8994810522247028,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.4865346689351584,
+            "win": 53.8408144377603,
+            "avg": 2.0001881717418897,
+            "avg_hold_days": 6.352383155946321,
+            "early_exit_pct": 18.25543729754743
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.3750316593952723,
+            "win": 55.11337343822304,
+            "avg": 1.6994810522247028,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.428192300806577,
+            "win": 53.07727903748265,
+            "avg": 1.8001881717418897,
+            "avg_hold_days": 6.352383155946321,
+            "early_exit_pct": 18.25543729754743
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.2756516002358242,
+            "win": 53.56316520129569,
+            "avg": 1.2994810522247022,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.3186061092091117,
+            "win": 51.5733456732994,
+            "avg": 1.400188171741889,
+            "avg_hold_days": 6.352383155946321,
+            "early_exit_pct": 18.25543729754743
+          }
+        }
+      },
+      "HOLDOUT": {
+        "0.2": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.120456345981153,
+            "win": 59.01716805796189,
+            "avg": 0.6347241597548499,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.223929748240849,
+            "win": 56.67034178610805,
+            "avg": 1.0431323733298774,
+            "avg_hold_days": 6.397227909907072,
+            "early_exit_pct": 18.081587651598678
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.0812275358326853,
+            "win": 58.22964246338006,
+            "avg": 0.43472415975484935,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.17767109976182,
+            "win": 56.00882028665931,
+            "avg": 0.8431323733298773,
+            "avg_hold_days": 6.397227909907072,
+            "early_exit_pct": 18.081587651598678
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.0062878445254508,
+            "win": 56.607339738541505,
+            "avg": 0.03472415975484915,
+            "avg_hold_days": 7.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.0899847054316698,
+            "win": 54.54402268073713,
+            "avg": 0.4431323733298768,
+            "avg_hold_days": 6.397227909907072,
+            "early_exit_pct": 18.081587651598678
+          }
+        }
+      }
+    },
+    "8": {
+      "TRAIN": {
+        "0.2": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.3579892874762352,
+            "win": 55.83063396575659,
+            "avg": 1.771238627396133,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.444371260607792,
+            "win": 53.16982878297085,
+            "avg": 1.9731462586349835,
+            "avg_hold_days": 7.129801018047201,
+            "early_exit_pct": 22.25821378991208
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.3119278190035224,
+            "win": 54.72003701989819,
+            "avg": 1.5712386273961325,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.3909906404582164,
+            "win": 52.15178158260064,
+            "avg": 1.7731462586349833,
+            "avg_hold_days": 7.129801018047201,
+            "early_exit_pct": 22.25821378991208
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 4322,
+            "pf": 1.2243416284026283,
+            "win": 53.49375289217954,
+            "avg": 1.1712386273961322,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 4322,
+            "pf": 1.2903790621216429,
+            "win": 50.94863489125405,
+            "avg": 1.3731462586349832,
+            "avg_hold_days": 7.129801018047201,
+            "early_exit_pct": 22.25821378991208
+          }
+        }
+      },
+      "HOLDOUT": {
+        "0.2": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.127009828555225,
+            "win": 61.096235627657904,
+            "avg": 0.7129816308695213,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.2097972607093246,
+            "win": 57.36336430934005,
+            "avg": 1.0445853031204977,
+            "avg_hold_days": 7.180658371397071,
+            "early_exit_pct": 21.656953851000157
+          }
+        },
+        "0.4": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.0901196275464324,
+            "win": 60.29295952118444,
+            "avg": 0.5129816308695216,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.166745989594699,
+            "win": 56.575838714758234,
+            "avg": 0.8445853031204977,
+            "avg_hold_days": 7.180658371397071,
+            "early_exit_pct": 21.656953851000157
+          }
+        },
+        "0.8": {
+          "FIXED": {
+            "n": 6349,
+            "pf": 1.019299690734317,
+            "win": 58.7651598676957,
+            "avg": 0.11298163086952127,
+            "avg_hold_days": 8.0,
+            "early_exit_pct": 0.0
+          },
+          "REFLIP_OR_MAX": {
+            "n": 6349,
+            "pf": 1.084821340165978,
+            "win": 55.31579776342731,
+            "avg": 0.4445853031204974,
+            "avg_hold_days": 7.180658371397071,
+            "early_exit_pct": 21.656953851000157
+          }
+        }
+      }
+    }
+  },
+  "annual_selected": [
+    {
+      "period": "HOLDOUT",
+      "year": 2025,
+      "n": 3180,
+      "pf": 1.5161720502922673,
+      "win": 61.76100628930817,
+      "avg": 2.2789028141216656,
+      "avg_hold_days": 6.470440251572327,
+      "early_exit_pct": 15.440251572327043
+    },
+    {
+      "period": "HOLDOUT",
+      "year": 2026,
+      "n": 3169,
+      "pf": 0.882290140880892,
+      "win": 50.2366677185232,
+      "avg": -0.5976218083419076,
+      "avg_hold_days": 6.323761438939728,
+      "early_exit_pct": 20.732092142631746
+    },
+    {
+      "period": "TRAIN",
+      "year": 2021,
+      "n": 5,
+      "pf": 0.3587419963411084,
+      "win": 60.0,
+      "avg": -10.567913394534305,
+      "avg_hold_days": 6.4,
+      "early_exit_pct": 20.0
+    },
+    {
+      "period": "TRAIN",
+      "year": 2022,
+      "n": 1058,
+      "pf": 1.7973548572638405,
+      "win": 58.60113421550095,
+      "avg": 2.6001270525340137,
+      "avg_hold_days": 6.371455576559546,
+      "early_exit_pct": 16.162570888468807
+    },
+    {
+      "period": "TRAIN",
+      "year": 2023,
+      "n": 1248,
+      "pf": 0.8017769836321587,
+      "win": 46.794871794871796,
+      "avg": -0.8086696629423157,
+      "avg_hold_days": 6.252403846153846,
+      "early_exit_pct": 20.993589743589745
+    },
+    {
+      "period": "TRAIN",
+      "year": 2024,
+      "n": 2011,
+      "pf": 1.6380871352454174,
+      "win": 54.05271009448036,
+      "avg": 3.029108982104496,
+      "avg_hold_days": 6.4042764793635,
+      "early_exit_pct": 17.652909000497267
+    }
+  ],
+  "BTC_regime_selected": [
+    {
+      "period": "HOLDOUT",
+      "regime": "DOWN",
+      "n": 3236,
+      "pf": 1.4134216935897486,
+      "win": 58.992583436341164,
+      "avg": 1.7919097142764366,
+      "avg_hold_days": 6.375463535228677,
+      "early_exit_pct": 18.294190358467244
+    },
+    {
+      "period": "HOLDOUT",
+      "regime": "RANGE",
+      "n": 1460,
+      "pf": 0.6118843639138475,
+      "win": 42.26027397260274,
+      "avg": -2.7035963119770487,
+      "avg_hold_days": 6.3198630136986305,
+      "early_exit_pct": 20.205479452054796
+    },
+    {
+      "period": "HOLDOUT",
+      "regime": "UP",
+      "n": 1653,
+      "pf": 1.590227985598194,
+      "win": 62.310949788263756,
+      "avg": 2.118377627561605,
+      "avg_hold_days": 6.508166969147005,
+      "early_exit_pct": 15.789473684210526
+    },
+    {
+      "period": "TRAIN",
+      "regime": "DOWN",
+      "n": 1254,
+      "pf": 0.9909894794454535,
+      "win": 50.079744816586924,
+      "avg": -0.04121870140767368,
+      "avg_hold_days": 6.350877192982456,
+      "early_exit_pct": 18.022328548644335
+    },
+    {
+      "period": "TRAIN",
+      "regime": "RANGE",
+      "n": 1338,
+      "pf": 3.033278062691004,
+      "win": 65.6203288490284,
+      "avg": 4.585373667925881,
+      "avg_hold_days": 6.537369207772795,
+      "early_exit_pct": 12.406576980568012
+    },
+    {
+      "period": "TRAIN",
+      "regime": "UP",
+      "n": 1730,
+      "pf": 1.1802013644721099,
+      "win": 45.54913294797688,
+      "avg": 0.9808506139588671,
+      "avg_hold_days": 6.210404624277457,
+      "early_exit_pct": 22.947976878612717
+    }
+  ],
+  "annual_walk_forward": [
+    {
+      "test_year": 2023,
+      "status": "COMPLETE",
+      "selected_horizon": 7,
+      "D0_threshold": 2.1162171507607184,
+      "TRAIN": {
+        "n": 992,
+        "pf": 1.7159990298110765,
+        "win": 58.16532258064516,
+        "avg": 2.4098979622331895,
+        "avg_hold_days": 6.369959677419355,
+        "early_exit_pct": 16.22983870967742
+      },
+      "TEST_40bp": {
+        "n": 1164,
+        "pf": 0.7878591982854128,
+        "win": 46.649484536082475,
+        "avg": -0.8647808526512238,
+        "avg_hold_days": 6.286082474226804,
+        "early_exit_pct": 20.103092783505154
+      },
+      "TEST_80bp": {
+        "n": 1164,
+        "pf": 0.7055059574345922,
+        "win": 44.072164948453604,
+        "avg": -1.2647808526512236,
+        "avg_hold_days": 6.286082474226804,
+        "early_exit_pct": 20.103092783505154
+      },
+      "fit_first_utc": "2021-12-18T00:00:00+00:00",
+      "fit_last_utc": "2022-12-23T00:00:00+00:00"
+    },
+    {
+      "test_year": 2024,
+      "status": "COMPLETE",
+      "selected_horizon": 6,
+      "D0_threshold": 2.050933244284415,
+      "TRAIN": {
+        "n": 2308,
+        "pf": 1.2332718231271074,
+        "win": 51.51646447140381,
+        "avg": 0.8023924831479772,
+        "avg_hold_days": 5.494367417677643,
+        "early_exit_pct": 16.594454072790292
+      },
+      "TEST_40bp": {
+        "n": 2017,
+        "pf": 1.4086888945592828,
+        "win": 55.87506197322757,
+        "avg": 1.7077341828327284,
+        "avg_hold_days": 5.57709469509172,
+        "early_exit_pct": 14.129895884977689
+      },
+      "TEST_80bp": {
+        "n": 2017,
+        "pf": 1.3001155917475515,
+        "win": 54.73475458601884,
+        "avg": 1.3077341828327282,
+        "avg_hold_days": 5.57709469509172,
+        "early_exit_pct": 14.129895884977689
+      },
+      "fit_first_utc": "2022-01-01T00:00:00+00:00",
+      "fit_last_utc": "2023-12-22T00:00:00+00:00"
+    },
+    {
+      "test_year": 2025,
+      "status": "COMPLETE",
+      "selected_horizon": 7,
+      "D0_threshold": 2.032636345086617,
+      "TRAIN": {
+        "n": 3327,
+        "pf": 1.3397747536090912,
+        "win": 51.0970844604749,
+        "avg": 1.5294290216086521,
+        "avg_hold_days": 6.335437330928765,
+        "early_exit_pct": 19.17643522693117
+      },
+      "TEST_40bp": {
+        "n": 3213,
+        "pf": 1.5294164763711156,
+        "win": 61.935885465297225,
+        "avg": 2.326461203831423,
+        "avg_hold_days": 6.458761282290694,
+        "early_exit_pct": 15.779645191409896
+      },
+      "TEST_80bp": {
+        "n": 3213,
+        "pf": 1.423483201842086,
+        "win": 60.75319016495487,
+        "avg": 1.9264612038314226,
+        "avg_hold_days": 6.458761282290694,
+        "early_exit_pct": 15.779645191409896
+      },
+      "fit_first_utc": "2023-01-01T00:00:00+00:00",
+      "fit_last_utc": "2024-12-23T00:00:00+00:00"
+    },
+    {
+      "test_year": 2026,
+      "status": "COMPLETE",
+      "selected_horizon": 7,
+      "D0_threshold": 2.1059067710105484,
+      "TRAIN": {
+        "n": 4962,
+        "pf": 1.5779591558212036,
+        "win": 59.04877065699314,
+        "avg": 2.6233583330321544,
+        "avg_hold_days": 6.452237001209189,
+        "early_exit_pct": 16.102378073357517
+      },
+      "TEST_40bp": {
+        "n": 3060,
+        "pf": 0.8818575289437635,
+        "win": 50.26143790849673,
+        "avg": -0.6044725537945148,
+        "avg_hold_days": 6.345098039215686,
+        "early_exit_pct": 20.130718954248366
+      },
+      "TEST_80bp": {
+        "n": 3060,
+        "pf": 0.8111549815962711,
+        "win": 48.59477124183007,
+        "avg": -1.004472553794515,
+        "avg_hold_days": 6.345098039215686,
+        "early_exit_pct": 20.130718954248366
+      },
+      "fit_first_utc": "2024-01-01T00:00:00+00:00",
+      "fit_last_utc": "2025-12-23T00:00:00+00:00"
+    }
+  ],
+  "date_clustered_holdout_CI": {
+    "entry_date_clusters": 502,
+    "replications": 2000,
+    "trade_weighted_mean_ci95_pct": [
+      -0.6383601397448344,
+      2.354766608100621
+    ],
+    "limitation": "date-clustered diagnostic; not full overlapping-position/account uncertainty"
+  },
+  "audit": {
+    "distinct_invariants": 30,
+    "consecutive_clean_passes": 10,
+    "data_evidence_counts": {
+      "raw_files": 856,
+      "raw_segments": 968,
+      "daily_segments": 968,
+      "mutation_points": 2986,
+      "age_D0_points": 450078
+    }
+  },
+  "previous_reflip_exact_replay": true,
+  "canonical_raw8_exact_parity": true,
+  "candidate_hash": "a82283ee15cb9c8cd3dc578472cbf3c25f0a5aff65ce8582e5210ee6130ee753",
+  "limits": [
+    "raw signals, not constrained account trades",
+    "no funding or liquidation model",
+    "annual rolling tests reuse historical data already explored; need prospective frozen validation"
+  ]
+}
