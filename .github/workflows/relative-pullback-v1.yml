@@ -1,0 +1,71 @@
+name: Relative Pullback Day V1 5Y
+
+'on':
+  push:
+    branches: [research-relative-pullback-day-v1]
+    paths:
+      - 'scripts/relative_pullback_*.py'
+      - 'tests/test_relative_pullback_v1.py'
+      - 'research/relative-pullback-v1/PLAN.md'
+      - '.github/workflows/relative-pullback-v1.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: relative-pullback-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Chronology and account regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/relative_pullback_data.py scripts/relative_pullback_v1.py scripts/relative_pullback_portfolio.py
+          python scripts/psar_chronology_smoke.py | tee canonical-smoke.log
+          python -m unittest discover -s tests -p test_relative_pullback_v1.py -v 2>&1 | tee relative-pullback-tests.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relative-pullback-v1-validation
+          path: |
+            canonical-smoke.log
+            relative-pullback-tests.log
+          if-no-files-found: error
+          retention-days: 30
+
+  backtest:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Official Binance frozen-window basket
+        run: python scripts/relative_pullback_data.py --out data --archives cache/15m --workers 8
+      - name: Causal signals and authoritative collision chronology
+        run: python scripts/relative_pullback_v1.py --data data --out relative-pullback-results --minute-cache cache/1m
+      - name: Account risk guards and daily target attainment
+        run: python scripts/relative_pullback_portfolio.py --data data --out relative-pullback-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relative-pullback-v1-results
+          path: |
+            relative-pullback-results/
+            data/download_manifest.json
+            research/relative-pullback-v1/PLAN.md
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
