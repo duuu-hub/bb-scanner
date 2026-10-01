@@ -1,0 +1,91 @@
+name: Sweep Reclaim V2 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/sweep_reclaim_v2_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Syntax and invariants
+        run: |
+          python -m py_compile scripts/sweep_reclaim_v2.py scripts/sweep_reclaim_v2_merge.py scripts/sweep_reclaim_research.py scripts/sweep_reclaim_merge.py scripts/external_breakout_replay.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import scripts.sweep_reclaim_v2 as s
+          assert len(s.CONFIGS)==8
+          assert {x["lookback"] for x in s.CONFIGS}=={96,192}
+          assert {x["ext_atr"] for x in s.CONFIGS}=={0.75,1.25}
+          assert {x["tp_r"] for x in s.CONFIGS}=={1.5,2.0}
+          assert s.MIN_TOUCHES==2 and s.AWAY_BARS==8 and s.MIN_LEVEL_AGE==16
+          print("SWEEP_RECLAIM_V2_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay shard
+        run: python scripts/sweep_reclaim_v2.py --data data --shard \${{ matrix.shard }} --shards 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweep-reclaim-v2-\${{ matrix.shard }}
+          path: |
+            sweep_reclaim_v2_raw_\${{ matrix.shard }}.csv.gz
+            sweep_reclaim_v2_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sweep-reclaim-v2-*
+          path: artifacts
+      - name: Portfolio report
+        run: python scripts/sweep_reclaim_v2_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweep-reclaim-v2-final
+          path: |
+            sweep_reclaim_v2_summary.csv
+            sweep_reclaim_v2_report.md
+            sweep_reclaim_v2_all_candidates.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
