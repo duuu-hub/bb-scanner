@@ -48,18 +48,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Replay shard
-        run: python scripts/breakout_algo3_replay.py --data data --shard \${{ matrix.shard }} --shards 8
+        run: python scripts/breakout_algo3_replay.py --data data --shard ${{ matrix.shard }} --shards 8
       - uses: actions/upload-artifact@v4
         with:
-          name: breakout-algo3-replay-\${{ matrix.shard }}
+          name: breakout-algo3-replay-${{ matrix.shard }}
           path: |
-            breakout_algo3_trades_shard_\${{ matrix.shard }}.csv.gz
-            breakout_algo3_meta_shard_\${{ matrix.shard }}.json
+            breakout_algo3_trades_shard_${{ matrix.shard }}.csv.gz
+            breakout_algo3_meta_shard_${{ matrix.shard }}.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
