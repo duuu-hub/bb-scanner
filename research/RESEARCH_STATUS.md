@@ -13,17 +13,17 @@ shards,24accounts and full preservation.96cells/271514resolved outcomes;two froz
 LONG candidates;ZERO strict survivors. All24saved accounts independently audited.
 Full rejection numbers and evidence are in the completed section below.
 
-V8 premium-basis absorption preregistered BEFORE implementation/outcomes on
-research-premium-absorption-v8, PLAN commitd4ec06ebc2633062535bd5ec418a8470a7b1d8e8.
-PhaseV8_PREREGISTERED_IMPLEMENTING;no V8 code/run/market outcome exists. New
-observable is the CLOSED15m premium-index path and active normalization toward
-zero after an extreme signed dislocation,with price/taker-flow absorption.
-16entries/96policies,6h/24h. This is not a V7 funding threshold adjustment.
-Official monthly premiumIndexKlines ZIP/CHECKSUM path/schema must pass an actual
-source probe. Exact timestamp,no unfinished/current substitution,no missing-month
-carry. Coverage>=95% separately partial2021/2022/2023. The partial2021 price/R/
-date-R selection gate is explicitly adaptive after V7's early-path collapse.
-Implement,test and ACTUALLY execute;no success or daily-goal claim.
+V8 premium-basis absorption actual run36928892394/code7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0 is
+IN PROGRESS on research-premium-absorption-v8. The economic PLAN was frozen
+before implementation/outcomes at commitd4ec06ebc2633062535bd5ec418a8470a7b1d8e8.
+The implementation contains a checksum-verified signed premiumIndexKlines loader,
+exact closed15m alignment,16entries/96policies,the adaptive partial2021/22/23
+selection gate,and full evidence preservation. Local181 unit/regression tests
+passed; local chronology smoke is not claimed because that environment lacked
+numba. The actual workflow installs numba and must pass chronology plus the
+official BTCUSDT2022-01 ZIP/CHECKSUM/schema probe before DEV starts. Actual
+validation logs/source probe and all market outcomes are still pending. No V8
+profitability,account-growth or daily-goal claim;do not duplicate this run.
 
 ## Completed failures and durable assets
 - V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:
