@@ -12,15 +12,25 @@ ALL20jobs successfully,130tests plus chronology/invariant smoke.96DEV policies,
 549129original outcomes audited; one frozen candidate, eightaccounts, ZEROstrict
 survivors. Saved8trade/daily/curve accounts independently reconciled. No duplicate.
 
-V7 preregistered onresearch-funding-crowding-v7, PLAN commit17e019d3980c4a03cd9f2aa00ebc824c937751ee.
-Current phaseV7_PREREGISTERED_IMPLEMENTING; no V7 run or market outcome exists.
+V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18 started
+onresearch-funding-crowding-v7 after PLAN17e019d3980c4a03cd9f2aa00ebc824c937751ee.
+PhaseV7_ACTUAL_VALIDATION_IN_PROGRESS.158local tests passed; local full
+chronology smoke lacksnumba, so NOlocal chronology pass claim. Actual Actions
+validate installs frozen packages, runs158tests/canonical smoke and an original
+BTCUSDT2022-01 fundingZIP/CHECKSUM/schema probe BEFORE permitting8DEVshards.
+No V7 market-profit result yet. Actual run confirmedin_progress; no duplicate.
 New external observable: unusually signed paid funding plus opposing closed
-price/flow confirmation, inventory-unwind hypothesis.16entries/96policies6h/24h.
-Funding is a conjectural crowding proxy, not proof of liquidation or OI. Past
-settled rates available only after15min; historical intervals normalized; no
-future/current imputation and no future credit added to comparable PnL. Verify
-original monthly ZIP/CHECKSUM, preserve rawbytes andsource coverage before DEV.
-Cumulative/adaptive search caveats retained. Implement/test/ACTUALLYexecute.
+price/flow confirmation, inventory-unwind conjecture.16entries/96policies6h/24h.
+Past settled rates available after15min; historical intervals normalized; no
+future/current imputation and no future credit added to comparable PnL.
+Preserve rawfundingZIP/CHECKSUM, parsedarrays/hashes and actuallyused original
+1mZIP/CHECKSUM plus exactslices. Fundingcoverage>=95% separately2022/2023
+required, otherwise SOURCE_COVERAGE_INSUFFICIENT. Same account/cost/risk gates.
+Expected durable branches research-funding-crowding-v7-dev-36922945306,
+research-funding-crowding-v7-results-36922945306(ifselected),
+research-funding-crowding-v7-evidence-36922945306;
+root research/funding-crowding-v7/run-36922945306/. Not yet result claims.
+Cumulative/adaptive search caveats retained; no user daily-goal success.
 
 Calendar reporting audit found older daily files count only completeKSTdates,
 omitting both partialUTC-boundary dates. Original files/history remain intact.
