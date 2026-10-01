@@ -42,4 +42,12 @@ A manual run sends a completion summary to Telegram even if there are no 4/7+ ca
 
 ## Safety
 
-This repository reads public market data only. It does not place orders and does not require a Bitget API key.
+The public scanner and backtest workflows read public market data and do not
+require a Bitget API key. This repository also contains authenticated Bitget
+**Demo** execution and forward-testing code, which can place simulated Demo
+orders when the required repository secrets are configured.
+
+Real/live trading must remain disabled under `AGENTS.md`. Never commit exchange
+credentials or Telegram credentials to source, logs, artifacts, or reports.
+Research work must use a non-`main` branch and follow both `AGENTS.md` and
+`RESEARCH_RULES.md`.

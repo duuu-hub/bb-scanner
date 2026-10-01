@@ -1,13 +1,52 @@
 # Repository Operating Rules for ChatGPT/Agent Changes
 
-These rules exist so work from separate ChatGPT conversations does not interfere with the live LONG3 forward watcher.
+Ruleset version: `2026-10-02`
+
+These rules apply to every ChatGPT conversation, coding agent, research agent,
+manual workflow, and automated workflow that reads from or writes to this
+repository. They exist so separate sessions cannot silently change research
+semantics or interfere with the live LONG3 forward watcher.
+
+## 0. Mandatory start gate (fail closed)
+
+Before changing a file, dispatching a workflow, interpreting a result, or
+claiming that work is running, the agent must:
+
+1. Read this entire `AGENTS.md` and the entire `RESEARCH_RULES.md` from the
+   target branch. A summary, remembered copy, or prior-chat instruction is not
+   a substitute for the current files.
+2. Resolve and record the repository, target branch, and current remote HEAD
+   SHA. The default branch for this research workstream is
+   `research-rank5-binance-15m-5y` unless the user explicitly names another
+   non-`main` branch.
+3. State the task scope and identify which canonical execution engine, data
+   split, cost model, and validation gate apply. Unknown items must be marked
+   unknown; they must not be guessed.
+4. Check for newer commits before writing. Never overwrite unrelated work from
+   another conversation or workflow.
+5. Stop without producing or promoting results if the rules cannot be read in
+   full, the branch cannot be verified, required data are unavailable, or a
+   required validation gate cannot be run.
+
+A generic request such as "continue", "run it", "do the research", or "fix
+it" authorizes work only on the declared research branch. It does **not**
+authorize a commit, push, pull request merge, or direct change to `main`.
+
+Current explicit user instructions control the requested task. If they change
+a frozen repository rule, record the changed rule, scope, and effective run in
+the resulting commit/report instead of silently treating the old and new
+results as comparable.
 
 ## 1. Research/code changes
 
-- Do research and code changes on a separate branch.
-- Do not develop directly on `main`.
-- Run the relevant tests on the branch before merging.
-- It is safe to merge tested code to `main` while a 4-hour LONG3 watcher is already running.
+- Do research and code changes on the declared non-`main` branch.
+- Do not develop, commit, push, or dispatch a research run from `main`.
+- Do not merge to `main` unless the user explicitly approves that merge in the
+  current conversation after seeing the tested change and its impact.
+- Run the relevant tests on the research branch before requesting or
+  performing an approved merge.
+- A tested change can technically be merged while a 4-hour watcher is active,
+  but this generation-handoff capability is not permission to merge.
 - A running watcher is pinned to the exact code commit it started with.
 - Code merged to `main` during that session must take effect only when the next watcher starts.
 
@@ -16,7 +55,7 @@ These rules exist so work from separate ChatGPT conversations does not interfere
 Current intended behavior:
 
 `Watcher A starts on code v1`
-→ research/code v2 may be merged to `main` at any time
+→ explicitly approved research/code v2 may be merged to `main`
 → Watcher A continues using v1 for all remaining 15-minute boundaries
 → Watcher A persists only forward-state/log files without updating its live source checkout
 → Watcher A ends
@@ -60,7 +99,10 @@ Never enable real/live trading.
 
 ## 5. Before merging runtime changes
 
-For changes touching the live LONG3 path, inspect current `main` first because other chats/workflows may have modified it.
+For an explicitly approved merge touching the live LONG3 path, inspect current
+`main` first because other chats/workflows may have modified it. Reading or
+testing against `main` is allowed; developing or writing directly on `main` is
+not.
 
 At minimum, validate:
 
@@ -81,9 +123,39 @@ Backtests/research workflows may run while the 4-hour watcher is active. They us
 
 Prefer research branches for code modifications so live state persistence and research work do not compete for the same code history unnecessarily.
 
-## 7. Main-branch merge timing
+## 7. Workflow dispatch and status truth
 
-There is no need to wait for the current 4-hour watcher to finish before merging tested research/code into `main`.
+An agent must never describe work as queued, running, completed, or successful
+from memory or intention. Use the following exact meanings:
+
+- `NOT_DISPATCHED`: no external run ID exists.
+- `QUEUED`: a GitHub Actions run ID exists and the current GitHub status is
+  queued/pending.
+- `RUNNING`: a run ID exists and a fresh status check says it is in progress.
+- `COMPLETED`: the run concluded successfully and every required shard and
+  artifact exists.
+- `FAILED`, `CANCELLED`, or `TIMED_OUT`: report the actual terminal state; do
+  not hide it behind "still checking" or silently substitute a retry.
+- `PARTIAL`: only some required shards/artifacts completed. Partial output must
+  not be reported as the full result.
+
+After dispatch, verify within approximately one minute that a run ID actually
+exists. If dispatch failed before an ID was created, retry once and disclose
+the retry. A transient infrastructure/download failure may be retried once
+after diagnosis; a code, data-integrity, or strategy-logic failure must not be
+rerun unchanged and presented as progress.
+
+Every progress report for a long run must include the workflow name, run ID,
+current state, branch/commit SHA, and GitHub run URL (the user's inspection and
+cancel path). For sharded work, report the total shard count and the IDs/states
+of all shards. A chat turn ending does not mean research continues: say it is
+continuing only when a verified external run is still queued or running.
+
+## 8. Main-branch merge timing
+
+After explicit user approval, there is no technical need to wait for the
+current 4-hour watcher to finish before merging tested research/code into
+`main`.
 
 Expected behavior is automatic generation handoff:
 
@@ -92,7 +164,7 @@ Expected behavior is automatic generation handoff:
 
 If this behavior is not true, treat it as an operational bug and fix it before further runtime changes.
 
-## 8. Signal universe vs Demo execution universe
+## 9. Signal universe vs Demo execution universe
 
 The canonical LONG3 signal scanner must use the normal live/public crypto
 USDT-perpetual universe so forward signals remain comparable with research and
@@ -116,7 +188,7 @@ execution capability filter, not a signal-generation filter.
 This separation keeps the forward-research environment aligned with eventual
 real trading while respecting the smaller Demo orderable universe.
 
-## 9. PSAR research canonical timing definition
+## 10. PSAR research canonical timing definition
 
 This section is authoritative for all PSAR research unless the user explicitly changes it.
 
@@ -140,7 +212,7 @@ For timeframe TF (currently compare 1H and 4H):
 
 Ultimate PSAR research objective: implement the SAME canonical logic on 1H and 4H, then compare them on identical data/execution assumptions before choosing the production timeframe.
 
-## 10. Mandatory intrabar / same-bar execution chronology
+## 11. Mandatory intrabar / same-bar execution chronology
 
 This section is authoritative for ALL backtests and research engines in this repository unless the user explicitly changes it. It is not PSAR-specific. A strategy/workflow may not replace, weaken, or silently bypass these rules.
 
@@ -157,3 +229,40 @@ This section is authoritative for ALL backtests and research engines in this rep
 - All 1H and 4H PSAR research, and any future strategy using OHLC backtests, must call/reproduce this same chronology contract. Do not create a strategy-local shortcut that uses 'TP first', 'SL first', arbitrary OHLC ordering, or same-parent-bar blanket SL without first applying the 1m authority rule.
 - Before trusting a large run, execute chronology smoke tests covering at minimum: pre-entry TP ignored, entry-minute TP=>LOSS, entry-minute SL=>LOSS, entry-minute both=>LOSS, established-position both=>LOSS, entry then later TP=>WIN, entry then later SL=>LOSS, and DATA_GAP handling.
 - A run that does not use this contract, or cannot prove it passed the chronology smoke tests, is INVALID and its PF, return, win rate, MDD, trade count, and sizing conclusions must not be compared with canonical results.
+
+## 12. Result provenance and admissibility
+
+Every reported backtest result must be traceable to all of the following:
+
+- repository and non-`main` branch;
+- workflow name and GitHub Actions run ID/URL;
+- exact commit SHA and, when relevant, canonical engine SHA;
+- data source, market type, universe rule, date range, and data artifact/run ID
+  or checksum;
+- frozen configuration or complete parameter grid;
+- signal timestamp and order-live semantics;
+- fees, slippage, funding, and fill assumptions;
+- TRAIN/VALIDATION/FORWARD split and whether each split had been seen before;
+- exclusions and counts for `DATA_GAP`, `ENTRY_MISMATCH`, `EXIT_MISMATCH`,
+  unresolved positions, and failed shards;
+- validation/audit command and its outcome.
+
+If any required provenance is absent, label the result `PROVISIONAL`. If a
+canonical timing, chronology, leakage, accounting, or data-integrity rule is
+violated, label it `INVALID/REJECTED` and do not use it for comparison,
+selection, sizing, demo admission, or production decisions. Never copy a
+metric from chat memory when the artifact can be checked directly.
+
+## 13. Rule-change and contradiction handling
+
+- `AGENTS.md` is the operational/safety authority; `RESEARCH_RULES.md` is the
+  strategy-research and evidence authority. Both are mandatory.
+- A strategy-specific document may add stricter requirements but may not
+  weaken either file.
+- When code, a workflow, a report, and these rules disagree, stop and expose
+  the contradiction. Do not choose the convenient interpretation.
+- A rule change applies prospectively unless the user explicitly orders a
+  historical rerun. Previously generated results retain the rule version and
+  validity status under which they were produced.
+- Never weaken a guard or relabel an invalid result merely to obtain a better
+  PF, return, win rate, MDD, or trade count.
