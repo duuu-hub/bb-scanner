@@ -41,9 +41,19 @@ Current:
   research/shock-confirmation-v3/run-36866930929/accounts.
 - Preserve code 84fe6a116dd21fec405120cfe2c4ad38cf04a65a, all 96 DEV cells on
   research-shock-confirm-v3-dev-36866930929, source hashes and rejected outcomes.
-- Next economic mechanism under design: compression-to-expansion trend continuation,
-  rather than immediate/confirmed shock fading. Not yet executed or selected.
-- Current chat is actively implementing; obey the central interactive lease.
+- V4 fixed-plan commit ae35b31876eec83ff82771022986d83e8c4f2e6c, branch
+  research-compression-expansion-v4. Moderate compression/volume/flow trend expansion.
+- Implementation commit e4c78b629ae0a0ff6cc4e9712385248588c89b32, 16 entry settings/96 DEV policies.
+  85 local unit tests passed. Local chronology smoke lacked numba; Actions installs
+  pinned numba and must pass the actual canonical smoke before DEV.
+- Explicit execution trigger was pushed; actual V4 run 36897289990.
+  Workflow Compression Expansion V4 Research Cycle. Performance is not yet known.
+- Full original catalogues, manifest statistics and 256 preserved historical CSV
+  hashes are verified before every DEV/GATE/account marking stage.
+- Prior V1/V2/V3 curves, raw trials, logs and every current V4 partial/complete
+  artifact are preserved on dedicated git evidence branches with SHA256 manifests.
+  Preservation is PENDING until its actual job succeeds; don't claim it already ran.
+- Expired interactive lease released. Inspect this active run; never duplicate it.
 
 Data boundaries: DEV 2021-09 through 2023; 2024 historically seen selection/
 gate, 2025-2026 previously seen comparison ONLY, not clean holdout. Reserved
