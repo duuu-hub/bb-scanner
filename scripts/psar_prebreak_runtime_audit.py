@@ -185,6 +185,8 @@ def audit(source,ns):
                     assert risk==abs(fill-sl)==1.
                     assert (sl<fill<105<tp) if long else (tp<95<fill<sl)
                 assert_account(out)
+                if "_approach_fill" in ns:
+                    assert all(q["maker"]==0 and q["taker"]==q["fills"] for q in out.values())
     add("Actual engine fixed-fill SL and pre-break geometry",geometry)
     def already_crossed():
         for long in (True,False):
@@ -197,6 +199,18 @@ def audit(source,ns):
             assert not out and not books
             out,books,_=fixture(ns,long)
             assert len(books)==1
+            if "_approach_fill" in ns:
+                if long:
+                    oo=[100.,103.5];hh=[102.,104.5];ll=[99.,103.5];e=103.;s=105.;expected=103.5
+                else:
+                    oo=[100.,96.5];hh=[101.,96.5];ll=[98.,96.];e=97.;s=95.;expected=96.5
+                arrays=[np.array(x) for x in (oo,hh,ll)]
+                assert ns["_approach_fill"](*arrays,0,2,e,s,long)==(1,expected,True)
+                arrays[0][1]=106. if long else 94.
+                arrays[1][1]=107. if long else 94.5
+                arrays[2][1]=105.5 if long else 93.
+                assert ns["_approach_fill"](*arrays,0,2,e,s,long) is None
+                assert ns["_approach_fill"](*arrays,0,2,s,s,long) is None
     add("Approach must reach entry in intended direction",approached)
     def once():
         for long in (True,False):
@@ -237,7 +251,7 @@ def known_findings(ns):
     finding={"intrabar_trigger_reported_as_maker":q["maker"]==1,
              "cost_policy":"All OPEN and intrabar approach fills must be charged as taker before cost selection",
              "zero_entry_distance":"PSAR-touch controls; excluded from strict pre-break candidates",
-             "gap_through_entry":"Current parent fill requires straddling threshold; actual stop gap execution needs ledger stress"}
+             "gap_through_entry":"15m OPEN gap correction present" if "_approach_fill" in ns else "Legacy parent fill requires straddling threshold"}
     # Demonstrate the gap-through omission rather than claiming a clean execution audit.
     result,books,_=fixture(ns,True,gap_through=True)
     finding["gap_through_counterexample_reproduced"]=not books
@@ -245,7 +259,7 @@ def known_findings(ns):
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument("--engine",default="scripts/psar_1h_breakthrough_compare.py")
-    ap.add_argument("--out",default="prebreak_runtime_audit.json");a=ap.parse_args()
+    ap.add_argument("--out",default="prebreak_runtime_audit.json");ap.add_argument("--require-trigger-fix",action="store_true");a=ap.parse_args()
     source,ns=load_engine(a.engine)
     names=audit(source,ns);print("DETAILED_CHECKS_PASS",len(names),flush=True)
     for repetition in range(10):
@@ -254,6 +268,10 @@ def main():
     sha=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
     result={"engine_blob_sha":sha,"checks":names,"check_count":30,"consecutive_clean_suite_repetitions":10,
             "findings":known_findings(ns),"scope":"Gross geometry/accounting/causality and mocked official 1m semantics; not cost or live execution approval"}
+    if a.require_trigger_fix:
+        assert "_approach_fill" in ns
+        assert not result["findings"]["intrabar_trigger_reported_as_maker"]
+        assert not result["findings"]["gap_through_counterexample_reproduced"]
     pathlib.Path(a.out).write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
 if __name__=="__main__":main()

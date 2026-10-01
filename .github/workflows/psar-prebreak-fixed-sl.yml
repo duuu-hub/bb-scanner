@@ -1,5 +1,5 @@
 name: PSAR Pre-Break Fixed-SL 30+10
-on:
+'on':
   push:
     branches: [research-rank5-binance-15m-5y]
     paths: ['.research/psar_prebreak_fixed_sl_run']
@@ -9,25 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          python - <<'PY'
-          s=open("scripts/psar_1h_breakthrough_compare.py").read()
-          assert s.count('sl=fill-(sb*a0 if b else -sb*a0)')==2
-          assert 'sl=s-(sb*a0 if b else -sb*a0)' not in s
-          assert 'touched=(h[j]>=entry) if long else (l[j]<=entry)' in s
-          assert 'if (b and ro[i]>=s) or ((not b) and ro[i]<=s): continue' in s
-          assert 'entered_atr.add(em)' in s and 'entered_pct.add(pct)' in s
-          for b in (True,False):
-            for fill in (90.,100.,110.):
-              for sb in (.1,.5,1.,3.):
-                atr=2.; sl=fill-(sb*atr if b else -sb*atr)
-                assert (sl<fill) if b else (sl>fill)
-          for _ in range(30):
-            assert True
-          for _ in range(10):
-            assert True
-          print("FIXED_SL_30PLUS10_PASS")
-          PY
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Runtime 30 checks and 10 clean suite repetitions
+        run: python scripts/psar_prebreak_runtime_audit.py --require-trigger-fix --out prebreak_runtime_audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-runtime-audit
+          path: prebreak_runtime_audit.json
   stats:
     needs: validate
     strategy:

@@ -170,6 +170,18 @@ def resample(t,o,h,l,c,m=16):
     rl=np.array([np.min(l[a:b]) for a,b in zip(st,en)],dtype=float)
     return t[st],o[st],rh,rl,c[en-1]
 
+def _approach_fill(o,h,l,start,stop,entry,psar,long):
+    """Stop-style approach entry; 15m OPEN gap fills at OPEN before PSAR only."""
+    for j in range(start,stop):
+        at_open=(o[j]>=entry) if long else (o[j]<=entry)
+        touched=(h[j]>=entry) if long else (l[j]<=entry)
+        if not (at_open or touched):continue
+        fill=float(o[j]) if at_open else float(entry)
+        if (long and not fill<psar) or ((not long) and not fill>psar):
+            return None
+        return j,fill,bool(at_open)
+    return None
+
 def evaluate(t,o,h,l,c,m,symbol=None):
     rt,ro,rh,rl,rc=resample(t,o,h,l,c,m); sar,bull=psar_open_projection(rh,rl); n=len(rt)
     # ATR available at bar i open = ATR14 through bar i-1 only
@@ -193,16 +205,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
         for em in ENTRY_ATR:
             if em in entered_atr: continue
             e=s-(em*a0 if b else -em*a0)
-            # Canonical open-time execution: favorable crossed target becomes taker at OPEN.
-            # Buy limit must be below open; sell limit must be above open.
-            crossed=(b and ro[i]>=e) or ((not b) and ro[i]<=e)
-            if crossed:
-                fs=start; fill=ro[i]
-            else:
-                hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
-                if not hits.size:continue
-                fs=start+int(hits[0]); fill=e
-            is_taker=bool(crossed)
+            approach=_approach_fill(o,h,l,start,min(start+m,len(t)),e,s,b)
+            if approach is None:continue
+            fs,fill,is_open_fill=approach
             entered_atr.add(em)
             for sb in SL_BUFFER_ATR:
                 sl=fill-(sb*a0 if b else -sb*a0)
@@ -213,13 +218,13 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=s+(td*a0 if b else -td*a0)
                     if (b and not tp>e) or ((not b) and not tp<e):continue
                     k=f"E{em:g}|SB{sb:g}|TA{td:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0,"gross_profit_R":0.0,"gross_loss_R":0.0})
-                    q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
-                    # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
-                    # whether an exit touch on fs happened before or after entry.
+                    q["fills"]+=1; q["taker"]+=1
+                    # A stop trigger occurs inside fs, so parent-bar OHLC cannot prove
+                    # whether an exit touch on fs happened before or after the trigger.
                     # Resolve any fill-bar exit candidate on authoritative 1m first;
                     # if no post-entry exit occurred, resume from fs+1.
                     scan_start=fs
-                    if not is_taker:
+                    if not is_open_fill:
                         fill_tp=(h[fs]>=tp) if b else (l[fs]<=tp)
                         fill_sl=(l[fs]<=sl) if b else (h[fs]>=sl)
                         if fill_tp or fill_sl:
@@ -231,10 +236,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="loss":_book(q,"loss",fill,tp,sl,risk);continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="entry_mismatch":
-                                # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
+                                # Parent 15m claimed a stop-trigger fill that authoritative 1m cannot reproduce.
                                 # Do not guess a fill or an outcome: exclude this parameterized signal.
-                                q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1;continue
-                            if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
+                                q["fills"]-=1; q["taker"]-=1; q["entry_mismatch"]+=1;continue
+                            if rr!="continue":raise RuntimeError(f"unexpected 1m trigger result {symbol} {int(t[fs])}: {rr}")
                         scan_start=fs+1
                     off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
                     if off<0:
@@ -260,14 +265,9 @@ def evaluate(t,o,h,l,c,m,symbol=None):
         for pct in ENTRY_PCT:
             if pct in entered_pct: continue
             e=s*(1-pct/100.0) if b else s*(1+pct/100.0)
-            crossed=(b and ro[i]>=e) or ((not b) and ro[i]<=e)
-            if crossed:
-                fs=start; fill=ro[i]
-            else:
-                hits=np.flatnonzero((l[start:min(start+m,len(t))]<=e)&(h[start:min(start+m,len(t))]>=e))
-                if not hits.size: continue
-                fs=start+int(hits[0]); fill=e
-            is_taker=bool(crossed)
+            approach=_approach_fill(o,h,l,start,min(start+m,len(t)),e,s,b)
+            if approach is None:continue
+            fs,fill,is_open_fill=approach
             entered_pct.add(pct)
             for sb in SL_BUFFER_ATR:
                 sl=fill-(sb*a0 if b else -sb*a0)
@@ -278,13 +278,13 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                     tp=s*(1+td/100.0) if b else s*(1-td/100.0)
                     if (b and not tp>e) or ((not b) and not tp<e):continue
                     k=f"P{pct:g}|SB{sb:g}|TP{td:g}|{side}";q=out.setdefault(k,{"fills":0,"taker":0,"maker":0,"win":0,"loss":0,"collision_15m":0,"resolved_1m":0,"collision_1m_loss":0,"data_gap":0,"entry_mismatch":0,"exit_mismatch":0,"unresolved_eod":0,"gross_profit_R":0.0,"gross_loss_R":0.0})
-                    q["fills"]+=1; q["taker" if is_taker else "maker"]+=1
-                    # A maker fill occurs inside fs, so parent-bar OHLC cannot prove
-                    # whether an exit touch on fs happened before or after entry.
+                    q["fills"]+=1; q["taker"]+=1
+                    # A stop trigger occurs inside fs, so parent-bar OHLC cannot prove
+                    # whether an exit touch on fs happened before or after the trigger.
                     # Resolve any fill-bar exit candidate on authoritative 1m first;
                     # if no post-entry exit occurred, resume from fs+1.
                     scan_start=fs
-                    if not is_taker:
+                    if not is_open_fill:
                         fill_tp=(h[fs]>=tp) if b else (l[fs]<=tp)
                         fill_sl=(l[fs]<=sl) if b else (h[fs]>=sl)
                         if fill_tp or fill_sl:
@@ -296,10 +296,10 @@ def evaluate(t,o,h,l,c,m,symbol=None):
                             if rr=="loss":_book(q,"loss",fill,tp,sl,risk);continue
                             if rr=="data_gap":q["data_gap"]+=1;continue
                             if rr=="entry_mismatch":
-                                # Parent 15m claimed a maker fill that authoritative 1m cannot reproduce.
+                                # Parent 15m claimed a stop-trigger fill that authoritative 1m cannot reproduce.
                                 # Do not guess a fill or an outcome: exclude this parameterized signal.
-                                q["fills"]-=1; q["maker"]-=1; q["entry_mismatch"]+=1;continue
-                            if rr!="continue":raise RuntimeError(f"unexpected 1m maker result {symbol} {int(t[fs])}: {rr}")
+                                q["fills"]-=1; q["taker"]-=1; q["entry_mismatch"]+=1;continue
+                            if rr!="continue":raise RuntimeError(f"unexpected 1m trigger result {symbol} {int(t[fs])}: {rr}")
                         scan_start=fs+1
                     off,hit_tp,hit_sl=_first_exit(h,l,scan_start,tp,sl,b)
                     if off<0:
@@ -374,5 +374,5 @@ for k,q in agg.items():
     q["win_pct"]=round(100*q["win"]/resolved,3) if resolved else None
     q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"]>0 else None
     q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"pre-break approach trigger; one fill per entry-distance per PSAR regime","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_atr_from_actual_fill":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL fixed from actual fill opposite trade direction by N*ATR; TP fixed beyond PSAR_ref","statistics_scope":"PSAR pre-break gross edge scan; one entry per distance per PSAR regime; exits may overlap across regimes; no equity curve/MDD","costs":"fees/slippage/funding excluded","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"pre-break stop-market approach trigger; all fills taker; 15m OPEN gaps at actual OPEN; reject fill at/past PSAR; one fill per entry-distance per PSAR regime","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_atr_from_actual_fill":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL fixed from actual fill opposite trade direction by N*ATR; TP fixed beyond PSAR_ref","statistics_scope":"PSAR pre-break gross edge scan; one entry per distance per PSAR regime; exits may overlap across regimes; no equity curve/MDD","costs":"all approach fills classified taker; fees/slippage/funding excluded; within-1m gap slippage still requires stress","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
