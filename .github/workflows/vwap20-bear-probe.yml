@@ -1,0 +1,23 @@
+name: VWAP20 BTC Bear Probe
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: [.research/vwap20_bear_probe_run]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas numpy
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir raw reg
+          for i in 0 1 2 3 4 5 6 7; do mkdir -p raw/$i; gh run download 36740950910 -n count-audit-$i -D raw/$i; done
+          gh run download 36735084022 -n vwap20-intersection-btc-regime -D reg
+      - run: python scripts/vwap20_bear_probe.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vwap20-bear-probe
+          path: bear_raw_events.csv
