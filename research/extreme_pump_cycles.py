@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Measure confirmed low->high pump cycles from the frozen 5Y Binance UM 15m dataset.
 
-Pre-registered definitions:
+Definitions:
 - Ignore the first 90 calendar days of each symbol (reduce listing/launch distortion).
 - A cycle starts from the lowest 15m low after the prior confirmed cycle.
 - Track the highest later 15m high.
 - A cycle is confirmed/closed when a later 15m low is <= 50% of that peak.
-- If a new low undercuts the trough before a 50% peak drawdown, restart the trough there
-  (the earlier rise was not a completed cycle).
+- If a new low undercuts the trough before a 50% peak drawdown, restart the trough there.
 - Open/unconfirmed cycles at the dataset end are excluded.
-- "Low liquidity" = bottom quartile of symbols by median daily quote volume over their
-  available history in this frozen dataset.
+- "Low liquidity" = bottom quartile of symbols by median daily quote volume.
+- Post-peak day-N return = exact 15m close at peak_ts + N*24h versus the peak HIGH.
+  It is NOT the minimum low within that horizon.
 """
 from __future__ import annotations
 import argparse, csv, gzip, json, math, statistics
@@ -47,6 +47,20 @@ def summarize(cycles):
         "max_x":1+max(vals)/100.0,
     }
 
+def horizon_summary(cycles):
+    out={}
+    for d in range(1,8):
+        key=f"day{d}_ret_pct"
+        vals=[c[key] for c in cycles if c.get(key) is not None]
+        out[f"day{d}"]={
+            "n":len(vals),
+            "mean_ret_pct":sum(vals)/len(vals) if vals else None,
+            "median_ret_pct":statistics.median(vals) if vals else None,
+            "p25_ret_pct":pctile(vals,0.25) if vals else None,
+            "p75_ret_pct":pctile(vals,0.75) if vals else None,
+        }
+    return out
+
 def analyze_symbol(path: Path):
     daily={}
     cycles=[]
@@ -72,8 +86,6 @@ def analyze_symbol(path: Path):
             if trough is None:
                 trough=lo; trough_ts=ts
                 continue
-            # If a previously established peak has now suffered a 50% drawdown,
-            # close the cycle BEFORE using this bar's high (conservative same-bar handling).
             if peak is not None and lo <= 0.5*peak:
                 if peak_ts is not None and peak_ts>trough_ts and peak>trough:
                     rise=(peak/trough-1.0)*100.0
@@ -88,12 +100,40 @@ def analyze_symbol(path: Path):
                     })
                 trough=lo; trough_ts=ts; peak=None; peak_ts=None
                 continue
-            # A fresh lower low invalidates any small, unconfirmed rise that preceded it.
             if lo < trough:
                 trough=lo; trough_ts=ts; peak=None; peak_ts=None
                 continue
             if hi > trough and (peak is None or hi>peak):
                 peak=hi; peak_ts=ts
+
+    # Second pass: exact +1d ... +7d close after each confirmed peak.
+    targets={}
+    for idx,c in enumerate(cycles):
+        for d in range(1,8):
+            targets.setdefault(c["peak_ts"]+d*DAY_MS,[]).append((idx,d))
+    if targets:
+        remaining=set(targets.keys())
+        with gzip.open(path,"rt",encoding="utf-8",newline="") as f:
+            r=csv.DictReader(f)
+            for row in r:
+                try:
+                    ts=int(row["open_time"])
+                except Exception:
+                    continue
+                if ts not in remaining:
+                    continue
+                try:
+                    close=float(row["close"])
+                except Exception:
+                    close=None
+                if close is not None and close>0:
+                    for idx,d in targets[ts]:
+                        peakv=cycles[idx]["peak"]
+                        cycles[idx][f"day{d}_ret_pct"]=(close/peakv-1.0)*100.0
+                remaining.discard(ts)
+                if not remaining:
+                    break
+
     med_daily=statistics.median(daily.values()) if daily else 0.0
     active_days=len(daily)
     return {
@@ -124,6 +164,26 @@ def main():
     low_cycles=[c for c in all_cycles if c["symbol"] in low_symbols]
     all_sorted=sorted(all_cycles,key=lambda x:x["rise_pct"],reverse=True)
     low_sorted=sorted(low_cycles,key=lambda x:x["rise_pct"],reverse=True)
+
+    groups={
+        "all_cycles": all_cycles,
+        "rise_ge_10x": [c for c in all_cycles if c["rise_x"]>=10],
+        "rise_ge_20x": [c for c in all_cycles if c["rise_x"]>=20],
+        "rise_ge_30x": [c for c in all_cycles if c["rise_x"]>=30],
+        "rise_ge_50x": [c for c in all_cycles if c["rise_x"]>=50],
+        "low_liquidity_all": low_cycles,
+        "low_liquidity_rise_ge_10x": [c for c in low_cycles if c["rise_x"]>=10],
+        "low_liquidity_rise_ge_20x": [c for c in low_cycles if c["rise_x"]>=20],
+        "low_liquidity_rise_ge_30x": [c for c in low_cycles if c["rise_x"]>=30],
+        "low_liquidity_rise_ge_50x": [c for c in low_cycles if c["rise_x"]>=50],
+    }
+    post_peak={}
+    for name,cs in groups.items():
+        post_peak[name]={
+            "cycle_n":len(cs),
+            "horizons":horizon_summary(cs),
+        }
+
     result={
         "definition":{
             "market":"Binance USD-M USDT perpetual universe from frozen 5Y artifact run 36095439671",
@@ -133,22 +193,26 @@ def main():
             "open_cycles_excluded":True,
             "low_liquidity_rule":"bottom 25% of symbols by median daily quote volume",
             "low_liquidity_cutoff_median_daily_quote_volume":q25,
+            "post_peak_metric":"exact 15m close at peak timestamp + N*24h versus peak high; not minimum low",
         },
         "symbols_total":len(symbols),
         "symbols_low_liquidity":len(low_symbols),
         "all":summarize(all_cycles),
         "low_liquidity":summarize(low_cycles),
+        "post_peak":post_peak,
         "top20_all":all_sorted[:20],
         "top20_low_liquidity":low_sorted[:20],
     }
     out=Path(args.out); out.mkdir(parents=True,exist_ok=True)
     (out/"summary.json").write_text(json.dumps(result,indent=2),encoding="utf-8")
+    fields=["symbol","trough_ts","peak_ts","trough","peak","rise_pct","rise_x"]+[f"day{d}_ret_pct" for d in range(1,8)]
     with (out/"cycles.csv").open("w",newline="",encoding="utf-8") as f:
-        fields=["symbol","trough_ts","peak_ts","trough","peak","rise_pct","rise_x"]
-        w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(all_sorted)
+        w=csv.DictWriter(f,fieldnames=fields,extrasaction="ignore"); w.writeheader(); w.writerows(all_sorted)
     with (out/"symbol_liquidity.csv").open("w",newline="",encoding="utf-8") as f:
-        fields=["symbol","rows","active_days","median_daily_quote_volume"]
-        w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(sorted(symbols,key=lambda x:x["median_daily_quote_volume"]))
+        fields2=["symbol","rows","active_days","median_daily_quote_volume"]
+        w=csv.DictWriter(f,fieldnames=fields2); w.writeheader(); w.writerows(sorted(symbols,key=lambda x:x["median_daily_quote_volume"]))
+    print("POST_PEAK_JSON")
+    print(json.dumps(post_peak,ensure_ascii=False),flush=True)
     print("RESULT_JSON")
     print(json.dumps(result,ensure_ascii=False),flush=True)
 
