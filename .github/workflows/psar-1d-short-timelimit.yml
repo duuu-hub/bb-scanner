@@ -10,12 +10,17 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
       - env: {GH_TOKEN: '${{ github.token }}'}
         run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - run: |
+          git rev-parse HEAD
+          sha256sum scripts/psar_1d_short_timelimit.py
+          grep -n -- '--out' scripts/psar_1d_short_timelimit.py
+          python scripts/psar_1d_short_timelimit.py --help | grep -- '--out'
           python -m py_compile scripts/psar_1d_short_timelimit.py
           python scripts/psar_1d_short_timelimit.py --data data --shard 0 --shards 64 --out smoke.csv.gz
           python - <<'PY'
@@ -34,6 +39,7 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
