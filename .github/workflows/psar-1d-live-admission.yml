@@ -1,0 +1,48 @@
+name: PSAR 1D Live Admission Evolution
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_live_admission_trigger']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psar-1d-live-admission
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned dependencies
+        run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Compile
+        run: python -m py_compile scripts/psar_1d_live_portfolio.py scripts/psar_1d_live_admission.py
+      - name: Download immutable sources
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36817230406 -R ${{ github.repository }} -p 'psar-1d-canonical-reconcile-*' -D canonical
+          gh run download 36819434601 -R ${{ github.repository }} -p 'psar-1d-live-portfolio-*' -D prior
+      - name: TRAIN-only admission and risk selection then frozen HOLDOUT replay
+        run: python scripts/psar_1d_live_admission.py --data data --canonical canonical --prior prior --out results
+      - name: Verify outputs
+        run: |
+          test -s results/summary.json
+          test -s results/REPORT.md
+          test -s results/train_admission_policies.csv
+          test -s results/train_admission_yearly.csv
+          test -s results/train_hash_seed_distribution.csv
+          test -s results/train_risk_grid_after_admission.csv
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-live-admission-${{ github.run_id }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
