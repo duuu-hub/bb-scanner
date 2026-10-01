@@ -1,0 +1,37 @@
+name: PSAR 1D Canonical Account Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_canonical_account_run_*']
+permissions: {contents: read, actions: read}
+jobs:
+  validate-account:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Compile frozen account validator
+        run: python -m py_compile scripts/validate_psar_1d_canonical_account.py
+      - name: Download pinned canonical and reconciliation artifacts
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p canonical reconciliation data
+          gh run download 36817442657 -R ${{ github.repository }} -n psar-1d-canonical-reflip-validation -D canonical
+          gh run download 36816705084 -R ${{ github.repository }} -n psar-1d-exact-reconciliation -D reconciliation
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Frozen account replay and 15m MTM risk
+        run: |
+          python scripts/validate_psar_1d_canonical_account.py \
+            --canonical canonical \
+            --reconciliation reconciliation \
+            --data data \
+            --out psar-1d-canonical-account
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-canonical-account-validation
+          path: psar-1d-canonical-account
+          retention-days: 90
