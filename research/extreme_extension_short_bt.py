@@ -60,37 +60,22 @@ def signals_for_symbol(symbol,rows,median_qv):
     peak=None
     fired=set()
     signals=[]
-    pending=[]  # (cross_idx, threshold, trough, trough_ts, cross_high)
 
     for i,(ts,op,hi,lo,cl) in enumerate(rows):
-        # Fill pending signals strictly at next bar open.
-        if pending:
-            for cross_idx,thr,tr,tr_ts,cross_hi in pending:
-                if i==cross_idx+1:
-                    signals.append({
-                        "symbol":symbol,"threshold_x":thr,
-                        "trough":tr,"trough_ts":tr_ts,
-                        "cross_ts":rows[cross_idx][0],"cross_high":cross_hi,
-                        "entry_ts":ts,"entry":op,
-                        "entry_vs_trough_x":op/tr,
-                        "median_daily_quote_volume":median_qv,
-                        "_entry_idx":i,
-                    })
-            pending=[]
-
         if ts < start_ts:
             continue
         if trough is None:
             trough=lo; trough_ts=ts; peak=hi; fired=set()
             continue
 
-        # Confirmed 50% drawdown resets cycle. We do not signal on the reset bar
-        # because intrabar order between its low and high is unknowable.
+        # A confirmed >=50% drawdown resets the cycle. Do not enter on the
+        # reset bar because low/high chronology inside the 15m candle is unknown.
         if peak is not None and lo <= 0.5*peak:
             trough=lo; trough_ts=ts; peak=hi; fired=set()
             continue
 
-        # New causal low before cycle reset: restart trough, no same-bar signal.
+        # A fresh causal low changes all threshold prices. New limits become
+        # active only from the next bar, avoiding same-bar chronology leakage.
         if lo < trough:
             trough=lo; trough_ts=ts; peak=hi; fired=set()
             continue
@@ -98,16 +83,24 @@ def signals_for_symbol(symbol,rows,median_qv):
         if peak is None or hi>peak:
             peak=hi
 
-        newly=[]
+        # Resting sell limits are fully determined by the prior causal trough.
+        # Conservative fill: exact limit price, even if the market gaps above it.
         for thr in THRESHOLDS:
-            if thr in fired: continue
-            if hi >= thr*trough:
+            if thr in fired:
+                continue
+            limit_price=thr*trough
+            if hi >= limit_price:
                 fired.add(thr)
-                newly.append((i,thr,trough,trough_ts,hi))
-        if newly:
-            pending.extend(newly)
+                signals.append({
+                    "symbol":symbol,"threshold_x":thr,
+                    "trough":trough,"trough_ts":trough_ts,
+                    "cross_ts":ts,"cross_high":hi,
+                    "entry_ts":ts,"entry":limit_price,
+                    "entry_vs_trough_x":float(thr),
+                    "median_daily_quote_volume":median_qv,
+                    "_entry_idx":i,
+                })
 
-    # Attach fixed-horizon outcomes.
     for s in signals:
         ei=s.pop("_entry_idx")
         entry=s["entry"]
@@ -190,7 +183,7 @@ def main():
             "listing_warmup_days":90,
             "cycle_reset_drawdown_pct":50,
             "thresholds_x":list(THRESHOLDS),
-            "entry":"next 15m open after first causal threshold crossing",
+            "entry":"resting short limit at threshold_x * current causal trough; exact limit fill when touched",
             "exit":"exact +N day 15m open, N=1..7",
             "cost20":"20bp total round trip",
             "cost40":"40bp total round trip",
