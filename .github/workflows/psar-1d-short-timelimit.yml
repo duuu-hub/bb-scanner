@@ -1,0 +1,25 @@
+name: PSAR 1D SHORT Time Limits
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_short_timelimit_run']
+permissions: {contents: read, actions: read}
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python -m py_compile scripts/psar_1d_short_timelimit.py && python scripts/psar_1d_short_timelimit.py --data data --shard ${{ matrix.shard }} --shards 8 --out tl_${{ matrix.shard }}.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-1d-short-timelimit-${{ matrix.shard }}
+          path: tl_${{ matrix.shard }}.csv.gz
