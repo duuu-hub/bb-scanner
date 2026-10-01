@@ -92,7 +92,7 @@ def _book(q,outcome,fill,tp,sl,risk):
 
 ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
 ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
-SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
+SL_BUFFER_ATR=(.10,.20,.30,.50,.75,1.0,1.5,2.0,3.0)
 TP_ATR=(.25,.5,.75,1.,1.25,1.5,2.,2.5,3.,3.5,4.,4.5,5.,5.5,6.,7.,8.,10.)
 TP_PCT=(.5,.75,1.,1.5,2.,3.,4.,5.,6.,7.,8.,9.,10.,12.,15.,20.,25.,30.)
 MIN_RISK_EPS=1e-12
@@ -205,7 +205,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
             is_taker=bool(crossed)
             entered_atr.add(em)
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0)
+                sl=fill-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
                 risk=abs(fill-sl)
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)):continue
@@ -270,7 +270,7 @@ def evaluate(t,o,h,l,c,m,symbol=None):
             is_taker=bool(crossed)
             entered_pct.add(pct)
             for sb in SL_BUFFER_ATR:
-                sl=s-(sb*a0 if b else -sb*a0)
+                sl=fill-(sb*a0 if b else -sb*a0)
                 if (b and not fill>sl) or ((not b) and not fill<sl):continue
                 risk=abs(fill-sl)
                 if risk<=MIN_RISK_EPS*max(1.,abs(fill),abs(sl)): continue
@@ -374,5 +374,5 @@ for k,q in agg.items():
     q["win_pct"]=round(100*q["win"]/resolved,3) if resolved else None
     q["gross_pf_actual_R"]=round(q["gross_profit_R"]/q["gross_loss_R"],5) if q["gross_loss_R"]>0 else None
     q["gross_expectancy_actual_R"]=round((q["gross_profit_R"]-q["gross_loss_R"])/resolved,5) if resolved else None
-res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"pre-break approach trigger; one fill per entry-distance per PSAR regime","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_buffer_atr_from_psar":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL and TP both fixed directly from PSAR_ref; actual fill never moves exit levels","statistics_scope":"PSAR pre-break gross edge scan; one entry per distance per PSAR regime; exits may overlap across regimes; no equity curve/MDD","costs":"fees/slippage/funding excluded","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
+res={"definition":{"workflow_commit_sha":os.environ.get("GITHUB_SHA","local"),"engine_blob_sha":os.environ.get("PSAR_ENGINE_BLOB_SHA","local"),"source_data_run":"36095439671","input_files_total":len(all_files),"shard_index":a.shard,"shard_count":a.shards,"tf":"1h","order_live":"pre-break approach trigger; one fill per entry-distance per PSAR regime","psar":"PRE-BREAK: open-time PSAR_ref frozen from closed history only; enter on the PRICE SIDE before PSAR, betting price will cross PSAR; 100-bar burn-in","atr":"SMA14 True Range through prior closed 1h bar","entry_atr":ENTRY_ATR,"entry_pct":ENTRY_PCT,"sl_atr_from_actual_fill":SL_BUFFER_ATR,"tp_atr_from_psar":TP_ATR,"tp_pct_from_psar":TP_PCT,"exit_geometry":"SL fixed from actual fill opposite trade direction by N*ATR; TP fixed beyond PSAR_ref","statistics_scope":"PSAR pre-break gross edge scan; one entry per distance per PSAR regime; exits may overlap across regimes; no equity curve/MDD","costs":"fees/slippage/funding excluded","chronology":"same canonical 15m + official Binance 1m chronology; same-1m entry+exit loss; mismatches excluded"},"files":len(files),"errors":errors,"summary":agg}
 open(a.out,"w").write(json.dumps(res,indent=2));print(json.dumps(res["definition"],indent=2))
