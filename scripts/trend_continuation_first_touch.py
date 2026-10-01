@@ -319,7 +319,11 @@ def summarize_cell(e, outcomes, slp, tl, split, cost_bp):
         "sl_n":int(statuses["SL"]),
         "time_n":int(statuses["TIME"]),
         "tp_rate_pct":(statuses["TP"]/n*100.0) if n else None,
+        "win_n":int(sum(x>0 for x in vals)),
         "win_rate_net_pct":(sum(x>0 for x in vals)/n*100.0) if n else None,
+        "sum_net_pct":float(sum(vals)) if n else 0.0,
+        "gross_profit_net_pct":float(sum(x for x in vals if x>0)) if n else 0.0,
+        "gross_loss_abs_net_pct":float(-sum(x for x in vals if x<0)) if n else 0.0,
         "avg_net_pct":(sum(vals)/n) if n else None,
         "median_net_pct":float(np.median(vals)) if n else None,
         "pf_net":safe_pf(vals) if n else None,
@@ -333,12 +337,17 @@ def main():
     ap.add_argument("--parts", required=True)
     ap.add_argument("--raw", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--restrict-to-raw-symbols", action="store_true")
     a = ap.parse_args()
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
 
     events, data_meta = build_signal_events(a.parts)
+    print("EVENT_BASE_ALL", len(events), "unique", len(events[["symbol","entry_ts"]].drop_duplicates()), flush=True)
+    if a.restrict_to_raw_symbols:
+        raw_syms={sym_from_path(p) for p in glob.glob(os.path.join(a.raw, "**", "*USDT.csv.gz"), recursive=True)}
+        events=events[events["symbol"].isin(raw_syms)].copy()
+        print("EVENT_BASE_SHARD", len(events), "symbols", events.symbol.nunique(), "unique", len(events[["symbol","entry_ts"]].drop_duplicates()), flush=True)
     events.to_csv(outdir/"signal_events.csv.gz", index=False, compression="gzip")
-    print("EVENT_BASE", len(events), "unique", len(events[["symbol","entry_ts"]].drop_duplicates()), flush=True)
 
     outcomes = precompute_outcomes(events, a.raw)
 
