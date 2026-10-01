@@ -1,0 +1,91 @@
+name: Impulse Pullback V1 5Y
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/impulse_pullback_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Syntax and invariants
+        run: |
+          python -m py_compile scripts/impulse_pullback_v1.py scripts/impulse_pullback_v1_merge.py scripts/sweep_reclaim_research.py scripts/sweep_reclaim_merge.py scripts/external_breakout_replay.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import scripts.impulse_pullback_v1 as s
+          assert len(s.CONFIGS)==4
+          assert {x["impulse_atr"] for x in s.CONFIGS}=={1.5,2.0}
+          assert {x["tp_r"] for x in s.CONFIGS}=={1.5,2.0}
+          assert s.PULL_MIN==.30 and s.PULL_MAX==.65
+          assert s.MAX_HOLD_BARS==24
+          print("IMPULSE_PULLBACK_V1_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay shard
+        run: python scripts/impulse_pullback_v1.py --data data --shard \${{ matrix.shard }} --shards 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impulse-pullback-v1-\${{ matrix.shard }}
+          path: |
+            impulse_pullback_v1_raw_\${{ matrix.shard }}.csv.gz
+            impulse_pullback_v1_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: impulse-pullback-v1-*
+          path: artifacts
+      - name: Portfolio report
+        run: python scripts/impulse_pullback_v1_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impulse-pullback-v1-final
+          path: |
+            impulse_pullback_v1_summary.csv
+            impulse_pullback_v1_report.md
+            impulse_pullback_v1_all_trades.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
