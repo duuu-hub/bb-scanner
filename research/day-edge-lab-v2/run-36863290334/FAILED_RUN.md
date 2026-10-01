@@ -1,0 +1,1 @@
+Run 36861359640 completed all canonical scans but its account audit stopped. The curve omitted pre-entry high-water equity at the same timestamp. This retry emits pre-entry equity and independently audits both boundary observations. Entry/exit/sizing rules were not retuned. Failed details remain in the original run.
