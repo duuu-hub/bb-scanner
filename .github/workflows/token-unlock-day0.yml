@@ -5,6 +5,7 @@ on:
     branches: [research-rank5-binance-15m-5y]
     paths:
       - 'research/token_unlock_intraday_day0.py'
+      - 'research/token_unlock_day0_validate.py'
       - '.github/workflows/token-unlock-day0.yml'
 
 permissions:
@@ -24,11 +25,14 @@ jobs:
         run: pip install pandas numpy requests
       - name: Recollect Binance raw 1h and analyze
         run: python research/token_unlock_intraday_day0.py
+      - name: Independent 1d cross-check
+        run: python research/token_unlock_day0_validate.py
       - name: Show report
         if: always()
         run: |
           test -f token_unlock_day0_result/REPORT.md && cat token_unlock_day0_result/REPORT.md || true
           test -f token_unlock_day0_result/group_summary.csv && cat token_unlock_day0_result/group_summary.csv || true
+          test -f token_unlock_day0_result/daily_crosscheck.json && cat token_unlock_day0_result/daily_crosscheck.json || true
       - name: Upload result
         if: always()
         uses: actions/upload-artifact@v4
