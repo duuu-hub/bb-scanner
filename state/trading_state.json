@@ -1,6 +1,6 @@
 {
   "closed_trades": [],
-  "last_run_ms": 1790825457672,
+  "last_run_ms": 1790826359869,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -156,7 +156,8 @@
     "SHORT3:S2:MONUSDT:1790808300000",
     "SHORT3:S3:MONUSDT:1790811000000",
     "SHORT3:S2:MONUSDT:1790812800000",
-    "LONG3:L3:AWEUSDT:1790821800000"
+    "LONG3:L3:AWEUSDT:1790821800000",
+    "SHORT3:S2:ESPUSDT:1790826300000"
   ],
   "signal_shadow_closed": [
     {
@@ -6329,11 +6330,10 @@
       "strategy": "S3",
       "symbol": "MONUSDT",
       "tp": 0.027882
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1790826358160,
       "deadline_ms": 1790826300000,
       "detected_price": 0.07335,
       "last_checked_ms": 1790825400000,
@@ -6360,7 +6360,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.07335,
+      "shadow_exit_price": 0.074497,
+      "shadow_return_pct": 1.5637355146557619,
       "side": "LONG",
       "signal_id": "LONG3:L3:AWEUSDT:1790783100000",
       "signal_time_ms": 1790783100000,
@@ -6368,12 +6371,14 @@
       "strategy": "L3",
       "symbol": "AWEUSDT",
       "tp": 0.080685
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1790827200000,
       "detected_price": 0.03184,
-      "last_checked_ms": 1790825400000,
+      "last_checked_ms": 1790826300000,
       "market_snapshot": {
         "alt_median_4h_pct": -1.568526154844091,
         "alt_positive_4h_pct": 11.03896103896104,
@@ -6410,7 +6415,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1790865000000,
       "detected_price": 0.074318,
-      "last_checked_ms": 1790825400000,
+      "last_checked_ms": 1790826300000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.21181455633101365,
         "alt_positive_4h_pct": 61.25541125541125,
@@ -6442,6 +6447,43 @@
       "strategy": "L3",
       "symbol": "AWEUSDT",
       "tp": 0.0817498
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1790840700000,
+      "detected_price": 0.110313,
+      "last_checked_ms": 1790826300000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.21181455633101365,
+        "alt_positive_4h_pct": 61.25541125541125,
+        "btc_1h_pct": 0.2858426966292127,
+        "btc_24h_pct": 0.439,
+        "btc_4h_pct": 0.08612028132626293,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.18100356420598374,
+        "eth_24h_pct": 0.639,
+        "eth_4h_pct": 0.060261804059846824,
+        "eth_btc_relative_strength_24h_pct": 0.2,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-01T00:39:59.898145+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S2"
+      ],
+      "max_hold_minutes": 240,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.110313,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S2:ESPUSDT:1790826300000",
+      "signal_time_ms": 1790826300000,
+      "sl": 0.11472552,
+      "strategy": "S2",
+      "symbol": "ESPUSDT",
+      "tp": 0.0992817
     }
   ],
   "spread_shadow_closed": [],
