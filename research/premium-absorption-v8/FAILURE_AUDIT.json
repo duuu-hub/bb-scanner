@@ -1,0 +1,125 @@
+{
+  "study": "V8_PREMIUM_ABSORPTION",
+  "actual_run": 36929463082,
+  "code_commit": "c049138866f628bb2de891b81a77b133de13359d",
+  "validation_job": 110594857319,
+  "selection_job": 110598381584,
+  "development_branch": "research-premium-absorption-v8-dev-36929463082",
+  "development_commit": "b05d753bff7a8fb0f752b221e1052b7fdaf768fe",
+  "development_path": "research/premium-absorption-v8/run-36929463082/development",
+  "complete_evidence": {
+    "branch": "research-premium-absorption-v8-evidence-36929463082",
+    "commit": "a35f285fb57926439fac98437c5d4a75f3cc52e4",
+    "path": "research/premium-absorption-v8/run-36929463082/complete-evidence",
+    "files": 21608,
+    "bytes": 2006309686,
+    "manifest_blob": "531da70f0e8a6d33df832534f6f4052b9eb3da88",
+    "manifest_bytes": 7287192
+  },
+  "status": "REJECTED_NO_DEVELOPMENT_POLICY_SURVIVOR",
+  "validation": {
+    "frozen_input_hashes": 256,
+    "tests": 181,
+    "canonical_chronology": "PASS",
+    "canonical_invariants": "PASS",
+    "official_premium_probe": {
+      "symbol": "BTCUSDT",
+      "month": "2022-01",
+      "bars": 2976,
+      "close_range": [-0.00392945, 0.00323124]
+    }
+  },
+  "source": {
+    "symbols": 256,
+    "premium_months_requested": 4687,
+    "premium_months_validated": 4626,
+    "premium_gap_months": 61,
+    "coverage": {
+      "2021": {"eligible": 1043507, "known": 1043507, "fraction": 1.0},
+      "2022": {"eligible": 3315216, "known": 3311382, "fraction": 0.9988435142687535},
+      "2023": {"eligible": 3547461, "known": 3539643, "fraction": 0.9977961702750221}
+    },
+    "official_minute_months_used_and_checksum_verified": 868
+  },
+  "trials": {
+    "entry_settings": 16,
+    "policy_cells": 96,
+    "resolved_parameterized_outcomes": 531854,
+    "canonical_outcome_exclusions": {
+      "DATA_GAP": 160,
+      "ENTRY_MISMATCH": 6
+    },
+    "intent_or_configuration_rejections": {
+      "STOP_ABOVE_8PCT": 399,
+      "ENTRY_CATCHUP_GAP": 2
+    },
+    "selected_policies": 0,
+    "gate_shards_executed": 0,
+    "account_scenarios_executed": 0
+  },
+  "all_96_cell_ranges": {
+    "net40_mean_bp": [-62.28674974925836, -19.034530534513447],
+    "net40_R_mean": [-0.2268079994334317, -0.060657613770248],
+    "net40_pf": [0.5829482835420807, 0.8834176118455279],
+    "win_pct": [24.7992700729927, 41.40328697850822],
+    "positive_overall_net40_price_cells": 0,
+    "positive_overall_net40_R_cells": 0
+  },
+  "year_screen": {
+    "2021": {
+      "positive_price_cells": 0,
+      "positive_R_cells": 0,
+      "positive_equal_entry_date_R_cells": 3,
+      "best_net40_mean_bp": -8.354755367571615,
+      "best_net40_R": -0.0361495061440947
+    },
+    "2022": {
+      "positive_price_cells": 25,
+      "positive_R_cells": 20,
+      "positive_equal_entry_date_R_cells": 17,
+      "best_net40_mean_bp": 31.612451052226284,
+      "best_net40_R": 0.1225982941964097
+    },
+    "2023": {
+      "positive_price_cells": 1,
+      "positive_R_cells": 3,
+      "positive_equal_entry_date_R_cells": 3,
+      "best_net40_mean_bp": 10.400334506254776,
+      "best_net40_R": 0.0548065406020377
+    }
+  },
+  "best_overall_price_cell": {
+    "policy": "PREMIUM_S+1_P10_N1_ANY__H96__TRAIL",
+    "n": 2951,
+    "symbols": 205,
+    "net40_mean_bp": -19.034530534513447,
+    "net40_R_mean": -0.092580270325912,
+    "net40_pf": 0.8834176118455279,
+    "win_pct": 27.685530328702136,
+    "year_2021_net40_mean_bp": -97.32573672515556,
+    "year_2022_net40_mean_bp": -21.600200169935903,
+    "year_2023_net40_mean_bp": -2.558041610990326
+  },
+  "parameter_group_mean_net40_bp": {
+    "LONG": -36.507954,
+    "SHORT": -36.117533,
+    "premium_5bp": -39.915468,
+    "premium_10bp": -32.710019,
+    "BTC_ANY": -34.924146,
+    "BTC_ALIGN4H": -37.701341,
+    "hold_6h": -36.868009,
+    "hold_24h": -35.757478,
+    "TP2": -35.973357,
+    "TP3": -34.568151,
+    "TRAIL": -38.396722
+  },
+  "diagnosis": [
+    "The source-coverage gate passed, so rejection is economic rather than a missing-premium artefact.",
+    "Every one of 96 cost-stressed cells is negative in both price and risk units overall.",
+    "The mechanism is regime-fragile: every cell has negative 2021 price and R, while only one cell has positive 2023 price.",
+    "Tighter 10bp dislocations and longer holds reduce the loss but do not approach a positive 40bp edge.",
+    "LONG and SHORT group losses are nearly symmetric, so the failure is not repaired by flipping direction.",
+    "No account replay was justified; therefore no account daily-target statistic exists for V8."
+  ],
+  "next_hypothesis": "V9 uses prior-day cross-sectional residual leadership plus next-day intraday resumption. It is a new cross-asset ranking observable, not another premium/funding threshold."
+}
