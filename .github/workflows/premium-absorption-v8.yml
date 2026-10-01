@@ -28,6 +28,24 @@ jobs:
         python -m py_compile scripts/premium_absorption_v8.py scripts/premium_index_archive.py scripts/official_minute_provenance.py
         scripts/day_edge_canonical.py scripts/research_evidence_archive.py
 
+        python - <<''PY''
+
+        import json
+
+        p=''research/premium-absorption-v8/FROZEN_INPUT_HASHES.json''
+
+        d=json.load(open(p))
+
+        assert d[''source_data_run'']==36095439671
+
+        assert len(d[''expected_csv_sha256''])==256
+
+        assert all(len(k)==64 for k in d[''expected_csv_sha256''].values())
+
+        print(''FROZEN_INPUT_BASELINE_PASS'',len(d[''expected_csv_sha256'']))
+
+        PY
+
         python -m unittest discover -s tests -p test_premium_absorption_v8.py -v 2>&1 | tee premium-tests.log
 
         python -m unittest discover -s tests -p test_funding_crowding_v7.py -v 2>&1 | tee funding-regression-tests.log
@@ -75,6 +93,10 @@ jobs:
           chronology-smoke.log
 
           research/premium-absorption-v8/PLAN.md
+
+          research/premium-absorption-v8/FROZEN_INPUT_HASHES.json
+
+          research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json
 
 
           minute-provenance-regressions.log
