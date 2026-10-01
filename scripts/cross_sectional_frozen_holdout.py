@@ -1,7 +1,7 @@
 import glob,json
 import pandas as pd
 
-train=json.load(open("train/cross_sectional_train_structure.json"))
+train_path=glob.glob("train/**/cross_sectional_train_structure.json",recursive=True)[0]\ntrain=json.load(open(train_path))
 p90=float(train["disp_quantiles"][2])
 
 frames=[pd.read_csv(p) for p in glob.glob("parts/**/*.csv.gz",recursive=True)]
