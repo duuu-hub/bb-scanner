@@ -1,0 +1,46 @@
+name: PSAR 1D Canonical Reconcile and Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_canonical_reconcile_trigger']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psar-1d-canonical-reconcile
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned dependencies
+        run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Compile and thirty distinct audits by ten rounds
+        run: |
+          python -m py_compile scripts/psar_1d_canonical_engine.py scripts/psar_1d_canonical_audit.py scripts/psar_1d_canonical_validate.py
+          python scripts/psar_1d_canonical_audit.py
+      - name: Download immutable raw and historical study artifacts
+        env:
+          GH_TOKEN: '${{ github.token }}'
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36691537039 -R ${{ github.repository }} -p 'psar-distance-age-1d-*' -D legacy
+      - name: Reconcile, audit all source segments, freeze TRAIN, validate annual folds
+        run: python scripts/psar_1d_canonical_validate.py --data data --legacy legacy --out results
+      - name: Verify completed outputs
+        run: |
+          test -s results/summary.json
+          test -s results/reconciliation.json
+          test -s results/audit_30_by_10.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-canonical-reconcile-${{ github.run_id }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 90
