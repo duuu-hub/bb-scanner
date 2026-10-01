@@ -1,0 +1,364 @@
+﻿2026-10-01T18:30:46.2199276Z Current runner version: '2.337.0'
+2026-10-01T18:30:46.2225354Z ##[group]Runner Image Provisioner
+2026-10-01T18:30:46.2226547Z Hosted Compute Agent
+2026-10-01T18:30:46.2227219Z Version: 20260901.588
+2026-10-01T18:30:46.2228008Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-01T18:30:46.2228785Z Build Date: 2026-09-01T19:56:44Z
+2026-10-01T18:30:46.2229503Z Worker ID: {3be22fb7-d8b6-4418-9358-203fd57299fa}
+2026-10-01T18:30:46.2230335Z Azure Region: westus
+2026-10-01T18:30:46.2230949Z ##[endgroup]
+2026-10-01T18:30:46.2232452Z ##[group]Operating System
+2026-10-01T18:30:46.2233194Z Ubuntu
+2026-10-01T18:30:46.2233779Z 24.04.5
+2026-10-01T18:30:46.2234359Z LTS
+2026-10-01T18:30:46.2234975Z ##[endgroup]
+2026-10-01T18:30:46.2235568Z ##[group]Runner Image
+2026-10-01T18:30:46.2236402Z Image: ubuntu-24.04
+2026-10-01T18:30:46.2237001Z Version: 20260927.320.1
+2026-10-01T18:30:46.2238750Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-01T18:30:46.2240313Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-01T18:30:46.2241354Z ##[endgroup]
+2026-10-01T18:30:46.2242558Z ##[group]GITHUB_TOKEN Permissions
+2026-10-01T18:30:46.2244935Z Actions: read
+2026-10-01T18:30:46.2245689Z Contents: write
+2026-10-01T18:30:46.2246561Z Metadata: read
+2026-10-01T18:30:46.2247155Z ##[endgroup]
+2026-10-01T18:30:46.2249313Z Secret source: Actions
+2026-10-01T18:30:46.2250389Z Cache mode: write
+2026-10-01T18:30:46.2251114Z Prepare workflow directory
+2026-10-01T18:30:46.2600020Z Prepare all required actions
+2026-10-01T18:30:46.2668356Z Getting action download info
+2026-10-01T18:30:46.7106691Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-01T18:30:46.8173088Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-01T18:30:46.8964212Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-01T18:30:47.3511754Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-01T18:30:47.5945992Z Complete job name: selection
+2026-10-01T18:30:47.6911902Z ##[group]Run actions/checkout@v4
+2026-10-01T18:30:47.6913132Z with:
+2026-10-01T18:30:47.6913902Z   repository: duuu-hub/bb-scanner
+2026-10-01T18:30:47.6923538Z   token: ***
+2026-10-01T18:30:47.6924301Z   ssh-strict: true
+2026-10-01T18:30:47.6925081Z   ssh-user: git
+2026-10-01T18:30:47.6925861Z   persist-credentials: true
+2026-10-01T18:30:47.6926953Z   clean: true
+2026-10-01T18:30:47.6927750Z   sparse-checkout-cone-mode: true
+2026-10-01T18:30:47.6928697Z   fetch-depth: 1
+2026-10-01T18:30:47.6929460Z   fetch-tags: false
+2026-10-01T18:30:47.6930239Z   show-progress: true
+2026-10-01T18:30:47.6931055Z   lfs: false
+2026-10-01T18:30:47.6931810Z   submodules: false
+2026-10-01T18:30:47.6932609Z   set-safe-directory: true
+2026-10-01T18:30:47.6933532Z   allow-unsafe-pr-checkout: false
+2026-10-01T18:30:47.6934839Z ##[endgroup]
+2026-10-01T18:30:47.7969828Z Syncing repository: duuu-hub/bb-scanner
+2026-10-01T18:30:47.7973420Z ##[group]Getting Git version info
+2026-10-01T18:30:47.7975443Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T18:30:47.7978489Z [command]/usr/bin/git version
+2026-10-01T18:30:47.8016812Z git version 2.55.0
+2026-10-01T18:30:47.8037254Z ##[endgroup]
+2026-10-01T18:30:47.8051749Z Temporarily overriding HOME='/home/runner/work/_temp/a73c810b-8e0c-4c43-a82a-2368d1276a78' before making global git config changes
+2026-10-01T18:30:47.8055973Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T18:30:47.8059559Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T18:30:47.8113010Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-01T18:30:47.8117991Z ##[group]Initializing the repository
+2026-10-01T18:30:47.8127853Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T18:30:47.8225273Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-01T18:30:47.8228633Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-01T18:30:47.8231631Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-01T18:30:47.8235984Z hint: call:
+2026-10-01T18:30:47.8238298Z hint:
+2026-10-01T18:30:47.8239832Z hint: 	git config --global init.defaultBranch <name>
+2026-10-01T18:30:47.8241729Z hint:
+2026-10-01T18:30:47.8243502Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-01T18:30:47.8246724Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-01T18:30:47.8249204Z hint:
+2026-10-01T18:30:47.8250500Z hint: 	git branch -m <name>
+2026-10-01T18:30:47.8252111Z hint:
+2026-10-01T18:30:47.8254194Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-01T18:30:47.8257546Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-01T18:30:47.8262779Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-01T18:30:47.8290128Z ##[endgroup]
+2026-10-01T18:30:47.8294380Z ##[group]Disabling automatic garbage collection
+2026-10-01T18:30:47.8295799Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-01T18:30:47.8342729Z ##[endgroup]
+2026-10-01T18:30:47.8344565Z ##[group]Setting up auth
+2026-10-01T18:30:47.8350662Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T18:30:47.8385091Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T18:30:47.8764598Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T18:30:47.8807233Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T18:30:47.9074471Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T18:30:47.9113901Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T18:30:47.9362602Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-01T18:30:47.9405479Z ##[endgroup]
+2026-10-01T18:30:47.9407647Z ##[group]Fetching the repository
+2026-10-01T18:30:47.9418837Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +65095198c689b09a3028ec460db8198f819b0bcc:refs/remotes/origin/research-btc-factor-lag-v6
+2026-10-01T18:30:49.1911532Z From https://github.com/duuu-hub/bb-scanner
+2026-10-01T18:30:49.1913544Z  * [new ref]         65095198c689b09a3028ec460db8198f819b0bcc -> origin/research-btc-factor-lag-v6
+2026-10-01T18:30:49.1917410Z ##[endgroup]
+2026-10-01T18:30:49.1918230Z ##[group]Determining the checkout info
+2026-10-01T18:30:49.1919823Z ##[endgroup]
+2026-10-01T18:30:49.1925941Z [command]/usr/bin/git sparse-checkout disable
+2026-10-01T18:30:49.1983594Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-01T18:30:49.2020046Z ##[group]Checking out the ref
+2026-10-01T18:30:49.2025457Z [command]/usr/bin/git checkout --progress --force -B research-btc-factor-lag-v6 refs/remotes/origin/research-btc-factor-lag-v6
+2026-10-01T18:30:49.4297173Z Switched to a new branch 'research-btc-factor-lag-v6'
+2026-10-01T18:30:49.4307812Z branch 'research-btc-factor-lag-v6' set up to track 'origin/research-btc-factor-lag-v6'.
+2026-10-01T18:30:49.4313876Z ##[endgroup]
+2026-10-01T18:30:49.4363922Z [command]/usr/bin/git log -1 --format=%H
+2026-10-01T18:30:49.4393869Z 65095198c689b09a3028ec460db8198f819b0bcc
+2026-10-01T18:30:49.4761886Z ##[group]Run actions/setup-python@v5
+2026-10-01T18:30:49.4762429Z with:
+2026-10-01T18:30:49.4762830Z   python-version: 3.12
+2026-10-01T18:30:49.4763273Z   check-latest: false
+2026-10-01T18:30:49.4766508Z   token: ***
+2026-10-01T18:30:49.4766918Z   update-environment: true
+2026-10-01T18:30:49.4767396Z   allow-prereleases: false
+2026-10-01T18:30:49.4767823Z   freethreaded: false
+2026-10-01T18:30:49.4768235Z ##[endgroup]
+2026-10-01T18:30:49.6123861Z ##[group]Installed versions
+2026-10-01T18:30:49.6227084Z (node:2293) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T18:30:49.6228701Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T18:30:49.6252247Z Successfully set up CPython (3.12.14)
+2026-10-01T18:30:49.6265427Z ##[endgroup]
+2026-10-01T18:30:49.6412620Z ##[group]Run pip install pandas==2.3.3 numpy==2.3.3
+2026-10-01T18:30:49.6413341Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-01T18:30:49.6703900Z shell: /usr/bin/bash -e {0}
+2026-10-01T18:30:49.6704464Z env:
+2026-10-01T18:30:49.6704994Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:49.6705719Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T18:30:49.6706677Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:49.6707308Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:49.6707978Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:49.6708635Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T18:30:49.6709192Z ##[endgroup]
+2026-10-01T18:30:50.7306650Z Collecting pandas==2.3.3
+2026-10-01T18:30:50.7758477Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-01T18:30:51.0077306Z Collecting numpy==2.3.3
+2026-10-01T18:30:51.0135400Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-01T18:30:51.0366956Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-01T18:30:51.0397261Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-01T18:30:51.0712462Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-01T18:30:51.0744288Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-01T18:30:51.0893040Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-01T18:30:51.0920982Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-01T18:30:51.1049460Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-01T18:30:51.1079666Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-01T18:30:51.1151695Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-01T18:30:51.1640235Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 272.3 MB/s  0:00:00
+2026-10-01T18:30:51.1713183Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-01T18:30:51.2834514Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 149.7 MB/s  0:00:00
+2026-10-01T18:30:51.2868860Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-01T18:30:51.2922986Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-01T18:30:51.3011580Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-01T18:30:51.3062003Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-01T18:30:51.4662373Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-01T18:30:58.7905281Z 
+2026-10-01T18:30:58.7918659Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-01T18:30:58.8612494Z ##[group]Run actions/download-artifact@v4
+2026-10-01T18:30:58.8612814Z with:
+2026-10-01T18:30:58.8613037Z   pattern: factor-lag-v6-dev-[0-7]
+2026-10-01T18:30:58.8613334Z   path: dev-parts
+2026-10-01T18:30:58.8613788Z   merge-multiple: false
+2026-10-01T18:30:58.8614040Z   repository: duuu-hub/bb-scanner
+2026-10-01T18:30:58.8614341Z   run-id: 36906530309
+2026-10-01T18:30:58.8614570Z env:
+2026-10-01T18:30:58.8614872Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:58.8615312Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T18:30:58.8615741Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:58.8616285Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:58.8616675Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:30:58.8617068Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T18:30:58.8617410Z ##[endgroup]
+2026-10-01T18:30:59.0307808Z (node:2334) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T18:30:59.0308670Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T18:30:59.3240220Z Found 9 artifact(s)
+2026-10-01T18:30:59.3241045Z Filtering artifacts by pattern 'factor-lag-v6-dev-[0-7]'
+2026-10-01T18:30:59.3263388Z Preparing to download the following artifacts:
+2026-10-01T18:30:59.3264543Z - factor-lag-v6-dev-1 (ID: 11186090688, Size: 8549450, Expected Digest: sha256:99880ffcbce3fdbf740e896fd18173926a4dde407119d66ba00aceb147941bbe)
+2026-10-01T18:30:59.3266070Z - factor-lag-v6-dev-4 (ID: 11185865523, Size: 5297082, Expected Digest: sha256:c56eba11bb0c0e99d260b0d29e73f613e5f70f09177bb8b77a04057356fbf721)
+2026-10-01T18:30:59.3267676Z - factor-lag-v6-dev-6 (ID: 11185735576, Size: 6886531, Expected Digest: sha256:a8b1c2d8f5b14e545c1f5ea57802cc55681528b3f866b9e7037398eb90cdb2be)
+2026-10-01T18:30:59.3268720Z - factor-lag-v6-dev-7 (ID: 11185395779, Size: 5877967, Expected Digest: sha256:6056300e0575da4d1ebb22f935bff821150b025a91d999e766beb165b232bfe7)
+2026-10-01T18:30:59.3269686Z - factor-lag-v6-dev-0 (ID: 11185366005, Size: 9323570, Expected Digest: sha256:d52ba25e253eb12323d6baac691b0db7600e88320d4ac49ed57395874102721d)
+2026-10-01T18:30:59.3270629Z - factor-lag-v6-dev-5 (ID: 11185356058, Size: 10607454, Expected Digest: sha256:8e79deed8eab14344f0a1f234e9ed933959f93818655389600d8fcd016903452)
+2026-10-01T18:30:59.3271825Z - factor-lag-v6-dev-2 (ID: 11185265794, Size: 8320922, Expected Digest: sha256:19fe24b6884dbe2983817d685c4213dd08e4890705cbf7a0e38fae401090ebfe)
+2026-10-01T18:30:59.3273137Z - factor-lag-v6-dev-3 (ID: 11184626934, Size: 4423372, Expected Digest: sha256:540e3abc3440876d50b8813592269260490cb55c36da8b981228735f1afd2782)
+2026-10-01T18:30:59.5715475Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-bc0b5d2c-01e5-5bc3-b1e7-2989af131643/artifacts/cb6221362ee03913003dd564e8c9f54fb0c87eab99741de23dc6a813f91b99fb.zip
+2026-10-01T18:30:59.5717240Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-1
+2026-10-01T18:30:59.7389221Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-54f39c99-d8e5-539b-b503-af54b08ab7a6/artifacts/9a991a82ec569a012a4ff4618414124dc712eaefed0831c4695dfcdb9f9d4a30.zip
+2026-10-01T18:30:59.7391459Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-2
+2026-10-01T18:30:59.7461334Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-f78a5f5f-2c7d-5993-ab1c-500b0c7f20a7/artifacts/ec4526a024473ea9d512b8e27621e6683d8187198d02b6c27294f4f0bf1f7279.zip
+2026-10-01T18:30:59.7465072Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-6
+2026-10-01T18:30:59.7511657Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-260a741a-c1f5-508f-9db6-3924bc1f67ad/artifacts/eb689e77bdb1a3ab879e67cd0de3dc50277f7e5d717978f691f0c03d391c9cbe.zip
+2026-10-01T18:30:59.7513426Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-5
+2026-10-01T18:30:59.7540858Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-ab003b8a-5edc-56d1-92fb-a2fb2cd1ba6a/artifacts/c93d7a70bbdd50a8240c4b2b6313da5d4a066e9e1d3e2428922cb1ca11772b12.zip
+2026-10-01T18:30:59.7543406Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-7
+2026-10-01T18:30:59.7609439Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-50930279-5209-57a3-9e6f-081aed4854c2/artifacts/d1024121889782a307393212ba2e4fcc6dbbe621c4b6f23145569a5f34f73017.zip
+2026-10-01T18:30:59.7611813Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-0
+2026-10-01T18:30:59.7626895Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-97bf9f9e-e5b5-5aed-9459-a8e268da9c5c/artifacts/a29f53e7c3249a5c82f82f5e846664b301c16bf8bef4ab80e36a9f01f24b7c78.zip
+2026-10-01T18:30:59.7629299Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-4
+2026-10-01T18:30:59.7846728Z Redirecting to blob download url: https://productionresultssa15.blob.core.windows.net/actions-results/ebca8432-af1d-8e13-a6ae-80c1f04fbdbf/workflow-job-run-8ff46e6a-964b-5750-b7ac-f73887d56cbc/artifacts/dce4731869448d4f8f8cf98e3a7a12ccb8cd5c8885033071823918197e358bab.zip
+2026-10-01T18:30:59.7849074Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/factor-lag-v6-dev-3
+2026-10-01T18:30:59.8883094Z (node:2334) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-01T18:31:00.9044437Z SHA256 digest of downloaded artifact is 99880ffcbce3fdbf740e896fd18173926a4dde407119d66ba00aceb147941bbe
+2026-10-01T18:31:00.9045180Z Artifact download completed successfully.
+2026-10-01T18:31:01.0300451Z SHA256 digest of downloaded artifact is 6056300e0575da4d1ebb22f935bff821150b025a91d999e766beb165b232bfe7
+2026-10-01T18:31:01.0301637Z Artifact download completed successfully.
+2026-10-01T18:31:01.0843422Z SHA256 digest of downloaded artifact is a8b1c2d8f5b14e545c1f5ea57802cc55681528b3f866b9e7037398eb90cdb2be
+2026-10-01T18:31:01.0844365Z Artifact download completed successfully.
+2026-10-01T18:31:01.1036841Z SHA256 digest of downloaded artifact is 540e3abc3440876d50b8813592269260490cb55c36da8b981228735f1afd2782
+2026-10-01T18:31:01.1037814Z Artifact download completed successfully.
+2026-10-01T18:31:01.1046555Z SHA256 digest of downloaded artifact is c56eba11bb0c0e99d260b0d29e73f613e5f70f09177bb8b77a04057356fbf721
+2026-10-01T18:31:01.1047249Z Artifact download completed successfully.
+2026-10-01T18:31:01.2931679Z SHA256 digest of downloaded artifact is 19fe24b6884dbe2983817d685c4213dd08e4890705cbf7a0e38fae401090ebfe
+2026-10-01T18:31:01.2932781Z Artifact download completed successfully.
+2026-10-01T18:31:01.2938868Z SHA256 digest of downloaded artifact is d52ba25e253eb12323d6baac691b0db7600e88320d4ac49ed57395874102721d
+2026-10-01T18:31:01.2939922Z Artifact download completed successfully.
+2026-10-01T18:31:01.3579524Z SHA256 digest of downloaded artifact is 8e79deed8eab14344f0a1f234e9ed933959f93818655389600d8fcd016903452
+2026-10-01T18:31:01.3580448Z Artifact download completed successfully.
+2026-10-01T18:31:01.3580880Z Total of 8 artifact(s) downloaded
+2026-10-01T18:31:01.3585593Z Download artifact has finished successfully
+2026-10-01T18:31:01.3820517Z ##[group]Run python scripts/btc_factor_lag_v6.py select --parts dev-parts --out selected-input
+2026-10-01T18:31:01.3821475Z [36;1mpython scripts/btc_factor_lag_v6.py select --parts dev-parts --out selected-input[0m
+2026-10-01T18:31:01.3821995Z [36;1mpython - <<'PY'[0m
+2026-10-01T18:31:01.3822298Z [36;1mimport json,os[0m
+2026-10-01T18:31:01.3822717Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-01T18:31:01.3823319Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-01T18:31:01.3823785Z [36;1mPY[0m
+2026-10-01T18:31:01.3894848Z shell: /usr/bin/bash -e {0}
+2026-10-01T18:31:01.3895182Z env:
+2026-10-01T18:31:01.3895521Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:01.3896049Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T18:31:01.3896744Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:01.3897231Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:01.3897686Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:01.3898125Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T18:31:01.3898517Z ##[endgroup]
+2026-10-01T18:31:08.7844813Z FACTOR_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "FACTOR_S+1_L4_G2_PRICE_ONLY", "side": 1, "horizon": 4, "gap": 0.02, "flow": "PRICE_ONLY", "hold": 96, "exit_type": "TP2", "policy": "FACTOR_S+1_L4_G2_PRICE_ONLY__H96__TP2", "development_net40_R": 0.0527431011452843, "development_worst_year_day_R": -0.3315295370265784}], "policies": [{"key": "FACTOR_S+1_L4_G2_PRICE_ONLY", "side": 1, "horizon": 4, "gap": 0.02, "flow": "PRICE_ONLY", "hold": 96, "exit_type": "TP2", "policy": "FACTOR_S+1_L4_G2_PRICE_ONLY__H96__TP2", "development_net40_R": 0.0527431011452843, "development_worst_year_day_R": -0.3315295370265784}], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-01T18:31:08.8966763Z ##[group]Run python - <<'PY'
+2026-10-01T18:31:08.8967172Z [36;1mpython - <<'PY'[0m
+2026-10-01T18:31:08.8967491Z [36;1mfrom pathlib import Path[0m
+2026-10-01T18:31:08.8967846Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-01T18:31:08.8968386Z [36;1mdest=Path('research/btc-factor-lag-v6')/('run-'+os.environ['GITHUB_RUN_ID'])/'development'[0m
+2026-10-01T18:31:08.8968954Z [36;1mshutil.copytree('selected-input',dest)[0m
+2026-10-01T18:31:08.8969448Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('scan_meta.json'))):[0m
+2026-10-01T18:31:08.8969998Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_meta.json')[0m
+2026-10-01T18:31:08.8970525Z [36;1mfor i,p in enumerate(sorted(Path('dev-parts').rglob('exclusions.csv'))):[0m
+2026-10-01T18:31:08.8971055Z [36;1m  shutil.copyfile(p,dest/f'full_dev_shard_{i}_exclusions.csv')[0m
+2026-10-01T18:31:08.8971555Z [36;1m(dest/'provenance.json').write_text(json.dumps(dict([0m
+2026-10-01T18:31:08.8972131Z [36;1m  run=int(os.environ['GITHUB_RUN_ID']),executed_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-01T18:31:08.8972654Z [36;1m  source_data_run=36095439671,policy_trials=96,[0m
+2026-10-01T18:31:08.8973154Z [36;1m  sha256={str(p.relative_to(dest)):hashlib.sha256(p.read_bytes()).hexdigest()[0m
+2026-10-01T18:31:08.8973683Z [36;1m          for p in dest.rglob('*') if p.is_file()}),indent=2))[0m
+2026-10-01T18:31:08.8974076Z [36;1mPY[0m
+2026-10-01T18:31:08.8974387Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-01T18:31:08.8974900Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-01T18:31:08.8975394Z [36;1mgit checkout -b "$RESULT_BRANCH"[0m
+2026-10-01T18:31:08.8975809Z [36;1mgit add "research/btc-factor-lag-v6/run-36906530309"[0m
+2026-10-01T18:31:08.8976538Z [36;1mgit commit -m "Preserve V6 development selection and all policy diagnostics"[0m
+2026-10-01T18:31:08.8977014Z [36;1mgit push origin "$RESULT_BRANCH"[0m
+2026-10-01T18:31:08.9047497Z shell: /usr/bin/bash -e {0}
+2026-10-01T18:31:08.9047827Z env:
+2026-10-01T18:31:08.9048162Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:08.9048669Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T18:31:08.9049154Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:08.9049600Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:08.9050044Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:08.9050494Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T18:31:08.9050937Z   RESULT_BRANCH: research-factor-lag-v6-dev-36906530309
+2026-10-01T18:31:08.9051314Z ##[endgroup]
+2026-10-01T18:31:08.9712438Z Switched to a new branch 'research-factor-lag-v6-dev-36906530309'
+2026-10-01T18:31:09.1831444Z [research-factor-lag-v6-dev-36906530309 67c74ff] Preserve V6 development selection and all policy diagnostics
+2026-10-01T18:31:09.1832606Z  35 files changed, 11815 insertions(+)
+2026-10-01T18:31:09.1833304Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-0/independent_candidates.csv.gz
+2026-10-01T18:31:09.1834112Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-0/scan_meta.json
+2026-10-01T18:31:09.1834919Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-1/independent_candidates.csv.gz
+2026-10-01T18:31:09.1835700Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-1/scan_meta.json
+2026-10-01T18:31:09.1836836Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-2/independent_candidates.csv.gz
+2026-10-01T18:31:09.1838195Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-2/scan_meta.json
+2026-10-01T18:31:09.1838903Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-3/independent_candidates.csv.gz
+2026-10-01T18:31:09.1839915Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-3/scan_meta.json
+2026-10-01T18:31:09.1840647Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-4/independent_candidates.csv.gz
+2026-10-01T18:31:09.1841348Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-4/scan_meta.json
+2026-10-01T18:31:09.1842037Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-5/independent_candidates.csv.gz
+2026-10-01T18:31:09.1842733Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-5/scan_meta.json
+2026-10-01T18:31:09.1843489Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-6/independent_candidates.csv.gz
+2026-10-01T18:31:09.1844220Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-6/scan_meta.json
+2026-10-01T18:31:09.1844934Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-7/independent_candidates.csv.gz
+2026-10-01T18:31:09.1845681Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/dev-7/scan_meta.json
+2026-10-01T18:31:09.1846679Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/development_policy_cells.csv
+2026-10-01T18:31:09.1847422Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_0_exclusions.csv
+2026-10-01T18:31:09.1848137Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_0_meta.json
+2026-10-01T18:31:09.1848845Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_1_exclusions.csv
+2026-10-01T18:31:09.1849544Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_1_meta.json
+2026-10-01T18:31:09.1850233Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_2_exclusions.csv
+2026-10-01T18:31:09.1850929Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_2_meta.json
+2026-10-01T18:31:09.1851831Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_3_exclusions.csv
+2026-10-01T18:31:09.1852512Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_3_meta.json
+2026-10-01T18:31:09.1853193Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_4_exclusions.csv
+2026-10-01T18:31:09.1853875Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_4_meta.json
+2026-10-01T18:31:09.1854559Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_5_exclusions.csv
+2026-10-01T18:31:09.1855237Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_5_meta.json
+2026-10-01T18:31:09.1855916Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_6_exclusions.csv
+2026-10-01T18:31:09.1857182Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_6_meta.json
+2026-10-01T18:31:09.1858328Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_7_exclusions.csv
+2026-10-01T18:31:09.1859771Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/full_dev_shard_7_meta.json
+2026-10-01T18:31:09.1860439Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/provenance.json
+2026-10-01T18:31:09.1861068Z  create mode 100644 research/btc-factor-lag-v6/run-36906530309/development/selection.json
+2026-10-01T18:31:13.6403907Z remote: 
+2026-10-01T18:31:13.6404938Z remote: Create a pull request for 'research-factor-lag-v6-dev-36906530309' on GitHub by visiting:        
+2026-10-01T18:31:13.6406461Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-factor-lag-v6-dev-36906530309        
+2026-10-01T18:31:13.6407387Z remote: 
+2026-10-01T18:31:13.6418139Z To https://github.com/duuu-hub/bb-scanner
+2026-10-01T18:31:13.6419455Z  * [new branch]      research-factor-lag-v6-dev-36906530309 -> research-factor-lag-v6-dev-36906530309
+2026-10-01T18:31:13.6519073Z ##[group]Run actions/upload-artifact@v4
+2026-10-01T18:31:13.6519427Z with:
+2026-10-01T18:31:13.6519698Z   name: factor-lag-v6-selected
+2026-10-01T18:31:13.6520016Z   path: selected-input/
+2026-10-01T18:31:13.6520303Z   retention-days: 30
+2026-10-01T18:31:13.6520579Z   compression-level: 0
+2026-10-01T18:31:13.6520873Z   if-no-files-found: warn
+2026-10-01T18:31:13.6521165Z   overwrite: false
+2026-10-01T18:31:13.6521442Z   include-hidden-files: false
+2026-10-01T18:31:13.6521740Z env:
+2026-10-01T18:31:13.6522055Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:13.6522555Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-01T18:31:13.6523049Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:13.6523485Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:13.6523918Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-01T18:31:13.6524403Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-01T18:31:13.6524793Z ##[endgroup]
+2026-10-01T18:31:13.8181348Z (node:2371) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T18:31:13.8182617Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T18:31:13.8304534Z With the provided path, there will be 18 files uploaded
+2026-10-01T18:31:13.8310039Z Artifact name is valid!
+2026-10-01T18:31:13.8310539Z Root directory input is valid!
+2026-10-01T18:31:14.2371164Z Beginning upload of artifact content to blob storage
+2026-10-01T18:31:14.2794855Z (node:2371) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-01T18:31:14.9071866Z Uploaded bytes 1000459
+2026-10-01T18:31:14.9834161Z Finished uploading artifact content to blob storage!
+2026-10-01T18:31:14.9835471Z SHA256 digest of uploaded artifact zip is 2bcd8364f1fa86fd010278a05768fffd5cf9452532e4ba6151d6a4e9048e7037
+2026-10-01T18:31:14.9836813Z Finalizing artifact upload
+2026-10-01T18:31:15.2518853Z Artifact factor-lag-v6-selected.zip successfully finalized. Artifact ID 11185546028
+2026-10-01T18:31:15.2520230Z Artifact factor-lag-v6-selected has been successfully uploaded! Final size is 1000459 bytes. Artifact ID is 11185546028
+2026-10-01T18:31:15.2526612Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36906530309/artifacts/11185546028
+2026-10-01T18:31:15.2707396Z Post job cleanup.
+2026-10-01T18:31:15.3919306Z (node:2384) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-01T18:31:15.3920100Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-01T18:31:15.4119956Z Post job cleanup.
+2026-10-01T18:31:15.5022416Z [command]/usr/bin/git version
+2026-10-01T18:31:15.5064974Z git version 2.55.0
+2026-10-01T18:31:15.5102463Z Temporarily overriding HOME='/home/runner/work/_temp/4d6c1d48-de29-476f-ae68-15d55d87d545' before making global git config changes
+2026-10-01T18:31:15.5103900Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-01T18:31:15.5107768Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-01T18:31:15.5148488Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-01T18:31:15.5184324Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-01T18:31:15.5454461Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-01T18:31:15.5486069Z http.https://github.com/.extraheader
+2026-10-01T18:31:15.5497906Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-01T18:31:15.5537678Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-01T18:31:15.5841413Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-01T18:31:15.5890994Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-01T18:31:15.6375970Z Evaluate and set job outputs
+2026-10-01T18:31:15.6382688Z Set output 'selected_count'
+2026-10-01T18:31:15.6384568Z Cleaning up orphan processes
+2026-10-01T18:31:15.6744931Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
