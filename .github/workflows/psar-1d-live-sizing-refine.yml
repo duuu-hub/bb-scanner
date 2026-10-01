@@ -1,0 +1,31 @@
+name: PSAR 1D Fine Sizing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_live_sizing_refine_trigger_*']
+permissions: {contents: read, actions: read}
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/psar_1d_live_portfolio.py scripts/psar_1d_live_admission.py scripts/psar_1d_live_sizing_refine.py
+      - name: Download immutable sources
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p data canonical prior
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36817230406 -R ${{ github.repository }} -p 'psar-1d-canonical-reconcile-*' -D canonical
+          gh run download 36819874770 -R ${{ github.repository }} -p 'psar-1d-live-admission-*' -D prior
+      - name: Fine TRAIN sizing then frozen HOLDOUT
+        run: python scripts/psar_1d_live_sizing_refine.py --data data --canonical canonical --prior-admission prior --out results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psar-1d-live-sizing-refine-${{ github.run_id }}
+          path: results/
+          retention-days: 90
