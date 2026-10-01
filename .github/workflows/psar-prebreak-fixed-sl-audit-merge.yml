@@ -1,0 +1,66 @@
+name: PSAR Pre-Break Fixed-SL Runtime Audit and Merge
+'on':
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_prebreak_fixed_sl_audit_merge_run']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit-and-merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: '36811700963'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Fetch immutable source engine
+        run: |
+          gh api "repos/${{ github.repository }}/git/blobs/6ef1f72760e468afed3f2386744fa6da9385def6" --jq .content | base64 --decode > pinned_prebreak_engine.py
+          test "$(git hash-object pinned_prebreak_engine.py)" = "6ef1f72760e468afed3f2386744fa6da9385def6"
+      - name: Actual 30 checks and 10 clean complete-suite repetitions
+        run: python scripts/psar_prebreak_runtime_audit.py --engine pinned_prebreak_engine.py --out prebreak_runtime_audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-fixed-sl-runtime-audit
+          path: prebreak_runtime_audit.json
+      - name: Wait for all 64 source shards, without restarting successes
+        run: |
+          python - <<'PY'
+          import json,os,subprocess,time
+          repo=os.environ["GITHUB_REPOSITORY"];run=os.environ["SOURCE_RUN"]
+          deadline=time.monotonic()+100*60
+          while True:
+              raw=subprocess.check_output(["gh","api",f"repos/{repo}/actions/runs/{run}/jobs?per_page=100&filter=latest"],text=True)
+              d=json.loads(raw); jobs=d["jobs"]
+              assert d["total_count"]==len(jobs)==65,("pagination/coverage",d["total_count"],len(jobs))
+              stats={int(j["name"][7:-1]):j for j in jobs if j["name"].startswith("stats (")}
+              assert set(stats)==set(range(64))
+              success=sorted(i for i,j in stats.items() if j["conclusion"]=="success")
+              bad=[(i,j["conclusion"],j["id"]) for i,j in stats.items() if j["status"]=="completed" and j["conclusion"]!="success"]
+              progress=sorted(i for i,j in stats.items() if j["status"]=="in_progress")
+              queued=sorted(i for i,j in stats.items() if j["status"]=="queued")
+              print("SOURCE_PROGRESS",json.dumps(dict(success=success,in_progress=progress,queued=queued,failed=bad)),flush=True)
+              if bad:raise RuntimeError(f"Only failed source shards require recovery; preserve all successes: {bad}")
+              if len(success)==64:break
+              if time.monotonic()>deadline:raise RuntimeError("Merge wait deadline reached; source shards left intact")
+              time.sleep(30)
+          PY
+      - name: Download and strictly merge fixed-SL artifacts
+        run: |
+          mkdir -p all
+          gh run download "$SOURCE_RUN" -R "${{ github.repository }}" -p 'psar-prebreak-fixed-sl-*' -D all
+          python scripts/psar_prebreak_fixed_sl_merge.py --data all --out psar_prebreak_fixed_sl_merged.json
+          cat psar_prebreak_fixed_sl_merged.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-prebreak-fixed-sl-merged
+          path: |
+            psar_prebreak_fixed_sl_merged.json
+            psar_prebreak_fixed_sl_merged.csv
+            psar_prebreak_fixed_sl_merged.md
+            prebreak_runtime_audit.json
