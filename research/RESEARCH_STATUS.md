@@ -23,12 +23,15 @@ implementation tree. Zero policy cells/market outcomes;selection/gate/accounts
 skipped. Preserve-cycle also failed on that same absent file. Durable failure
 record is research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json.
 
-V8 source-repair attempt2 run36929463082/codec049138866f628bb2de891b81a77b133de13359d is IN
-PROGRESS. It adds the exact preregistered256-file baseline(blob5cd01ee5...,text
-SHA256 0c3f09f4...) and a fail-fast validation preflight. Economic hypothesis,
-16entries/96policies,selection and execution rules are unchanged;this is not a
-new discovery. Actual attempt2 validation/DEV logs and all market outcomes remain
-pending. No V8 profitability,account-growth or daily-goal claim;do not duplicate.
+V8 source-repair attempt2 run36929463082/codec049138866f628bb2de891b81a77b133de13359d
+is executing eight DEV shards. Actual validation job110594857319 passed the
+256-hash frozen-input preflight,all181tests,ALL_CHRONOLOGY_SMOKE_PASS,
+ALL_CANONICAL_INVARIANTS_PASS and the official BTCUSDT2022-01 premium probe
+(2,976bars,range-.00392945..+.00323124). All eight jobs then passed frozen-source
+catalogue verification and entered the actual canonical V8 scan step. Economic
+hypothesis,16entries/96policies,selection and execution rules remain unchanged.
+No V8 market outcome is complete yet;no profitability,account-growth or
+daily-goal claim;do not duplicate this run.
 
 ## Completed failures and durable assets
 - V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:

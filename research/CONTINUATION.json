@@ -1,6 +1,6 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-01T21:34:07.224Z",
+  "updated_at": "2026-10-01T21:35:38.338Z",
   "interactive_lease": null,
   "current_branch": "research-premium-absorption-v8",
   "current_run": 36929463082,
@@ -120,8 +120,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Monitor actual V8 repair run36929463082 without duplication. Confirm FROZEN_INPUT_BASELINE_PASS256, all181 tests, canonical smoke and official premium probe in actual logs; then confirm DEV scans really start. Audit all96 cells/coverage when complete. Attempt1 run36928892394 is a preserved source-packaging failure with zero market cells, not a discovery.",
-  "phase": "V8_SOURCE_REPAIR_RUN_2_VALIDATION",
+  "next_action": "Do not launch a duplicate. Monitor all eight actual V8 DEV scan jobs in run36929463082; source catalogue verification has passed and each canonical scan step is in progress. On completion, read every shard artifact, reconcile all96 cells, exact 2021/2022/2023 premium coverage, exclusions and raw outcomes before accepting selection. Then inspect any 2024/account jobs and preservation.",
+  "phase": "V8_DEV_RUNNING",
   "last_failure": {
     "study": "V7",
     "audited": true,
@@ -277,11 +277,29 @@
     "study": "V8",
     "run": 36929463082,
     "code_commit": "c049138866f628bb2de891b81a77b133de13359d",
-    "status": "IN_PROGRESS_SOURCE_REPAIR_VALIDATION",
+    "status": "IN_PROGRESS_8_DEV_SHARDS",
     "launched_at": "2026-10-01T21:33:24Z",
-    "actual_validation_log_read": false,
+    "actual_validation_log_read": true,
     "market_outcomes_available": false,
-    "note": "Attempt2 changes only source packaging/preflight. Frozen economic hypothesis,96 policies,selection and execution semantics are unchanged."
+    "note": "Attempt2 changes only source packaging/preflight. Frozen economic hypothesis,96 policies,selection and execution semantics are unchanged.",
+    "validation": {
+      "job_id": 110594857319,
+      "status": "SUCCESS",
+      "frozen_input_hashes": 256,
+      "tests": 181,
+      "canonical_chronology": "PASS",
+      "canonical_invariants": "PASS",
+      "official_premium_probe": {
+        "symbol": "BTCUSDT",
+        "month": "2022-01",
+        "bars": 2976,
+        "close_range": [
+          -0.00392945,
+          0.00323124
+        ]
+      }
+    },
+    "source_catalogue_verified_in_all_started_shards": true
   },
   "v8_attempt_failures": [
     {
@@ -299,5 +317,17 @@
       "cause": "Frozen 256-file input-hash baseline omitted from implementation tree.",
       "repair_record": "research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json"
     }
-  ]
+  ],
+  "completed_v8_validation": {
+    "attempt": 2,
+    "run": 36929463082,
+    "job_id": 110594857319,
+    "status": "SUCCESS",
+    "frozen_input_baseline": "PASS_256",
+    "tests": 181,
+    "canonical_chronology": "PASS",
+    "canonical_invariants": "PASS",
+    "official_premium_probe": "PASS_2976_BARS",
+    "source": "Actual job log read; validation is not profitability."
+  }
 }
