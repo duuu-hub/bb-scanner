@@ -13,17 +13,22 @@ shards,24accounts and full preservation.96cells/271514resolved outcomes;two froz
 LONG candidates;ZERO strict survivors. All24saved accounts independently audited.
 Full rejection numbers and evidence are in the completed section below.
 
-V8 premium-basis absorption actual run36928892394/code7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0 is
-IN PROGRESS on research-premium-absorption-v8. The economic PLAN was frozen
-before implementation/outcomes at commitd4ec06ebc2633062535bd5ec418a8470a7b1d8e8.
-The implementation contains a checksum-verified signed premiumIndexKlines loader,
-exact closed15m alignment,16entries/96policies,the adaptive partial2021/22/23
-selection gate,and full evidence preservation. Local181 unit/regression tests
-passed; local chronology smoke is not claimed because that environment lacked
-numba. The actual workflow installs numba and must pass chronology plus the
-official BTCUSDT2022-01 ZIP/CHECKSUM/schema probe before DEV starts. Actual
-validation logs/source probe and all market outcomes are still pending. No V8
-profitability,account-growth or daily-goal claim;do not duplicate this run.
+V8 attempt1 run36928892394/code7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0
+completed FAILURE before any market scan. Actual validation job110592960293 passed
+181tests,ALL_CHRONOLOGY_SMOKE_PASS,ALL_CANONICAL_INVARIANTS_PASS and official
+BTCUSDT2022-01 premium probe(2,976bars,range-.00392945..+.00323124). All eight
+DEV jobs then failed at frozen-source verification because
+research/premium-absorption-v8/FROZEN_INPUT_HASHES.json was absent from the
+implementation tree. Zero policy cells/market outcomes;selection/gate/accounts
+skipped. Preserve-cycle also failed on that same absent file. Durable failure
+record is research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json.
+
+V8 source-repair attempt2 run36929463082/codec049138866f628bb2de891b81a77b133de13359d is IN
+PROGRESS. It adds the exact preregistered256-file baseline(blob5cd01ee5...,text
+SHA256 0c3f09f4...) and a fail-fast validation preflight. Economic hypothesis,
+16entries/96policies,selection and execution rules are unchanged;this is not a
+new discovery. Actual attempt2 validation/DEV logs and all market outcomes remain
+pending. No V8 profitability,account-growth or daily-goal claim;do not duplicate.
 
 ## Completed failures and durable assets
 - V7 actual run36922945306/code4db8b13a5ea64f3aef610609c994b2fe2cd0fc18:

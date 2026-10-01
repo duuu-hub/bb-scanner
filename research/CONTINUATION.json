@@ -1,9 +1,9 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-01T21:29:34.974Z",
+  "updated_at": "2026-10-01T21:34:07.224Z",
   "interactive_lease": null,
   "current_branch": "research-premium-absorption-v8",
-  "current_run": 36928892394,
+  "current_run": 36929463082,
   "current_workflow": "Premium Absorption V8 Research Cycle",
   "current_plan": "research/premium-absorption-v8/PLAN.md",
   "latest_research_checkpoint": "research/RESEARCH_STATUS.md",
@@ -110,7 +110,7 @@
     "v7_strict_account_survivors": 0,
     "v8_entry_settings_planned": 16,
     "v8_dev_policy_cells_planned": 96,
-    "v8_execution_attempts": 1
+    "v8_execution_attempts": 2
   },
   "goal": {
     "max_hold_days": 7,
@@ -120,8 +120,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Monitor actual V8 run36928892394 without duplication. Read validation job logs and official premiumIndexKlines ZIP/CHECKSUM probe before accepting source or code execution. If validation passes, let eight DEV shards run; then audit all96 cells and coverage directly. If source repair is required, preserve the failed attempt and repair only the source contract without changing the frozen economic hypothesis. No profitability or daily-goal claim.",
-  "phase": "V8_ACTUAL_RUNNING_VALIDATION",
+  "next_action": "Monitor actual V8 repair run36929463082 without duplication. Confirm FROZEN_INPUT_BASELINE_PASS256, all181 tests, canonical smoke and official premium probe in actual logs; then confirm DEV scans really start. Audit all96 cells/coverage when complete. Attempt1 run36928892394 is a preserved source-packaging failure with zero market cells, not a discovery.",
+  "phase": "V8_SOURCE_REPAIR_RUN_2_VALIDATION",
   "last_failure": {
     "study": "V7",
     "audited": true,
@@ -158,13 +158,14 @@
     "expires_at": "2026-10-01T16:44:57.017Z"
   },
   "plan_commit": "d4ec06ebc2633062535bd5ec418a8470a7b1d8e8",
-  "code_commit": "7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0",
+  "code_commit": "c049138866f628bb2de891b81a77b133de13359d",
   "current_result_locations": {
-    "workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/36928892394",
-    "expected_development_branch": "research-premium-absorption-v8-dev-36928892394",
-    "expected_development_path": "research/premium-absorption-v8/run-36928892394/development",
-    "expected_evidence_branch": "research-premium-absorption-v8-evidence-36928892394",
-    "expected_evidence_path": "research/premium-absorption-v8/run-36928892394/complete-evidence"
+    "workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/36929463082",
+    "expected_development_branch": "research-premium-absorption-v8-dev-36929463082",
+    "expected_development_path": "research/premium-absorption-v8/run-36929463082/development",
+    "expected_evidence_branch": "research-premium-absorption-v8-evidence-36929463082",
+    "expected_evidence_path": "research/premium-absorption-v8/run-36929463082/complete-evidence",
+    "attempt1_failure_record": "research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -274,12 +275,29 @@
   },
   "current_execution": {
     "study": "V8",
-    "run": 36928892394,
-    "code_commit": "7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0",
-    "status": "IN_PROGRESS_VALIDATION",
-    "launched_at": "2026-10-01T21:28:18Z",
+    "run": 36929463082,
+    "code_commit": "c049138866f628bb2de891b81a77b133de13359d",
+    "status": "IN_PROGRESS_SOURCE_REPAIR_VALIDATION",
+    "launched_at": "2026-10-01T21:33:24Z",
     "actual_validation_log_read": false,
     "market_outcomes_available": false,
-    "note": "Local181 tests passed; local chronology smoke was not claimed because numba was unavailable. Actual Actions installs numba and must pass chronology plus official source probe before DEV."
-  }
+    "note": "Attempt2 changes only source packaging/preflight. Frozen economic hypothesis,96 policies,selection and execution semantics are unchanged."
+  },
+  "v8_attempt_failures": [
+    {
+      "attempt": 1,
+      "run": 36928892394,
+      "code_commit": "7f93ea6b0b21a624aaa24dfcd5a502bf9e990bd0",
+      "status": "SOURCE_PIPELINE_PACKAGING_FAILURE",
+      "validation_job": 110592960293,
+      "validation_tests": 181,
+      "canonical_chronology": "PASS",
+      "official_premium_probe": "PASS_2976_BARS",
+      "development_jobs_failed": 8,
+      "policy_cells_executed": 0,
+      "market_outcomes": 0,
+      "cause": "Frozen 256-file input-hash baseline omitted from implementation tree.",
+      "repair_record": "research/premium-absorption-v8/ATTEMPT_1_SOURCE_FAILURE.json"
+    }
+  ]
 }
