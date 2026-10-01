@@ -80,7 +80,9 @@ def stop_loss_fraction(tr, fee):
     return price_loss + fee * (1 + price_ratio) + FUND_PER_DAY * max_hold * BAR / DAY
 
 
-def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
+def simulate(ledger, market, start, end, cost_bps=20, guarded=True, all_kst_days=False):
+    if end <= start or (end - start) % BAR:
+        raise ValueError('invalid account interval')
     fee = cost_bps / 20000
     entries = defaultdict(list)
     for row in ledger.to_dict("records"):
@@ -128,6 +130,18 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
                        "hold_min": (ts - tr["entry_time"]) / 60000,
                        "entry_fee": p["entry_fee"], "exit_fee": exit_fee, "funding": funding})
 
+    def append_day(until, end_equity):
+        full = until - day_begin == DAY and (day_begin + KOREA_OFFSET) % DAY == 0
+        if not all_kst_days and not full:
+            return
+        row = {"day": pd.Timestamp(day * DAY, unit="ms", tz="UTC").strftime("%Y-%m-%d"),
+               "start_equity": day_base, "end_equity": end_equity,
+               "return_pct": 100 * (end_equity / day_base - 1),
+               "entries": day_entries, "active": day_active}
+        if all_kst_days:
+            row.update(partial_day=not full, covered_hours=(until - day_begin) / 3_600_000)
+        daily.append(row)
+
     for ts in range(start, end + BAR, BAR):
         # Earlier intrabar exits are credited only once; no early slot release.
         due = sorted((int(p["trade"]["exit_time"]), sym) for sym, p in active.items()
@@ -139,11 +153,7 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
         pre_entry_eq = eq
         today = korea_day(ts)
         if today != day:
-            if ts - day_begin == DAY and (day_begin + KOREA_OFFSET) % DAY == 0:
-                daily.append({"day": pd.Timestamp(day * DAY, unit="ms", tz="UTC").strftime("%Y-%m-%d"),
-                              "start_equity": day_base, "end_equity": eq,
-                              "return_pct": 100 * (eq / day_base - 1),
-                              "entries": day_entries, "active": day_active})
+            append_day(ts, eq)
             day, day_begin, day_base = today, ts, eq
             day_entries = 0
             day_active = bool(active)
@@ -225,6 +235,8 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
                       "reduced": reduced, "halted": halted})
     if active:
         raise ValueError("unclosed position at split end")
+    if all_kst_days and end > day_begin:
+        append_day(end, cash)
     rdf, ddf = pd.DataFrame(trades), pd.DataFrame(daily)
     ordered = sorted(trades, key=lambda r: (r["exit_time"], r["symbol"]))
     pnls = [r["net_pnl"] for r in ordered]
@@ -242,7 +254,9 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
                "avg_gross_pct": 100 * exposure_sum / ticks, "max_gross_pct": 100 * max_exposure,
                "max_reserved_risk_at_entry_pct": max_open_risk_at_entry * 100,
                "risk_half_time": half_time, "halt_time": halt_time, "guard_triggers": triggers,
-               "rejections": dict(rejections), "calendar_days": len(daily)}
+               "rejections": dict(rejections), "calendar_days": len(daily),
+               "calendar_scope": "ALL_INTERSECTED_KST_DATES" if all_kst_days else "COMPLETE_KST_DATES_ONLY",
+               "partial_calendar_days": sum(row.get('partial_day', False) for row in daily)}
     if len(ddf):
         returns = ddf.return_pct.to_numpy(float)
         summary.update({"daily_mean_pct": float(returns.mean()),
@@ -253,6 +267,9 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
                         "no_entry_days_pct": float(np.mean(ddf.entries == 0) * 100),
                         "flat_days_pct": float(np.mean(~ddf.active) * 100),
                         "worst_day_pct": float(returns.min()), "best_day_pct": float(returns.max())})
+        if all_kst_days:
+            assert len(ddf) == korea_day(end - 1) - korea_day(start) + 1
+            assert np.isclose(np.prod(1 + returns / 100), cash, atol=1e-10)
     return summary, rdf, ddf, pd.DataFrame(curve)
 
 

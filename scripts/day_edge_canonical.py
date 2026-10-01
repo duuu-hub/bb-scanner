@@ -172,7 +172,7 @@ def choose(summary,yearly,out,integrity):
     (out/'survivors.json').write_text(json.dumps(d,indent=2))
     print('REPLAY_DECISION',json.dumps(d),flush=True)
 
-def accounts(data,parts,out,selection_path,splits,expected_shards=8):
+def accounts(data,parts,out,selection_path,splits,expected_shards=8,all_kst_days=False):
     out.mkdir(parents=True,exist_ok=True)
     paths=sorted(parts.rglob('independent_candidates.csv.gz'))
     metas=sorted(parts.rglob('scan_meta.json'))
@@ -218,7 +218,8 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
             for cost in (20,40):
                 for guarded in (True,False):
                     key=f'{split}__{name}__{cost}bp__{"guarded" if guarded else "diagnostic"}'
-                    r,tr,day,curve=account.simulate(sel,market,start,end,cost,guarded)
+                    r,tr,day,curve=account.simulate(sel,market,start,end,cost,guarded,
+                                                  all_kst_days=all_kst_days)
                     r.update(split=split,variant=name,independent_n=len(sel));results.append(r)
                     folder=out/'details'/key;folder.mkdir(parents=True,exist_ok=True)
                     tr.to_csv(folder/'trades.csv.gz',index=False,compression='gzip')
@@ -238,13 +239,22 @@ def accounts(data,parts,out,selection_path,splits,expected_shards=8):
                     if len(day):
                         assert np.isclose((day.return_pct>=.7).mean()*100,r['day_ge_0_7_pct'])
                         assert np.isclose((day.return_pct>=2).mean()*100,r['day_ge_2_pct'])
+                        if all_kst_days:
+                            assert len(day)==account.korea_day(end-1)-account.korea_day(start)+1
+                            assert not day.day.duplicated().any()
+                            assert np.isclose(np.prod(1+day.return_pct/100),1+r['net_return_pct']/100,atol=1e-10)
+                            assert np.isclose(day.covered_hours.sum(),(end-start)/3_600_000)
                         dates=pd.to_datetime(day.day)
                         for freq in ('Y','Q'):
                             for period,g in day.groupby(dates.dt.to_period(freq)):
                                 periods.append(dict(scenario=key,split=split,variant=name,
                                     cost_bps=cost,guarded=guarded,period=str(period),days=len(g),
-                                    net_return_pct=float(100*(np.prod(1+g.return_pct/100)-1))))
+                                    net_return_pct=float(100*(np.prod(1+g.return_pct/100)-1)),
+                                    partial_days=int(g.partial_day.sum()) if all_kst_days else 0,
+                                    covered_hours=float(g.covered_hours.sum()) if all_kst_days else 24*len(g)))
                     audits.append(dict(scenario=key,all_checks_passed=True,trades=len(tr),
+                        calendar_scope=r['calendar_scope'],calendar_days=len(day),
+                        daily_sha256=hashlib.sha256((folder/'daily.csv').read_bytes()).hexdigest(),
                         trades_sha256=hashlib.sha256((folder/'trades.csv.gz').read_bytes()).hexdigest(),
                         curve_sha256=hashlib.sha256((folder/'curve.csv.gz').read_bytes()).hexdigest()))
                     print('ACCOUNT',key,json.dumps({k:r.get(k) for k in
@@ -270,10 +280,13 @@ def main():
     for name in ('data','parts','out','selection'): a.add_argument('--'+name,type=Path,required=True)
     a.add_argument('--splits',nargs='+',choices=SPLITS,default=['DEV','GATE'])
     a.add_argument('--expected-shards',type=int,default=8)
+    a.add_argument('--all-kst-days',action='store_true',
+                   help='Include and flag partial boundary dates, inactivity and post-halt dates.')
     args=ap.parse_args()
     if args.command=='scan':
         scan(args.data,args.btc,args.selection,args.out,args.minute_cache,tuple(args.splits),args.delay_bars)
     else:
-        accounts(args.data,args.parts,args.out,args.selection,tuple(args.splits),args.expected_shards)
+        accounts(args.data,args.parts,args.out,args.selection,tuple(args.splits),args.expected_shards,
+                 all_kst_days=args.all_kst_days)
 
 if __name__=='__main__': main()
