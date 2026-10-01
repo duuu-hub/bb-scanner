@@ -1,7 +1,6 @@
 import io,urllib.request,zipfile,os,time,re
 from datetime import datetime,timezone
 import pandas as pd,numpy as np
-from numba import njit
 _ONE_MIN_CACHE={}
 def _symbol(p):
     b=os.path.basename(p)
@@ -43,23 +42,27 @@ def _one_min(symbol,ts):
             if first_ym!=ym or last_ym!=ym:raise RuntimeError(f"1m archive month mismatch requested={ym} actual={first_ym}..{last_ym}")
             if len(v[0])>1 and np.any(np.diff(v[0])!=60000):
                 bad=np.flatnonzero(np.diff(v[0])!=60000)[:5]
-                return ("data_gap", f"1m timestamp gap/duplicate at rows {bad.tolist()}")
+                v=("data_gap", f"1m timestamp gap/duplicate at rows {bad.tolist()}")
+                _ONE_MIN_CACHE[key]=v
+                return v
             _ONE_MIN_CACHE[key]=v;return v
         except Exception as e:
             last=e
             if attempt<3: time.sleep(2**attempt)
-    raise RuntimeError(f"1m download failed after retries {symbol} {ym}: {last}")
+    v=("data_gap", f"1m download failed after retries {symbol} {ym}: {last}")
+    _ONE_MIN_CACHE[key]=v
+    return v
 def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None):
     d=_one_min(symbol,ts)
     if isinstance(d,tuple) and len(d)==2 and d[0]=="data_gap":return "data_gap"
     t,h,l=d;a=np.searchsorted(t,ts);z=np.searchsorted(t,ts+900000)
-    if z-a!=15 or a>=len(t) or t[a]!=ts or t[z-1]!=ts+840000:
-        raise RuntimeError(f"incomplete 1m window {symbol} {ts}: count={z-a}")
-    # Chronology windows use the official Binance 1m archive as the authority.
-    # The cached 15m source may be an older Binance snapshot and can differ by ticks
-    # after exchange-side historical kline corrections. Never mix snapshots by
-    # rejecting or altering 1m chronology based on stale 15m H/L. Window completeness,
-    # timestamp continuity and OHLC validity are enforced in _one_min above.
+    if z-a!=15 or a>=len(t) or not np.array_equal(t[a:z],ts+np.arange(15,dtype=np.int64)*60000):
+        return "data_gap"
+    if source_high is not None and source_low is not None:
+        # Never combine incompatible 15m and 1m price snapshots.
+        if not (np.isclose(np.max(h[a:z]),source_high,rtol=1e-10,atol=1e-12)
+                and np.isclose(np.min(l[a:z]),source_low,rtol=1e-10,atol=1e-12)):
+            return "source_mismatch"
     entered=entry is None;entry_seen=entered
     for j in range(a,z):
         if not entered:
@@ -79,44 +82,6 @@ def _resolve_1m(symbol,ts,tp,sl,long,entry=None,source_high=None,source_low=None
     if entry is not None:
         return "continue" if entry_seen else "entry_mismatch"
     return "exit_mismatch"
-
-def _design_tp(entry_target,sl,r,long):
-    """TP stays anchored to the designed entry target even after a favorable OPEN fill."""
-    design_risk=abs(entry_target-sl)
-    return entry_target+r*design_risk if long else entry_target-r*design_risk
-
-def _book_resolved(q,outcome,fill,tp,sl,design_risk):
-    """Book realized P/L in units of the original designed risk."""
-    if outcome=="win":
-        q["win"]+=1
-        q["gross_profit_design_R"]+=abs(tp-fill)/design_risk
-    elif outcome=="loss":
-        q["loss"]+=1
-        q["gross_loss_design_R"]+=abs(fill-sl)/design_risk
-    else:
-        raise RuntimeError(f"cannot book unresolved outcome {outcome}")
-
-ENTRY_ATR=(0.0,.10,.20,.30,.40,.50,.60,.70,.80,.90,1.0,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3.0,3.5,4.0,4.5,5.0,5.5,6.0)
-ENTRY_PCT=(0.0,.1,.2,.3,.4,.5,.75,1.0,1.5,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0)
-SL_BUFFER_ATR=(0.0,.10,.20,.30,.50)
-RS=(.5,.75,1.,1.25,1.5,2.,2.5,3.,4.)
-MIN_RISK_EPS=1e-12
-PSAR_BURNIN_BARS=100
-
-@njit(cache=True)
-def _first_exit(h,l,start,tp,sl,long):
-    """Return the first post-start 15m exit bar and which levels it touches.
-
-    The legacy engine built full suffix boolean arrays for TP and SL, then compared
-    their first hit indices. The earliest bar touching either level is sufficient:
-    if both are touched on that same bar, the caller resolves chronology on 1m.
-    """
-    for j in range(start,len(h)):
-        hit_tp=(h[j]>=tp) if long else (l[j]<=tp)
-        hit_sl=(l[j]<=sl) if long else (h[j]>=sl)
-        if hit_tp or hit_sl:
-            return j-start,hit_tp,hit_sl
-    return -1,False,False
 
 def psar_open_projection(h,l,af0=.02,step=.02,afmax=.2):
     n=len(h); out=np.full(n,np.nan); bull=np.ones(n,bool)
