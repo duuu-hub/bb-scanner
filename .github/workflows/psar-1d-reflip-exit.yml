@@ -1,0 +1,21 @@
+name: PSAR 1D Reflip Exit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_1d_reflip_run']
+permissions: {contents: read, actions: read}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_1d_reflip_exit.py --data data --tf 1d --shard 0 --shards 1 --out result.json
+      - run: test -s result.json && grep -q REFLIP_OR_MAX result.json
+      - uses: actions/upload-artifact@v4
+        with: {name: psar-1d-reflip-exit, path: result.json}
