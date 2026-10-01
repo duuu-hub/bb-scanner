@@ -35,6 +35,10 @@ def run():
     y=x.copy();y.loc[0,"signal_ts"]=CUT-STEP;y.loc[0,"exit_ts"]=CUT+STEP;y.loc[1,"signal_ts"]=CUT
     assert len(period(y,"train"))==0 and len(period(y,"holdout"))==1
     print("PASS no_holdout_returns_in_training_selection")
+    boundary=pd.DataFrame([dict(signal_ts=CUT-STEP,fill_ts=CUT-STEP,
+        exit_ts=CUT,limit_days=14)])
+    assert len(period(boundary,"train"))==0
+    print("PASS early_exit_does_not_override_full_training_horizon")
     q=pd.DataFrame([dict(pnl_pct=.1,outcome="time",fill_ts=0,exit_ts=STEP)])
     assert stats(q,20)["positive_n"]==0
     print("PASS positive_outcome_uses_net_PnL")
@@ -44,7 +48,7 @@ def run():
     z3,b3=replay(x.iloc[:1], [0], .5, 20, altered)
     assert np.isclose(b3.notional.iloc[0],.5)
     print("PASS entry_equity_does_not_use_future_close")
-    print("ALL_PORTFOLIO_AUDITS_PASS",8)
+    print("ALL_PORTFOLIO_AUDITS_PASS",9)
 
 
 if __name__=="__main__":

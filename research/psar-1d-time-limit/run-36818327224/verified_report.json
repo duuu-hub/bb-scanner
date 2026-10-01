@@ -1,0 +1,66 @@
+{
+  "threshold": 10.174524905858567,
+  "variant": [
+    2.75,
+    1.2,
+    0.75
+  ],
+  "limits": [
+    1,
+    3,
+    7,
+    14
+  ],
+  "costs_bp": [
+    20,
+    40
+  ],
+  "workflow_commit_sha": "09902dbe357be7497329410ec197eb288b3f99e5",
+  "engine_sha256": "e467220d754bfb23761baf7faf130bad23c9ef51cc6f44391ec662d979a78dda",
+  "audit_checks": [
+    "8 unique shards",
+    "one commit",
+    "one engine hash",
+    "one shard per symbol",
+    "row totals reconcile",
+    "engine invariants",
+    "1/3 common fills and earlier natural exits invariant",
+    "3/7 common fills and earlier natural exits invariant",
+    "7/14 common fills and earlier natural exits invariant"
+  ],
+  "engine_behavior_tests": 63,
+  "counters": {
+    "eligible_short_signals": 265941,
+    "unfilled": 43249,
+    "partial_horizon_14d": 3317,
+    "partial_horizon_7d": 1571,
+    "partial_horizon_3d": 601,
+    "partial_horizon_1d": 35
+  },
+  "original_input_run": 36817548101,
+  "invalid_tp_events_excluded": 2627,
+  "invalid_tp_signals_excluded": 672,
+  "train_40bp_candidate_days": [],
+  "decision": "NO_SIZING: all frozen limits fail train 40bp raw edge",
+  "source_signal_start": 1639094400000,
+  "source_signal_end": 1788134400000,
+  "final_exit": 1788220800000,
+  "chosen_train_only": null,
+  "selection_rule": "maximize train account return at 40bp subject to 15m-close MTM MDD<=30%; no holdout re-selection",
+  "optimization_status": "not run: no train-qualified horizon",
+  "sizing": "percent of current equity at known prior 15m close; half round-trip cost each side",
+  "gross_cap": "entry-allocation slot budget; marked exposure can exceed it during price/equity moves and is reported",
+  "fill_timestamp": "canonical 15m fill bucket start; intraminute timestamp not available",
+  "funding": "not separately modeled; 20/40bp are constant fee plus slippage scenarios",
+  "training_boundary": "each training limit requires its full horizon by 2025-01-01 UTC; joint comparison uses a common complete 14-day training cohort",
+  "baseline": {
+    "available": true,
+    "reference_run": 36710246395,
+    "resolved_n": 65173,
+    "excluded_unresolved_n": 4226,
+    "paired_14d_n": 65003,
+    "warning": "Historical reference uses its original snapshot mismatch policy and resolved-only scope; not a new unlimited portfolio backtest."
+  },
+  "portfolio_tests_after_boundary_check": 9,
+  "independent_summary_recalculation": "all-period values reconcile; training eligibility is outcome-independent full horizon"
+}

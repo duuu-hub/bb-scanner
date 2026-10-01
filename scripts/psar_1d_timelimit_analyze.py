@@ -143,7 +143,10 @@ def mark_to_market(book, cost, prices, start, end):
 def period(x, name):
     if name == "train":
         # No training sizing uses returns after the 2025-01-01 boundary.
-        return x[(x.signal_ts>=TRAIN_START)&(x.signal_ts<CUT)&(x.exit_ts<=CUT)]
+        eligible = (x.signal_ts>=TRAIN_START)&(x.signal_ts<CUT)&(x.exit_ts<=CUT)
+        if "limit_days" in x:
+            eligible &= x.fill_ts+x.limit_days*DAY <= CUT
+        return x[eligible]
     if name == "holdout":
         return x[x.signal_ts>=CUT]
     return x[x.signal_ts>=TRAIN_START]
@@ -252,6 +255,8 @@ def main():
         for days,g in frame.groupby("limit_days"):
             for name in ("all","train","holdout"):
                 sub=period(g,name)
+                if scope == "common_14d_cohort" and name == "train":
+                    sub=sub[sub.fill_ts+14*DAY<=CUT]
                 for cost in (0,20,40):
                     z=stats(sub,cost);z.update(limit_days=int(days),period=name,scope=scope)
                     raw.append(z)
@@ -332,12 +337,12 @@ def main():
         source_signal_start=int(x.signal_ts.min()),source_signal_end=int(x.signal_ts.max()),
         final_exit=int(x.exit_ts.max()),chosen_train_only=chosen,
         selection_rule="maximize train account return at 40bp subject to 15m-close MTM MDD<=30%; no holdout re-selection",
-        optimization_status="best tested grid point; boundary points are not claimed as a global optimum",
+        optimization_status="not run: no train-qualified horizon" if not candidate_days else "best tested grid point; boundary points are not claimed as a global optimum",
         sizing="percent of current equity at known prior 15m close; half round-trip cost each side",
         gross_cap="entry-allocation slot budget; marked exposure can exceed it during price/equity moves and is reported",
         fill_timestamp="canonical 15m fill bucket start; intraminute timestamp not available",
         funding="not separately modeled; 20/40bp are constant fee plus slippage scenarios",
-        training_boundary="training signals must exit by 2025-01-01 UTC; boundary-crossing trades excluded from training selection",
+        training_boundary="each training limit requires its full horizon by 2025-01-01 UTC; joint horizon comparison uses a common complete 14-day training cohort",
         baseline=baseline_reference(a.baseline,x,out))
     with open(out/"report.json","w") as f:json.dump(report,f,indent=2,allow_nan=False)
     print("RAW_HIGH_VOL_COST20")
