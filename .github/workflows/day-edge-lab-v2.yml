@@ -1,0 +1,99 @@
+name: Day Edge Lab V2 Development Scout
+
+'on':
+  push:
+    branches: [research-day-edge-lab-v2]
+    paths: ['.research/day-edge-lab-v2-run']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: day-edge-lab-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Causality, chronology and account checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p test_day_edge_lab.py -v 2>&1 | tee lab-tests.log
+          python -m unittest discover -s tests -p test_relative_pullback_v1.py -v 2>&1 | tee account-tests.log
+          python scripts/psar_chronology_smoke.py | tee canonical-smoke.log
+      - name: Prepare authoritative BTC context
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-3 -D btc-source
+          mkdir btc
+          cp btc-source/BTCUSDT.csv.gz btc/BTCUSDT.csv.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: day-edge-v2-btc
+          path: btc/BTCUSDT.csv.gz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-validation
+          path: |
+            lab-tests.log
+            account-tests.log
+            canonical-smoke.log
+            research/day-edge-lab-v2/PLAN.md
+          retention-days: 30
+
+  scout:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0, 1, 2, 3, 4, 5, 6, 7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Frozen source shard
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+      - uses: actions/download-artifact@v4
+        with: {name: day-edge-v2-btc, path: btc}
+      - name: Development and 2024 gate only
+        run: python scripts/day_edge_lab.py scout --data data --btc btc/BTCUSDT.csv.gz --out scout-${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-scout-${{ matrix.shard }}
+          path: scout-${{ matrix.shard }}/
+          retention-days: 30
+
+  merge:
+    needs: scout
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'day-edge-v2-scout-*', path: parts}
+      - run: python scripts/day_edge_lab.py merge --parts parts --out day-edge-v2-screen
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-screen
+          path: |
+            day-edge-v2-screen/
+            research/day-edge-lab-v2/PLAN.md
+          retention-days: 30
