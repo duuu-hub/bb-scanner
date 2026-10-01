@@ -71,7 +71,8 @@ for p in files:
    if not np.isfinite(sar[i]) or not np.isfinite(atr[i]) or atr[i]<=0:continue
    if flip[i]:last=i;eid=flipn;flipn+=1;d0=abs(rc[i-1]-sar[i])/atr[i]
    if last<0:continue
-   side=1 if bull[i] else -1;dt=abs(ro[i]-sar[i])/atr[i];row={"symbol":symbol,"ts":int(rt[i]),"side":"BULL" if side==1 else "BEAR","event":eid,"age":i-last,"age_bin":abin(i-last),"d0":float(d0),"dt":float(dt)}\n   for z in (1,2,3,4,5,6,7,8): row[f"bull{z}"]=bool(bull[i+z])
+   side=1 if bull[i] else -1;dt=abs(ro[i]-sar[i])/atr[i];row={"symbol":symbol,"ts":int(rt[i]),"side":"BULL" if side==1 else "BEAR","event":eid,"age":i-last,"age_bin":abin(i-last),"d0":float(d0),"dt":float(dt)}
+   for z in (1,2,3,4,5,6,7,8): row[f"bull{z}"]=bool(bull[i+z])
    for z in H:
     row[f"ret{z}"]=float(side*(ro[i+z]/ro[i]-1)*100)
     row[f"mfe{z}"]=float((rh[i:i+z].max()/ro[i]-1)*100 if side==1 else (1-rl[i:i+z].min()/ro[i])*100)
