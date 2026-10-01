@@ -39,11 +39,11 @@ jobs:
         with:
           pattern: cross-sectional-part-*
           path: parts
-      - run: python scripts/cross_sectional_merge_scan.py
+      - run: python scripts/cross_sectional_merge_scan.py\n      - run: python scripts/cross_sectional_event_scan.py
       - uses: actions/upload-artifact@v4
         with:
           name: cross-sectional-relative-strength-results
           path: |
             cross_sectional_cells.csv
             cross_sectional_spreads.csv
-            cross_sectional_summary.json
+            cross_sectional_summary.json\n            event_cells.csv\n            event_spreads.csv\n            event_summary.json
