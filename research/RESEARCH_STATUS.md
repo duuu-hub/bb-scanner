@@ -44,15 +44,24 @@ Current:
 - V4 fixed-plan commit ae35b31876eec83ff82771022986d83e8c4f2e6c, branch
   research-compression-expansion-v4. Moderate compression/volume/flow trend expansion.
 - Implementation commit e4c78b629ae0a0ff6cc4e9712385248588c89b32, 16 entry settings/96 DEV policies.
-  85 local unit tests passed. Local chronology smoke lacked numba; Actions installs
-  pinned numba and must pass the actual canonical smoke before DEV.
-- Explicit execution trigger was pushed; actual V4 run 36897289990.
-  Workflow Compression Expansion V4 Research Cycle. Performance is not yet known.
+  85 unit tests and the canonical chronology smoke actually passed in Actions.
+  Local smoke had previously lacked numba; this is resolved by the actual pinned CI run.
+- Actual V4 run 36897289990 completed all eight DEV shards and 96 cells.
+  ZERO selected candidates; 2024 GATE/accounts skipped. All global 40bp means
+  were negative (-134.5623 to -13.0059 bp), 97,686 parameterized observations.
+  Forty-eight DATA_GAP outcome exclusions cover two unique symbol/entry events.
+  Frozen per-year price test was omitted in selection code but every cell already
+  failed 2022 R/global price, so correction cannot change zero candidates.
+  Full audit is on research-compression-expansion-v4/FAILURE_AUDIT.md and .json.
 - Full original catalogues, manifest statistics and 256 preserved historical CSV
   hashes are verified before every DEV/GATE/account marking stage.
-- Prior V1/V2/V3 curves, raw trials, logs and every current V4 partial/complete
-  artifact are preserved on dedicated git evidence branches with SHA256 manifests.
-  Preservation is PENDING until its actual job succeeds; don't claim it already ran.
+- Prior V1/V2/V3 full evidence is actually preserved on
+  research-dayedge-evidence-36897289990: 808 files/155,194,348 bytes, curves,
+  raw V3 DEV trials and four actual run logs. Manifest sizes match git tree.
+- V4 full raw evidence archive failed because gh api blocked ANSI log bytes.
+  Archive-only recovery actual run 36898980631 is in progress. No market rerun.
+  V4 all-96 selection diagnostics already preserved on
+  research-compression-v4-dev-36897289990; full evidence state is RECOVERY_RUNNING.
 - Expired interactive lease released. Inspect this active run; never duplicate it.
 
 Data boundaries: DEV 2021-09 through 2023; 2024 historically seen selection/
@@ -62,9 +71,9 @@ been seen in other chats and one month cannot independently prove an edge.
 Never retune to old comparison years. Track global search count, failures
 and economic hypotheses; repeated good backtests are not proof.
 
-Next: inspect V3 and its official-minute exclusions. If no material account
-survivor, diagnose and preregister/implement/execute the next economic
-hypothesis instead of ending at failure. If one survives, review neighbours,
+Next: V4 is rejected. Finish archive-only recovery, then preregister/implement/
+validate/execute V5 failed range sweep plus aggressive-flow divergence on a
+new research branch. This is adaptive exploration, not independent evidence. If one survives, review neighbours,
 freeze a finalist and stress costs/slippage, actual delayed execution,
 already-seen comparative years, block dependence and fresh forward evidence.
 Always report gap between measured account daily results and requested goal;
