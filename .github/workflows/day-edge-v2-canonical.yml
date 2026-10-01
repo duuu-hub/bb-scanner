@@ -1,0 +1,166 @@
+name: Day Edge Lab V2 Canonical Account Replay
+
+'on':
+  push:
+    branches: [research-day-edge-lab-v2]
+    paths: ['.research/day-edge-v2-canonical-run']
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: day-edge-v2-canonical-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Validate chronology, causality and risk budgets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/day_edge_canonical.py scripts/relative_pullback_portfolio.py
+          python -m unittest discover -s tests -p test_day_edge_canonical.py -v 2>&1 | tee canonical-tests.log
+          python -m unittest discover -s tests -p test_day_edge_lab.py -v 2>&1 | tee scout-tests.log
+          python -m unittest discover -s tests -p test_relative_pullback_v1.py -v 2>&1 | tee account-tests.log
+          python scripts/psar_chronology_smoke.py | tee chronology-smoke.log
+      - name: Bind the actual frozen scout selection
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-screen -D scout-results
+          python - <<'PY'
+          import pathlib,json,shutil
+          paths=list(pathlib.Path('scout-results').rglob('selection.json'))
+          assert len(paths)==1,paths
+          obj=json.loads(paths[0].read_text())
+          assert {s['key']:s['hold'] for s in obj['selected']}=={
+            'SHOCK_FADE_L1_T6_M-1':48,'SHOCK_FADE_L4_T6_M-1':96},obj
+          pathlib.Path('frozen-input').mkdir()
+          shutil.copyfile(paths[0],'frozen-input/selection.json')
+          shutil.copyfile('research/day-edge-lab-v2/EXECUTION_PLAN.md','frozen-input/EXECUTION_PLAN.md')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: day-edge-v2-frozen-selection
+          path: frozen-input/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-canonical-validation
+          path: |
+            canonical-tests.log
+            scout-tests.log
+            account-tests.log
+            chronology-smoke.log
+          retention-days: 30
+
+  scan:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0, 1, 2, 3, 4, 5, 6, 7]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        with:
+          path: cache/1m
+          key: day-edge-canon-v2-source-36095439671-shard-${{ matrix.shard }}
+      - name: Download frozen market data and context
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+      - uses: actions/download-artifact@v4
+        with: {name: day-edge-v2-frozen-selection, path: frozen-input}
+      - name: Canonical stop chronology on all chronological intents
+        run: python scripts/day_edge_canonical.py scan --data data --btc btc/BTCUSDT.csv.gz --selection frozen-input/selection.json --out canonical-${{ matrix.shard }} --minute-cache cache/1m
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-canonical-${{ matrix.shard }}
+          path: canonical-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  accounts:
+    needs: scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'day-edge-v2-canonical-[0-7]', path: canonical-parts}
+      - uses: actions/download-artifact@v4
+        with: {name: day-edge-v2-frozen-selection, path: frozen-input}
+      - name: Full frozen market source for net equity marks
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D market
+      - name: Identical constrained accounts, costs and independent arithmetic audit
+        run: python scripts/day_edge_canonical.py accounts --data market --parts canonical-parts --out day-edge-v2-account --selection frozen-input/selection.json --expected-shards 8
+      - name: Preserve complete research evidence on a separate result branch
+        env: {RESULT_BRANCH: 'research-day-edge-v2-results-${{ github.run_id }}'}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil,json,hashlib,os,pandas as pd
+          dest=Path('research/day-edge-lab-v2')/('run-'+os.environ['GITHUB_RUN_ID'])
+          dest.mkdir(parents=True)
+          for name in ['summary.csv','summary.json','year_quarter.csv','audit.json',
+                       'survivors.json','independent_candidates.csv.gz']:
+            shutil.copyfile(Path('day-edge-v2-account')/name,dest/name)
+          shutil.copyfile('frozen-input/selection.json',dest/'selection.json')
+          shutil.copyfile('frozen-input/EXECUTION_PLAN.md',dest/'EXECUTION_PLAN.md')
+          for i,p in enumerate(sorted(Path('canonical-parts').rglob('scan_meta.json'))):
+            shutil.copyfile(p,dest/f'scan_shard_{i}_meta.json')
+          trades=[]
+          for p in sorted(Path('day-edge-v2-account/details').glob('*/trades.csv.gz')):
+            try: d=pd.read_csv(p)
+            except pd.errors.EmptyDataError: continue
+            d['scenario']=p.parent.name;trades.append(d)
+          if trades:
+            pd.concat(trades,ignore_index=True).to_csv(dest/'executed_trades.csv.gz',index=False,compression='gzip')
+          hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in dest.iterdir() if p.is_file()}
+          (dest/'provenance.json').write_text(json.dumps(dict(run=int(os.environ['GITHUB_RUN_ID']),
+            executed_commit=os.environ['GITHUB_SHA'],source_data_run=36095439671,
+            scout_run=36858492497,file_sha256=hashes),indent=2))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RESULT_BRANCH"
+          git add "research/day-edge-lab-v2/run-${{ github.run_id }}"
+          git commit -m "Preserve canonical Day Edge V2 results from run ${{ github.run_id }}"
+          git push origin "$RESULT_BRANCH"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-canonical-summary
+          path: research/day-edge-lab-v2/run-${{ github.run_id }}/
+          retention-days: 30
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: day-edge-v2-canonical-details
+          path: day-edge-v2-account/
+          retention-days: 30
+          compression-level: 0

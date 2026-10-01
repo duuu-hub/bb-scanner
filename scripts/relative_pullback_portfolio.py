@@ -74,7 +74,10 @@ def stop_loss_fraction(tr, fee):
     """Budget actual adverse SL fill, both fees, and maximum-hold funding."""
     price_ratio = tr["sl"] / tr["entry"] * (1 - tr["side"] * STOP_SLIP)
     price_loss = tr["side"] * (1 - price_ratio)
-    return price_loss + fee * (1 + price_ratio) + FUND_PER_DAY * MAX_HOLD * BAR / DAY
+    max_hold = int(tr.get('max_hold_bars', MAX_HOLD))
+    if not 0 < max_hold <= 7 * DAY // BAR:
+        raise ValueError('holding budget must be within seven days')
+    return price_loss + fee * (1 + price_ratio) + FUND_PER_DAY * max_hold * BAR / DAY
 
 
 def simulate(ledger, market, start, end, cost_bps=20, guarded=True):
