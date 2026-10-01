@@ -1,0 +1,96 @@
+name: Trend Continuation First Touch 5Y
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/trend_continuation_prepare.py'
+      - 'scripts/trend_continuation_first_touch.py'
+      - '.github/workflows/trend-continuation-first-touch.yml'
+      - '.research/trend_continuation_first_touch_run'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prepare:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Syntax check
+        run: |
+          python -m py_compile scripts/trend_continuation_prepare.py
+          python -m py_compile scripts/trend_continuation_first_touch.py
+      - name: Download frozen 5Y shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw_shard
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
+            -D raw_shard
+      - name: Prepare compact shard
+        run: |
+          python scripts/trend_continuation_prepare.py \
+            --data raw_shard \
+            --out "trend_part_${{ matrix.shard }}.csv.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trend-continuation-part-${{ matrix.shard }}
+          path: trend_part_${{ matrix.shard }}.csv.gz
+          retention-days: 30
+          compression-level: 0
+
+  analyze:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trend-continuation-part-*
+          path: parts
+      - name: Download frozen raw 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw_data
+          gh run download 36095439671 -R ${{ github.repository }} -D raw_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+          find raw_data -name '*USDT.csv.gz' | wc -l
+      - name: Run first-touch study
+        run: |
+          rm -rf trend_continuation_result
+          python scripts/trend_continuation_first_touch.py \
+            --parts parts \
+            --raw raw_data \
+            --out trend_continuation_result
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trend-continuation-first-touch-${{ github.run_id }}
+          path: trend_continuation_result/
+          retention-days: 30
+          compression-level: 6
