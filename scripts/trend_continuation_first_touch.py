@@ -353,7 +353,8 @@ def main():
         raw_syms={sym_from_path(p) for p in glob.glob(os.path.join(a.raw, "**", "*USDT.csv.gz"), recursive=True)}
         events=events[events["symbol"].isin(raw_syms)].copy()
         print("EVENT_BASE_SHARD", len(events), "symbols", events.symbol.nunique(), "unique", len(events[["symbol","entry_ts"]].drop_duplicates()), flush=True)
-    events.to_csv(outdir/"signal_events.csv.gz", index=False, compression="gzip")
+    if not a.events_in:
+        events.to_csv(outdir/"signal_events.csv.gz", index=False, compression="gzip")
 
     outcomes = precompute_outcomes(events, a.raw)
 
