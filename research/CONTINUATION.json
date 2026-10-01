@@ -1,11 +1,11 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-01T17:51:46.041Z",
+  "updated_at": "2026-10-01T18:13:44.732Z",
   "interactive_lease": null,
-  "current_branch": "research-liquidity-sweep-v5",
-  "current_run": 36902157396,
-  "current_workflow": "Liquidity Sweep Absorption V5 Research Cycle",
-  "current_plan": "research/liquidity-sweep-v5/PLAN.md",
+  "current_branch": "research-btc-factor-lag-v6",
+  "current_run": null,
+  "current_workflow": "BTC Factor Lag V6 Research Cycle",
+  "current_plan": "research/btc-factor-lag-v6/PLAN.md",
   "latest_research_checkpoint": "research/RESEARCH_STATUS.md",
   "previous_results": {
     "v1_run": 36853787624,
@@ -30,7 +30,17 @@
     "v4_complete_evidence_commit": "7297eed57a6c652ce601a3b0520c51606b75c04c",
     "v4_evidence_recovery_run": 36898980631,
     "prior_complete_evidence_branch": "research-dayedge-evidence-36897289990",
-    "prior_complete_evidence_path": "research/dayedge-evidence/prior-run-36897289990"
+    "prior_complete_evidence_path": "research/dayedge-evidence/prior-run-36897289990",
+    "v5_run": 36902157396,
+    "v5_code_commit": "5b26f467543d6724461e8f10557c1e8839075f02",
+    "v5_survivors": 0,
+    "v5_development_branch": "research-liquidity-v5-dev-36902157396",
+    "v5_development_path": "research/liquidity-sweep-v5/run-36902157396/development",
+    "v5_complete_evidence_branch": "research-liquidity-v5-evidence-36902157396",
+    "v5_complete_evidence_path": "research/liquidity-sweep-v5/run-36902157396/complete-evidence",
+    "v5_failure_audit_branch": "research-btc-factor-lag-v6",
+    "v5_failure_audit_path": "research/liquidity-sweep-v5",
+    "v5_failure_audit_commit": "23589bd985b56934b4698710896f610be168740c"
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -51,7 +61,14 @@
     "v4_account_scenarios": 0,
     "v5_entry_settings_planned": 16,
     "v5_dev_policy_cells_planned": 96,
-    "v5_execution_attempts": 1
+    "v5_execution_attempts": 1,
+    "v5_entry_settings_executed": 16,
+    "v5_canonical_dev_cells_executed": 96,
+    "v5_selected_policies": 0,
+    "v5_account_scenarios": 0,
+    "v6_entry_settings_planned": 16,
+    "v6_dev_policy_cells_planned": 96,
+    "v6_execution_attempts": 0
   },
   "goal": {
     "max_hold_days": 7,
@@ -61,46 +78,32 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Inspect actual V5 validation logs (99 tests plus canonical smoke), then eight DEV shards, frozen selection, GATE, account audit and evidence preservation. Never duplicate active run 36902157396. Audit annual PRICE-and-R/KST dates, exclusions, official ZIP/CHECKSUM/slice provenance. If no strict account survivor, numerically diagnose and preregister/implement/execute the next economic mechanism; do not stop at failure. Provisional historical CAGR is not daily goal completion.",
-  "phase": "V5_VALIDATING_AND_RUNNING",
+  "next_action": "Implement frozen V6 BTC factor underreaction/catch-up without retuning; causal OLS ending before impulse, same official minute chronology/provenance, optional all-KST-day reporting with identical fills/risk. Run meaningful local/CI tests then actual branch-specific workflow; inspect real logs/results and preserve all. V5 fully audited/rejected, no active study to duplicate. Historical pass remains provisional, not daily target achievement.",
+  "phase": "V6_PREREGISTERED_IMPLEMENTING",
   "last_failure": {
-    "study": "V4",
+    "study": "V5",
     "audited": true,
     "cells_examined": 96,
     "selected": 0,
-    "parameterized_resolved_outcomes": 97686,
+    "parameterized_resolved_outcomes": 99382,
     "positive_net40_price_cells": 0,
     "mean_net40_bp_range": [
-      -134.5623103215448,
-      -13.005865652540502
+      -79.24898808316254,
+      -31.65487562480532
     ],
-    "parameterized_data_gap_exclusions": 48,
-    "unique_excluded_symbol_entry_events": 2,
-    "diagnosis": "All cells negative global net40 price/R and 2022 R. C50 sparse; C75 sufficiently frequent but negative. Per-year price check omission cannot change zero selection and is explicitly preserved."
+    "parameterized_data_gap_exclusions": 26,
+    "unique_excluded_symbol_entry_events": 3,
+    "positive_gross_mean_cells": 31,
+    "original_raw_audit_all_checks_passed": true,
+    "diagnosis": "All global net40 PRICE/R and all2022 PRICE/R means negative.31 gross-positive means defeated by45.28-49.77bp average cost drag. Original99,382 observations and all96 cell means reconciled; full archive and slices hashed."
   },
   "previous_interactive_lease": {
     "owner": "current_chat",
     "expires_at": "2026-10-01T16:44:57.017Z"
   },
-  "plan_commit": "6492c32200739e2902e3c824cb94722f52eb539d",
-  "code_commit": "5b26f467543d6724461e8f10557c1e8839075f02",
-  "current_result_locations": {
-    "development": {
-      "branch": "research-liquidity-v5-dev-36902157396",
-      "path": "research/liquidity-sweep-v5/run-36902157396/development",
-      "state": "PENDING"
-    },
-    "accounts": {
-      "branch": "research-liquidity-v5-results-36902157396",
-      "path": "research/liquidity-sweep-v5/run-36902157396/accounts",
-      "state": "PENDING"
-    },
-    "complete_evidence": {
-      "branch": "research-liquidity-v5-evidence-36902157396",
-      "path": "research/liquidity-sweep-v5/run-36902157396/complete-evidence",
-      "state": "PENDING"
-    }
-  },
+  "plan_commit": "23589bd985b56934b4698710896f610be168740c",
+  "code_commit": null,
+  "current_result_locations": {},
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
     "run": 36898980631,
@@ -111,5 +114,15 @@
     "raw_original_outcomes_reconciled": 97686,
     "metric_label_correction_commit": "7297eed57a6c652ce601a3b0520c51606b75c04c",
     "market_outcomes_repeated": false
+  },
+  "reporting_audit": {
+    "old_calendar_mode": "COMPLETE_KST_DATES_ONLY_EXCLUDES_PARTIAL_BOUNDARIES",
+    "v6_calendar_mode": "ALL_INTERSECTED_KST_DATES_INCLUDE_PARTIAL_BOUNDARIES",
+    "old_v3_dev_days": 851,
+    "old_v3_gate_days": 365,
+    "expected_v6_dev_dates": 853,
+    "expected_v6_gate_dates": 367,
+    "trade_and_risk_semantics_change": false,
+    "old_saved_curve_reaudit": "PENDING; do not relabel old original goal rates as full all-date rates"
   }
 }

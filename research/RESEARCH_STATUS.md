@@ -7,25 +7,43 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V5 branch research-liquidity-sweep-v5, Liquidity Sweep Absorption V5 Research Cycle.
-Preregistered PLAN commit 6492c32200739e2902e3c824cb94722f52eb539d;
-execution code commit 5b26f467543d6724461e8f10557c1e8839075f02.
-Actual run 36902157396: https://github.com/duuu-hub/bb-scanner/actions/runs/36902157396. Validation/market results still pending.
-No duplicate execution. Current phase V5_VALIDATING_AND_RUNNING.
+V5 run36902157396 actually completed eightDEVshards/96cells with ZERO seeds.
+Original99,382 saved observations audited; full minute/data/validation evidence
+preserved. No GATE/accounts ran. No active V5 execution to duplicate.
 
-V5 tests a failed 12h/24h intrabar range sweep which closes back INSIDE the old
-range, opposite aggressive taker flow, >=50% rejection wick and volume expansion.
-Different event from V4 closed breakout; adaptively motivated, not independent
-discovery or proof of actual order-book absorption. Frozen 16 entry settings x
-6 hold/exit choices =96 DEV policies. Holds6h/12h, TP2/TP3/closed-candle trail.
-Thirty new tests plus69 shared regressions passed locally (99 total). Actions
-must independently pass99 and actual canonical smoke before DEV; read logs.
-The new minute loader verifies original official ZIP SHA against CHECKSUM,
-rejects verified-cache corruption, preserves original provenance and exact
-authoritative slices. Implementation tests are not market download evidence.
+V6 preregistered on research-btc-factor-lag-v6, PLAN commit23589bd985b56934b4698710896f610be168740c.
+Phase V6_PREREGISTERED_IMPLEMENTING; no V6 run or market result exists yet.
+New conjecture: BTC-factor-sensitive coins underreacting to a BTC impulse may
+catch up after their own closed15m direction/volume confirmation.672 matched
+prior returns estimate beta/R2 ending BEFORE the1h/4h impulse.16entry settings,
+96policycells,6h/24hhold. Adaptive hypothesis, not independent discovery.
+Implement/test then trigger only its own workflow marker. Never claim execution
+without actual Actions logs, never silently retune after results.
+
+Calendar reporting audit found older daily files count only completeKSTdates,
+omitting both partialUTC-boundary dates. Original files/history remain intact.
+V6 explicitly counts ALL intersectedKSTdates and flags partial hours; default
+legacy mode retained for reproduction. No fill/risk/cash changes.853DEV dates
+(851full+2partial),367GATE dates(365full+2partial). Old V3 goal rates851/365 are
+complete-only, not all-date attainment; saved-curve correction remains pending.
 
 ## Completed failures and durable assets
 
+- V5 actual run36902157396/code5b26f467543d6724461e8f10557c1e8839075f02:
+  16entries/96cells,99tests plus canonical smoke succeeded;ZEROseeds,gate/accounts
+  skipped.99,382overlapping outcomes read/reconciled to all96original cell means.
+  Net40 price means-79.2490 to-31.6549bp, global price/R positivezero;every2022
+  price/Rnegative.31gross-positive means defeated by45.28-49.77bp cost drag.
+  26DATA_GAPpolicy exclusions cover3unique coin/entry events.10ENTRY_PATH_GAP
+  and80STOP_ABOVE_8PCT are intent/config exclusions. Archive523files/5,972,165bytes;
+  all484downloaded originalDEVfile SHA/bytes match,436validated exactminute slices,
+  397officialZIP/CHECKSUM matches. Original ledgers audited, no market rerun.
+  DEV branch research-liquidity-v5-dev-36902157396,
+  path research/liquidity-sweep-v5/run-36902157396/development.
+  Full branch research-liquidity-v5-evidence-36902157396,
+  path research/liquidity-sweep-v5/run-36902157396/complete-evidence.
+  Failure/audit/decomposition on V6 plan commit23589bd985b56934b4698710896f610be168740c,
+  path research/liquidity-sweep-v5/. All failures remain research assets.
 - V1 Relative Pullback: actual run36853787624, rejected. Results commit
   0717d432abd0e7c040fa24799218d2a4ab76bce0.
 - V2 scout run36858492497:36 entries/144 fixed-time cells. Then canonical
@@ -105,7 +123,7 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Inspect actual current V5 logs/results/evidence paths in CONTINUATION.json.
+Implement/test frozen V6 then execute its actual workflow and inspect logs/results.
 If failed, diagnose numerically and preregister/implement/validate/execute the next
 economic mechanism. If provisional survivor, freeze before neighbours/stress and
 fresh forward validation; report target attainment on ALL calendar dates.
