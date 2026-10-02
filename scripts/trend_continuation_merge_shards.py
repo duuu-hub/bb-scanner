@@ -11,8 +11,8 @@ SUMCOLS=["n","raw_signals","overlap_skips","excluded","tp_n","sl_n","time_n","wi
 
 def main():
     fs=sorted(glob.glob("shard_results/**/cells.csv",recursive=True))
-    if len(fs)!=8:
-        raise RuntimeError(f"expected 8 shard cells files, got {len(fs)}")
+    if len(fs)<8 or len(fs)%8!=0:
+        raise RuntimeError(f"expected a positive multiple of 8 shard cells files, got {len(fs)}")
     z=pd.concat([pd.read_csv(f) for f in fs],ignore_index=True)
     g=z.groupby(KEY,dropna=False,as_index=False)[SUMCOLS].sum()
     g["tp_rate_pct"]=np.where(g.n>0,g.tp_n/g.n*100,np.nan)
@@ -38,7 +38,7 @@ def main():
         if a.get("avg_net_pct",float("nan"))>0 and b.get("avg_net_pct",float("nan"))>0:
             robust.append(x)
     summary={
-        "shards":8,
+        "shard_files":int(len(fs)),
         "cells":int(len(g)),
         "top_train_paired_holdout":paired[:30],
         "train_and_holdout_positive":robust[:30],
