@@ -42,7 +42,7 @@ def eval_symbol(symbol,t,o,h,l,c):
  if len(ht)<60:return []
  hf=ema(hc,EMA_FAST);hs=ema(hc,EMA_SLOW)
  hclose=ht+4*HOUR
- out=[];free={m:-1 for m in MODES}
+ out=[]
  for q in range(60,len(rt)-3):
   if not np.isfinite(ra[q]) or ra[q]<=0:continue
   A=float(ra[q]);rng=float(rh[q]-rl[q]);body=abs(float(rc[q]-ro[q]))
@@ -101,12 +101,11 @@ def eval_symbol(symbol,t,o,h,l,c):
    candidates.append(("PULLBACK_STRUCT",trigger+1,"struct",pull_ext,trigger,pull_depth))
 
   for mode,start,slmode,pext,confirm,pdepth in candidates:
-   if start>=len(t) or start<free[mode]:continue
+   if start>=len(t):continue
    ret=enter_trade(symbol,t,o,h,l,c,start,side,A,slmode,pext)
    if ret is None:continue
    z,sl,tp=ret
    if z is None:continue
-   free[mode]=z["exit_bar"]+1
    out.append({"mode":mode,"config":f"IPC2_{mode}","symbol":symbol,"impulse_time":int(rt[q]),
     "entry_time":int(t[start]),"exit_time":int(t[z["exit_bar"]]),"side":side,
     "impulse_atr":float(rng/A),"pull_depth":pdepth,"entry":float(o[start]),"sl":float(sl),"tp":float(tp),
