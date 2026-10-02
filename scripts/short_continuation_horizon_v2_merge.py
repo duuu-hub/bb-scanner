@@ -15,7 +15,7 @@ def select_exec(g,cap):
  z=g.sort_values(["entry_time","impulse_atr","symbol"],ascending=[True,False,True]).copy()
  acc=[];op=[];conc=[];expo=[]
  for _,r in z.iterrows():
-  et=int(r.entry_time);op=[p for p in op if p["exit_time"]>et]
+  et=int(r.entry_time);op=[p for p in op if p["exit_time"]>=et]
   if cap<99 and len(op)>=cap:continue
   if any(p["symbol"]==r.symbol for p in op):continue
   notional=RISK/float(r.risk_pct);gross=sum(p["notional"] for p in op)
@@ -26,17 +26,23 @@ def select_exec(g,cap):
 
 def acct(sel,bp):
  if not len(sel):return {}
- z=sel.sort_values(["entry_time","exit_time"]).reset_index(drop=True)
+ z=sel.sort_values(["entry_time","exit_time","symbol"]).reset_index(drop=True)
  ev=[]
- for i,r in z.iterrows():ev.append((int(r.entry_time),1,i));ev.append((int(r.exit_time),0,i))
- ev.sort(key=lambda x:(x[0],x[1]))
+ for i,r in z.iterrows():
+  et=int(r.entry_time);xt=int(r.exit_time)
+  ev.append((et,1,i))
+  # Old positions exiting at this bar are realized before new entries.
+  # Same-bar entry/exit trades must enter first and exit after.
+  ev.append((xt,2 if xt==et else 0,i))
+ ev.sort(key=lambda x:(x[0],x[1],x[2]))
  eq=1.;peak=1.;mdd=0.;openrisk={};pnls=[]
  for ts,typ,i in ev:
-  if typ==0:
+  if typ==1:
+   openrisk[i]=eq*RISK
+  else:
    if i not in openrisk:continue
    rc=openrisk.pop(i);r=z.iloc[i];nr=(float(r.gross_return)-bp/10000.)/float(r.risk_pct)
    pnl=rc*nr;eq+=pnl;pnls.append(pnl);peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak if peak>0 else 0)
-  else:openrisk[i]=eq*RISK
  return {"ret":100*(eq-1),"mdd":100*mdd,"pf":pf(pnls)}
 
 def f(v,d=3):
