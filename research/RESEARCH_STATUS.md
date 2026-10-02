@@ -7,28 +7,22 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V9 actual Actions run36955250542 was created 2026-10-02 02:21:30 UTC on
-research-cross-sectional-leader-v9 at implementation commit
-2e1bb92891c2c480028c075b30afe91275cc0c43. Validation job110676681938 is QUEUED as of
-2026-10-02 02:21:43 UTC; no V9 market outcomes exist yet. Local 232 research
-tests (33 new V9) passed and the actual 8-file-shard synthetic map/reduce/load/
-scan fixture passed. Local chronology smoke lacks numba; the actual Actions
-validate job installs pinned numba and must pass chronology/invariants before
-any DEV map. This is implementation progress, not trading profitability.
+V9 actual Actions run36955250542/code
+2e1bb92891c2c480028c075b30afe91275cc0c43 advanced: validation
+job110676681938 completed SUCCESS. Its actual log proves the frozen256-hash
+contract,232 tests (33 new V9), canonical chronology smoke, canonical invariants
+and the synthetic eight-map global rank/reduce/load/scan path. The validation
+artifact is11206572898,ZIP SHA256
+2dd197573fff23904ea99b34cf7828144eb54a401c5080faaa507caf81741195.
+This validates implementation plumbing only, not market profitability.
 
-Preregistration remains commit53fea7dd385bdd1ec7048f58be23087f5168158a.
-16 entries x 2 holds x 3 exits = 96 fixed policy cells. The workflow preserves
-all8 DEV daily maps/global ranks on a separate rank result branch BEFORE exit
-outcomes; GATE maps/ranks are conditional on frozen DEV selection. Full source
-hashes, official1m inputs, exclusions, all cells, account curves and actual job
-logs are archived even for failed stages. V9 adds an explicit DEV2021/2022/2023
-and GATE2024 account gate; all KST calendar days remain counted. Expected result
-branches/paths are listed in CONTINUATION.json and are not yet claimed to exist.
-
-V8 run36929463082 completed and was audited/rejected: all96 cost-adjusted
-price/R means negative; zero selected policy and zero account replay. Complete
-failure evidence remains in the branches below. The whole-account daily goal
-remains unproved and unmet.
+All eight real DEV prior-midnight rank-map jobs are now QUEUED. No real V9 rank
+rows, canonical exit outcomes, selected policy, account scenario or daily-goal
+result exists yet. Preregistration remains commit
+53fea7dd385bdd1ec7048f58be23087f5168158a;16 entries/96 cells remain fixed.
+Continue the same run, verify all source hashes and map logs, then audit the
+persisted global rank hash before DEV exit scanning. Whole-account daily
++0.7%–2% remains unproved and unmet.
 
 ## Completed failures and durable assets
 - V8 actual run36929463082/codec049138866f628bb2de891b81a77b133de13359d:
@@ -199,3 +193,6 @@ locations in CONTINUATION.json are expected locations, not completed evidence.
 Queue observation 2026-10-02 02:25:11 UTC: V9 validation is queued. Repository
 read-only inventory showed10 in-progress runs and10 queued runs at02:24 UTC;
 this does not establish a quota/capacity cause. Unrelated work is unchanged.
+
+V9 progress 2026-10-02T03:13:39Z: actual validation SUCCESS; eight real DEV rank-map jobs
+queued. No duplicate execution launched and no unrelated workflow changed.
