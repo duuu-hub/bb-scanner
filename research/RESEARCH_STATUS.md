@@ -21,16 +21,18 @@ V12 validation;invalid parser exclusion/V11 outcomes unchanged,no market rerun.
 
 V13 breakout level retest preregistered BEFORE implementation at
 1859c6096948fc851bca09d267ce3642028da838,
-branch research-breakout-level-retest-v13.
-Fixed prior1d/3d channel breakout snapshot followed by closed retest/recovery,
-optional low pullback participation;16entries/96cells. Code
-869fbc6ca98c23880d9d64ffb71a322509b73d3d. Local338 tests19.213s and
-synthetic8-shard CLI PASS; local immutable-copy newline error repaired and saved.
-Actual run36992677948: pinned dependencies installed,validation job110792275453
-in progress; no actual market outcomes observed yet. Existing run only,no duplicate.
-Expected full evidence branch research-breakout-level-retest-v13-evidence-36992677948
-and root research/breakout-level-retest-v13/run-36992677948/complete-evidence.
-V12 raw failure audit preserved on V13 prereg branch.
+branch research-breakout-level-retest-v13;code869fbc6ca98c23880d9d64ffb71a322509b73d3d.
+Prior1d/3d breakout level frozen then closed retest/recovery;16entries/96cells.
+Local338 PASS19.213s;one local terminal-newline immutable copy error repaired and saved.
+Actual run36992677948/validation job110792275453:338 tests PASS26.970s,
+pinned numpy2.3.3/pandas2.3.3/numba0.62.1;canonical chronology/invariants and
+synthetic8 shards PASS. Actual validation log/attestation saved on central research
+branch under research/breakout-level-retest-v13/run-36992677948/observed-validation.
+All8 DEV canonical scan steps active in Actions metadata;no completed market
+ledger/outcome read yet. Expected complete evidence branch
+research-breakout-level-retest-v13-evidence-36992677948 and root
+research/breakout-level-retest-v13/run-36992677948/complete-evidence.
+Monitor existing run,no duplicate. Own lease released after verified handoff.
 Whole-account daily+0.7%-2% remains unmet.
 
 ## Completed failures and durable assets

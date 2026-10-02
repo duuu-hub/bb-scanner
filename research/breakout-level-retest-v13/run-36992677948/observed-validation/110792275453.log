@@ -1,0 +1,780 @@
+﻿2026-10-02T09:56:44.5297921Z Current runner version: '2.337.0'
+2026-10-02T09:56:44.5336225Z ##[group]Runner Image Provisioner
+2026-10-02T09:56:44.5337759Z Hosted Compute Agent
+2026-10-02T09:56:44.5338689Z Version: 20260901.588
+2026-10-02T09:56:44.5339781Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-02T09:56:44.5341138Z Build Date: 2026-09-01T19:56:44Z
+2026-10-02T09:56:44.5342286Z Worker ID: {15ab13c9-95d6-4305-8afb-a94f6e04e4b9}
+2026-10-02T09:56:44.5343944Z Azure Region: eastus
+2026-10-02T09:56:44.5344934Z ##[endgroup]
+2026-10-02T09:56:44.5347416Z ##[group]Operating System
+2026-10-02T09:56:44.5348481Z Ubuntu
+2026-10-02T09:56:44.5349310Z 24.04.5
+2026-10-02T09:56:44.5350261Z LTS
+2026-10-02T09:56:44.5351156Z ##[endgroup]
+2026-10-02T09:56:44.5352555Z ##[group]Runner Image
+2026-10-02T09:56:44.5354023Z Image: ubuntu-24.04
+2026-10-02T09:56:44.5354996Z Version: 20260927.320.1
+2026-10-02T09:56:44.5357383Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-02T09:56:44.5360174Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-02T09:56:44.5361947Z ##[endgroup]
+2026-10-02T09:56:44.5364422Z ##[group]GITHUB_TOKEN Permissions
+2026-10-02T09:56:44.5367762Z Actions: read
+2026-10-02T09:56:44.5368815Z Contents: read
+2026-10-02T09:56:44.5369756Z Metadata: read
+2026-10-02T09:56:44.5370617Z ##[endgroup]
+2026-10-02T09:56:44.5374244Z Secret source: Actions
+2026-10-02T09:56:44.5375823Z Cache mode: write
+2026-10-02T09:56:44.5377391Z Prepare workflow directory
+2026-10-02T09:56:44.6153618Z Prepare all required actions
+2026-10-02T09:56:44.6231153Z Getting action download info
+2026-10-02T09:56:44.8098667Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-02T09:56:44.9073101Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-02T09:56:44.9836398Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-02T09:56:45.1958976Z Complete job name: validate
+2026-10-02T09:56:45.2681405Z ##[group]Run actions/checkout@v4
+2026-10-02T09:56:45.2682342Z with:
+2026-10-02T09:56:45.2682855Z   repository: duuu-hub/bb-scanner
+2026-10-02T09:56:45.2687162Z   token: ***
+2026-10-02T09:56:45.2687601Z   ssh-strict: true
+2026-10-02T09:56:45.2688057Z   ssh-user: git
+2026-10-02T09:56:45.2688500Z   persist-credentials: true
+2026-10-02T09:56:45.2688983Z   clean: true
+2026-10-02T09:56:45.2689428Z   sparse-checkout-cone-mode: true
+2026-10-02T09:56:45.2689954Z   fetch-depth: 1
+2026-10-02T09:56:45.2690385Z   fetch-tags: false
+2026-10-02T09:56:45.2690830Z   show-progress: true
+2026-10-02T09:56:45.2691281Z   lfs: false
+2026-10-02T09:56:45.2691689Z   submodules: false
+2026-10-02T09:56:45.2692132Z   set-safe-directory: true
+2026-10-02T09:56:45.2692642Z   allow-unsafe-pr-checkout: false
+2026-10-02T09:56:45.2693599Z env:
+2026-10-02T09:56:45.2697469Z   GH_TOKEN: ***
+2026-10-02T09:56:45.2697903Z ##[endgroup]
+2026-10-02T09:56:45.3745260Z Syncing repository: duuu-hub/bb-scanner
+2026-10-02T09:56:45.3748208Z ##[group]Getting Git version info
+2026-10-02T09:56:45.3749425Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T09:56:45.3750977Z [command]/usr/bin/git version
+2026-10-02T09:56:45.3844868Z git version 2.55.0
+2026-10-02T09:56:45.3873084Z ##[endgroup]
+2026-10-02T09:56:45.3890704Z Temporarily overriding HOME='/home/runner/work/_temp/4013a970-b470-4d2d-884f-c34cec435eb9' before making global git config changes
+2026-10-02T09:56:45.3892261Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T09:56:45.3897226Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T09:56:45.3955436Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T09:56:45.3959234Z ##[group]Initializing the repository
+2026-10-02T09:56:45.3964426Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T09:56:45.4068734Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-02T09:56:45.4070116Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-02T09:56:45.4071386Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-02T09:56:45.4072122Z hint: call:
+2026-10-02T09:56:45.4072524Z hint:
+2026-10-02T09:56:45.4073057Z hint: 	git config --global init.defaultBranch <name>
+2026-10-02T09:56:45.4074206Z hint:
+2026-10-02T09:56:45.4074811Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-02T09:56:45.4075738Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-02T09:56:45.4076464Z hint:
+2026-10-02T09:56:45.4076878Z hint: 	git branch -m <name>
+2026-10-02T09:56:45.4077351Z hint:
+2026-10-02T09:56:45.4077978Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-02T09:56:45.4080439Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-02T09:56:45.4093188Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-02T09:56:45.4151707Z ##[endgroup]
+2026-10-02T09:56:45.4152621Z ##[group]Disabling automatic garbage collection
+2026-10-02T09:56:45.4157026Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-02T09:56:45.4194917Z ##[endgroup]
+2026-10-02T09:56:45.4195799Z ##[group]Setting up auth
+2026-10-02T09:56:45.4202435Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T09:56:45.4239986Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T09:56:45.4681602Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T09:56:45.4723031Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T09:56:45.4974778Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T09:56:45.5012793Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T09:56:45.5286601Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-02T09:56:45.5341863Z ##[endgroup]
+2026-10-02T09:56:45.5343595Z ##[group]Fetching the repository
+2026-10-02T09:56:45.5354651Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +869fbc6ca98c23880d9d64ffb71a322509b73d3d:refs/remotes/origin/research-breakout-level-retest-v13
+2026-10-02T09:56:46.5048112Z From https://github.com/duuu-hub/bb-scanner
+2026-10-02T09:56:46.5049595Z  * [new ref]         869fbc6ca98c23880d9d64ffb71a322509b73d3d -> origin/research-breakout-level-retest-v13
+2026-10-02T09:56:46.5061879Z ##[endgroup]
+2026-10-02T09:56:46.5063055Z ##[group]Determining the checkout info
+2026-10-02T09:56:46.5084919Z ##[endgroup]
+2026-10-02T09:56:46.5085980Z [command]/usr/bin/git sparse-checkout disable
+2026-10-02T09:56:46.5143730Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-02T09:56:46.5186942Z ##[group]Checking out the ref
+2026-10-02T09:56:46.5192943Z [command]/usr/bin/git checkout --progress --force -B research-breakout-level-retest-v13 refs/remotes/origin/research-breakout-level-retest-v13
+2026-10-02T09:56:46.7448202Z Switched to a new branch 'research-breakout-level-retest-v13'
+2026-10-02T09:56:46.7451071Z branch 'research-breakout-level-retest-v13' set up to track 'origin/research-breakout-level-retest-v13'.
+2026-10-02T09:56:46.7462801Z ##[endgroup]
+2026-10-02T09:56:46.7514265Z [command]/usr/bin/git log -1 --format=%H
+2026-10-02T09:56:46.7542829Z 869fbc6ca98c23880d9d64ffb71a322509b73d3d
+2026-10-02T09:56:46.7916149Z ##[group]Run actions/setup-python@v5
+2026-10-02T09:56:46.7917461Z with:
+2026-10-02T09:56:46.7918431Z   python-version: 3.12
+2026-10-02T09:56:46.7919512Z   check-latest: false
+2026-10-02T09:56:46.7929412Z   token: ***
+2026-10-02T09:56:46.7930451Z   update-environment: true
+2026-10-02T09:56:46.7931592Z   allow-prereleases: false
+2026-10-02T09:56:46.7932717Z   freethreaded: false
+2026-10-02T09:56:46.7933889Z env:
+2026-10-02T09:56:46.7943090Z   GH_TOKEN: ***
+2026-10-02T09:56:46.7944207Z ##[endgroup]
+2026-10-02T09:56:46.9447430Z ##[group]Installed versions
+2026-10-02T09:56:46.9482554Z (node:2280) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T09:56:46.9485613Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T09:56:46.9487985Z Successfully set up CPython (3.12.14)
+2026-10-02T09:56:46.9490825Z ##[endgroup]
+2026-10-02T09:56:46.9697077Z ##[group]Run set -euo pipefail
+2026-10-02T09:56:46.9698343Z [36;1mset -euo pipefail[0m
+2026-10-02T09:56:46.9699629Z [36;1mpip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1[0m
+2026-10-02T09:56:47.0028608Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T09:56:47.0030038Z env:
+2026-10-02T09:56:47.0039470Z   GH_TOKEN: ***
+2026-10-02T09:56:47.0040601Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:56:47.0042300Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T09:56:47.0044138Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:56:47.0045672Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:56:47.0047216Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:56:47.0049016Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T09:56:47.0050323Z ##[endgroup]
+2026-10-02T09:56:48.9155784Z Collecting pandas==2.3.3
+2026-10-02T09:56:48.9699902Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-02T09:56:49.2231615Z Collecting numpy==2.3.3
+2026-10-02T09:56:49.2286223Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-02T09:56:49.3372858Z Collecting numba==0.62.1
+2026-10-02T09:56:49.3424290Z   Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+2026-10-02T09:56:49.3569399Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-02T09:56:49.3605039Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-02T09:56:49.3948888Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-02T09:56:49.3990183Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-02T09:56:49.4158524Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-02T09:56:49.4199020Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-02T09:56:49.4792742Z Collecting llvmlite<0.46,>=0.45.0dev0 (from numba==0.62.1)
+2026-10-02T09:56:49.4840813Z   Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2026-10-02T09:56:49.5016893Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-02T09:56:49.5052874Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-02T09:56:49.5141325Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-02T09:56:49.5973668Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 157.9 MB/s  0:00:00
+2026-10-02T09:56:49.6060934Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-02T09:56:49.6997592Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 180.6 MB/s  0:00:00
+2026-10-02T09:56:49.7044724Z Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.8 MB)
+2026-10-02T09:56:49.7268549Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 181.1 MB/s  0:00:00
+2026-10-02T09:56:49.7318163Z Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (56.3 MB)
+2026-10-02T09:56:50.0020605Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.3/56.3 MB 209.6 MB/s  0:00:00
+2026-10-02T09:56:50.0061214Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-02T09:56:50.0137184Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-02T09:56:50.0229476Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-02T09:56:50.0285902Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-02T09:56:50.3426452Z Installing collected packages: pytz, tzdata, six, numpy, llvmlite, python-dateutil, numba, pandas
+2026-10-02T09:57:01.6712307Z 
+2026-10-02T09:57:01.6736622Z Successfully installed llvmlite-0.45.1 numba-0.62.1 numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-02T09:57:01.7634626Z ##[group]Run set -euo pipefail
+2026-10-02T09:57:01.7634980Z [36;1mset -euo pipefail[0m
+2026-10-02T09:57:01.7635851Z [36;1mpython -m py_compile scripts/breakout_level_retest_v13.py scripts/validate_breakout_retest_v13.py scripts/official_minute_provenance.py scripts/day_edge_canonical.py scripts/research_evidence_archive.py[0m
+2026-10-02T09:57:01.7636836Z [36;1mpython scripts/validate_breakout_retest_v13.py 2>&1 | tee v13-tests.log[0m
+2026-10-02T09:57:01.7637372Z [36;1mpython scripts/psar_chronology_smoke.py 2>&1 | tee chronology-smoke.log[0m
+2026-10-02T09:57:01.7638039Z [36;1mpython scripts/breakout_level_retest_v13.py smoke --out synthetic-v13 2>&1 | tee retest-pipeline-smoke.log[0m
+2026-10-02T09:57:01.7705228Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T09:57:01.7705567Z env:
+2026-10-02T09:57:01.7708318Z   GH_TOKEN: ***
+2026-10-02T09:57:01.7708615Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:01.7709098Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T09:57:01.7709544Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:01.7709944Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:01.7710320Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:01.7710698Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T09:57:01.7711021Z ##[endgroup]
+2026-10-02T09:57:02.0592250Z FROZEN_V13_INPUT_CONTRACT_PASS 256 856
+2026-10-02T09:57:03.0670194Z test_btc_missing_endpoint_is_unavailable (test_breakout_level_retest_v13.FeatureTests.test_btc_missing_endpoint_is_unavailable) ... ok
+2026-10-02T09:57:03.0750793Z test_channel_and_volume_restart_after_gap (test_breakout_level_retest_v13.FeatureTests.test_channel_and_volume_restart_after_gap) ... ok
+2026-10-02T09:57:03.0835432Z test_current_breakout_cannot_change_its_prior_level_baseline_or_atr (test_breakout_level_retest_v13.FeatureTests.test_current_breakout_cannot_change_its_prior_level_baseline_or_atr) ... ok
+2026-10-02T09:57:03.0838854Z test_fixed_grid_and_holds (test_breakout_level_retest_v13.FeatureTests.test_fixed_grid_and_holds) ... ok
+2026-10-02T09:57:03.1026256Z test_future_perturbation_preserves_prefix_features_and_signal (test_breakout_level_retest_v13.FeatureTests.test_future_perturbation_preserves_prefix_features_and_signal) ... ok
+2026-10-02T09:57:03.1071972Z test_independent_prior_channel_quote_and_atr_cutoffs (test_breakout_level_retest_v13.FeatureTests.test_independent_prior_channel_quote_and_atr_cutoffs) ... ok
+2026-10-02T09:57:03.1108076Z test_actual_entry_minute_tp_loses_and_later_chronology_is_honored (test_breakout_level_retest_v13.FillExitTests.test_actual_entry_minute_tp_loses_and_later_chronology_is_honored) ... ok
+2026-10-02T09:57:03.1113721Z test_actual_fill_structural_stop_priority_and_time_cutoffs (test_breakout_level_retest_v13.FillExitTests.test_actual_fill_structural_stop_priority_and_time_cutoffs) ... ok
+2026-10-02T09:57:03.1121917Z test_adverse_fill_is_retained_favourable_catchup_and_wrong_side_are_excluded (test_breakout_level_retest_v13.FillExitTests.test_adverse_fill_is_retained_favourable_catchup_and_wrong_side_are_excluded) ... ok
+2026-10-02T09:57:03.1125543Z test_cooldown_independent_of_exit (test_breakout_level_retest_v13.FillExitTests.test_cooldown_independent_of_exit) ... ok
+2026-10-02T09:57:03.1130184Z test_entry_timestamp_gap_and_split_cutoff (test_breakout_level_retest_v13.FillExitTests.test_entry_timestamp_gap_and_split_cutoff) ... ok
+2026-10-02T09:57:03.1136845Z test_floor_and_maximum_stop_risk_use_actual_fill (test_breakout_level_retest_v13.FillExitTests.test_floor_and_maximum_stop_risk_use_actual_fill) ... ok
+2026-10-02T09:57:03.1145403Z test_missing_minute_and_mismatched_entry_never_fabricate_pnl (test_breakout_level_retest_v13.FillExitTests.test_missing_minute_and_mismatched_entry_never_fabricate_pnl) ... ok
+2026-10-02T09:57:03.1157198Z test_tp_levels_and_independent_fee_funding_math (test_breakout_level_retest_v13.FillExitTests.test_tp_levels_and_independent_fee_funding_math) ... ok
+2026-10-02T09:57:03.4382782Z test_all96_including_zero_and_frozen_selection (test_breakout_level_retest_v13.SelectionSourceTests.test_all96_including_zero_and_frozen_selection) ... V13_RETEST_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "RETEST_S+1_N96_WAIT8_ANY", "side": 1, "window": 96, "wait": 8, "participation": "ANY", "hold": 48, "exit_type": "TP2", "policy": "RETEST_S+1_N96_WAIT8_ANY__H48__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "RETEST_S+1_N96_WAIT8_ANY", "side": 1, "window": 96, "wait": 8, "participation": "ANY", "hold": 48, "exit_type": "TP2", "policy": "RETEST_S+1_N96_WAIT8_ANY__H48__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 1, "rejection_counts": {"N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:03.4418259Z ok
+2026-10-02T09:57:03.7025125Z test_empty_preserves_all96_zero_cells (test_breakout_level_retest_v13.SelectionSourceTests.test_empty_preserves_all96_zero_cells) ... V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:03.7060357Z ok
+2026-10-02T09:57:03.8779909Z test_incomplete_duplicate_or_tampered_shards_fail_closed (test_breakout_level_retest_v13.SelectionSourceTests.test_incomplete_duplicate_or_tampered_shards_fail_closed) ... ok
+2026-10-02T09:57:04.1561597Z test_negative_or_clustered_active_dates_fail (test_breakout_level_retest_v13.SelectionSourceTests.test_negative_or_clustered_active_dates_fail) ... V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:04.4325031Z V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"NET40_R_MEAN_NONPOSITIVE": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_mean_bp_NONPOSITIVE": 95}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:04.7324008Z V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"2021_DATES": 96, "2022_DATES": 96, "2023_DATES": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:04.7342566Z ok
+2026-10-02T09:57:04.7350968Z test_real_frozen_catalogue_has856_and256_hashes (test_breakout_level_retest_v13.SelectionSourceTests.test_real_frozen_catalogue_has856_and256_hashes) ... ok
+2026-10-02T09:57:04.7369540Z test_source_verifier_rejects_market_btc_and_catalogue_changes (test_breakout_level_retest_v13.SelectionSourceTests.test_source_verifier_rejects_market_btc_and_catalogue_changes) ... ok
+2026-10-02T09:57:05.5177026Z test_synthetic_eight_file_shard_pipeline (test_breakout_level_retest_v13.SelectionSourceTests.test_synthetic_eight_file_shard_pipeline) ... V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.5207922Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.5556944Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.5589014Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.5928337Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.5959382Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.6305225Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.6337316Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.6704047Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.6736927Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.7093129Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.7125622Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.7477206Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.7508774Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:05.7853027Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:05.7885403Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:06.0325766Z V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "0510d85000c6b12dfd5904d09e7f5ec044cfefd0641ec95fd82ba1a9640734e3", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:06.0347428Z V13_SYNTHETIC_PIPELINE_PASS {"synthetic_only": true, "scans": 8, "all96_cells_preserved": true, "market_profitability_claim": false}
+2026-10-02T09:57:06.0453740Z ok
+2026-10-02T09:57:06.0464712Z test_breakout_guards_are_checked_before_state_creation (test_breakout_level_retest_v13.SnapshotTests.test_breakout_guards_are_checked_before_state_creation) ... ok
+2026-10-02T09:57:06.0469303Z test_failed_close_cancels_before_retest (test_breakout_level_retest_v13.SnapshotTests.test_failed_close_cancels_before_retest) ... ok
+2026-10-02T09:57:06.0474391Z test_first_retest_consumes_snapshot_and_invalid_fill_cannot_retry (test_breakout_level_retest_v13.SnapshotTests.test_first_retest_consumes_snapshot_and_invalid_fill_cannot_retry) ... ok
+2026-10-02T09:57:06.0479982Z test_lowvolume_arithmetic_mean_excludes_breakout_and_uses_frozen_baseline (test_breakout_level_retest_v13.SnapshotTests.test_lowvolume_arithmetic_mean_excludes_breakout_and_uses_frozen_baseline) ... ok
+2026-10-02T09:57:06.0485388Z test_maximum_wait_is_inclusive_and_expired_snapshot_cannot_signal (test_breakout_level_retest_v13.SnapshotTests.test_maximum_wait_is_inclusive_and_expired_snapshot_cannot_signal) ... ok
+2026-10-02T09:57:06.0490537Z test_mirrored_sides_and_minimum_wait (test_breakout_level_retest_v13.SnapshotTests.test_mirrored_sides_and_minimum_wait) ... ok
+2026-10-02T09:57:06.0502321Z test_retest_touch_recovery_body_clv_and_market_guards (test_breakout_level_retest_v13.SnapshotTests.test_retest_touch_recovery_body_clv_and_market_guards) ... ok
+2026-10-02T09:57:06.0505107Z test_snapshot_ignores_new_breakout_and_keeps_original_level_atr_baseline (test_breakout_level_retest_v13.SnapshotTests.test_snapshot_ignores_new_breakout_and_keeps_original_level_atr_baseline) ... ok
+2026-10-02T09:57:06.0506880Z test_source_gap_clears_snapshot (test_breakout_level_retest_v13.SnapshotTests.test_source_gap_clears_snapshot) ... ok
+2026-10-02T09:57:06.0508779Z test_unknown_participation_fails_closed (test_breakout_level_retest_v13.SnapshotTests.test_unknown_participation_fails_closed) ... ok
+2026-10-02T09:57:06.0517404Z test_canonical_gap_return_not_changed_by_retention (test_taker_absorption_release_v12.FailedOriginalTests.test_canonical_gap_return_not_changed_by_retention) ... ok
+2026-10-02T09:57:06.0530228Z test_malformed_bytes_retained_without_inventing_validity (test_taker_absorption_release_v12.FailedOriginalTests.test_malformed_bytes_retained_without_inventing_validity) ... ok
+2026-10-02T09:57:06.0548577Z test_tamper_failed_zip_and_checksum_rejected_with_bytes_saved (test_taker_absorption_release_v12.FailedOriginalTests.test_tamper_failed_zip_and_checksum_rejected_with_bytes_saved) ... ok
+2026-10-02T09:57:06.0551863Z test_exact_btc_alignment_missing_prior_never_filled (test_taker_absorption_release_v12.FeatureTests.test_exact_btc_alignment_missing_prior_never_filled) ... ok
+2026-10-02T09:57:06.0783242Z test_future_mutation_does_not_change_features_or_existing_intents (test_taker_absorption_release_v12.FeatureTests.test_future_mutation_does_not_change_features_or_existing_intents) ... ok
+2026-10-02T09:57:06.0940564Z test_gap_restarts_setup_and_pre_setup_volume (test_taker_absorption_release_v12.FeatureTests.test_gap_restarts_setup_and_pre_setup_volume) ... ok
+2026-10-02T09:57:06.0948255Z test_grid_sixteen_entries_ninety_six_policies (test_taker_absorption_release_v12.FeatureTests.test_grid_sixteen_entries_ninety_six_policies) ... ok
+2026-10-02T09:57:06.1040162Z test_independent_setup_window_volume_weighting_and_cutoffs (test_taker_absorption_release_v12.FeatureTests.test_independent_setup_window_volume_weighting_and_cutoffs) ... ok
+2026-10-02T09:57:06.1212152Z test_release_bar_cannot_change_its_setup_or_prior_atr (test_taker_absorption_release_v12.FeatureTests.test_release_bar_cannot_change_its_setup_or_prior_atr) ... ok
+2026-10-02T09:57:06.4016833Z test_all96_including_zero_and_frozen_selection (test_taker_absorption_release_v12.SelectionSourceTests.test_all96_including_zero_and_frozen_selection) ... V12_ABSORPTION_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "ABSORB_S+1_W4_Q60_PRICE_ONLY", "side": 1, "window": 4, "share": 0.6, "flow": "PRICE_ONLY", "hold": 16, "exit_type": "TP2", "policy": "ABSORB_S+1_W4_Q60_PRICE_ONLY__H16__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "ABSORB_S+1_W4_Q60_PRICE_ONLY", "side": 1, "window": 4, "share": 0.6, "flow": "PRICE_ONLY", "hold": 16, "exit_type": "TP2", "policy": "ABSORB_S+1_W4_Q60_PRICE_ONLY__H16__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 1, "rejection_counts": {"N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:06.4056901Z ok
+2026-10-02T09:57:06.6639130Z test_empty_preserves_all96_zero_cells (test_taker_absorption_release_v12.SelectionSourceTests.test_empty_preserves_all96_zero_cells) ... V12_ABSORPTION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:06.6673044Z ok
+2026-10-02T09:57:06.8333059Z test_incomplete_duplicate_or_tampered_shards_fail_closed (test_taker_absorption_release_v12.SelectionSourceTests.test_incomplete_duplicate_or_tampered_shards_fail_closed) ... ok
+2026-10-02T09:57:07.1105288Z test_negative_or_clustered_active_dates_fail (test_taker_absorption_release_v12.SelectionSourceTests.test_negative_or_clustered_active_dates_fail) ... V12_ABSORPTION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:07.3920119Z V12_ABSORPTION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"NET40_R_MEAN_NONPOSITIVE": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_mean_bp_NONPOSITIVE": 95}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:07.6861392Z V12_ABSORPTION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"2021_DATES": 96, "2022_DATES": 96, "2023_DATES": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:07.6882129Z ok
+2026-10-02T09:57:07.6890550Z test_real_frozen_catalogue_has856_and256_hashes (test_taker_absorption_release_v12.SelectionSourceTests.test_real_frozen_catalogue_has856_and256_hashes) ... ok
+2026-10-02T09:57:07.6908479Z test_source_verifier_rejects_market_btc_and_catalogue_changes (test_taker_absorption_release_v12.SelectionSourceTests.test_source_verifier_rejects_market_btc_and_catalogue_changes) ... ok
+2026-10-02T09:57:08.4771146Z test_synthetic_eight_file_shard_pipeline (test_taker_absorption_release_v12.SelectionSourceTests.test_synthetic_eight_file_shard_pipeline) ... V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.4806223Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.5242133Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.5275382Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.5722206Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.5753629Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.6202773Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.6235961Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.6692226Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.6724405Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.7181709Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.7213779Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.7654174Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.7688961Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:08.8142443Z V12_ABSORPTION_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:08.8175196Z V12_ABSORPTION_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:09.0622456Z V12_ABSORPTION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "TAKER_ABSORPTION_RELEASE_UNION", "source_context_sha256": "ea3bb8ebc0f2d69fe3efae2e739546eb681cf7ae3f3644f262d63b19f3b667a5", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Executed-flow versus price-response absorption-release experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:09.0646313Z V12_SYNTHETIC_PIPELINE_PASS {"synthetic_only": true, "scans": 8, "all96_cells_preserved": true, "market_profitability_claim": false}
+2026-10-02T09:57:09.0771724Z ok
+2026-10-02T09:57:09.0785720Z test_actual_minute_entry_mismatch_and_gap_are_excluded (test_taker_absorption_release_v12.SignalExitTests.test_actual_minute_entry_mismatch_and_gap_are_excluded) ... ok
+2026-10-02T09:57:09.0815354Z test_actual_one_minute_entry_tp_and_established_collision_order (test_taker_absorption_release_v12.SignalExitTests.test_actual_one_minute_entry_tp_and_established_collision_order) ... ok
+2026-10-02T09:57:09.0828361Z test_authoritative_exclusions_remain_excluded (test_taker_absorption_release_v12.SignalExitTests.test_authoritative_exclusions_remain_excluded) ... ok
+2026-10-02T09:57:09.0840303Z test_both_sides_and_confirmation_modes_release_against_setup_flow (test_taker_absorption_release_v12.SignalExitTests.test_both_sides_and_confirmation_modes_release_against_setup_flow) ... ok
+2026-10-02T09:57:09.0849500Z test_favorable_gap_wrong_side_wide_stop_and_path_exclusions (test_taker_absorption_release_v12.SignalExitTests.test_favorable_gap_wrong_side_wide_stop_and_path_exclusions) ... ok
+2026-10-02T09:57:09.0856368Z test_next_open_structural_stop_actual_risk_and_priority (test_taker_absorption_release_v12.SignalExitTests.test_next_open_structural_stop_actual_risk_and_priority) ... ok
+2026-10-02T09:57:09.0862924Z test_release_current_flow_is_separate_and_optional (test_taker_absorption_release_v12.SignalExitTests.test_release_current_flow_is_separate_and_optional) ... ok
+2026-10-02T09:57:09.0882947Z test_setup_volume_flatness_persistence_and_release_are_required (test_taker_absorption_release_v12.SignalExitTests.test_setup_volume_flatness_persistence_and_release_are_required) ... ok
+2026-10-02T09:57:09.0887870Z test_stop_floor_and_cooldown_independent_of_exit (test_taker_absorption_release_v12.SignalExitTests.test_stop_floor_and_cooldown_independent_of_exit) ... ok
+2026-10-02T09:57:09.0899832Z test_tp_two_three_trail_shared_resolver_and_independent_net (test_taker_absorption_release_v12.SignalExitTests.test_tp_two_three_trail_shared_resolver_and_independent_net) ... ok
+2026-10-02T09:57:09.0997816Z test_breakout_atr_and_prior_flow_exclude_current (test_aggressive_flow_cascade_v11.FeatureTests.test_breakout_atr_and_prior_flow_exclude_current) ... ok
+2026-10-02T09:57:09.1076676Z test_coin_gap_restarts_every_prior_window (test_aggressive_flow_cascade_v11.FeatureTests.test_coin_gap_restarts_every_prior_window) ... ok
+2026-10-02T09:57:09.1079410Z test_exact_btc_alignment_never_interpolates (test_aggressive_flow_cascade_v11.FeatureTests.test_exact_btc_alignment_never_interpolates) ... ok
+2026-10-02T09:57:09.1192568Z test_future_mutation_cannot_change_earlier_features (test_aggressive_flow_cascade_v11.FeatureTests.test_future_mutation_cannot_change_earlier_features) ... ok
+2026-10-02T09:57:09.1198483Z test_grid_is_sixteen_by_two_by_three (test_aggressive_flow_cascade_v11.FeatureTests.test_grid_is_sixteen_by_two_by_three) ... ok
+2026-10-02T09:57:09.4069886Z test_all96_including_zero_and_frozen_selection (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_all96_including_zero_and_frozen_selection) ... V11_CASCADE_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "CASCADE_S+1_T15_B16_CURRENT65", "side": 1, "threshold": 0.015, "lookback": 16, "flow": "CURRENT65", "hold": 8, "exit_type": "TP15", "policy": "CASCADE_S+1_T15_B16_CURRENT65__H8__TP15", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "CASCADE_S+1_T15_B16_CURRENT65", "side": 1, "threshold": 0.015, "lookback": 16, "flow": "CURRENT65", "hold": 8, "exit_type": "TP15", "policy": "CASCADE_S+1_T15_B16_CURRENT65__H8__TP15", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 1, "rejection_counts": {"N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:09.4106044Z ok
+2026-10-02T09:57:09.6628211Z test_empty_preserves_all96_zero_cells (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_empty_preserves_all96_zero_cells) ... V11_CASCADE_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:09.6664971Z ok
+2026-10-02T09:57:09.8226989Z test_incomplete_duplicate_or_tampered_shards_fail_closed (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_incomplete_duplicate_or_tampered_shards_fail_closed) ... ok
+2026-10-02T09:57:10.1114737Z test_negative_or_clustered_active_dates_fail (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_negative_or_clustered_active_dates_fail) ... V11_CASCADE_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:10.3994968Z V11_CASCADE_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"NET40_R_MEAN_NONPOSITIVE": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_mean_bp_NONPOSITIVE": 95}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:10.7201082Z V11_CASCADE_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"2021_DATES": 96, "2022_DATES": 96, "2023_DATES": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:10.7224137Z ok
+2026-10-02T09:57:10.7233542Z test_real_frozen_catalogue_has856_and256_hashes (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_real_frozen_catalogue_has856_and256_hashes) ... ok
+2026-10-02T09:57:10.7252160Z test_source_verifier_rejects_market_btc_and_catalogue_changes (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_source_verifier_rejects_market_btc_and_catalogue_changes) ... ok
+2026-10-02T09:57:11.5083921Z test_synthetic_eight_file_shard_pipeline (test_aggressive_flow_cascade_v11.SelectionSourceTests.test_synthetic_eight_file_shard_pipeline) ... V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.5115643Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.5480560Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.5513260Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.5903291Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.5936208Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.6315816Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.6353816Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.6740875Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.6776169Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.7164816Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.7200128Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.7578147Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.7614464Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:11.7983664Z V11_CASCADE_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:11.8016919Z V11_CASCADE_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:12.0451564Z V11_CASCADE_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "AGGRESSIVE_FLOW_CASCADE_UNION", "source_context_sha256": "50f1fa39150dc60fcba8c3c911010b842b62a96a8e64591ecc53f1a1618e3c8b", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Short-horizon aggressive-flow continuation experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:12.0475596Z V11_SYNTHETIC_PIPELINE_PASS {"synthetic_only": true, "scans": 8, "all96_cells_preserved": true, "market_profitability_claim": false}
+2026-10-02T09:57:12.0551967Z ok
+2026-10-02T09:57:12.0559714Z test_authoritative_exclusion_is_not_invented_loss (test_aggressive_flow_cascade_v11.SignalExitTests.test_authoritative_exclusion_is_not_invented_loss) ... ok
+2026-10-02T09:57:12.0562592Z test_intent_cooldown_is_not_exit_conditioned (test_aggressive_flow_cascade_v11.SignalExitTests.test_intent_cooldown_is_not_exit_conditioned) ... ok
+2026-10-02T09:57:12.0569040Z test_mirrored_current_and_persistent_flow_signals (test_aggressive_flow_cascade_v11.SignalExitTests.test_mirrored_current_and_persistent_flow_signals) ... ok
+2026-10-02T09:57:12.0572957Z test_next_open_gap_actual_fill_stop_and_future_ohlc (test_aggressive_flow_cascade_v11.SignalExitTests.test_next_open_gap_actual_fill_stop_and_future_ohlc) ... ok
+2026-10-02T09:57:12.0577781Z test_persistent_flow_uses_three_prior_bars_and_current_separately (test_aggressive_flow_cascade_v11.SignalExitTests.test_persistent_flow_uses_three_prior_bars_and_current_separately) ... ok
+2026-10-02T09:57:12.0587907Z test_shock_relative_btc_volume_breakout_and_clv_are_hard (test_aggressive_flow_cascade_v11.SignalExitTests.test_shock_relative_btc_volume_breakout_and_clv_are_hard) ... ok
+2026-10-02T09:57:12.0594446Z test_stop_floor_wide_invalid_and_path_gap_counted (test_aggressive_flow_cascade_v11.SignalExitTests.test_stop_floor_wide_invalid_and_path_gap_counted) ... ok
+2026-10-02T09:57:12.0604803Z test_tp15_tp25_and_trail_use_shared_resolver (test_aggressive_flow_cascade_v11.SignalExitTests.test_tp15_tp25_and_trail_use_shared_resolver) ... ok
+2026-10-02T09:57:12.0611724Z test_actual_fill_gap_ignores_future_entry_bar_ohlc (test_residual_reversion_v10.EntryExitTests.test_actual_fill_gap_ignores_future_entry_bar_ohlc) ... ok
+2026-10-02T09:57:12.0615444Z test_actual_fill_risk_fit_cutoff_and_equilibrium_are_frozen (test_residual_reversion_v10.EntryExitTests.test_actual_fill_risk_fit_cutoff_and_equilibrium_are_frozen) ... ok
+2026-10-02T09:57:12.0620458Z test_authoritative_exclusion_is_not_a_guessed_loss (test_residual_reversion_v10.EntryExitTests.test_authoritative_exclusion_is_not_a_guessed_loss) ... ok
+2026-10-02T09:57:12.0626949Z test_common_shock_or_missing_btc_is_rejected (test_residual_reversion_v10.EntryExitTests.test_common_shock_or_missing_btc_is_rejected) ... ok
+2026-10-02T09:57:12.0630428Z test_cooldown_depends_on_intents_not_future_exits (test_residual_reversion_v10.EntryExitTests.test_cooldown_depends_on_intents_not_future_exits) ... ok
+2026-10-02T09:57:12.0636041Z test_flow_filter_and_price_only (test_residual_reversion_v10.EntryExitTests.test_flow_filter_and_price_only) ... ok
+2026-10-02T09:57:12.0641077Z test_full_grid_is_sixteen_by_two_by_three (test_residual_reversion_v10.EntryExitTests.test_full_grid_is_sixteen_by_two_by_three) ... ok
+2026-10-02T09:57:12.0655128Z test_mean_and_tp2_use_explicit_shared_fixed_target_path (test_residual_reversion_v10.EntryExitTests.test_mean_and_tp2_use_explicit_shared_fixed_target_path) ... ok
+2026-10-02T09:57:12.0662290Z test_mirrored_residual_inward_confirmations (test_residual_reversion_v10.EntryExitTests.test_mirrored_residual_inward_confirmations) ... ok
+2026-10-02T09:57:12.0667226Z test_next_open_path_and_split_bounds (test_residual_reversion_v10.EntryExitTests.test_next_open_path_and_split_bounds) ... ok
+2026-10-02T09:57:12.0687339Z test_quality_room_deviation_and_relaxation_are_hard_conditions (test_residual_reversion_v10.EntryExitTests.test_quality_room_deviation_and_relaxation_are_hard_conditions) ... ok
+2026-10-02T09:57:12.0696495Z test_stop_floor_maximum_invalid_atr_and_target_passed_are_counted (test_residual_reversion_v10.EntryExitTests.test_stop_floor_maximum_invalid_atr_and_target_passed_are_counted) ... ok
+2026-10-02T09:57:12.0944941Z test_beta_intercept_sigma_r2_rho_half_life_against_direct_window (test_residual_reversion_v10.PriorModelTests.test_beta_intercept_sigma_r2_rho_half_life_against_direct_window) ... ok
+2026-10-02T09:57:12.1280196Z test_coin_gap_restarts_the_full_prior_window (test_residual_reversion_v10.PriorModelTests.test_coin_gap_restarts_the_full_prior_window) ... ok
+2026-10-02T09:57:12.1643056Z test_current_coin_and_btc_do_not_enter_training_moments (test_residual_reversion_v10.PriorModelTests.test_current_coin_and_btc_do_not_enter_training_moments) ... ok
+2026-10-02T09:57:12.1814276Z test_current_turnover_atr_and_observed_days_are_causal (test_residual_reversion_v10.PriorModelTests.test_current_turnover_atr_and_observed_days_are_causal) ... ok
+2026-10-02T09:57:12.1816629Z test_exact_alignment_never_interpolates_missing_or_future_btc (test_residual_reversion_v10.PriorModelTests.test_exact_alignment_never_interpolates_missing_or_future_btc) ... ok
+2026-10-02T09:57:12.2221890Z test_future_mutation_cannot_change_earlier_any_model_value (test_residual_reversion_v10.PriorModelTests.test_future_mutation_cannot_change_earlier_any_model_value) ... ok
+2026-10-02T09:57:12.2463262Z test_inward_change_uses_same_frozen_model_for_both_closes (test_residual_reversion_v10.PriorModelTests.test_inward_change_uses_same_frozen_model_for_both_closes) ... ok
+2026-10-02T09:57:12.2706500Z test_missing_btc_invalidates_every_contaminated_training_window (test_residual_reversion_v10.PriorModelTests.test_missing_btc_invalidates_every_contaminated_training_window) ... ok
+2026-10-02T09:57:12.3195024Z test_zero_factor_and_residual_variance_fail_closed (test_residual_reversion_v10.PriorModelTests.test_zero_factor_and_residual_variance_fail_closed) ... ok
+2026-10-02T09:57:13.1259941Z test_actual_synthetic_file_scan_and_selection_pipeline (test_residual_reversion_v10.SelectionSourceTests.test_actual_synthetic_file_scan_and_selection_pipeline) ... V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.1291282Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.1783321Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.1815916Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.2310809Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.2346800Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.2845235Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.2878599Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.3371744Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.3404011Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.3895500Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.3931307Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.4429514Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.4462237Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.4961331Z V10_RESIDUAL_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:13.4994627Z V10_RESIDUAL_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:13.7427830Z V10_RESIDUAL_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "70d175b6463aa8ed45955a0e14a086656b12b22f8d98eae76e6e9509fed44203", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:13.7446518Z V10_SYNTHETIC_PIPELINE_PASS {"synthetic_only": true, "scans": 8, "all96_cells_preserved": true, "market_profitability_claim": false}
+2026-10-02T09:57:13.7517388Z ok
+2026-10-02T09:57:13.7519783Z test_annual_price_R_and_2021_partial_year_are_required (test_residual_reversion_v10.SelectionSourceTests.test_annual_price_R_and_2021_partial_year_are_required) ... ok
+2026-10-02T09:57:14.0245277Z test_empty_stage_is_recorded_as_all96_zero_cells (test_residual_reversion_v10.SelectionSourceTests.test_empty_stage_is_recorded_as_all96_zero_cells) ... V10_RESIDUAL_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:14.0280321Z ok
+2026-10-02T09:57:14.3072900Z test_freeze_complete_selection_and_all96_including_zero_cells (test_residual_reversion_v10.SelectionSourceTests.test_freeze_complete_selection_and_all96_including_zero_cells) ... V10_RESIDUAL_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "RESIDUAL_S+1_W672_Z2_PRICE_ONLY", "side": 1, "fit": 672, "z": 2, "flow": "PRICE_ONLY", "hold": 24, "exit_type": "MEAN", "policy": "RESIDUAL_S+1_W672_Z2_PRICE_ONLY__H24__MEAN", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "RESIDUAL_S+1_W672_Z2_PRICE_ONLY", "side": 1, "fit": 672, "z": 2, "flow": "PRICE_ONLY", "hold": 24, "exit_type": "MEAN", "policy": "RESIDUAL_S+1_W672_Z2_PRICE_ONLY__H24__MEAN", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 1, "rejection_counts": {"N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:14.3113812Z ok
+2026-10-02T09:57:14.4973106Z test_incomplete_duplicate_or_tampered_shard_fails_closed (test_residual_reversion_v10.SelectionSourceTests.test_incomplete_duplicate_or_tampered_shard_fails_closed) ... ok
+2026-10-02T09:57:14.7729264Z test_nonpositive_price_r_or_clustered_dates_fail_selection (test_residual_reversion_v10.SelectionSourceTests.test_nonpositive_price_r_or_clustered_dates_fail_selection) ... V10_RESIDUAL_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:15.0495795Z V10_RESIDUAL_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"NET40_R_MEAN_NONPOSITIVE": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_mean_bp_NONPOSITIVE": 95}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:15.3277277Z V10_RESIDUAL_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "RESIDUAL_REVERSION_UNION", "source_context_sha256": "91835c8f0b86a06046841c757e76202fc5e0b602e5b17bc471966e49ab762c95", "source_symbols": 16, "economic_surviving_cells": 0, "rejection_counts": {"2021_DATES": 96, "2022_DATES": 96, "2023_DATES": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Prior-fitted single-coin residual experiment, no market neutrality. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:15.3295914Z ok
+2026-10-02T09:57:15.3304939Z test_real_catalogue_contract_has856_hashes_and256_baseline_matches (test_residual_reversion_v10.SelectionSourceTests.test_real_catalogue_contract_has856_hashes_and256_baseline_matches) ... ok
+2026-10-02T09:57:15.3321997Z test_source_verifier_rejects_hash_btc_and_catalogue_tampering (test_residual_reversion_v10.SelectionSourceTests.test_source_verifier_rejects_hash_btc_and_catalogue_tampering) ... ok
+2026-10-02T09:57:15.3366910Z test_both_partial_edge_days_and_all_empty_days_count (test_btc_factor_lag_v6.AllCalendarTests.test_both_partial_edge_days_and_all_empty_days_count) ... ok
+2026-10-02T09:57:15.3422640Z test_edge_day_profits_and_costs_are_retained_and_reconcile_final_equity (test_btc_factor_lag_v6.AllCalendarTests.test_edge_day_profits_and_costs_are_retained_and_reconcile_final_equity) ... ok
+2026-10-02T09:57:15.3476467Z test_every_day_after_permanent_halt_remains_in_denominator (test_btc_factor_lag_v6.AllCalendarTests.test_every_day_after_permanent_halt_remains_in_denominator) ... ok
+2026-10-02T09:57:15.3500098Z test_exact_kst_midnight_end_adds_no_zero_duration_date (test_btc_factor_lag_v6.AllCalendarTests.test_exact_kst_midnight_end_adds_no_zero_duration_date) ... ok
+2026-10-02T09:57:15.3615524Z test_reporting_option_does_not_change_trades_cash_dd_risks_or_curve (test_btc_factor_lag_v6.AllCalendarTests.test_reporting_option_does_not_change_trades_cash_dd_risks_or_curve) ... ok
+2026-10-02T09:57:15.3736882Z test_coin_gap_restarts_full_fit_history (test_btc_factor_lag_v6.FactorTimingTests.test_coin_gap_restarts_full_fit_history) ... ok
+2026-10-02T09:57:15.3835447Z test_current_volatility_and_turnover_are_excluded_from_prior_baselines (test_btc_factor_lag_v6.FactorTimingTests.test_current_volatility_and_turnover_are_excluded_from_prior_baselines) ... ok
+2026-10-02T09:57:15.3838155Z test_exact_timestamp_alignment_does_not_forward_fill_btc (test_btc_factor_lag_v6.FactorTimingTests.test_exact_timestamp_alignment_does_not_forward_fill_btc) ... ok
+2026-10-02T09:57:15.3960749Z test_future_price_perturbation_does_not_change_features_or_fits (test_btc_factor_lag_v6.FactorTimingTests.test_future_price_perturbation_does_not_change_features_or_fits) ... ok
+2026-10-02T09:57:15.4053899Z test_impulse_returns_do_not_enter_prior_fit (test_btc_factor_lag_v6.FactorTimingTests.test_impulse_returns_do_not_enter_prior_fit) ... ok
+2026-10-02T09:57:15.4117435Z test_missing_btc_return_invalidates_all_contaminated_windows (test_btc_factor_lag_v6.FactorTimingTests.test_missing_btc_return_invalidates_all_contaminated_windows) ... ok
+2026-10-02T09:57:15.4180935Z test_ols_beta_and_r2_match_demeaned_numpy_reference (test_btc_factor_lag_v6.FactorTimingTests.test_ols_beta_and_r2_match_demeaned_numpy_reference) ... ok
+2026-10-02T09:57:15.4243846Z test_zero_factor_variance_never_becomes_a_signal (test_btc_factor_lag_v6.FactorTimingTests.test_zero_factor_variance_never_becomes_a_signal) ... ok
+2026-10-02T09:57:15.4247333Z test_actual_fill_sets_stop_risk_and_signal_priority (test_btc_factor_lag_v6.LagSignalTests.test_actual_fill_sets_stop_risk_and_signal_priority) ... ok
+2026-10-02T09:57:15.4252893Z test_canonical_exclusion_is_retained_not_assigned_a_fake_loss (test_btc_factor_lag_v6.LagSignalTests.test_canonical_exclusion_is_retained_not_assigned_a_fake_loss) ... ok
+2026-10-02T09:57:15.4255965Z test_cooldown_is_intent_based_not_future_exit_based (test_btc_factor_lag_v6.LagSignalTests.test_cooldown_is_intent_based_not_future_exit_based) ... ok
+2026-10-02T09:57:15.4261366Z test_entry_gap_uses_next_open_without_future_ohlc (test_btc_factor_lag_v6.LagSignalTests.test_entry_gap_uses_next_open_without_future_ohlc) ... ok
+2026-10-02T09:57:15.4270961Z test_fit_quality_and_liquidity_are_hard_filters (test_btc_factor_lag_v6.LagSignalTests.test_fit_quality_and_liquidity_are_hard_filters) ... ok
+2026-10-02T09:57:15.4275418Z test_flow_confirmation_rejects_opposite_taker_pressure (test_btc_factor_lag_v6.LagSignalTests.test_flow_confirmation_rejects_opposite_taker_pressure) ... ok
+2026-10-02T09:57:15.4281064Z test_mirrored_lag_price_and_flow_confirmations (test_btc_factor_lag_v6.LagSignalTests.test_mirrored_lag_price_and_flow_confirmations) ... ok
+2026-10-02T09:57:15.4284773Z test_next_open_path_gap_and_split_entry_are_excluded (test_btc_factor_lag_v6.LagSignalTests.test_next_open_path_gap_and_split_entry_are_excluded) ... ok
+2026-10-02T09:57:15.4286873Z test_overreacted_coin_cannot_qualify_as_lagger (test_btc_factor_lag_v6.LagSignalTests.test_overreacted_coin_cannot_qualify_as_lagger) ... ok
+2026-10-02T09:57:15.4292244Z test_policy_rows_uses_same_canonical_resolver_and_actual_tp_risk (test_btc_factor_lag_v6.LagSignalTests.test_policy_rows_uses_same_canonical_resolver_and_actual_tp_risk) ... ok
+2026-10-02T09:57:15.4296997Z test_sixteen_entries_and_ninety_six_unique_policies (test_btc_factor_lag_v6.LagSignalTests.test_sixteen_entries_and_ninety_six_unique_policies) ... ok
+2026-10-02T09:57:15.4300304Z test_stop_floor_and_maximum_are_applied_to_actual_fill (test_btc_factor_lag_v6.LagSignalTests.test_stop_floor_and_maximum_are_applied_to_actual_fill) ... ok
+2026-10-02T09:57:15.4306347Z test_weak_wrong_or_missing_btc_impulse_is_rejected (test_btc_factor_lag_v6.LagSignalTests.test_weak_wrong_or_missing_btc_impulse_is_rejected) ... ok
+2026-10-02T09:57:15.6854439Z test_clustered_entries_do_not_satisfy_yearly_date_frequency (test_btc_factor_lag_v6.SelectionTests.test_clustered_entries_do_not_satisfy_yearly_date_frequency) ... FACTOR_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:15.6871532Z ok
+2026-10-02T09:57:15.9288777Z test_empty_original_shards_preserve_all96_rejections (test_btc_factor_lag_v6.SelectionTests.test_empty_original_shards_preserve_all96_rejections) ... FACTOR_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:15.9320055Z ok
+2026-10-02T09:57:16.1882966Z test_positive_price_never_hides_negative_annual_r_mean (test_btc_factor_lag_v6.SelectionTests.test_positive_price_never_hides_negative_annual_r_mean) ... FACTOR_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:16.1901042Z ok
+2026-10-02T09:57:16.4658563Z test_positive_r_never_hides_negative_annual_price_mean (test_btc_factor_lag_v6.SelectionTests.test_positive_r_never_hides_negative_annual_price_mean) ... FACTOR_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:16.4676873Z ok
+2026-10-02T09:57:16.7232051Z test_selected_year_labels_follow_kst_not_utc_and_other_cells_remain (test_btc_factor_lag_v6.SelectionTests.test_selected_year_labels_follow_kst_not_utc_and_other_cells_remain) ... FACTOR_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "FACTOR_S+1_L4_G1_PRICE_ONLY", "side": 1, "horizon": 4, "gap": 0.01, "flow": "PRICE_ONLY", "hold": 24, "exit_type": "TP2", "policy": "FACTOR_S+1_L4_G1_PRICE_ONLY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "FACTOR_S+1_L4_G1_PRICE_ONLY", "side": 1, "horizon": 4, "gap": 0.01, "flow": "PRICE_ONLY", "hold": 24, "exit_type": "TP2", "policy": "FACTOR_S+1_L4_G1_PRICE_ONLY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "FACTOR_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:16.7267417Z ok
+2026-10-02T09:57:16.9682333Z test_all_96_cells_including_zero_cells_are_preserved (test_compression_expansion_v4.ExpansionTests.test_all_96_cells_including_zero_cells_are_preserved) ... EXPANSION_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "EXPAND_S+1_W16_C50_ANY", "side": 1, "window": 16, "compression": 0.5, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "EXPAND_S+1_W16_C50_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "EXPAND_S+1_W16_C50_ANY", "side": 1, "window": 16, "compression": 0.5, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "EXPAND_S+1_W16_C50_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "EXPANSION_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:16.9715369Z ok
+2026-10-02T09:57:16.9792361Z test_breakout_candle_cannot_change_its_prior_baselines (test_compression_expansion_v4.ExpansionTests.test_breakout_candle_cannot_change_its_prior_baselines) ... ok
+2026-10-02T09:57:16.9830608Z test_btc_alignment_does_not_fill_missing_context_with_zero (test_compression_expansion_v4.ExpansionTests.test_btc_alignment_does_not_fill_missing_context_with_zero) ... ok
+2026-10-02T09:57:16.9835483Z test_empty_source_fails_before_any_btc_or_minute_fetch (test_compression_expansion_v4.ExpansionTests.test_empty_source_fails_before_any_btc_or_minute_fetch) ... ok
+2026-10-02T09:57:16.9876608Z test_fixed_cooldown_is_not_exit_conditioned (test_compression_expansion_v4.ExpansionTests.test_fixed_cooldown_is_not_exit_conditioned) ... ok
+2026-10-02T09:57:16.9880872Z test_frozen_grid_has_96_unique_policies (test_compression_expansion_v4.ExpansionTests.test_frozen_grid_has_96_unique_policies) ... ok
+2026-10-02T09:57:16.9993567Z test_future_changes_cannot_modify_past_features (test_compression_expansion_v4.ExpansionTests.test_future_changes_cannot_modify_past_features) ... ok
+2026-10-02T09:57:17.0061397Z test_gap_restarts_prior_rolling_baselines (test_compression_expansion_v4.ExpansionTests.test_gap_restarts_prior_rolling_baselines) ... ok
+2026-10-02T09:57:17.0229778Z test_incomplete_part_cannot_enter_selection (test_compression_expansion_v4.ExpansionTests.test_incomplete_part_cannot_enter_selection) ... ok
+2026-10-02T09:57:17.0271994Z test_invalid_fill_side_stop_is_excluded (test_compression_expansion_v4.ExpansionTests.test_invalid_fill_side_stop_is_excluded) ... ok
+2026-10-02T09:57:17.0347373Z test_long_and_short_have_mirrored_qualification (test_compression_expansion_v4.ExpansionTests.test_long_and_short_have_mirrored_qualification) ... ok
+2026-10-02T09:57:17.2736373Z test_many_clustered_trades_cannot_pass_daily_frequency_gate (test_compression_expansion_v4.ExpansionTests.test_many_clustered_trades_cannot_pass_daily_frequency_gate) ... EXPANSION_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "EXPANSION_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:17.2754295Z ok
+2026-10-02T09:57:17.2797995Z test_structural_stop_uses_prior_atr_and_actual_entry (test_compression_expansion_v4.ExpansionTests.test_structural_stop_uses_prior_atr_and_actual_entry) ... ok
+2026-10-02T09:57:17.2837187Z test_violent_shock_does_not_qualify_as_moderate_expansion (test_compression_expansion_v4.ExpansionTests.test_violent_shock_does_not_qualify_as_moderate_expansion) ... ok
+2026-10-02T09:57:17.2874596Z test_volume_without_prior_compression_does_not_qualify (test_compression_expansion_v4.ExpansionTests.test_volume_without_prior_compression_does_not_qualify) ... ok
+2026-10-02T09:57:17.2948403Z test_wrong_flow_rejects_apparent_breakout (test_compression_expansion_v4.ExpansionTests.test_wrong_flow_rejects_apparent_breakout) ... ok
+2026-10-02T09:57:17.3010792Z test_chronology_exclusions_require_review_even_if_growth_passes (test_cross_sectional_leader_v9.AccountGateTests.test_chronology_exclusions_require_review_even_if_growth_passes) ... ok
+2026-10-02T09:57:17.3067319Z test_dev2024_partial_boundary_never_substitutes_gate2024 (test_cross_sectional_leader_v9.AccountGateTests.test_dev2024_partial_boundary_never_substitutes_gate2024) ... ok
+2026-10-02T09:57:17.3454791Z test_each_account_threshold_halt_and_missing_values_fail (test_cross_sectional_leader_v9.AccountGateTests.test_each_account_threshold_halt_and_missing_values_fail) ... ok
+2026-10-02T09:57:17.3558964Z test_partial2021_is_required_and_small_return_is_not_daily_goal (test_cross_sectional_leader_v9.AccountGateTests.test_partial2021_is_required_and_small_return_is_not_daily_goal) ... ok
+2026-10-02T09:57:17.3645484Z test_actual_next_open_risk_floor_gap_and_wide_stop (test_cross_sectional_leader_v9.EconomicTests.test_actual_next_open_risk_floor_gap_and_wide_stop) ... ok
+2026-10-02T09:57:17.3788335Z test_adverse_gap_retained_and_entry_path_gap_excluded (test_cross_sectional_leader_v9.EconomicTests.test_adverse_gap_retained_and_entry_path_gap_excluded) ... ok
+2026-10-02T09:57:17.3926792Z test_any_never_zero_imputes_missing_btc_and_align_requires_sign (test_cross_sectional_leader_v9.EconomicTests.test_any_never_zero_imputes_missing_btc_and_align_requires_sign) ... ok
+2026-10-02T09:57:17.4001627Z test_canonical_tp3_and_minute_exclusion_and_costs (test_cross_sectional_leader_v9.EconomicTests.test_canonical_tp3_and_minute_exclusion_and_costs) ... ok
+2026-10-02T09:57:17.4073954Z test_ceiling_tail_count_is_predeclared (test_cross_sectional_leader_v9.EconomicTests.test_ceiling_tail_count_is_predeclared) ... ok
+2026-10-02T09:57:17.4133203Z test_closed_baseline_does_not_include_current_or_future_bars (test_cross_sectional_leader_v9.EconomicTests.test_closed_baseline_does_not_include_current_or_future_bars) ... ok
+2026-10-02T09:57:17.4204320Z test_future_ohlc_does_not_change_intents_or_priority (test_cross_sectional_leader_v9.EconomicTests.test_future_ohlc_does_not_change_intents_or_priority) ... ok
+2026-10-02T09:57:17.4476219Z test_mirrored_tail_and_resumption (test_cross_sectional_leader_v9.EconomicTests.test_mirrored_tail_and_resumption) ... ok
+2026-10-02T09:57:17.4546221Z test_onset_is_contiguous_and_cooldown_ignores_future_exits (test_cross_sectional_leader_v9.EconomicTests.test_onset_is_contiguous_and_cooldown_ignores_future_exits) ... ok
+2026-10-02T09:57:17.5164955Z test_residual_volume_flow_return_eligibility_and_breakout_filters (test_cross_sectional_leader_v9.EconomicTests.test_residual_volume_flow_return_eligibility_and_breakout_filters) ... ok
+2026-10-02T09:57:17.5240354Z test_second_day_requires_consecutive_previous_tail (test_cross_sectional_leader_v9.EconomicTests.test_second_day_requires_consecutive_previous_tail) ... ok
+2026-10-02T09:57:17.5245289Z test_sixteen_entries_and_ninety_six_policies (test_cross_sectional_leader_v9.EconomicTests.test_sixteen_entries_and_ninety_six_policies) ... ok
+2026-10-02T09:57:17.5322251Z test_sl_applies_adverse_slip_and_full_cost_inclusive_r (test_cross_sectional_leader_v9.EconomicTests.test_sl_applies_adverse_slip_and_full_cost_inclusive_r) ... ok
+2026-10-02T09:57:17.5399171Z test_absent_symbol_previous_date_or_stale_rank_never_backfilled (test_cross_sectional_leader_v9.RankTests.test_absent_symbol_previous_date_or_stale_rank_never_backfilled) ... ok
+2026-10-02T09:57:20.9092234Z test_actual_file_map_reduce_load_and_scan_synthetic_pipeline (test_cross_sectional_leader_v9.RankTests.test_actual_file_map_reduce_load_and_scan_synthetic_pipeline) ... V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:20.9113694Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:20.9883012Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:20.9904571Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.0671869Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.0694546Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.1458871Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.1481052Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.2271790Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.2293654Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.3071567Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.3094348Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.3891467Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.3914131Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.4699199Z V9_RANK_MAP DEV 4 / 4 rows 20
+2026-10-02T09:57:21.4721925Z V9_RANK_MAP_DONE DEV 20 source_files 4
+2026-10-02T09:57:21.5105467Z V9_RANK_REDUCE_DONE DEV {"map_rows": 160, "rank_rows": 160, "ranked_dates": 5, "minimum_universe": 30, "rank_data_sha256": "cff23a9b4629ff05a471858c7e5e777c3eee518373e7fcf262efe202e066e246"} excluded_low_universe_dates 0
+2026-10-02T09:57:21.6205514Z V9_LEADER_SCAN DEV 4 / 4 parameterized_outcomes 0
+2026-10-02T09:57:21.6238640Z V9_LEADER_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:21.6263183Z V9_RANK_MAP_REDUCE_SMOKE_PASS {"status": "PASS", "synthetic_only": true, "map_rows": 160, "rank_rows": 160, "symbols": 32, "maps": 8, "scan_complete": true, "availability_checks": 3, "reverse_input_order": "PASS", "market_profitability_claim": false}
+2026-10-02T09:57:21.6311039Z ok
+2026-10-02T09:57:21.6364702Z test_coin_gap_breaks_exact24h_snapshot (test_cross_sectional_leader_v9.RankTests.test_coin_gap_breaks_exact24h_snapshot) ... ok
+2026-10-02T09:57:21.6848889Z test_eight_shard_reducer_and_verified_loader_round_trip (test_cross_sectional_leader_v9.RankTests.test_eight_shard_reducer_and_verified_loader_round_trip) ... V9_RANK_REDUCE_DONE DEV {"map_rows": 64, "rank_rows": 64, "ranked_dates": 2, "minimum_universe": 30, "rank_data_sha256": "08e45578ae99612f7d0aeeb228a86ffa3f584ab6d539b333d8a34276e01959c9"} excluded_low_universe_dates 0
+2026-10-02T09:57:21.6975937Z ok
+2026-10-02T09:57:21.7048742Z test_exact_midnight_and_one_closed_next_day_bar (test_cross_sectional_leader_v9.RankTests.test_exact_midnight_and_one_closed_next_day_bar) ... ok
+2026-10-02T09:57:21.7113211Z test_full24h_snapshots_are_causal_and_missing_btc_is_excluded (test_cross_sectional_leader_v9.RankTests.test_full24h_snapshots_are_causal_and_missing_btc_is_excluded) ... ok
+2026-10-02T09:57:21.7244836Z test_global_rank_is_independent_of_shard_order_and_ties (test_cross_sectional_leader_v9.RankTests.test_global_rank_is_independent_of_shard_order_and_ties) ... ok
+2026-10-02T09:57:21.7417973Z test_invalid_duplicate_nonfinite_path_or_low_turnover_fails (test_cross_sectional_leader_v9.RankTests.test_invalid_duplicate_nonfinite_path_or_low_turnover_fails) ... ok
+2026-10-02T09:57:21.7538169Z test_minimum_universe_excluded_and_recorded (test_cross_sectional_leader_v9.RankTests.test_minimum_universe_excluded_and_recorded) ... ok
+2026-10-02T09:57:21.8716547Z test_missing_shard_altered_hash_or_context_fails_reducer (test_cross_sectional_leader_v9.RankTests.test_missing_shard_altered_hash_or_context_fails_reducer) ... ok
+2026-10-02T09:57:21.8719202Z test_observed_days_counts_source_dates_not_future_or_missing_dates (test_cross_sectional_leader_v9.RankTests.test_observed_days_counts_source_dates_not_future_or_missing_dates) ... ok
+2026-10-02T09:57:21.9198581Z test_rank_hash_and_rank_geometry_corruption_fail_closed (test_cross_sectional_leader_v9.RankTests.test_rank_hash_and_rank_geometry_corruption_fail_closed) ... V9_RANK_REDUCE_DONE DEV {"map_rows": 64, "rank_rows": 64, "ranked_dates": 2, "minimum_universe": 30, "rank_data_sha256": "08e45578ae99612f7d0aeeb228a86ffa3f584ab6d539b333d8a34276e01959c9"} excluded_low_universe_dates 0
+2026-10-02T09:57:21.9343873Z ok
+2026-10-02T09:57:22.2049285Z test_all96_cells_selection_and_union_are_preserved (test_cross_sectional_leader_v9.SelectionTests.test_all96_cells_selection_and_union_are_preserved) ... V9_LEADER_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "LEADER_S+1_T5_D1_ANY", "side": 1, "tail": 5, "persistence": 1, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "LEADER_S+1_T5_D1_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "LEADER_S+1_T5_D1_ANY", "side": 1, "tail": 5, "persistence": 1, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "LEADER_S+1_T5_D1_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 1, "rejection_counts": {"N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:22.2093309Z ok
+2026-10-02T09:57:22.4780814Z test_each_year_price_r_and_active_date_frequency_are_hard_gates (test_cross_sectional_leader_v9.SelectionTests.test_each_year_price_r_and_active_date_frequency_are_hard_gates) ... V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2021_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:22.7441167Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2021_net40_R_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:23.0120777Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2022_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:23.2843251Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2022_net40_R_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:23.5685685Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2023_net40_mean_bp_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:23.8377709Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2023_net40_R_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_DATES": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_DATES": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_DATES": 95, "2023_net40_mean_bp_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:24.1074415Z V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"2021_DATES": 96, "2022_DATES": 96, "2023_DATES": 96, "N_LT_300": 95, "SYMBOLS_LT_10": 95, "TOP_SYMBOL_GT_30PCT": 95, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 95, "2021_N": 95, "2021_net40_R_NONPOSITIVE": 95, "2021_net40_mean_bp_NONPOSITIVE": 95, "2021_day_R_NONPOSITIVE": 95, "2022_N": 95, "2022_net40_R_NONPOSITIVE": 95, "2022_net40_mean_bp_NONPOSITIVE": 95, "2022_day_R_NONPOSITIVE": 95, "2023_N": 95, "2023_net40_R_NONPOSITIVE": 95, "2023_net40_mean_bp_NONPOSITIVE": 95, "2023_day_R_NONPOSITIVE": 95}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:24.1090848Z ok
+2026-10-02T09:57:24.3588551Z test_empty_cells_still_count96_and_do_not_select (test_cross_sectional_leader_v9.SelectionTests.test_empty_cells_still_count96_and_do_not_select) ... V9_LEADER_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "CROSS_SECTIONAL_LEADER_UNION", "rank_manifest_sha256": "300a54f20d8143e3db53309df0f4e794904a32ab152168953851353dcd2ab5ae", "rank_data_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Overlapping parameterized outcomes and active-date means are diagnostics, not executable account profits."}
+2026-10-02T09:57:24.3621418Z ok
+2026-10-02T09:57:24.4266450Z test_incomplete_duplicate_shard_or_modified_ledger_fails (test_cross_sectional_leader_v9.SelectionTests.test_incomplete_duplicate_shard_or_modified_ledger_fails) ... ok
+2026-10-02T09:57:24.4275662Z test_actual_max_hold_used_in_stop_risk_budget (test_day_edge_canonical.CanonicalTests.test_actual_max_hold_used_in_stop_risk_budget) ... ok
+2026-10-02T09:57:24.4276992Z test_authoritative_mismatch_is_not_a_fake_loss (test_day_edge_canonical.CanonicalTests.test_authoritative_mismatch_is_not_a_fake_loss) ... ok
+2026-10-02T09:57:24.4278588Z test_beyond_one_week_is_rejected (test_day_edge_canonical.CanonicalTests.test_beyond_one_week_is_rejected) ... ok
+2026-10-02T09:57:24.4307302Z test_curve_preserves_peak_before_new_entry_cost (test_day_edge_canonical.CanonicalTests.test_curve_preserves_peak_before_new_entry_cost) ... ok
+2026-10-02T09:57:24.4310782Z test_entry_bar_calls_authority_even_single_tp (test_day_edge_canonical.CanonicalTests.test_entry_bar_calls_authority_even_single_tp) ... ok
+2026-10-02T09:57:24.4312039Z test_gap_sl_fills_at_worse_open (test_day_edge_canonical.CanonicalTests.test_gap_sl_fills_at_worse_open) ... ok
+2026-10-02T09:57:24.4319376Z test_incomplete_shards_fail_closed (test_day_edge_canonical.CanonicalTests.test_incomplete_shards_fail_closed) ... ok
+2026-10-02T09:57:24.4320844Z test_missing_path_is_excluded (test_day_edge_canonical.CanonicalTests.test_missing_path_is_excluded) ... ok
+2026-10-02T09:57:24.4324141Z test_parent_collision_uses_minute_authority (test_day_edge_canonical.CanonicalTests.test_parent_collision_uses_minute_authority) ... ok
+2026-10-02T09:57:24.4326103Z test_short_has_linear_entry_denominator (test_day_edge_canonical.CanonicalTests.test_short_has_linear_entry_denominator) ... ok
+2026-10-02T09:57:24.4327653Z test_timeout_cannot_cross_split (test_day_edge_canonical.CanonicalTests.test_timeout_cannot_cross_split) ... ok
+2026-10-02T09:57:24.4329043Z test_timeout_is_exact_seed_deadline (test_day_edge_canonical.CanonicalTests.test_timeout_is_exact_seed_deadline) ... ok
+2026-10-02T09:57:24.4330680Z test_trailing_stop_only_activates_after_bar_close (test_day_edge_canonical.CanonicalTests.test_trailing_stop_only_activates_after_bar_close) ... ok
+2026-10-02T09:57:24.4365978Z test_union_tie_uses_entry_priority_not_future_outcome (test_day_edge_canonical.CanonicalTests.test_union_tie_uses_entry_priority_not_future_outcome) ... ok
+2026-10-02T09:57:24.4387407Z test_btc_missing_timestamp_is_not_forward_filled (test_day_edge_lab.ScoutTests.test_btc_missing_timestamp_is_not_forward_filled) ... ok
+2026-10-02T09:57:24.4389463Z test_configurations_are_predeclared_and_distinct (test_day_edge_lab.ScoutTests.test_configurations_are_predeclared_and_distinct) ... ok
+2026-10-02T09:57:24.4434476Z test_eligibility_uses_age_and_past_turnover (test_day_edge_lab.ScoutTests.test_eligibility_uses_age_and_past_turnover) ... ok
+2026-10-02T09:57:24.4479312Z test_features_are_invariant_to_future_changes (test_day_edge_lab.ScoutTests.test_features_are_invariant_to_future_changes) ... ok
+2026-10-02T09:57:24.4512661Z test_features_restart_after_gaps (test_day_edge_lab.ScoutTests.test_features_restart_after_gaps) ... ok
+2026-10-02T09:57:24.4523673Z test_missing_bar_excludes_fixed_time_event (test_day_edge_lab.ScoutTests.test_missing_bar_excludes_fixed_time_event) ... ok
+2026-10-02T09:57:24.4771877Z test_missing_year_cannot_pass_selection (test_day_edge_lab.ScoutTests.test_missing_year_cannot_pass_selection) ... MERGE_DONE {"status": "NO_CELL_PASSED_FROZEN_GATE", "cells_examined": 144, "shard_count": 1, "eligible_cells": [], "selected": [], "observations": "Overlapping across coins; NO account return inference."}
+2026-10-02T09:57:24.4775828Z ok
+2026-10-02T09:57:24.4784462Z test_next_open_entry_and_fixed_open_exit (test_day_edge_lab.ScoutTests.test_next_open_entry_and_fixed_open_exit) ... ok
+2026-10-02T09:57:24.4802562Z test_outcome_cannot_cross_split (test_day_edge_lab.ScoutTests.test_outcome_cannot_cross_split) ... ok
+2026-10-02T09:57:24.4823923Z test_quote_volume_baseline_excludes_latest_hour (test_day_edge_lab.ScoutTests.test_quote_volume_baseline_excludes_latest_hour) ... ok
+2026-10-02T09:57:24.4830087Z test_scheduled_nonoverlap_does_not_use_outcome (test_day_edge_lab.ScoutTests.test_scheduled_nonoverlap_does_not_use_outcome) ... ok
+2026-10-02T09:57:24.4836089Z test_short_has_linear_entry_denominator (test_day_edge_lab.ScoutTests.test_short_has_linear_entry_denominator) ... ok
+2026-10-02T09:57:24.4838048Z test_signal_onset_uses_only_previous_closed_state (test_day_edge_lab.ScoutTests.test_signal_onset_uses_only_previous_closed_state) ... ok
+2026-10-02T09:57:24.5070329Z test_all_immutable_cache_components_fail_closed_without_redownload (test_funding_crowding_v7.ArchiveTests.test_all_immutable_cache_components_fail_closed_without_redownload) ... ok
+2026-10-02T09:57:24.5204538Z test_invalid_timestamp_interval_and_rate_are_rejected (test_funding_crowding_v7.ArchiveTests.test_invalid_timestamp_interval_and_rate_are_rejected) ... ok
+2026-10-02T09:57:24.5216525Z test_missing_archive_is_recorded_explicitly (test_funding_crowding_v7.ArchiveTests.test_missing_archive_is_recorded_explicitly) ... ok
+2026-10-02T09:57:24.5262731Z test_missing_checksum_and_mismatch_preserve_raw_failure_not_zero (test_funding_crowding_v7.ArchiveTests.test_missing_checksum_and_mismatch_preserve_raw_failure_not_zero) ... ok
+2026-10-02T09:57:24.5300390Z test_official_header_and_headerless_arrays_agree (test_funding_crowding_v7.ArchiveTests.test_official_header_and_headerless_arrays_agree) ... ok
+2026-10-02T09:57:24.5361970Z test_original_bytes_checksum_and_verified_cache_are_preserved (test_funding_crowding_v7.ArchiveTests.test_original_bytes_checksum_and_verified_cache_are_preserved) ... ok
+2026-10-02T09:57:24.5391144Z test_original_minute_archive_is_retained_and_frozen_hash_cannot_be_replaced (test_funding_crowding_v7.ArchiveTests.test_original_minute_archive_is_retained_and_frozen_hash_cannot_be_replaced) ... ok
+2026-10-02T09:57:24.5404666Z test_transient_exhaustion_stops_and_keeps_downloaded_bytes (test_funding_crowding_v7.ArchiveTests.test_transient_exhaustion_stops_and_keeps_downloaded_bytes) ... ok
+2026-10-02T09:57:24.5433797Z test_asof_matches_independent_record_by_record_oracle (test_funding_crowding_v7.AvailabilityTests.test_asof_matches_independent_record_by_record_oracle) ... ok
+2026-10-02T09:57:24.5456303Z test_future_funding_perturbation_cannot_change_earlier_decisions (test_funding_crowding_v7.AvailabilityTests.test_future_funding_perturbation_cannot_change_earlier_decisions) ... ok
+2026-10-02T09:57:24.5462561Z test_lagged_timestamp_and_variable_interval_normalization (test_funding_crowding_v7.AvailabilityTests.test_lagged_timestamp_and_variable_interval_normalization) ... ok
+2026-10-02T09:57:24.5472896Z test_missing_month_cannot_carry_previous_rate_and_stale_interval_expires (test_funding_crowding_v7.AvailabilityTests.test_missing_month_cannot_carry_previous_rate_and_stale_interval_expires) ... ok
+2026-10-02T09:57:24.5490004Z test_stage_end_is_physically_filtered_and_previous_month_loaded (test_funding_crowding_v7.AvailabilityTests.test_stage_end_is_physically_filtered_and_previous_month_loaded) ... ok
+2026-10-02T09:57:24.5496152Z test_twentyfour_hour_interval_still_expires_after_twelve_hours (test_funding_crowding_v7.AvailabilityTests.test_twentyfour_hour_interval_still_expires_after_twelve_hours) ... ok
+2026-10-02T09:57:24.5501286Z test_actual_next_open_stop_and_priority_use_available_inputs (test_funding_crowding_v7.EconomicTimingTests.test_actual_next_open_stop_and_priority_use_available_inputs) ... ok
+2026-10-02T09:57:24.5509647Z test_actual_risk_tp_and_shared_canonical_exclusion (test_funding_crowding_v7.EconomicTimingTests.test_actual_risk_tp_and_shared_canonical_exclusion) ... ok
+2026-10-02T09:57:24.5512702Z test_any_btc_can_be_missing_but_alignment_requires_exact_direction (test_funding_crowding_v7.EconomicTimingTests.test_any_btc_can_be_missing_but_alignment_requires_exact_direction) ... ok
+2026-10-02T09:57:24.5520394Z test_entry_gap_stop_floor_and_overwide_stop_are_explicit (test_funding_crowding_v7.EconomicTimingTests.test_entry_gap_stop_floor_and_overwide_stop_are_explicit) ... ok
+2026-10-02T09:57:24.5527089Z test_flow_and_reclaim_reject_their_opposite_confirmations (test_funding_crowding_v7.EconomicTimingTests.test_flow_and_reclaim_reject_their_opposite_confirmations) ... ok
+2026-10-02T09:57:24.5529675Z test_intent_cooldown_uses_fixed_history_not_future_exit (test_funding_crowding_v7.EconomicTimingTests.test_intent_cooldown_uses_fixed_history_not_future_exit) ... ok
+2026-10-02T09:57:24.5544045Z test_mirrored_long_negative_short_positive_with_each_confirmation (test_funding_crowding_v7.EconomicTimingTests.test_mirrored_long_negative_short_positive_with_each_confirmation) ... ok
+2026-10-02T09:57:24.5546461Z test_missing_funding_is_rejected_even_if_price_and_flow_pass (test_funding_crowding_v7.EconomicTimingTests.test_missing_funding_is_rejected_even_if_price_and_flow_pass) ... ok
+2026-10-02T09:57:24.5606736Z test_prior_atr_range_and_volume_exclude_current_and_future_bars (test_funding_crowding_v7.EconomicTimingTests.test_prior_atr_range_and_volume_exclude_current_and_future_bars) ... ok
+2026-10-02T09:57:24.5611702Z test_sixteen_entries_and_ninety_six_unique_frozen_policies (test_funding_crowding_v7.EconomicTimingTests.test_sixteen_entries_and_ninety_six_unique_frozen_policies) ... ok
+2026-10-02T09:57:24.5614074Z test_duplicate_universe_coverage_cannot_be_counted_twice (test_funding_crowding_v7.SelectionCoverageTests.test_duplicate_universe_coverage_cannot_be_counted_twice) ... ok
+2026-10-02T09:57:24.8208669Z test_full96cells_and_kst_year_selection_after95percent_gate (test_funding_crowding_v7.SelectionCoverageTests.test_full96cells_and_kst_year_selection_after95percent_gate) ... FUNDING_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "FUNDING_S+1_F5_RECLAIM_ANY", "side": 1, "threshold": 0.0005, "confirmation": "RECLAIM", "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "FUNDING_S+1_F5_RECLAIM_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "FUNDING_S+1_F5_RECLAIM_ANY", "side": 1, "threshold": 0.0005, "confirmation": "RECLAIM", "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "FUNDING_S+1_F5_RECLAIM_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:24.8246609Z ok
+2026-10-02T09:57:25.0798840Z test_positive_results_cannot_hide_input_insufficiency (test_funding_crowding_v7.SelectionCoverageTests.test_positive_results_cannot_hide_input_insufficiency) ... FUNDING_SELECT {"status": "SOURCE_COVERAGE_INSUFFICIENT", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": false, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 752, "unavailable": 48, "fraction": 0.94}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:25.0817373Z ok
+2026-10-02T09:57:25.3360549Z test_price_r_date_frequency_and_empty_cells_reject_independently (test_funding_crowding_v7.SelectionCoverageTests.test_price_r_date_frequency_and_empty_cells_reject_independently) ... FUNDING_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:25.5941399Z FUNDING_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:25.8516559Z FUNDING_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:26.0978033Z FUNDING_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "FUNDING_UNION", "funding_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:26.1010013Z ok
+2026-10-02T09:57:26.1021113Z test_checksum_mismatch_is_explicit_gap (test_liquidity_sweep_v5.MinuteTests.test_checksum_mismatch_is_explicit_gap) ... ok
+2026-10-02T09:57:26.1034782Z test_definitive_missing_archive_and_checksum_excluded (test_liquidity_sweep_v5.MinuteTests.test_definitive_missing_archive_and_checksum_excluded) ... ok
+2026-10-02T09:57:26.1080952Z test_exact_authoritative_slice_and_provenance_are_preserved (test_liquidity_sweep_v5.MinuteTests.test_exact_authoritative_slice_and_provenance_are_preserved) ... ok
+2026-10-02T09:57:26.1089975Z test_exhausted_transient_error_is_not_fabricated_data_gap (test_liquidity_sweep_v5.MinuteTests.test_exhausted_transient_error_is_not_fabricated_data_gap) ... ok
+2026-10-02T09:57:26.1149845Z test_gapped_or_bad_geometry_official_archive_excluded (test_liquidity_sweep_v5.MinuteTests.test_gapped_or_bad_geometry_official_archive_excluded) ... ok
+2026-10-02T09:57:26.1194602Z test_legacy_cache_without_original_checksum_is_not_trusted (test_liquidity_sweep_v5.MinuteTests.test_legacy_cache_without_original_checksum_is_not_trusted) ... ok
+2026-10-02T09:57:26.1246278Z test_official_header_and_headerless_values_agree (test_liquidity_sweep_v5.MinuteTests.test_official_header_and_headerless_values_agree) ... ok
+2026-10-02T09:57:26.1296514Z test_original_zip_checksum_then_verified_cache (test_liquidity_sweep_v5.MinuteTests.test_original_zip_checksum_then_verified_cache) ... ok
+2026-10-02T09:57:26.1305585Z test_shared_canonical_resolver_excludes_checksum_gap (test_liquidity_sweep_v5.MinuteTests.test_shared_canonical_resolver_excludes_checksum_gap) ... ok
+2026-10-02T09:57:26.1345242Z test_shared_canonical_resolver_keeps_entry_minute_tp_only_as_loss (test_liquidity_sweep_v5.MinuteTests.test_shared_canonical_resolver_keeps_entry_minute_tp_only_as_loss) ... ok
+2026-10-02T09:57:26.1387760Z test_verified_cache_corruption_fails_without_replacement (test_liquidity_sweep_v5.MinuteTests.test_verified_cache_corruption_fails_without_replacement) ... ok
+2026-10-02T09:57:26.1456287Z test_actual_entry_and_closed_sweep_anchored_sl (test_liquidity_sweep_v5.SweepTests.test_actual_entry_and_closed_sweep_anchored_sl) ... ok
+2026-10-02T09:57:26.4017805Z test_all_cells_preserved_and_year_is_kst (test_liquidity_sweep_v5.SweepTests.test_all_cells_preserved_and_year_is_kst) ... SWEEP_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "SWEEP_S+1_W48_A55_ANY", "side": 1, "window": 48, "flow": 0.55, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "SWEEP_S+1_W48_A55_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "SWEEP_S+1_W48_A55_ANY", "side": 1, "window": 48, "flow": 0.55, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "SWEEP_S+1_W48_A55_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "SWEEP_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:26.4057025Z ok
+2026-10-02T09:57:26.4093715Z test_btc_missing_fails_alignment_but_any_ignores_it (test_liquidity_sweep_v5.SweepTests.test_btc_missing_fails_alignment_but_any_ignores_it) ... ok
+2026-10-02T09:57:26.6788204Z test_clustered_entry_days_cannot_satisfy_frequency (test_liquidity_sweep_v5.SweepTests.test_clustered_entry_days_cannot_satisfy_frequency) ... SWEEP_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "SWEEP_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:26.6806358Z ok
+2026-10-02T09:57:26.6845308Z test_cooldown_uses_intents_not_future_outcomes (test_liquidity_sweep_v5.SweepTests.test_cooldown_uses_intents_not_future_outcomes) ... ok
+2026-10-02T09:57:26.6849014Z test_empty_source_stops_before_minute_retrieval (test_liquidity_sweep_v5.SweepTests.test_empty_source_stops_before_minute_retrieval) ... ok
+2026-10-02T09:57:26.6915211Z test_flow_threshold_boundary_is_symmetric (test_liquidity_sweep_v5.SweepTests.test_flow_threshold_boundary_is_symmetric) ... ok
+2026-10-02T09:57:26.7018595Z test_future_perturbation_preserves_every_past_feature (test_liquidity_sweep_v5.SweepTests.test_future_perturbation_preserves_every_past_feature) ... ok
+2026-10-02T09:57:26.7077307Z test_gaps_reset_range_and_volume_history (test_liquidity_sweep_v5.SweepTests.test_gaps_reset_range_and_volume_history) ... ok
+2026-10-02T09:57:26.7082160Z test_grid_is_frozen_and_unique (test_liquidity_sweep_v5.SweepTests.test_grid_is_frozen_and_unique) ... ok
+2026-10-02T09:57:26.7249498Z test_incomplete_parts_rejected (test_liquidity_sweep_v5.SweepTests.test_incomplete_parts_rejected) ... ok
+2026-10-02T09:57:26.7284577Z test_invalid_gap_fill_is_not_a_valid_stop (test_liquidity_sweep_v5.SweepTests.test_invalid_gap_fill_is_not_a_valid_stop) ... ok
+2026-10-02T09:57:26.7349400Z test_minimum_stop_and_above_eight_percent_exclusion (test_liquidity_sweep_v5.SweepTests.test_minimum_stop_and_above_eight_percent_exclusion) ... ok
+2026-10-02T09:57:26.9870637Z test_positive_r_cannot_hide_negative_annual_price_return (test_liquidity_sweep_v5.SweepTests.test_positive_r_cannot_hide_negative_annual_price_return) ... SWEEP_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "SWEEP_UNION", "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:26.9889681Z ok
+2026-10-02T09:57:26.9959826Z test_price_must_reject_inside_known_range (test_liquidity_sweep_v5.SweepTests.test_price_must_reject_inside_known_range) ... ok
+2026-10-02T09:57:27.0021328Z test_prior_baselines_cannot_use_current_candle (test_liquidity_sweep_v5.SweepTests.test_prior_baselines_cannot_use_current_candle) ... ok
+2026-10-02T09:57:27.0088568Z test_sides_require_opposite_aggressive_flow (test_liquidity_sweep_v5.SweepTests.test_sides_require_opposite_aggressive_flow) ... ok
+2026-10-02T09:57:27.0121480Z test_sweep_has_prior_atr_minimum_distance (test_liquidity_sweep_v5.SweepTests.test_sweep_has_prior_atr_minimum_distance) ... ok
+2026-10-02T09:57:27.0215585Z test_wick_body_and_volume_must_agree (test_liquidity_sweep_v5.SweepTests.test_wick_body_and_volume_must_agree) ... ok
+2026-10-02T09:57:27.0268982Z test_404_checksum_failure_and_transient_are_not_zero_imputed (test_premium_absorption_v8.ArchiveTests.test_404_checksum_failure_and_transient_are_not_zero_imputed) ... ok
+2026-10-02T09:57:27.0522336Z test_each_verified_cache_component_corruption_fails_without_redownload (test_premium_absorption_v8.ArchiveTests.test_each_verified_cache_component_corruption_fails_without_redownload) ... ok
+2026-10-02T09:57:27.0533335Z test_exact_alignment_missing_month_and_stage_cut (test_premium_absorption_v8.ArchiveTests.test_exact_alignment_missing_month_and_stage_cut) ... ok
+2026-10-02T09:57:27.0546352Z test_future_premium_cannot_change_prior_alignment (test_premium_absorption_v8.ArchiveTests.test_future_premium_cannot_change_prior_alignment) ... ok
+2026-10-02T09:57:27.0695779Z test_invalid_width_header_timestamp_geometry_and_values_fail (test_premium_absorption_v8.ArchiveTests.test_invalid_width_header_timestamp_geometry_and_values_fail) ... ok
+2026-10-02T09:57:27.0707124Z test_load_symbol_includes_previous_month_but_never_future_stage (test_premium_absorption_v8.ArchiveTests.test_load_symbol_includes_previous_month_but_never_future_stage) ... ok
+2026-10-02T09:57:27.0780726Z test_original_checksum_npz_and_verified_cache_are_immutable (test_premium_absorption_v8.ArchiveTests.test_original_checksum_npz_and_verified_cache_are_immutable) ... ok
+2026-10-02T09:57:27.0831528Z test_signed_header_and_headerless_arrays_agree (test_premium_absorption_v8.ArchiveTests.test_signed_header_and_headerless_arrays_agree) ... ok
+2026-10-02T09:57:27.0893621Z test_current_and_future_price_cannot_change_prior_baselines (test_premium_absorption_v8.EconomicTests.test_current_and_future_price_cannot_change_prior_baselines) ... ok
+2026-10-02T09:57:27.0901027Z test_entry_gap_floor_overwide_stop_and_path_gap_are_explicit (test_premium_absorption_v8.EconomicTests.test_entry_gap_floor_overwide_stop_and_path_gap_are_explicit) ... ok
+2026-10-02T09:57:27.0904042Z test_fixed_intent_cooldown_not_future_exit (test_premium_absorption_v8.EconomicTests.test_fixed_intent_cooldown_not_future_exit) ... ok
+2026-10-02T09:57:27.0911680Z test_flow_volume_price_and_btc_filters (test_premium_absorption_v8.EconomicTests.test_flow_volume_price_and_btc_filters) ... ok
+2026-10-02T09:57:27.0920031Z test_mirrored_signed_dislocation_and_normalization (test_premium_absorption_v8.EconomicTests.test_mirrored_signed_dislocation_and_normalization) ... ok
+2026-10-02T09:57:27.0923929Z test_missing_or_noncontiguous_premium_invalidates_signal (test_premium_absorption_v8.EconomicTests.test_missing_or_noncontiguous_premium_invalidates_signal) ... ok
+2026-10-02T09:57:27.0928211Z test_next_open_actual_risk_priority_and_future_ohlc_independence (test_premium_absorption_v8.EconomicTests.test_next_open_actual_risk_priority_and_future_ohlc_independence) ... ok
+2026-10-02T09:57:27.0931345Z test_normalization_magnitude_and_direction_are_hard_filters (test_premium_absorption_v8.EconomicTests.test_normalization_magnitude_and_direction_are_hard_filters) ... ok
+2026-10-02T09:57:27.0941923Z test_shared_resolver_tp_and_exclusion (test_premium_absorption_v8.EconomicTests.test_shared_resolver_tp_and_exclusion) ... ok
+2026-10-02T09:57:27.0946812Z test_sixteen_entries_ninety_six_policies (test_premium_absorption_v8.EconomicTests.test_sixteen_entries_ninety_six_policies) ... ok
+2026-10-02T09:57:27.3544629Z test_2022_and_2023_price_and_r_still_hard_gates (test_premium_absorption_v8.SelectionTests.test_2022_and_2023_price_and_r_still_hard_gates) ... PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:27.6153671Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:27.8744112Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:28.1352790Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:28.1370284Z ok
+2026-10-02T09:57:28.3984115Z test_95percent_three_year_coverage_and_all96cells (test_premium_absorption_v8.SelectionTests.test_95percent_three_year_coverage_and_all96cells) ... PREMIUM_SELECT {"status": "ACCOUNT_REPLAY_REQUIRED", "cells_examined": 96, "selected": [{"key": "PREMIUM_S+1_P5_N1_ANY", "side": 1, "threshold": 0.0005, "lookback": 1, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "PREMIUM_S+1_P5_N1_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "policies": [{"key": "PREMIUM_S+1_P5_N1_ANY", "side": 1, "threshold": 0.0005, "lookback": 1, "btc": "ANY", "hold": 24, "exit_type": "TP2", "policy": "PREMIUM_S+1_P5_N1_ANY__H24__TP2", "development_net40_R": 0.5, "development_worst_year_day_R": 0.5}], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:28.4015243Z ok
+2026-10-02T09:57:28.6592209Z test_below_coverage_is_input_failure_not_alpha (test_premium_absorption_v8.SelectionTests.test_below_coverage_is_input_failure_not_alpha) ... PREMIUM_SELECT {"status": "SOURCE_COVERAGE_INSUFFICIENT", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": false, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 752, "unavailable": 48, "fraction": 0.94}, "2022": {"eligible": 800, "known": 752, "unavailable": 48, "fraction": 0.94}, "2023": {"eligible": 800, "known": 752, "unavailable": 48, "fraction": 0.94}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:28.6608979Z ok
+2026-10-02T09:57:28.9037911Z test_duplicate_coverage_symbol_and_empty_cells (test_premium_absorption_v8.SelectionTests.test_duplicate_coverage_symbol_and_empty_cells) ... PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:28.9068009Z ok
+2026-10-02T09:57:29.1653084Z test_partial2021_price_r_date_and_frequency_are_hard_gates (test_premium_absorption_v8.SelectionTests.test_partial2021_price_r_date_and_frequency_are_hard_gates) ... PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:29.4231968Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:29.6824168Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:29.9426810Z PREMIUM_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "PREMIUM_ABSORPTION_UNION", "premium_coverage": {"passed": true, "minimum_fraction": 0.95, "years": {"2021": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2022": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}, "2023": {"eligible": 800, "known": 760, "unavailable": 40, "fraction": 0.95}}, "symbols": 8}, "note": "Independent overlapping policies and active-entry-date means are diagnostics, not account profits."}
+2026-10-02T09:57:29.9444873Z ok
+2026-10-02T09:57:29.9449946Z test_entry_minute_both_is_loss (test_relative_pullback_v1.ChronologyTests.test_entry_minute_both_is_loss) ... ok
+2026-10-02T09:57:29.9452913Z test_entry_minute_sl_is_loss (test_relative_pullback_v1.ChronologyTests.test_entry_minute_sl_is_loss) ... ok
+2026-10-02T09:57:29.9455974Z test_entry_minute_tp_is_loss (test_relative_pullback_v1.ChronologyTests.test_entry_minute_tp_is_loss) ... ok
+2026-10-02T09:57:29.9458774Z test_entry_price_mismatch_is_excluded (test_relative_pullback_v1.ChronologyTests.test_entry_price_mismatch_is_excluded) ... ok
+2026-10-02T09:57:29.9460905Z test_established_first_minute_tp_is_win (test_relative_pullback_v1.ChronologyTests.test_established_first_minute_tp_is_win) ... ok
+2026-10-02T09:57:29.9463106Z test_established_same_minute_both_is_loss (test_relative_pullback_v1.ChronologyTests.test_established_same_minute_both_is_loss) ... ok
+2026-10-02T09:57:29.9465884Z test_later_sl_proven_before_tp (test_relative_pullback_v1.ChronologyTests.test_later_sl_proven_before_tp) ... ok
+2026-10-02T09:57:29.9468583Z test_later_tp_proven_before_sl (test_relative_pullback_v1.ChronologyTests.test_later_tp_proven_before_sl) ... ok
+2026-10-02T09:57:29.9472207Z test_official_data_gap_is_excluded (test_relative_pullback_v1.ChronologyTests.test_official_data_gap_is_excluded) ... ok
+2026-10-02T09:57:29.9475211Z test_parent_exit_not_reproduced_is_mismatch (test_relative_pullback_v1.ChronologyTests.test_parent_exit_not_reproduced_is_mismatch) ... ok
+2026-10-02T09:57:29.9477298Z test_short_entry_touch_is_loss (test_relative_pullback_v1.ChronologyTests.test_short_entry_touch_is_loss) ... ok
+2026-10-02T09:57:29.9480116Z test_short_later_tp_is_win (test_relative_pullback_v1.ChronologyTests.test_short_later_tp_is_win) ... ok
+2026-10-02T09:57:29.9511086Z test_cash_equals_sum_of_net_trade_pnls (test_relative_pullback_v1.PortfolioTests.test_cash_equals_sum_of_net_trade_pnls) ... ok
+2026-10-02T09:57:29.9537328Z test_day_loss_blocks_later_entry (test_relative_pullback_v1.PortfolioTests.test_day_loss_blocks_later_entry) ... ok
+2026-10-02T09:57:29.9583195Z test_drawdown_halt_is_permanent_within_split (test_relative_pullback_v1.PortfolioTests.test_drawdown_halt_is_permanent_within_split) ... ok
+2026-10-02T09:57:29.9618726Z test_empty_days_are_in_denominator_and_korea_aligned (test_relative_pullback_v1.PortfolioTests.test_empty_days_are_in_denominator_and_korea_aligned) ... ok
+2026-10-02T09:57:29.9666820Z test_half_risk_latches_into_next_day (test_relative_pullback_v1.PortfolioTests.test_half_risk_latches_into_next_day) ... ok
+2026-10-02T09:57:29.9696118Z test_profit_above_two_percent_does_not_block_entry (test_relative_pullback_v1.PortfolioTests.test_profit_above_two_percent_does_not_block_entry) ... ok
+2026-10-02T09:57:29.9719575Z test_same_symbol_opposite_signal_is_rejected (test_relative_pullback_v1.PortfolioTests.test_same_symbol_opposite_signal_is_rejected) ... ok
+2026-10-02T09:57:29.9743572Z test_short_position_accounting (test_relative_pullback_v1.PortfolioTests.test_short_position_accounting) ... ok
+2026-10-02T09:57:29.9773883Z test_simultaneous_risk_and_six_slot_caps (test_relative_pullback_v1.PortfolioTests.test_simultaneous_risk_and_six_slot_caps) ... ok
+2026-10-02T09:57:29.9786419Z test_split_crossing_outcome_is_rejected (test_relative_pullback_v1.PortfolioTests.test_split_crossing_outcome_is_rejected) ... ok
+2026-10-02T09:57:29.9788071Z test_gap_stop_fills_at_worse_open (test_relative_pullback_v1.SignalTests.test_gap_stop_fills_at_worse_open) ... ok
+2026-10-02T09:57:29.9797739Z test_hour_only_becomes_available_when_closed (test_relative_pullback_v1.SignalTests.test_hour_only_becomes_available_when_closed) ... ok
+2026-10-02T09:57:29.9847969Z test_indicators_do_not_use_future_candles (test_relative_pullback_v1.SignalTests.test_indicators_do_not_use_future_candles) ... ok
+2026-10-02T09:57:29.9874651Z test_indicators_restart_after_data_gap (test_relative_pullback_v1.SignalTests.test_indicators_restart_after_data_gap) ... ok
+2026-10-02T09:57:29.9876478Z test_missing_timeout_path_is_excluded (test_relative_pullback_v1.SignalTests.test_missing_timeout_path_is_excluded) ... ok
+2026-10-02T09:57:29.9884855Z test_short_return_uses_linear_entry_denominator (test_relative_pullback_v1.SignalTests.test_short_return_uses_linear_entry_denominator) ... ok
+2026-10-02T09:57:29.9886219Z test_signal_confirmed_close_and_next_open_alignment (test_relative_pullback_v1.SignalTests.test_signal_confirmed_close_and_next_open_alignment) ... ok
+2026-10-02T09:57:29.9887225Z test_timeout_is_exactly_twelve_hours (test_relative_pullback_v1.SignalTests.test_timeout_is_exactly_twelve_hours) ... ok
+2026-10-02T09:57:29.9899349Z test_archive_keeps_failed_evidence_and_validates_exact_copy (test_research_evidence_archive.EvidenceTests.test_archive_keeps_failed_evidence_and_validates_exact_copy) ... EVIDENCE_ARCHIVED failed-study 2 files 48 bytes
+2026-10-02T09:57:29.9905023Z ok
+2026-10-02T09:57:29.9925792Z test_incomplete_cache_is_rejected_and_failure_saved (test_research_evidence_archive.EvidenceTests.test_incomplete_cache_is_rejected_and_failure_saved) ... ok
+2026-10-02T09:57:29.9951179Z test_matches_full_catalogue_stats_and_prior_sha256 (test_research_evidence_archive.EvidenceTests.test_matches_full_catalogue_stats_and_prior_sha256) ... FROZEN_SOURCE_VERIFIED 1 files 1 prior SHA256 matches
+2026-10-02T09:57:29.9954824Z ok
+2026-10-02T09:57:29.9989866Z test_same_stats_but_changed_source_bytes_are_rejected (test_research_evidence_archive.EvidenceTests.test_same_stats_but_changed_source_bytes_are_rejected) ... ok
+2026-10-02T09:57:29.9998796Z test_incomplete_curve_cannot_be_silently_filled (test_saved_calendar_audit.SavedCalendarTests.test_incomplete_curve_cannot_be_silently_filled) ... ok
+2026-10-02T09:57:30.0099120Z test_reconstruction_keeps_entries_on_both_partial_days_and_midnight (test_saved_calendar_audit.SavedCalendarTests.test_reconstruction_keeps_entries_on_both_partial_days_and_midnight) ... ok
+2026-10-02T09:57:30.0128974Z test_cooldown_is_fixed_not_outcome_conditioned (test_shock_confirmation_v3.ConfirmTests.test_cooldown_is_fixed_not_outcome_conditioned) ... ok
+2026-10-02T09:57:30.0210110Z test_features_ignore_future_prices_and_flow (test_shock_confirmation_v3.ConfirmTests.test_features_ignore_future_prices_and_flow) ... ok
+2026-10-02T09:57:30.0236998Z test_flow_share_uses_actual_quote_ratio (test_shock_confirmation_v3.ConfirmTests.test_flow_share_uses_actual_quote_ratio) ... ok
+2026-10-02T09:57:30.0284581Z test_future_confirming_bar_cannot_move_old_stop (test_shock_confirmation_v3.ConfirmTests.test_future_confirming_bar_cannot_move_old_stop) ... ok
+2026-10-02T09:57:30.0329615Z test_gap_restarts_recent_shock_and_stop_window (test_shock_confirmation_v3.ConfirmTests.test_gap_restarts_recent_shock_and_stop_window) ... ok
+2026-10-02T09:57:30.0333848Z test_predeclared_grid (test_shock_confirmation_v3.ConfirmTests.test_predeclared_grid) ... ok
+2026-10-02T09:57:30.0359540Z test_shock_window_excludes_current_confirming_bar (test_shock_confirmation_v3.ConfirmTests.test_shock_window_excludes_current_confirming_bar) ... ok
+2026-10-02T09:57:30.0363950Z test_structural_stop_and_actual_fill_risk (test_shock_confirmation_v3.ConfirmTests.test_structural_stop_and_actual_fill_risk) ... ok
+2026-10-02T09:57:30.0364895Z 
+2026-10-02T09:57:30.0365161Z ----------------------------------------------------------------------
+2026-10-02T09:57:30.0365722Z Ran 338 tests in 26.970s
+2026-10-02T09:57:30.0365949Z 
+2026-10-02T09:57:30.0366071Z OK
+2026-10-02T09:57:30.6046169Z PASS long_preentry_tp_ignored win
+2026-10-02T09:57:30.6046687Z PASS long_entry_same1m_tp_loss loss
+2026-10-02T09:57:30.6047065Z PASS long_gap_through_entry_then_tp win
+2026-10-02T09:57:30.6047469Z PASS short_gap_through_entry_then_tp win
+2026-10-02T09:57:30.6047823Z PASS long_entry_same1m_sl_loss loss
+2026-10-02T09:57:30.6048171Z PASS long_entry_same1m_both_loss loss
+2026-10-02T09:57:30.6048504Z PASS long_entry_then_tp win
+2026-10-02T09:57:30.6048816Z PASS long_entry_then_sl loss
+2026-10-02T09:57:30.6049160Z PASS long_preentry_tp_then_entry_continue continue
+2026-10-02T09:57:30.6049606Z PASS long_entry_not_seen_entry_mismatch entry_mismatch
+2026-10-02T09:57:30.6050032Z PASS long_established_same1m_both_loss loss
+2026-10-02T09:57:30.6050529Z PASS long_established_parent_collision_not_seen_exit_mismatch exit_mismatch
+2026-10-02T09:57:30.6051034Z PASS short_entry_same1m_tp_loss loss
+2026-10-02T09:57:30.6051368Z PASS short_entry_same1m_sl_loss loss
+2026-10-02T09:57:30.6051689Z PASS short_entry_then_tp win
+2026-10-02T09:57:30.6052026Z PASS short_entry_then_sl loss
+2026-10-02T09:57:30.6052412Z PASS short_preentry_tp_then_entry_continue continue
+2026-10-02T09:57:30.6052778Z ALL_CHRONOLOGY_SMOKE_PASS
+2026-10-02T09:57:30.6053040Z PASS resample_exact_buckets
+2026-10-02T09:57:30.6053545Z PASS psar_open_causality
+2026-10-02T09:57:30.6053831Z PASS psar_burnin_initialization_sanity
+2026-10-02T09:57:30.6054142Z PASS binance_1m_header_contract
+2026-10-02T09:57:30.6054423Z ALL_CANONICAL_INVARIANTS_PASS
+2026-10-02T09:57:31.8334961Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:31.8369627Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:31.8716620Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:31.8749462Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:31.9081143Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:31.9113569Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:31.9438925Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:31.9470777Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:31.9800374Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:31.9831834Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:32.0162289Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:32.0194267Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:32.0522246Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:32.0554688Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:32.0895023Z V13_RETEST_SCAN DEV 1 / 1 parameterized_outcomes 0
+2026-10-02T09:57:32.0926632Z V13_RETEST_SCAN_DONE DEV 0 chronology_exclusions 0
+2026-10-02T09:57:32.3486230Z V13_RETEST_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "BREAKOUT_LEVEL_RETEST_UNION", "source_context_sha256": "6d625feca2e52ff96801eeb41e5a99fdbe3811cff26d8d04bacc756e6a3332e4", "source_symbols": 8, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 96, "SYMBOLS_LT_10": 96, "TOP_SYMBOL_GT_30PCT": 96, "NET40_MEAN_BP_NONPOSITIVE": 96, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N": 96, "2021_DATES": 96, "2021_net40_R_NONPOSITIVE": 96, "2021_net40_mean_bp_NONPOSITIVE": 96, "2021_day_R_NONPOSITIVE": 96, "2022_N": 96, "2022_DATES": 96, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N": 96, "2023_DATES": 96, "2023_net40_R_NONPOSITIVE": 96, "2023_net40_mean_bp_NONPOSITIVE": 96, "2023_day_R_NONPOSITIVE": 96}, "note": "Frozen breakout level and closed retest experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T09:57:32.3504359Z V13_SYNTHETIC_PIPELINE_PASS {"synthetic_only": true, "scans": 8, "all96_cells_preserved": true, "market_profitability_claim": false}
+2026-10-02T09:57:32.4131313Z ##[group]Run actions/upload-artifact@v4
+2026-10-02T09:57:32.4131773Z with:
+2026-10-02T09:57:32.4132018Z   name: breakout-level-retest-v13-validation
+2026-10-02T09:57:32.4132813Z   path: v13-tests.log
+chronology-smoke.log
+retest-pipeline-smoke.log
+synthetic-v13/
+research/breakout-level-retest-v13/
+2026-10-02T09:57:32.4133715Z   retention-days: 30
+2026-10-02T09:57:32.4134028Z   compression-level: 0
+2026-10-02T09:57:32.4134439Z   if-no-files-found: warn
+2026-10-02T09:57:32.4134874Z   overwrite: false
+2026-10-02T09:57:32.4135125Z   include-hidden-files: false
+2026-10-02T09:57:32.4135416Z env:
+2026-10-02T09:57:32.4139160Z   GH_TOKEN: ***
+2026-10-02T09:57:32.4139616Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:32.4140422Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T09:57:32.4141076Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:32.4141575Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:32.4141954Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T09:57:32.4142600Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T09:57:32.4143042Z ##[endgroup]
+2026-10-02T09:57:32.5838713Z (node:2374) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T09:57:32.5839461Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T09:57:32.6351847Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-02T09:57:32.6416048Z The least common ancestor is /home/runner/work/bb-scanner/bb-scanner. This will be the root directory of the artifact
+2026-10-02T09:57:32.6417316Z With the provided path, there will be 106 files uploaded
+2026-10-02T09:57:32.6418523Z Artifact name is valid!
+2026-10-02T09:57:32.6419069Z Root directory input is valid!
+2026-10-02T09:57:32.8480828Z Beginning upload of artifact content to blob storage
+2026-10-02T09:57:32.9650026Z (node:2374) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-02T09:57:33.0340765Z Uploaded bytes 1528746
+2026-10-02T09:57:33.0500673Z Finished uploading artifact content to blob storage!
+2026-10-02T09:57:33.0502161Z SHA256 digest of uploaded artifact zip is 108908365268c0459ae8a88e75a889a3d27a70c71cd20558f8579716ade0fe37
+2026-10-02T09:57:33.0503196Z Finalizing artifact upload
+2026-10-02T09:57:33.2500717Z Artifact breakout-level-retest-v13-validation.zip successfully finalized. Artifact ID 11220191259
+2026-10-02T09:57:33.2502132Z Artifact breakout-level-retest-v13-validation has been successfully uploaded! Final size is 1528746 bytes. Artifact ID is 11220191259
+2026-10-02T09:57:33.2508060Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36992677948/artifacts/11220191259
+2026-10-02T09:57:33.2686207Z Post job cleanup.
+2026-10-02T09:57:33.3889910Z (node:2386) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T09:57:33.3891247Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T09:57:33.4104413Z Post job cleanup.
+2026-10-02T09:57:33.5142352Z [command]/usr/bin/git version
+2026-10-02T09:57:33.5199199Z git version 2.55.0
+2026-10-02T09:57:33.5262875Z Temporarily overriding HOME='/home/runner/work/_temp/15669c81-29fd-4835-b3f2-88ec48ef618f' before making global git config changes
+2026-10-02T09:57:33.5264949Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T09:57:33.5294452Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T09:57:33.5340752Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T09:57:33.5399219Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T09:57:33.5770751Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T09:57:33.5814179Z http.https://github.com/.extraheader
+2026-10-02T09:57:33.5825480Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-02T09:57:33.5871617Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T09:57:33.6169658Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T09:57:33.6216186Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T09:57:33.6607036Z Cleaning up orphan processes
+2026-10-02T09:57:33.6993743Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
