@@ -20,18 +20,18 @@ jobs:
         run: python -m py_compile scripts/long_short_continuation_combo_v1.py
       - name: Download completed long mirror shards
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p long_artifacts
-          gh run download 36974905362 -R \${{ github.repository }} -p 'long-mirror-continuation-v1-*' -D long_artifacts
+          gh run download 36974905362 -R ${{ github.repository }} -p 'long-mirror-continuation-v1-*' -D long_artifacts
           find long_artifacts -name 'long_continuation_mirror_*.csv.gz' | wc -l
           test "$(find long_artifacts -name 'long_continuation_mirror_*.csv.gz' | wc -l)" -eq 6
       - name: Download frozen short horizon artifact
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p short_source
-          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D short_source
+          gh run download 36963458040 -R ${{ github.repository }} -n short-continuation-horizon-v2-final -D short_source
           test -f short_source/short_continuation_horizon_all.csv.gz
       - name: Merge long and short
         run: |
