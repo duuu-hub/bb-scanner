@@ -71,7 +71,7 @@ def trade(symbol,t,o,h,l,c,start,side,sl,tp,maxbars):
   else:xb=k;xp=tp;reason="TP"
  if xb is None:
   xb=end-1;xp=float(c[xb]);reason="TIME"
- gross=(xp/fill-1) if long else (fill/xp-1)
+ gross=(xp/fill-1) if long else ((fill-xp)/fill)
  out={"exit_bar":int(xb),"exit":float(xp),"reason":reason,"risk_pct":float(risk_pct),
       "gross_return":float(gross),"gross_r":float(gross/risk_pct)}
  for bp in (20,40):
