@@ -1,0 +1,105 @@
+name: Impulse Entry Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/impulse_entry_audit_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Audit invariants
+        run: |
+          python -m py_compile scripts/impulse_entry_audit.py scripts/impulse_entry_audit_merge.py scripts/sweep_reclaim_research.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import numpy as np
+          import scripts.sweep_reclaim_research as b
+          import scripts.impulse_entry_audit as a
+
+          # Short return denominator regression: entry 100 -> TP 90 must be exactly +10%, not +11.111%.
+          t=np.array([0,900000,1800000],dtype=np.int64)
+          o=np.array([100.,100.,100.]);h=np.array([101.,101.,101.]);l=np.array([99.,89.,99.]);c=np.array([100.,90.,100.])
+          z=b.trade("TEST",t,o,h,l,c,0,"short",110.,90.,2)
+          assert z is not None and abs(z["gross_return"]-0.10)<1e-12, z
+
+          # >65% pullback must invalidate permanently.
+          oo=np.array([107.,106.,106.]);hh=np.array([108.,109.,109.]);ll=np.array([103.,106.,106.]);cc=np.array([107.,108.,108.])
+          trig,ext,dep,invalid=a.find_pullback_trigger("long",0,3,110.,100.,10.,10.,oo,hh,ll,cc)
+          assert invalid and trig is None
+
+          # Valid 30-65% pullback plus continuation can trigger.
+          oo=np.array([106.,106.,106.]);hh=np.array([107.,109.,109.]);ll=np.array([106.,106.5,106.]);cc=np.array([106.5,108.5,108.])
+          trig,ext,dep,invalid=a.find_pullback_trigger("long",0,3,110.,100.,10.,10.,oo,hh,ll,cc)
+          assert (not invalid) and trig==1, (trig,ext,dep,invalid)
+          print("IMPULSE_AUDIT_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay audit shard
+        run: python scripts/impulse_entry_audit.py --data data --shard \${{ matrix.shard }} --shards 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impulse-entry-audit-\${{ matrix.shard }}
+          path: |
+            impulse_entry_audit_\${{ matrix.shard }}.csv.gz
+            impulse_entry_audit_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: impulse-entry-audit-*
+          path: artifacts
+      - name: Merge audit
+        run: python scripts/impulse_entry_audit_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: impulse-entry-audit-final
+          path: |
+            impulse_entry_audit_summary.csv
+            impulse_entry_audit_paired.csv
+            impulse_entry_audit_report.md
+            impulse_entry_audit_all.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
