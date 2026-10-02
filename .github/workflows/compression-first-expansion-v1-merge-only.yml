@@ -1,0 +1,40 @@
+name: Compression First Expansion V1 Merge Only
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/compression_first_expansion_v1_merge_only_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - name: Compile merge
+        run: python -m py_compile scripts/compression_first_expansion_v1_merge.py
+      - name: Download successful V1 TRAIN shards
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p artifacts
+          gh run download 36982033592 -R \${{ github.repository }} -p 'compression-first-expansion-v1-*' -D artifacts
+          test "$(find artifacts -name 'compression_first_expansion_v1_*.csv.gz' | wc -l)" -eq 8
+          test "$(find artifacts -name 'compression_first_expansion_v1_meta_*.json' | wc -l)" -eq 8
+      - name: Merge TRAIN only
+        run: |
+          python scripts/compression_first_expansion_v1_merge.py \
+            --input artifacts \
+            --out compression_first_expansion_v1_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-first-expansion-v1-train-final-fixed
+          path: compression_first_expansion_v1_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
