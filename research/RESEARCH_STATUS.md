@@ -326,3 +326,11 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Test-only repair commit: `eb360c6bc81fcb4ad9bdf5494dd6b2143803dabe`. It removes the unintended earlier touch and changes only the synthetic entry price needed to engage the floor; signal/economic parameters are unchanged.
 - Run-1 evidence branch: `research-breadth-pullback-reclaim-v16-evidence-37074012724`.
 - Exactly one retry trigger commit: `217a46b0e752800b70115eb9a63528d809242ce6`. Its Actions run ID/log is pending discovery; do not launch another duplicate.
+
+
+## 2026-10-03 — V16 retry validation passed; DEV maps active
+
+- Existing retry run [37074366568](https://github.com/duuu-hub/bb-scanner/actions/runs/37074366568), code/trigger `217a46b0e752800b70115eb9a63528d809242ce6`.
+- Actual validation job `111060825788`: frozen input contract passed (256 prior hashes / 856 source files); independent saved V13 audit passed; 458/458 tests passed in 59.852 s; canonical chronology smoke passed.
+- All eight DEV breadth-map jobs are now active. This establishes implementation validation only, not market profitability, account growth, or daily-target achievement.
+- Continue the existing run through map/reduce, eight canonical scans, selection, and evidence; do not launch a duplicate.
