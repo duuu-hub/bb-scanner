@@ -85,7 +85,6 @@ def eval_symbol(symbol,t,o,h,l,c):
   # B. No pullback requirement: wait only for first same-direction 15m continuation confirmation.
   end=min(s0+MAX_PULL_BARS,len(t)-1)
   for k in range(s0,end):
-   if k<=s0:continue
    if side=="long":
     ok=(c[k]>o[k] and (c[k]-o[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]>h[k-1])
    else:
