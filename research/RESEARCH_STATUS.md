@@ -7,24 +7,28 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V9 actual run36955250542/code2e1bb92891c2c480028c075b30afe91275cc0c43:
-232-test validation/canonical chronology/invariants PASS; all8 real DEV daily
-rank maps and global reducer/durable rank preservation SUCCESS. Ranks comprise
-82,191 symbol/date observations across821 UTC rank dates, not trades/profits.
-All856 processed source files and256 prior frozen hashes previously verified.
-Rank branch research-cross-sectional-leader-v9-ranks-development-36955250542,
-commit29cef4098a66750cf7df94fb7c797e156ffff02e; preregistration53fea7dd385bdd1ec7048f58be23087f5168158a.
+V9 run36955250542/code2e1bb92891c2c480028c075b30afe91275cc0c43:
+232tests/canonical checks,eight DEV shards,96-cell selection completed;
+223218 parameterized outcomes,zero survivors;GATE/accounts skipped.
+94/96 net40 price/R means negative;two small-positive cells fail sample/year.
+All96 have negative2022 R/equal-dateR. Saved source/count/exclusion audit PASS:
+856files/256prior hashes,54DATA_GAP policy observations/9events,496checksums.
+Actual logs read; durable DEV8ee2ea6255e914329032496bd14be07a70cece0e.
+Existing V9 full preservation continues; raw-ledger mean/archive byte audit pending.
 
-Actual exit-scan progress read 2026-10-02T04:14:43Z: seven of eight DEV shards
-SUCCESS with artifact uploads and actual completed logs audited. Partial totals
-191,500 resolved parameterized outcomes and38 chronology exclusions. Shard0
-job110695502433 is still executing the canonical scan. These partial counts are
-not executable account trades and do not establish profitability. Combined96
-policy cells, exclusion breakdown and selection are pending. No account result
-or daily-goal evidence exists yet. No duplicate execution or unrelated change.
-Whole-account daily+0.7%–2% remains unproved and unmet.
+V10 new relative-price residual/AR1 reversion preregistered ata42078eb11baa5442e4009a3e96a9e64f4665fce,
+branchresearch-residual-reversion-v10.16entries/96fixed cells;full856 catalogue
+frozen before code. Implementation/tests/one actual launch in progress;owner
+lease until2026-10-02T06:27:24Z;other sessions read-only.
+No V10 actual result. Daily whole-account+.7%-2% remains unproved/unmet.
 
 ## Completed failures and durable assets
+- V9 actual36955250542:16entries/96cells/223218outcomes,zero selected/account.
+  Net40 price means-63.6210 to+5.3485bp,R-.27166 to+.04636,PF.57707-1.02713.
+  Two small-positive cells N153/234,2022negative;all96 2022R negative.
+  Failure audit onV10 PLAN commita42078eb11baa5442e4009a3e96a9e64f4665fce;DEV8ee2ea6255e914329032496bd14be07a70cece0e.
+  Full archive/raw-ledger audit pending on existing preservation job.
+
 - V8 actual run36929463082/codec049138866f628bb2de891b81a77b133de13359d:
   workflow operationally SUCCESS;256 frozen hashes,181tests/canonical checks,
   eightDEV shards and selection completed.16entries/96cells/531854resolved
@@ -174,13 +178,10 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Follow the existing run36955250542 and remaining DEV shard0. On completion
-read its actual log and saved combined96 policy cells/selection directly,
-reconcile source hashes and chronology exclusions, and verify the full durable
-archive. Freeze before seen2024 GATE/accounts. If rejected, preserve numeric
-causes and proceed with a preregistered new economic hypothesis, implementation,
-tests and actual execution. Provisional survivors still require fixed
-neighbours, stress, actual delays, time dependence and fresh forward evidence.
+Honor V10 implementation lease. Implement frozen hypothesis and independent
+OLS/AR1/causality/source/96-cell tests; execute actual canonical/account/calendar
+smoke, launch once, record actual code/run and release lease. Follow V9 existing
+preservation for pending full archive/ledger audits, no duplicated market scan.
 
 ## V9 execution handoff — 2026-10-02 02:21 UTC
 
@@ -200,3 +201,6 @@ V9 rank audit 2026-10-02T03:45:29Z: all8 maps+reducer+rank preservation SUCCESS;
 
 V9 partial exit audit 2026-10-02T04:14:43Z:7/8DEV shards SUCCESS with actual logs/artifacts;
 191,500 parameterized outcomes,38 exclusions; shard0 active, combined cells pending.
+
+V9 final DEV/V10 preregistration 2026-10-02T04:27:24Z:96cells/223218outcomes/zero survivors;
+V10 PLANa42078eb11baa5442e4009a3e96a9e64f4665fce,implementation/actual launch pending.
