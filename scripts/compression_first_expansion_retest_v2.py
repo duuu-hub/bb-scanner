@@ -7,7 +7,6 @@ import numpy as np,pandas as pd
 import scripts.external_breakout_replay as ex
 import scripts.sweep_reclaim_research as base
 import scripts.compression_first_expansion_v1 as v1
-import scripts.psar_open_canonical_compare as canon
 
 TRAIN_START=pd.Timestamp("2021-01-01T00:00:00Z").value//10**6
 TRAIN_END=pd.Timestamp("2025-01-01T00:00:00Z").value//10**6
@@ -45,6 +44,27 @@ def first_retest_fill(t,o,h,start,limit,max_ttl):
    return {"bar":j,"fill":float(limit),"is_taker":False}
  return None
 
+
+def resolve_1m_short_retest(symbol,ts,tp,sl,entry=None):
+ d=ex.w1m(symbol,ts)
+ if len(d)==2 and d[0]=="data_gap":return "data_gap"
+ _,_,h,l=d
+ entered=entry is None;entry_seen=entered
+ for j in range(15):
+  if not entered:
+   if h[j]<entry:continue
+   ht=l[j]<=tp;hs=h[j]>=sl
+   if ht or hs:return "loss"
+   entered=True;entry_seen=True
+   continue
+  ht=l[j]<=tp;hs=h[j]>=sl
+  if ht and hs:return "loss"
+  if hs:return "loss"
+  if ht:return "win"
+ if entry is not None:
+  return "continue" if entry_seen else "entry_mismatch"
+ return "exit_mismatch"
+
 def resolve_trade(symbol,t,o,h,l,c,fill_bar,fill,is_taker,a96,sl_mult,tp_r):
  risk=float(sl_mult*a96)
  if not np.isfinite(risk) or risk<=0:return {"status":"bad_risk"}
@@ -57,11 +77,7 @@ def resolve_trade(symbol,t,o,h,l,c,fill_bar,fill,is_taker,a96,sl_mult,tp_r):
  j=int(fill_bar);xp=xb=reason=None
  hit_tp=l[j]<=tp;hit_sl=h[j]>=sl
  if hit_tp or hit_sl:
-  rr=canon._resolve_1m(
-    symbol,int(t[j]),tp,sl,False,
-    None if is_taker else fill,
-    float(h[j]),float(l[j])
-  )
+  rr=resolve_1m_short_retest(symbol,int(t[j]),tp,sl,None if is_taker else fill)
   if rr in ("data_gap","entry_mismatch","exit_mismatch"):
    return {"status":rr}
   if rr=="win":xp,xb,reason=tp,j,"TP"
@@ -75,7 +91,7 @@ def resolve_trade(symbol,t,o,h,l,c,fill_bar,fill,is_taker,a96,sl_mult,tp_r):
    ht=l[k]<=tp;hs=h[k]>=sl
    if not (ht or hs):continue
    if ht and hs:
-    rr=canon._resolve_1m(symbol,int(t[k]),tp,sl,False,None,float(h[k]),float(l[k]))
+    rr=resolve_1m_short_retest(symbol,int(t[k]),tp,sl,None)
     if rr in ("data_gap","exit_mismatch","entry_mismatch"):
      return {"status":rr}
     xp,xb,reason=(tp,k,"TP") if rr=="win" else (sl,k,"SL")
@@ -208,7 +224,6 @@ def main():
     rows.extend(signal_rows(s,*tuple(x[aa:bb] for x in d),cnt,ccfg))
   finally:
    ex.CACHE.clear()
-   canon._ONE_MIN_CACHE.clear()
   if n%10==0 or n==len(fs):
    print(f"PROGRESS {n}/{len(fs)} {s} rows={len(rows)} raw_signals={cnt['raw_short_signals']} elapsed_min={(time.time()-started)/60:.1f}",flush=True)
 
@@ -234,7 +249,7 @@ def main():
   "exit":{"sl_atr96_grid":SL_ATR,"tp_r_grid":TP_R,"hold_bars":HOLD_BARS,
           "risk_pct_bounds":[MIN_RISK,MAX_RISK]},
   "costs_round_trip_bp":[20,40],"funding":"excluded",
-  "canonical_maker_resolver":"scripts/psar_open_canonical_compare.py::_resolve_1m semantics",
+  "canonical_maker_resolver":"V2-local exact SHORT mirror of canonical _resolve_1m semantics using external_breakout_replay.w1m",
   "global_counters":dict(cnt),
   "config_counters":{k:dict(v) for k,v in ccfg.items()},
   "rows":len(rows),"symbols":len(fs)
