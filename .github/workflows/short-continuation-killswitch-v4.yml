@@ -1,0 +1,66 @@
+name: Short Continuation KillSwitch V4
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/short_continuation_killswitch_v4_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Smoke causality invariants
+        run: |
+          python -m py_compile scripts/short_continuation_killswitch_v4.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import pandas as pd
+          import scripts.short_continuation_killswitch_v4 as s
+
+          rows=[]
+          # First 20 trades all win but exit exactly at t=1000.
+          for i in range(20):
+            rows.append(dict(entry_time=i,exit_time=1000,symbol=f"S{i}",impulse_atr=2.5,
+                             risk_pct=.02,gross_return=.03,reason="TP"))
+          # Candidate at t=1000 must NOT see those same-time exits.
+          rows.append(dict(entry_time=1000,exit_time=1100,symbol="NOW",impulse_atr=2.5,
+                           risk_pct=.02,gross_return=.03,reason="TP"))
+          # Candidate at t=1001 may see them.
+          rows.append(dict(entry_time=1001,exit_time=1101,symbol="NEXT",impulse_atr=2.5,
+                           risk_pct=.02,gross_return=.03,reason="TP"))
+          d=pd.DataFrame(rows)
+          m=s.build_shadow_gate(d,20,"SUMR_POS")
+          now=d.index[d.symbol=="NOW"][0]
+          nxt=d.index[d.symbol=="NEXT"][0]
+          assert not bool(m.loc[now]), m
+          assert bool(m.loc[nxt]), m
+          print("KILLSWITCH_V4_CAUSALITY_PASS")
+          PY
+      - name: Download frozen horizon V2 final artifact
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p source
+          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D source
+          test -f source/short_continuation_horizon_all.csv.gz
+      - name: Run kill-switch audit
+        run: |
+          python scripts/short_continuation_killswitch_v4.py \
+            --input source/short_continuation_horizon_all.csv.gz \
+            --out killswitch_v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-continuation-killswitch-v4-final
+          path: killswitch_v4/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
