@@ -7,22 +7,23 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V9 actual Actions run36955250542/code
-2e1bb92891c2c480028c075b30afe91275cc0c43 advanced: validation
-job110676681938 completed SUCCESS. Its actual log proves the frozen256-hash
-contract,232 tests (33 new V9), canonical chronology smoke, canonical invariants
-and the synthetic eight-map global rank/reduce/load/scan path. The validation
-artifact is11206572898,ZIP SHA256
-2dd197573fff23904ea99b34cf7828144eb54a401c5080faaa507caf81741195.
-This validates implementation plumbing only, not market profitability.
+V9 actual run36955250542/code2e1bb92891c2c480028c075b30afe91275cc0c43:
+232-test validation/canonical chronology/invariants PASS; all8 real DEV daily
+rank-map jobs SUCCESS; global reducer and durable rank preservation SUCCESS.
+Actual logs and the saved manifest were read 2026-10-02T03:45:29Z.856 original
+processed source files checked; all256 prior frozen CSV hashes matched. The8
+map counts reconcile to82,191 symbol/date rank observations across821 UTC
+rank dates, minimum eligible universe30, no low-universe dates excluded.
+These are prior-day rank observations, not executable trades or profits.
 
-All eight real DEV prior-midnight rank-map jobs are now QUEUED. No real V9 rank
-rows, canonical exit outcomes, selected policy, account scenario or daily-goal
-result exists yet. Preregistration remains commit
-53fea7dd385bdd1ec7048f58be23087f5168158a;16 entries/96 cells remain fixed.
-Continue the same run, verify all source hashes and map logs, then audit the
-persisted global rank hash before DEV exit scanning. Whole-account daily
-+0.7%–2% remains unproved and unmet.
+Rank branch research-cross-sectional-leader-v9-ranks-development-36955250542,
+commit29cef4098a66750cf7df94fb7c797e156ffff02e, path
+research/cross-sectional-leader-v9/run-36955250542/ranks-development;
+rank CSV SHA256254fc4035dc8d5e19e650e9336bfe31de58a1037cdc0a88cc1fee4b50a3dd355.
+Preregistration remains53fea7dd385bdd1ec7048f58be23087f5168158a.
+The16 entries/96 fixed exit policy cells are now queued in8 DEV scan jobs.
+No V9 policy outcome, selected/account result or daily-goal evidence exists yet.
+Whole-account daily+0.7%–2% remains unproved and unmet.
 
 ## Completed failures and durable assets
 - V8 actual run36929463082/codec049138866f628bb2de891b81a77b133de13359d:
@@ -174,15 +175,13 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-V9 implementation is committed and actual run36955250542 exists. As of
-2026-10-02 02:25:11 UTC, its validation job110676681938 remains QUEUED and no
-execution steps/logs or market outcomes are available. Resume by checking this
-same run, never starting a duplicate. Actual chronology validation must pass
-before the8 DEV maps; audit persisted global rank rows/hashes before96 DEV exit
-cells. Read actual selection/artifacts and conditionally check frozen GATE/
-accounts. If rejected, preserve the numeric failure and preregister, implement,
-test and execute a genuinely new mechanism. Provisional survivors require fixed
-neighbours, stress, real delays, time dependence and new forward observations.
+Audit the8 DEV exit scan jobs on the existing run36955250542; no duplicate
+execution. Daily maps/global rank hash are already verified and saved before
+exit outcomes. On completion read all96 cells and exclusions directly. Freeze
+selection before seen2024 GATE/accounts. If rejected, preserve numeric causes
+and proceed to a preregistered new economic mechanism with implementation,
+tests and actual execution. Provisional survivors still require fixed
+neighbours, stress, actual delays, time dependence and fresh forward evidence.
 
 ## V9 execution handoff — 2026-10-02 02:21 UTC
 
@@ -196,3 +195,6 @@ this does not establish a quota/capacity cause. Unrelated work is unchanged.
 
 V9 progress 2026-10-02T03:13:39Z: actual validation SUCCESS; eight real DEV rank-map jobs
 queued. No duplicate execution launched and no unrelated workflow changed.
+
+V9 rank audit 2026-10-02T03:45:29Z: all8 maps+reducer+rank preservation SUCCESS;
+82,191 saved ranks/821UTC dates. Eight exit-scan jobs queued; no profit claim.
