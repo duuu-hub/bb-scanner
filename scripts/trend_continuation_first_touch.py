@@ -8,7 +8,7 @@ Pre-registered discovery design:
 - Strength: cross-sectional winner percentile plus absolute trailing return.
 - Signal only on a fresh transition into the qualifying state (no repeated signal every 15m).
 - TP fixed at +1.0%.
-- SL sweep: -0.50%, -0.75%, -1.00%.
+- SL sweep: -1.00%, -1.50%, -2.00%, -2.50%, -3.00%, -4.00%, -5.00%.
 - Time limits: 1h, 2h, 4h, 6h.
 - Costs: 20bp and 40bp round trip.
 - Train: <= 2024-12-31. Holdout: >= 2025-01-01.
@@ -38,7 +38,7 @@ ABS_THRESH = {
     "8h": (8.0, 12.0, 20.0),
     "24h": (12.0, 20.0, 30.0),
 }
-SLS = (0.50, 0.75, 1.00)
+SLS = (1.00, 1.50, 2.00, 2.50, 3.00, 4.00, 5.00)
 TIME_LIMITS = {"1h": 4, "2h": 8, "4h": 16, "6h": 24}
 COST_BPS = (20, 40)
 MIN_UNIVERSE = 20
