@@ -17,7 +17,7 @@ N1278/194symbols,-9.5794bp,-.04375R,PF.946. Sources856/prior256 hashes;
 checks/exclusions audited. Full original ledgers await existing preserve_cycle.
 Daily account +0.7%-2% remains unmet.
 
-V11 distinct aggressive taker-flow cascade continuation is being preregistered
+V11 distinct aggressive taker-flow cascade continuation was preregistered at commit 1ffcce44d054adb42a0cff620f8381cfa388b4e2 and is being implemented
 on branch research-aggressive-flow-cascade-v11 before code or market outcomes.
 It targets short-lived order-flow persistence after an idiosyncratic high-volume
 breakout, rather than V3 shock reversal,V4 compression breakout,V6 BTC lag,
@@ -223,3 +223,6 @@ V10 final DEV/V11 handoff 2026-10-02T05:11:06Z:all8 scans and selection SUCCESS;
 340491 parameterized outcomes,159 DATA_GAP exclusions,all96 global net40 price/R
 negative,zero selected;gate/accounts skipped. Saved outputs audited. V11 distinct
 aggressive-flow cascade hypothesis preregistration started; no market run yet.
+
+V11 preregistration checkpoint 2026-10-02T05:16:00Z:PLAN/full856 catalogue
+committed before code at 1ffcce44d054adb42a0cff620f8381cfa388b4e2;implementation/tests/launch pending.
