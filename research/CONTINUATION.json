@@ -1,6 +1,6 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-02T09:57:00Z",
+  "updated_at": "2026-10-02T09:58:17Z",
   "interactive_lease": {
     "owner": "dayedge-v12-research-20261002T0856Z",
     "acquired_at": "2026-10-02T08:56:00Z",
@@ -8,10 +8,10 @@
     "purpose": "Own continuation: V11/V12 audits complete; implement,test,launch preregistered V13 on separate research branch."
   },
   "current_branch": "research-breakout-level-retest-v13",
-  "current_run": null,
+  "current_run": 36992677948,
   "current_workflow": "Breakout Level Retest V13 Research Cycle",
   "current_plan": "research/breakout-level-retest-v13/PLAN.md",
-  "latest_research_checkpoint": "V13_LOCAL338_SYNTHETIC_PASS_ACTUAL_PINNED_VALIDATION_REQUIRED",
+  "latest_research_checkpoint": "V13_ONE_RUN_PINNED_DEPENDENCIES_INSTALLED_ACTUAL338_VALIDATION_IN_PROGRESS",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -238,8 +238,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Find unique V13 workflow for code commit; read actual338/chronology/invariants/synthetic logs before claiming market execution. No duplicate marker.",
-  "phase": "V13_CODE_COMMITTED_ACTIONS_DISCOVERY_PENDING",
+  "next_action": "Read actual validate log; only after338/canonical/synthetic PASS monitor existing eight DEV shards. Do not re-push marker. On completion inspect original outcomes/artifacts and preserve audits.",
+  "phase": "V13_ACTUAL_VALIDATION_RUNNING",
   "last_failure": {
     "version": "V12",
     "run": 36989682215,
@@ -258,10 +258,14 @@
   "plan_commit": "1859c6096948fc851bca09d267ce3642028da838",
   "code_commit": "869fbc6ca98c23880d9d64ffb71a322509b73d3d",
   "current_result_locations": {
-    "status": "NOT_EXECUTED",
-    "research_branch": "research-breakout-level-retest-v13",
-    "plan_path": "research/breakout-level-retest-v13/PLAN.md",
-    "previous_failure_audit_path": "research/taker-absorption-release-v12/FAILURE_AUDIT.md"
+    "status": "EXPECTED_PENDING_COMPLETION",
+    "development_branch": "research-breakout-level-retest-v13-dev-36992677948",
+    "development_path": "research/breakout-level-retest-v13/run-36992677948/development",
+    "account_branch": "research-breakout-level-retest-v13-results-36992677948",
+    "account_path": "research/breakout-level-retest-v13/run-36992677948/accounts",
+    "complete_evidence_branch": "research-breakout-level-retest-v13-evidence-36992677948",
+    "complete_evidence_path": "research/breakout-level-retest-v13/run-36992677948/complete-evidence",
+    "expected_does_not_mean_saved": true
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -379,10 +383,73 @@
     "local_tests_status": "PASS",
     "local_failures": 1,
     "local_failure_type": "Immutable local copy terminal newline; repaired exact byte copy; economic rules unchanged.",
-    "actual_validation": "NOT_OBSERVED",
+    "actual_validation": "in_progress",
     "market_outcomes": false,
     "profit_claim": false,
-    "daily_target_claim": false
+    "daily_target_claim": false,
+    "run_id": 36992677948,
+    "workflow_run_status": "in_progress",
+    "validation_job": 110792275453,
+    "job_snapshot": [
+      {
+        "id": 110792275453,
+        "name": "validate",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_id": 36992677948,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-python@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Install pinned research dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Breakout snapshot retest causality and canonical account validation",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 5
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 6
+          },
+          {
+            "name": "Post Run actions/setup-python@v5",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12
+          }
+        ]
+      }
+    ]
   },
   "v8_attempt_failures": [
     {
@@ -1540,5 +1607,6 @@
       "All eight original compressed ledger bytes/hash/arithmetic checked; full archive git byte sizes checked. Other archive files have not all been downloaded and SHA256-rehashed by this audit.",
       "No V12 market rerun, account growth claim or daily target claim."
     ]
-  }
+  },
+  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/36992677948"
 }
