@@ -11,9 +11,25 @@ def pf(x):
  x=np.asarray(x,float);gp=x[x>0].sum();gl=-x[x<0].sum()
  return float("inf") if gl==0 and gp>0 else (float(gp/gl) if gl>0 else np.nan)
 
+def select_exec(g):
+ z=g.sort_values(["entry_time","impulse_atr","symbol"],ascending=[True,False,True]).copy()
+ accepted=[];openp=[];conc=[];expo=[]
+ for _,r in z.iterrows():
+  et=int(r.entry_time)
+  openp=[p for p in openp if p["exit_time"]>et]
+  if len(openp)>=base.MAX_OPEN:continue
+  if any(p["symbol"]==r.symbol for p in openp):continue
+  notional=base.RISK_BUDGET/float(r.risk_pct)
+  gross=sum(p["notional"] for p in openp)
+  if gross+notional>base.MAX_GROSS+1e-12:continue
+  accepted.append(r.to_dict())
+  openp.append({"symbol":r.symbol,"exit_time":int(r.exit_time),"notional":notional})
+  conc.append(len(openp));expo.append(gross+notional)
+ return pd.DataFrame(accepted),conc,expo
+
 def metrics(g,label):
  if not len(g):return {"split":label,"raw_n":0}
- sel,conc,expo=base.select_exec(g)
+ sel,conc,expo=select_exec(g)
  a20=base.account_sim(sel,20);a40=base.account_sim(sel,40)
  days=max((g.entry_time.max()-g.entry_time.min())/86400000,1)
  q={"split":label,"raw_n":len(g),"raw_gross_pf":pf(g.gross_r),"raw_pf20":pf(g.net20_r),"raw_pf40":pf(g.net40_r),
