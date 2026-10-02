@@ -1,0 +1,111 @@
+name: BTC Impulse Alt Lag Catch-up V1 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/btc_impulse_alt_lag_catchup_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile and audit smoke
+        run: |
+          python -m py_compile scripts/btc_impulse_alt_lag_features_v1.py scripts/btc_impulse_alt_lag_catchup_v1_merge.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          import pandas as pd
+          import scripts.btc_impulse_alt_lag_catchup_v1_merge as m
+          assert len(m.PORT_CONFIGS)==48
+          d=pd.DataFrame([
+            {"symbol":"AUSDT","entry_time":1,"side":"long","lag_gap":3.0,"alt_norm_move":0.1},
+            {"symbol":"BUSDT","entry_time":1,"side":"long","lag_gap":2.0,"alt_norm_move":0.2},
+            {"symbol":"CUSDT","entry_time":1,"side":"long","lag_gap":1.0,"alt_norm_move":0.3},
+            {"symbol":"DUSDT","entry_time":2,"side":"short","lag_gap":4.0,"alt_norm_move":0.1},
+          ])
+          z=m.pick_pairs(d,.25,1)
+          assert list(z.symbol)==["AUSDT","DUSDT"]
+          assert m.LAG_MAX==(.25,.50,.75) and m.TOPK==(3,6)
+          assert m.HOLD_BARS==(16,32)
+          print("BTC_LAG_V1_SELECTION_SMOKE_PASS")
+          PY
+
+  features:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Extract TRAIN lag features
+        run: |
+          python scripts/btc_impulse_alt_lag_features_v1.py \
+            --data data \
+            --shard \${{ matrix.shard }} \
+            --shards 12
+      - uses: actions/upload-artifact@v4
+        with:
+          name: btc-lag-features-v1-\${{ matrix.shard }}
+          path: |
+            btc_lag_features_\${{ matrix.shard }}.csv.gz
+            btc_lag_features_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: features
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: btc-lag-features-v1-*
+          path: feature_artifacts
+      - name: Verify feature shards
+        run: |
+          test "$(find feature_artifacts -name 'btc_lag_features_*.csv.gz' | wc -l)" -eq 12
+          test "$(find feature_artifacts -name 'btc_lag_features_meta_*.json' | wc -l)" -eq 12
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Select laggards before outcomes and evaluate TRAIN
+        run: |
+          python scripts/btc_impulse_alt_lag_catchup_v1_merge.py \
+            --features feature_artifacts \
+            --data data \
+            --out btc_lag_catchup_v1_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: btc-impulse-alt-lag-catchup-v1-train-final
+          path: btc_lag_catchup_v1_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
