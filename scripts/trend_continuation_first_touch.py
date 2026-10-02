@@ -339,7 +339,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--restrict-to-raw-symbols", action="store_true")
     ap.add_argument("--events-in", default="")
+    ap.add_argument("--tp-pct", type=float, default=1.0)
     a = ap.parse_args()
+    global TP_PCT
+    TP_PCT=float(a.tp_pct)
     outdir = Path(a.out); outdir.mkdir(parents=True, exist_ok=True)
 
     if a.events_in:
@@ -367,7 +370,7 @@ def main():
                 for cost in COST_BPS:
                     for split in ("TRAIN","HOLDOUT"):
                         s = summarize_cell(e, outcomes, slp, tl, split, cost)
-                        s.update({"lookback":lb,"tail":tail,"threshold_pct":thr})
+                        s.update({"lookback":lb,"tail":tail,"threshold_pct":thr,"tp_pct":TP_PCT})
                         rows.append(s)
     cells = pd.DataFrame(rows)
     cells.to_csv(outdir/"cells.csv", index=False)
