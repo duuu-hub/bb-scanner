@@ -1,0 +1,111 @@
+{
+  "experiment_id": "compression_first_expansion_retest_v2_train",
+  "generation_reason": "V1 immediate-entry failed net of costs. V1 post-hoc diagnostics suggested SHORT gross edge survives only in stronger moves; V2 changes entry mechanism only, testing a causal pullback/retest limit entry. This is a new EXPLORATORY generation.",
+  "registered_before_outcome": true,
+  "parent_experiment": "compression_first_expansion_v1_train",
+  "parent_train_result_run": 36996299502,
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "registration_base_head": "34782de37c4743d6235b34a781c29102bc035d77",
+  "data": {
+    "source_run": 36095439671,
+    "market": "Binance USD-M USDT perpetual",
+    "parent_timeframe": "15m",
+    "date_range": "2021-01-01 through 2024-12-31 UTC TRAIN only",
+    "validation_period": "2025-2026 is SEEN validation and must not be read by this TRAIN run",
+    "universe": "all symbols in frozen source artifacts",
+    "point_in_time_universe_status": "unknown; survivorship/listing eligibility must be audited before VALIDATED_CANDIDATE"
+  },
+  "signal": {
+    "side": "SHORT only",
+    "why_short_only": "Chosen after V1; therefore post-hoc relative to V1 and explicitly a new exploratory generation.",
+    "compression": "ATR16/ATR96 <= 0.65 using values available before signal bar",
+    "box": "prior 16 completed 15m bars",
+    "first_breakout_guard": "previous close inside its own prior-16-bar box",
+    "breakout": "signal bar close < prior box low",
+    "expansion": "signal bar range >= 2.0 * ATR16",
+    "body_to_range_min": 0.6,
+    "order_live": "next 15m bar open after signal close"
+  },
+  "retest_entry": {
+    "penetration_definition": "D = box_low - signal_close > 0",
+    "sell_limit": "signal_close + retrace_fraction * D",
+    "retrace_fraction_grid": [
+      0.25,
+      0.5,
+      1
+    ],
+    "ttl_bars_grid": [
+      2,
+      4,
+      8
+    ],
+    "ttl_minutes": [
+      30,
+      60,
+      120
+    ],
+    "crossed_at_bar_open": "if bar open >= sell limit, fill immediately at bar open as taker; otherwise resting sell limit fills when high reaches the limit",
+    "maker_fill_bar_chronology": "use canonical official Binance 1m resolver when fill-bar TP/SL chronology is ambiguous; same-1m exit after maker fill is conservative loss",
+    "unfilled": "expire without trade at TTL"
+  },
+  "exits": {
+    "stop_distance_atr96_grid": [
+      1,
+      1.5
+    ],
+    "target_r_grid": [
+      1.5,
+      2.5
+    ],
+    "max_hold_bars": 32,
+    "max_hold_hours_label": 8,
+    "time_exit_convention": "V1-compatible: if no TP/SL, use close of final allowed 15m bar at the 32-bar horizon; recorded timestamp is that bar's open_time",
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "costs": {
+    "round_trip_all_in_bp": [
+      20,
+      40
+    ],
+    "funding": "excluded",
+    "separate_slippage": "not modeled beyond all-in cost stress"
+  },
+  "portfolio": {
+    "starting_equity": 1,
+    "compounding": true,
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false,
+    "priority": "entry_time ascending; expansion_strength descending; compression_strength descending; symbol ascending"
+  },
+  "selection": {
+    "dataset": "TRAIN only",
+    "minimum_executable_trades": 500,
+    "minimum_exec_per_day": 0.34,
+    "gates": [
+      "20bp account return > 0",
+      "40bp account return > 0",
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD20 <= 35%",
+      "at least 3 of 4 calendar years have positive 20bp return",
+      "no calendar year PF20 < 0.85",
+      "at least one adjacent grid configuration has PF20 > 1.03 and positive 20bp account return"
+    ],
+    "primary_ranking": "highest 20bp account return among passing configs; tie lower MDD20, then higher PF40, then more executable trades",
+    "next_if_pass": "freeze TRAIN-selected stable region before opening 2025-2026 validation",
+    "next_if_fail": "preserve V2 as failed and move to another entry/exit mechanism; do not mine validation"
+  },
+  "execution": {
+    "canonical_contract": "AGENTS.md section 11",
+    "maker_resolver": "scripts/psar_open_canonical_compare.py::_resolve_1m semantics",
+    "collision_policy": "official Binance 1m; same 1m ambiguous => LOSS; data gaps/mismatches excluded",
+    "required_smoke": "psar_chronology_smoke.py plus V2-specific sell-limit entry smoke cases"
+  },
+  "classification": "EXPLORATORY"
+}
