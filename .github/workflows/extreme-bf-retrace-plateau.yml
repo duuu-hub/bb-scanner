@@ -64,10 +64,10 @@ jobs:
               post=[x for x in data if x[0]>=sig_ts]
               if not pre: continue
               running_peak=max(pre[0][1],pre[0][2])
-              armed=False; rebound=False; low=None; reb_high=None; retr=None
+              armed=False; rebound=False; low=None; reb_high=None; state_frozen=None; retr=None; confirm_ts=None
               for ts,o,h,l,c in pre:
                   if h>running_peak:
-                      running_peak=h;armed=False;rebound=False;low=None;reb_high=None
+                      running_peak=h;armed=False;rebound=False;low=None;reb_high=None;state_frozen=None
                   dd=max(0,1-c/running_peak)
                   if not armed:
                       if dd>=0.15:
@@ -75,7 +75,7 @@ jobs:
                   elif not rebound:
                       low=min(low,l)
                       if h>=low*1.10 and h<running_peak*0.995:
-                          rebound=True;reb_high=h
+                          rebound=True;reb_high=h;state_frozen=low
                   else:
                       reb_high=max(reb_high,h)
                       if c<state_frozen:
@@ -83,6 +83,8 @@ jobs:
                               retr=(reb_high-low)/(running_peak-low)*100
                           break
               if retr is None: continue
+              assert confirm_ts is not None and confirm_ts+900000==sig_ts, (sym,base,"signal_mismatch")
+              assert abs(state_frozen-target_frozen)<=max(1e-12,abs(target_frozen)*1e-9), (sym,base,"frozen_mismatch")
               maxh=max(x[2] for x in post) if post else -1
               recs.append({
                   "symbol":sym,"base_x":base,"base_entry_ts":rr["base_entry_ts"],
