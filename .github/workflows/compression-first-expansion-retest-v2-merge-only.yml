@@ -1,0 +1,40 @@
+name: Compression Retest V2 Merge Only
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/compression_first_expansion_retest_v2_merge_only_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile merge
+        run: python -m py_compile scripts/compression_first_expansion_retest_v2_merge.py
+      - name: Download successful V2 TRAIN shards
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p artifacts
+          gh run download 37000861960 -R \${{ github.repository }} -p 'compression-retest-v2-*' -D artifacts
+          test "$(find artifacts -name 'compression_retest_v2_*.csv.gz' | wc -l)" -eq 12
+          test "$(find artifacts -name 'compression_retest_v2_meta_*.json' | wc -l)" -eq 12
+      - name: Merge TRAIN only
+        run: |
+          python scripts/compression_first_expansion_retest_v2_merge.py \
+            --input artifacts \
+            --out compression_retest_v2_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-retest-v2-train-final-fixed
+          path: compression_retest_v2_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
