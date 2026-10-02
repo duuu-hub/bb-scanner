@@ -23,8 +23,14 @@ V13 breakout level retest preregistered BEFORE implementation at
 1859c6096948fc851bca09d267ce3642028da838,
 branch research-breakout-level-retest-v13.
 Fixed prior1d/3d channel breakout snapshot followed by closed retest/recovery,
-optional low pullback participation;16entries/96cells. Code/tests/launch pending.
-V12 failure audit is preserved on this preregistered research branch.
+optional low pullback participation;16entries/96cells. Code
+869fbc6ca98c23880d9d64ffb71a322509b73d3d. Local338 tests19.213s and
+synthetic8-shard CLI PASS; local immutable-copy newline error repaired and saved.
+Actual run36992677948: pinned dependencies installed,validation job110792275453
+in progress; no actual market outcomes observed yet. Existing run only,no duplicate.
+Expected full evidence branch research-breakout-level-retest-v13-evidence-36992677948
+and root research/breakout-level-retest-v13/run-36992677948/complete-evidence.
+V12 raw failure audit preserved on V13 prereg branch.
 Whole-account daily+0.7%-2% remains unmet.
 
 ## Completed failures and durable assets
