@@ -316,3 +316,13 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Final implementation commit before trigger: `6b8ddcdc97090fcbf2a8030f56497f256c2f8118`.
 - Exactly one trigger was pushed at commit `11d1d8c6aeda6b7da41d5a937a74ff796a9f531f`.
 - Audit state: Actions run ID and actual validation result are pending discovery. Do not claim execution, do not treat registered tests as passed, and do not launch a duplicate.
+
+
+## 2026-10-03 — V16 run 1 validation failure and fixture-only retry
+
+- Actual run: [37074012724](https://github.com/duuu-hub/bb-scanner/actions/runs/37074012724), trigger/code commit `11d1d8c6aeda6b7da41d5a937a74ff796a9f531f`.
+- Log-backed result: 458 tests ran in 59.405 s; 455 passed, 3 failed, 0 errors. The independent saved V13 audit passed first. Every V16 market map/scan/selection/account job was skipped, so market outcomes remain zero.
+- The three failures were synthetic-fixture defects: two tests left the fixture's bar 104 as an earlier valid pullback touch, and the stop-floor test's price geometry produced a 0.8168% structural stop rather than exercising the 0.5% floor.
+- Test-only repair commit: `eb360c6bc81fcb4ad9bdf5494dd6b2143803dabe`. It removes the unintended earlier touch and changes only the synthetic entry price needed to engage the floor; signal/economic parameters are unchanged.
+- Run-1 evidence branch: `research-breadth-pullback-reclaim-v16-evidence-37074012724`.
+- Exactly one retry trigger commit: `217a46b0e752800b70115eb9a63528d809242ce6`. Its Actions run ID/log is pending discovery; do not launch another duplicate.
