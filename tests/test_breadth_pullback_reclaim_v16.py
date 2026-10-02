@@ -66,14 +66,14 @@ class SignalContract(unittest.TestCase):
     def test_pullback_touch_required(self):
         z=self.get();z[4][3][101:111]=100.8;self.assertFalse(self.rows(z)[0])
     def test_same_bar_touch_and_reclaim_forbidden(self):
-        z=self.get();z[4][3][103]=100.8;z[4][3][105]=100.4;self.assertFalse(self.rows(z)[0])
+        z=self.get();z[4][3][101:105]=100.8;z[4][3][105]=100.4;self.assertFalse(self.rows(z)[0])
     def test_reclaim_must_be_after_touch(self):
         z=self.get();z[4][4][103]=101.;z[4][2][102]=100.6;z[5]['clv'][103]=.9
         r,_=self.rows(z);self.assertEqual(r[0]['reclaim_index'],105)
     def test_pre_reclaim_invalidation_blocks(self):
         z=self.get();z[4][3][104]=99.4;r,e=self.rows(z);self.assertFalse(r);self.assertEqual(e['PRE_RECLAIM_INVALIDATION'],1)
     def test_touch_after_ten_bars_is_ignored(self):
-        z=self.get();z[4][3][103]=100.8;z[4][3][111]=100.4;self.assertFalse(self.rows(z)[0])
+        z=self.get();z[4][3][101:111]=100.8;z[4][3][111]=100.4;self.assertFalse(self.rows(z)[0])
     def test_reclaim_after_twelve_bars_is_ignored(self):
         z=self.get();z[5]['clv'][105]=.5;z[4][4][105]=100.;z[4][1][113]=100.5;z[4][4][113]=101.;z[4][2][112]=100.6;z[5]['clv'][113]=.9
         self.assertFalse(self.rows(z)[0])
@@ -89,7 +89,7 @@ class SignalContract(unittest.TestCase):
     def test_adverse_entry_gap_retained(self):
         z=self.get();z[4][1][106]=100.5;self.assertEqual(len(self.rows(z)[0]),1)
     def test_stop_floor(self):
-        z=self.get();z[5]['prior_atr'][100]=.1;z[4][3][103]=100.95
+        z=self.get();z[5]['prior_atr'][100]=.1;z[4][3][103]=100.95;z[4][1][106]=100.5
         r,_=self.rows(z);self.assertAlmostEqual(r[0]['risk_pct'],.005)
     def test_stop_above_six_percent_rejected(self):
         z=self.get();z[4][3][100]=80.;z[4][3][103]=90.
