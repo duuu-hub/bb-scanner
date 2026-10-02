@@ -1,0 +1,55 @@
+name: Extreme Extension Threshold Stats
+
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_extension_threshold_stats_run'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: python -m py_compile research/extreme_extension_threshold_stats.py
+
+      - name: Download frozen 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir -p pump_data
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+
+      - name: Run threshold statistics
+        run: |
+          rm -rf extreme_threshold_stats
+          python research/extreme_extension_threshold_stats.py \
+            --data-root pump_data \
+            --out extreme_threshold_stats
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: extreme-extension-threshold-stats-${{ github.run_id }}
+          path: extreme_threshold_stats/
+          retention-days: 30
+          compression-level: 6
