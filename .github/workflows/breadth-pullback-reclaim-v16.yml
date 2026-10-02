@@ -1,0 +1,649 @@
+name: Breadth Pullback Reclaim V16 Research Cycle
+'on':
+  push:
+    branches:
+    - research-breadth-pullback-reclaim-v16
+    paths:
+    - .research/breadth-pullback-reclaim-v16-run
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: breadth-pullback-reclaim-v16-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1'
+    - name: Independent V13 original-ledger arithmetic before any V16 market step
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/audit_breakout_retest_v13.py --out audit-v13-originals 2>&1 | tee saved-v13-audit.log'
+    - name: Global breadth causality and canonical chronology/account validation
+      shell: bash
+      run: 'set -euo pipefail
+
+        python -m py_compile scripts/breadth_pullback_v16.py scripts/breadth_pullback_reclaim_v16.py scripts/validate_breadth_pullback_v16.py scripts/audit_breakout_retest_v13.py
+
+        python scripts/validate_breadth_pullback_v16.py 2>&1 | tee v16-tests.log
+
+        python scripts/psar_chronology_smoke.py 2>&1 | tee chronology-smoke.log
+
+        python scripts/breadth_pullback_reclaim_v16.py smoke --out synthetic-v16 2>&1 | tee breadth-pipeline-smoke.log'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-validation
+        path: 'v16-tests.log
+
+          chronology-smoke.log
+
+          breadth-pipeline-smoke.log
+
+          saved-v13-audit.log
+
+          audit-v13-originals/
+
+          synthetic-v16/
+
+          research/breadth-pullback-reclaim-v16/'
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+  map_development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Fetch immutable source and BTC
+      shell: bash
+      run: "set -euo pipefail\nif [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then\n  gh run download 36095439671 -R ${{ github.repository\
+        \ }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data\nfi\ngh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc\
+        \ -D btc\ngh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest\n\
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json\
+        \ --out map-development-${{ matrix.shard }}/source_check.json"
+    - name: Map exact closed shock counts without exit outcomes
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_v16.py map --stage DEV --data data --btc btc/BTCUSDT.csv.gz --source-check map-development-${{ matrix.shard }}/source_check.json
+        --out map-development-${{ matrix.shard }}'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-map-development-${{ matrix.shard }}
+        path: map-development-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  breadth_development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: breadth-pullback-reclaim-v16-map-development-[0-7]
+        path: maps
+    - name: Reduce all eight original shards and freeze global breadth
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_v16.py reduce --stage DEV --parts maps --out frozen-breadth
+
+        mkdir -p research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-development
+
+        cp frozen-breadth/* research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-development/
+
+        cp -r maps research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-development/original-map-shards'
+    - name: Preserve breadth-development on a separate research branch
+      shell: bash
+      run: 'set -euo pipefail
+
+        git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git checkout -b "research-breadth-pullback-reclaim-v16-breadth-development-${{ github.run_id }}"
+
+        git add "research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-development"
+
+        git commit -m "Preserve V16 breadth-development before subsequent research stages"
+
+        git push origin HEAD
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-breadth-development
+        path: frozen-breadth/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: map_development
+    permissions:
+      contents: write
+      actions: read
+  development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Fetch immutable source and BTC
+      shell: bash
+      run: "set -euo pipefail\nif [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then\n  gh run download 36095439671 -R ${{ github.repository\
+        \ }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data\nfi\ngh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc\
+        \ -D btc\ngh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest\n\
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json\
+        \ --out dev-${{ matrix.shard }}/source_check.json"
+    - uses: actions/download-artifact@v4
+      with:
+        name: breadth-pullback-reclaim-v16-breadth-development
+        path: frozen-breadth
+    - uses: actions/cache@v4
+      with:
+        path: cache/verified-1m
+        key: breadth-pullback-reclaim-v16-dev-1m-shard-${{ matrix.shard }}
+        restore-keys: 'premium-absorption-v8-dev-1m-shard-${{ matrix.shard }}
+
+          factor-lag-v6-dev-1m-shard-${{ matrix.shard }}'
+    - name: Canonical exit scan on frozen global breadth impulse, first pullback, and later reclaim
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_reclaim_v16.py scan --stage DEV --data data --btc btc/BTCUSDT.csv.gz --breadth-dir frozen-breadth --source-check
+        dev-${{ matrix.shard }}/source_check.json --out dev-${{ matrix.shard }} --minute-cache cache/verified-1m'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-dev-${{ matrix.shard }}
+        path: dev-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: breadth_development
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  map_gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Fetch immutable source and BTC
+      shell: bash
+      run: "set -euo pipefail\nif [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then\n  gh run download 36095439671 -R ${{ github.repository\
+        \ }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data\nfi\ngh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc\
+        \ -D btc\ngh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest\n\
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json\
+        \ --out map-gate-${{ matrix.shard }}/source_check.json"
+    - name: Map exact closed shock counts without exit outcomes
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_v16.py map --stage GATE --data data --btc btc/BTCUSDT.csv.gz --source-check map-gate-${{ matrix.shard }}/source_check.json
+        --out map-gate-${{ matrix.shard }}'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-map-gate-${{ matrix.shard }}
+        path: map-gate-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: selection
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+    if: needs.selection.outputs.selected_count != '0'
+  breadth_gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: breadth-pullback-reclaim-v16-map-gate-[0-7]
+        path: maps
+    - name: Reduce all eight original shards and freeze global breadth
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_v16.py reduce --stage GATE --parts maps --out frozen-breadth
+
+        mkdir -p research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-gate
+
+        cp frozen-breadth/* research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-gate/
+
+        cp -r maps research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-gate/original-map-shards'
+    - name: Preserve breadth-gate on a separate research branch
+      shell: bash
+      run: 'set -euo pipefail
+
+        git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git checkout -b "research-breadth-pullback-reclaim-v16-breadth-gate-${{ github.run_id }}"
+
+        git add "research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/breadth-gate"
+
+        git commit -m "Preserve V16 breadth-gate before subsequent research stages"
+
+        git push origin HEAD
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-breadth-gate
+        path: frozen-breadth/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: map_gate
+    permissions:
+      contents: write
+      actions: read
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Fetch immutable source and BTC
+      shell: bash
+      run: "set -euo pipefail\nif [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then\n  gh run download 36095439671 -R ${{ github.repository\
+        \ }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data\nfi\ngh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc\
+        \ -D btc\ngh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest\n\
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json\
+        \ --out gate-${{ matrix.shard }}/source_check.json"
+    - uses: actions/download-artifact@v4
+      with:
+        name: breadth-pullback-reclaim-v16-breadth-gate
+        path: frozen-breadth
+    - uses: actions/cache@v4
+      with:
+        path: cache/verified-1m
+        key: breadth-pullback-reclaim-v16-gate-1m-shard-${{ matrix.shard }}
+        restore-keys: 'premium-absorption-v8-gate-1m-shard-${{ matrix.shard }}
+
+          factor-lag-v6-gate-1m-shard-${{ matrix.shard }}'
+    - uses: actions/download-artifact@v4
+      with:
+        name: breadth-pullback-reclaim-v16-selected
+        path: selected-input
+    - name: Canonical exit scan on frozen global breadth impulse, first pullback, and later reclaim
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_reclaim_v16.py scan --stage GATE --data data --btc btc/BTCUSDT.csv.gz --breadth-dir frozen-breadth --source-check
+        gate-${{ matrix.shard }}/source_check.json --out gate-${{ matrix.shard }} --minute-cache cache/verified-1m --selection selected-input/selection.json'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-gate-${{ matrix.shard }}
+        path: gate-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs:
+    - breadth_gate
+    - selection
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  selection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: breadth-pullback-reclaim-v16-dev-[0-7]
+        path: dev-parts
+    - name: Freeze DEV selection before gate data processing
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/breadth_pullback_reclaim_v16.py select --parts dev-parts --out selected-input
+
+        python - <<''SELECT''
+
+        import json,os
+
+        n=len(json.load(open(''selected-input/selection.json''))[''policies''])
+
+        with open(os.environ[''GITHUB_OUTPUT''],''a'') as f:f.write(''selected_count=''+str(n)+''\n'')
+
+        SELECT
+
+        '
+      id: pick
+    - name: Preserve all cells, complete shard diagnostics and exclusion counts
+      shell: bash
+      run: "set -euo pipefail\npython - <<'SAVE'\nfrom pathlib import Path\nimport shutil,json,os,hashlib\np=Path('research/breadth-pullback-reclaim-v16/run-'+os.environ['GITHUB_RUN_ID']+'/development')\n\
+        shutil.copytree('selected-input',p)\nfor name in ['scan_meta.json','exclusions.csv','breadth_manifest.json','source_check.json']:\n for i,f in enumerate(sorted(Path('dev-parts').rglob(name))):\n\
+        \  shutil.copyfile(f,p/('full_dev_shard_'+str(i)+'_'+name))\n(p/'provenance.json').write_text(json.dumps(dict(run=int(os.environ['GITHUB_RUN_ID']),code_commit=os.environ['GITHUB_SHA'],\n\
+        \ source_data_run=36095439671,cells=96,sha256={str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file()}),indent=2))\n\
+        SAVE\n"
+    - name: Preserve dev on a separate research branch
+      shell: bash
+      run: 'set -euo pipefail
+
+        git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git checkout -b "research-breadth-pullback-reclaim-v16-dev-${{ github.run_id }}"
+
+        git add "research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/development"
+
+        git commit -m "Preserve V16 dev before subsequent research stages"
+
+        git push origin HEAD
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-selected
+        path: selected-input/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: development
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      selected_count: ${{ steps.pick.outputs.selected_count }}
+  accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - uses: actions/download-artifact@v4
+      with:
+        name: breadth-pullback-reclaim-v16-selected
+        path: combined-parts
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: breadth-pullback-reclaim-v16-gate-[0-7]
+        path: combined-parts/gate
+    - name: Verify same full account marking universe
+      shell: bash
+      run: 'set -euo pipefail
+
+        gh run download 36095439671 -R ${{ github.repository }} -p ''rank5-binance-um-15m-5y-data-shard-*'' -D market
+
+        gh run download 36095439671 -R ${{ github.repository }} -p ''rank5-binance-um-15m-5y-manifest-shard-*'' -D source-manifests
+
+        python scripts/research_evidence_archive.py verify-source --data market --manifests source-manifests --expected-shards 8 --baseline research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json
+        --out leader-account/source_check.json
+
+        python scripts/breadth_pullback_reclaim_v16.py accounts --data market --parts combined-parts --out leader-account --selection combined-parts/selection.json
+
+        '
+    - name: Save account arithmetic, all calendar days, curves and source hashes
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/accounts
+
+        cp -r leader-account/. research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/accounts/
+
+        cp combined-parts/selection.json research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/accounts/
+
+        cp combined-parts/development_policy_cells.csv research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/accounts/'
+    - name: Preserve results on a separate research branch
+      shell: bash
+      run: 'set -euo pipefail
+
+        git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git checkout -b "research-breadth-pullback-reclaim-v16-results-${{ github.run_id }}"
+
+        git add "research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/accounts"
+
+        git commit -m "Preserve V16 results before subsequent research stages"
+
+        git push origin HEAD
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: breadth-pullback-reclaim-v16-account-details
+        path: leader-account/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs:
+    - selection
+    - gate
+    permissions:
+      contents: write
+      actions: read
+    if: needs.selection.outputs.selected_count != '0'
+  preserve_cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: 'set -euo pipefail
+
+        pip install pandas==2.3.3 numpy==2.3.3'
+    - name: Collect completed and failed evidence with actual Actions logs
+      shell: bash
+      run: "set -euo pipefail\nmkdir -p cycle-evidence/job-logs\nif ! gh run download ${{ github.run_id }} -R ${{ github.repository }} -p 'breadth-pullback-reclaim-v16-*'\
+        \ -D cycle-evidence; then\n  echo 'One or more stage artifacts unavailable; actual completed job logs retained.' > cycle-evidence/artifact-download-incomplete.txt\n\
+        fi\ngh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100 > cycle-evidence/actions-jobs.json\npython - <<'JOBS'\
+        \ > completed-jobs.txt\nimport json\nfor j in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:\n if j['status']=='completed' and j['conclusion']!='skipped':\
+        \ print(j['id'])\nJOBS\nwhile read job_id; do\n  gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log\n\
+        done < completed-jobs.txt\ncp research/breadth-pullback-reclaim-v16/PLAN.md cycle-evidence/FROZEN_PLAN.md\ncp research/breadth-pullback-reclaim-v16/IMPLEMENTATION_CONTRACT.md\
+        \ cycle-evidence/\ncp research/breadth-pullback-reclaim-v16/FROZEN_INPUT_HASHES.json cycle-evidence/\ncp research/breadth-pullback-reclaim-v16/PREEXECUTION_VALIDATION.json\
+        \ cycle-evidence/\n\ncp research/breadth-pullback-reclaim-v16/FROZEN_CONTEXT.json cycle-evidence/\n"
+    - name: Archive every original trial, source, failure and audit
+      shell: bash
+      run: 'set -euo pipefail
+
+        python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V16-complete-or-partial --out research/breadth-pullback-reclaim-v16/run-${{
+        github.run_id }}/complete-evidence'
+    - name: Preserve evidence on a separate research branch
+      shell: bash
+      run: 'set -euo pipefail
+
+        git config user.name "github-actions[bot]"
+
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        git checkout -b "research-breadth-pullback-reclaim-v16-evidence-${{ github.run_id }}"
+
+        git add "research/breadth-pullback-reclaim-v16/run-${{ github.run_id }}/complete-evidence"
+
+        git commit -m "Preserve V16 evidence before subsequent research stages"
+
+        git push origin HEAD
+
+        '
+    needs:
+    - validate
+    - map_development
+    - breadth_development
+    - development
+    - map_gate
+    - breadth_gate
+    - gate
+    - selection
+    - accounts
+    permissions:
+      contents: write
+      actions: read
+    if: always()
