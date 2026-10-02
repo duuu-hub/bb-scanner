@@ -57,7 +57,7 @@ def trade_sequence_mdd(vals):
         mdd=min(mdd,eq-peak)
     return mdd
 
-@lru_cache(maxsize=1024)
+@lru_cache(maxsize=8192)
 def load_1m_day_ohlc(symbol,day):
     url=f"{BASE_1M}/{symbol}/1m/{symbol}-1m-{day}.zip"
     req=urllib.request.Request(url,headers={"User-Agent":"body70-validation/1.0"})
