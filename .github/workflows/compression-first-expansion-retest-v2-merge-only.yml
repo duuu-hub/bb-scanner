@@ -20,10 +20,10 @@ jobs:
         run: python -m py_compile scripts/compression_first_expansion_retest_v2_merge.py
       - name: Download successful V2 TRAIN shards
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p artifacts
-          gh run download 37000861960 -R \${{ github.repository }} -p 'compression-retest-v2-*' -D artifacts
+          gh run download 37000861960 -R ${{ github.repository }} -p 'compression-retest-v2-*' -D artifacts
           test "$(find artifacts -name 'compression_retest_v2_*.csv.gz' | wc -l)" -eq 12
           test "$(find artifacts -name 'compression_retest_v2_meta_*.json' | wc -l)" -eq 12
       - name: Merge TRAIN only
