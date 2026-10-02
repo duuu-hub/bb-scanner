@@ -183,10 +183,10 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Honor active V11 lease. Commit the frozen hypothesis/full856 catalogue before
-code, implement causal flow/breakout/source/chronology/account tests and launch
-once. Follow V10 preserve_cycle; audit durable original ledgers when complete.
-No duplicate V10 dispatch, seen-gate tuning or daily-target claim.
+Follow actual V11 run36980518301; read all eight DEV logs/artifacts and do not
+dispatch a duplicate. If all96 reject, quantify failure and preregister a genuinely
+different V12 before code. If a policy survives, freeze it before seen2024/account
+replay. No daily-target claim without strict account/calendar-day evidence.
 
 ## V9 execution handoff — 2026-10-02 02:21 UTC
 
@@ -226,3 +226,13 @@ aggressive-flow cascade hypothesis preregistration started; no market run yet.
 
 V11 preregistration checkpoint 2026-10-02T05:16:00Z:PLAN/full856 catalogue
 committed before code at 1ffcce44d054adb42a0cff620f8381cfa388b4e2;implementation/tests/launch pending.
+
+V10 durable archive 2026-10-02T07:50Z: preserve job110714511115 SUCCESS;
+2805 files/1286245712 bytes including814 official1m original ZIPs and32 candidate
+ledgers. Branch research-residual-reversion-v10-evidence-36966622286,
+commit830be9d0efa1addb294173fbce59f969b853555d. Manifest read directly.
+
+V11 actual launch 2026-10-02T07:49Z: run36980518301/code7f7c3b517978e3401e80d1d2f9fafea01cc048d1;
+actual validation job110753756045 SUCCESS: frozen256/full856 source contract,
+281 tests, chronology/canonical invariants and synthetic8/all96 PASS. Eight real
+DEV shards queued. Market/account outcomes unavailable; no profit/target claim.
