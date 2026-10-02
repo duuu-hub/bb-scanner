@@ -292,3 +292,16 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Failure evidence: `research/breadth-expansion-continuation-v15/V15_RUN1_FAILURE.json`; complete-evidence branch `research-breadth-expansion-continuation-v15-evidence-37019476663`.
 - Only the assertion was corrected at `e67900eae2f8742488daab1665562cef2837cd42`; no signal, cost, chronology, selection, or account parameter changed.
 - Retry trigger: `fe7775f16203282a4574173202624dc70ca8acfa`. Its Actions run ID is pending discovery; do not launch another duplicate.
+
+
+## 2026-10-03 — V15 actual rejection and V16 preregistration
+
+- Actual V15 run: [37025951533](https://github.com/duuu-hub/bb-scanner/actions/runs/37025951533), code `fe7775f16203282a4574173202624dc70ca8acfa`.
+- Log-backed execution: 416/416 tests passed; all eight DEV breadth maps passed; eight-shard reduction passed; all eight canonical Binance 1m DEV scans passed; selection and complete-evidence preservation passed.
+- Result: 96 cells examined, zero survivors. 2024 gate and account jobs were correctly skipped.
+- All 96 cells had negative net40 R. 93/96 also had non-positive net40 mean bp.
+- Ranges: N 225–15,500; symbols 116–238; net40 mean -74.7411 to +13.8584 bp; net40 R -0.20748 to -0.02815; PF 0.4803–1.0820.
+- Best gross-looking cell `EXPAND_S+1_H96_B10_PRICE_ONLY__H48__TP2`: N=476, 154 symbols, +13.8584 bp/trade, PF 1.0820, R=-0.02815. Its yearly R was +0.0887 / -0.1805 / +0.1012, and calendar-day R was negative in all three DEV years.
+- Durable audit: `research/breadth-expansion-continuation-v15/V15_ACTUAL_REJECTION.json` at `fdc689b6be16a50ff244982ab4012d160f8c0a1d`.
+- V16 was preregistered before implementation/outcomes at `0f16d614794396ecf7b7cbec3af6b9af138b7792` on `research-breadth-pullback-reclaim-v16`.
+- V16 is economically distinct: it does not enter the breadth impulse immediately. It requires a later controlled first pullback and a still-later closed-bar reclaim, explicitly forbidding same-bar touch/reclaim assumptions. Frozen grid remains 16 entries and 96 policies.
