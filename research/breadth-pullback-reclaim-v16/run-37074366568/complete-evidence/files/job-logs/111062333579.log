@@ -1,0 +1,399 @@
+﻿2026-10-02T22:53:23.2789188Z Current runner version: '2.337.0'
+2026-10-02T22:53:23.2815268Z ##[group]Runner Image Provisioner
+2026-10-02T22:53:23.2816247Z Hosted Compute Agent
+2026-10-02T22:53:23.2816958Z Version: 20260901.588
+2026-10-02T22:53:23.2817592Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-02T22:53:23.2818350Z Build Date: 2026-09-01T19:56:44Z
+2026-10-02T22:53:23.2819046Z Worker ID: {59f829b4-bbcd-4557-adb5-f7d16ed7d216}
+2026-10-02T22:53:23.2819755Z Azure Region: eastus
+2026-10-02T22:53:23.2820403Z ##[endgroup]
+2026-10-02T22:53:23.2822160Z ##[group]Operating System
+2026-10-02T22:53:23.2823265Z Ubuntu
+2026-10-02T22:53:23.2823829Z 24.04.5
+2026-10-02T22:53:23.2824328Z LTS
+2026-10-02T22:53:23.2824913Z ##[endgroup]
+2026-10-02T22:53:23.2825529Z ##[group]Runner Image
+2026-10-02T22:53:23.2826170Z Image: ubuntu-24.04
+2026-10-02T22:53:23.2826743Z Version: 20260927.320.1
+2026-10-02T22:53:23.2828081Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-02T22:53:23.2829665Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-02T22:53:23.2830691Z ##[endgroup]
+2026-10-02T22:53:23.2832130Z ##[group]GITHUB_TOKEN Permissions
+2026-10-02T22:53:23.2834275Z Actions: read
+2026-10-02T22:53:23.2834873Z Contents: write
+2026-10-02T22:53:23.2835422Z Metadata: read
+2026-10-02T22:53:23.2836114Z ##[endgroup]
+2026-10-02T22:53:23.2838145Z Secret source: Actions
+2026-10-02T22:53:23.2839244Z Cache mode: write
+2026-10-02T22:53:23.2840147Z Prepare workflow directory
+2026-10-02T22:53:23.3347977Z Prepare all required actions
+2026-10-02T22:53:23.3397116Z Getting action download info
+2026-10-02T22:53:23.5833754Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-02T22:53:23.6872303Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-02T22:53:23.7652634Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-02T22:53:23.9412559Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-02T22:53:24.1458865Z Complete job name: selection
+2026-10-02T22:53:24.2174130Z ##[group]Run actions/checkout@v4
+2026-10-02T22:53:24.2174999Z with:
+2026-10-02T22:53:24.2175444Z   repository: duuu-hub/bb-scanner
+2026-10-02T22:53:24.2179169Z   token: ***
+2026-10-02T22:53:24.2179598Z   ssh-strict: true
+2026-10-02T22:53:24.2180024Z   ssh-user: git
+2026-10-02T22:53:24.2180461Z   persist-credentials: true
+2026-10-02T22:53:24.2181140Z   clean: true
+2026-10-02T22:53:24.2181582Z   sparse-checkout-cone-mode: true
+2026-10-02T22:53:24.2182092Z   fetch-depth: 1
+2026-10-02T22:53:24.2182511Z   fetch-tags: false
+2026-10-02T22:53:24.2182939Z   show-progress: true
+2026-10-02T22:53:24.2183369Z   lfs: false
+2026-10-02T22:53:24.2183764Z   submodules: false
+2026-10-02T22:53:24.2184202Z   set-safe-directory: true
+2026-10-02T22:53:24.2184690Z   allow-unsafe-pr-checkout: false
+2026-10-02T22:53:24.2185506Z env:
+2026-10-02T22:53:24.2189188Z   GH_TOKEN: ***
+2026-10-02T22:53:24.2189601Z ##[endgroup]
+2026-10-02T22:53:24.3420839Z Syncing repository: duuu-hub/bb-scanner
+2026-10-02T22:53:24.3424088Z ##[group]Getting Git version info
+2026-10-02T22:53:24.3425289Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T22:53:24.3427147Z [command]/usr/bin/git version
+2026-10-02T22:53:24.3602241Z git version 2.55.0
+2026-10-02T22:53:24.3614552Z ##[endgroup]
+2026-10-02T22:53:24.3628646Z Temporarily overriding HOME='/home/runner/work/_temp/b8e7071b-88c2-4b96-8899-e32c6b98bb66' before making global git config changes
+2026-10-02T22:53:24.3632808Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T22:53:24.3639847Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T22:53:24.3718991Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T22:53:24.3721383Z ##[group]Initializing the repository
+2026-10-02T22:53:24.3733300Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T22:53:24.3861823Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-02T22:53:24.3863784Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-02T22:53:24.3865479Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-02T22:53:24.3866836Z hint: call:
+2026-10-02T22:53:24.3867545Z hint:
+2026-10-02T22:53:24.3868407Z hint: 	git config --global init.defaultBranch <name>
+2026-10-02T22:53:24.3869452Z hint:
+2026-10-02T22:53:24.3870429Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-02T22:53:24.3872501Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-02T22:53:24.3873926Z hint:
+2026-10-02T22:53:24.3874375Z hint: 	git branch -m <name>
+2026-10-02T22:53:24.3874884Z hint:
+2026-10-02T22:53:24.3875515Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-02T22:53:24.3876555Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-02T22:53:24.3879419Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-02T22:53:24.3934725Z ##[endgroup]
+2026-10-02T22:53:24.3936428Z ##[group]Disabling automatic garbage collection
+2026-10-02T22:53:24.3940363Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-02T22:53:24.3976331Z ##[endgroup]
+2026-10-02T22:53:24.3977760Z ##[group]Setting up auth
+2026-10-02T22:53:24.3983174Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T22:53:24.4020494Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T22:53:24.4416365Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T22:53:24.4457811Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T22:53:24.4683722Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T22:53:24.4720036Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T22:53:24.4946918Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-02T22:53:24.4987444Z ##[endgroup]
+2026-10-02T22:53:24.4988864Z ##[group]Fetching the repository
+2026-10-02T22:53:24.4999543Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +217a46b0e752800b70115eb9a63528d809242ce6:refs/remotes/origin/research-breadth-pullback-reclaim-v16
+2026-10-02T22:53:25.4959562Z From https://github.com/duuu-hub/bb-scanner
+2026-10-02T22:53:25.4962515Z  * [new ref]         217a46b0e752800b70115eb9a63528d809242ce6 -> origin/research-breadth-pullback-reclaim-v16
+2026-10-02T22:53:25.4967632Z ##[endgroup]
+2026-10-02T22:53:25.4969136Z ##[group]Determining the checkout info
+2026-10-02T22:53:25.4970484Z ##[endgroup]
+2026-10-02T22:53:25.4974834Z [command]/usr/bin/git sparse-checkout disable
+2026-10-02T22:53:25.5032017Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-02T22:53:25.5065570Z ##[group]Checking out the ref
+2026-10-02T22:53:25.5073474Z [command]/usr/bin/git checkout --progress --force -B research-breadth-pullback-reclaim-v16 refs/remotes/origin/research-breadth-pullback-reclaim-v16
+2026-10-02T22:53:25.7355770Z Switched to a new branch 'research-breadth-pullback-reclaim-v16'
+2026-10-02T22:53:25.7360687Z branch 'research-breadth-pullback-reclaim-v16' set up to track 'origin/research-breadth-pullback-reclaim-v16'.
+2026-10-02T22:53:25.7371758Z ##[endgroup]
+2026-10-02T22:53:25.7419613Z [command]/usr/bin/git log -1 --format=%H
+2026-10-02T22:53:25.7446682Z 217a46b0e752800b70115eb9a63528d809242ce6
+2026-10-02T22:53:25.7801346Z ##[group]Run actions/setup-python@v5
+2026-10-02T22:53:25.7801958Z with:
+2026-10-02T22:53:25.7802387Z   python-version: 3.12
+2026-10-02T22:53:25.7802845Z   check-latest: false
+2026-10-02T22:53:25.7805602Z   token: ***
+2026-10-02T22:53:25.7806043Z   update-environment: true
+2026-10-02T22:53:25.7806522Z   allow-prereleases: false
+2026-10-02T22:53:25.7806980Z   freethreaded: false
+2026-10-02T22:53:25.7807407Z env:
+2026-10-02T22:53:25.7810065Z   GH_TOKEN: ***
+2026-10-02T22:53:25.7810470Z ##[endgroup]
+2026-10-02T22:53:25.9136276Z ##[group]Installed versions
+2026-10-02T22:53:25.9224110Z (node:2299) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T22:53:25.9225649Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T22:53:25.9227022Z Successfully set up CPython (3.12.14)
+2026-10-02T22:53:25.9228457Z ##[endgroup]
+2026-10-02T22:53:25.9400224Z ##[group]Run set -euo pipefail
+2026-10-02T22:53:25.9400843Z [36;1mset -euo pipefail[0m
+2026-10-02T22:53:25.9401762Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-02T22:53:25.9726612Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T22:53:25.9727326Z env:
+2026-10-02T22:53:25.9731158Z   GH_TOKEN: ***
+2026-10-02T22:53:25.9731732Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:25.9732498Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:25.9733257Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:25.9733977Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:25.9734679Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:25.9735296Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:25.9735821Z ##[endgroup]
+2026-10-02T22:53:27.0824157Z Collecting pandas==2.3.3
+2026-10-02T22:53:27.1342114Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-02T22:53:27.3757257Z Collecting numpy==2.3.3
+2026-10-02T22:53:27.3912085Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-02T22:53:27.4173817Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-02T22:53:27.4211351Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-02T22:53:27.4559515Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-02T22:53:27.4596203Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-02T22:53:27.4742813Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-02T22:53:27.4785068Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-02T22:53:27.4925247Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-02T22:53:27.4967812Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-02T22:53:27.5092211Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-02T22:53:27.5732965Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 206.7 MB/s  0:00:00
+2026-10-02T22:53:27.5784309Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-02T22:53:27.9587499Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 44.0 MB/s  0:00:00
+2026-10-02T22:53:27.9651563Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-02T22:53:27.9743019Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-02T22:53:27.9882009Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-02T22:53:27.9957214Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-02T22:53:28.1593658Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-02T22:53:35.1296298Z 
+2026-10-02T22:53:35.1311721Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-02T22:53:35.1990464Z ##[group]Run actions/download-artifact@v4
+2026-10-02T22:53:35.1990801Z with:
+2026-10-02T22:53:35.1991395Z   pattern: breadth-pullback-reclaim-v16-dev-[0-7]
+2026-10-02T22:53:35.1991721Z   path: dev-parts
+2026-10-02T22:53:35.1991947Z   merge-multiple: false
+2026-10-02T22:53:35.1992202Z   repository: duuu-hub/bb-scanner
+2026-10-02T22:53:35.1992483Z   run-id: 37074366568
+2026-10-02T22:53:35.1992696Z env:
+2026-10-02T22:53:35.1995048Z   GH_TOKEN: ***
+2026-10-02T22:53:35.1995349Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:35.1995787Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:35.1996217Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:35.1996602Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:35.1996982Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:35.1997440Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:35.1997769Z ##[endgroup]
+2026-10-02T22:53:35.3638764Z (node:2335) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T22:53:35.3639568Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T22:53:35.4531795Z Found 18 artifact(s)
+2026-10-02T22:53:35.4532838Z Filtering artifacts by pattern 'breadth-pullback-reclaim-v16-dev-[0-7]'
+2026-10-02T22:53:35.4542449Z Preparing to download the following artifacts:
+2026-10-02T22:53:35.4544255Z - breadth-pullback-reclaim-v16-dev-5 (ID: 11256360159, Size: 47630612, Expected Digest: sha256:9b26f4ff53bfac4c987e2557aea9d4bfb816055c96e8e5b99f23bfae9ed8c359)
+2026-10-02T22:53:35.4546666Z - breadth-pullback-reclaim-v16-dev-1 (ID: 11256239065, Size: 39767991, Expected Digest: sha256:5a1a3c549f68295c42f996ca919f3438c9877fee17c1fca14f46c111704fe8dd)
+2026-10-02T22:53:35.4549850Z - breadth-pullback-reclaim-v16-dev-3 (ID: 11256164235, Size: 29819341, Expected Digest: sha256:3ca152f401a99022841c1eb9002c7e31c63796a1c0a44e739896d57dcbdc3ad0)
+2026-10-02T22:53:35.4552656Z - breadth-pullback-reclaim-v16-dev-2 (ID: 11256159208, Size: 39366041, Expected Digest: sha256:dc72d4637d211bbd12b08f1712c287b25c3336727f9acc66656e4b8e68dc8efe)
+2026-10-02T22:53:35.4559634Z - breadth-pullback-reclaim-v16-dev-7 (ID: 11255784572, Size: 26839850, Expected Digest: sha256:a4909f3895bbe4beca6856ffe937581daa969af113cfe8eb3e1f324a62be15a0)
+2026-10-02T22:53:35.4562765Z - breadth-pullback-reclaim-v16-dev-0 (ID: 11255624910, Size: 61054308, Expected Digest: sha256:a8bd0b4b56df293796c2ed1b77d8e50ea71da160474ae4204a864776c18ba3c8)
+2026-10-02T22:53:35.4565027Z - breadth-pullback-reclaim-v16-dev-6 (ID: 11255534966, Size: 39354215, Expected Digest: sha256:802fd15a99e245314ac5ec1991936263ea4e32297162042e6c32176c45a1cbab)
+2026-10-02T22:53:35.4567152Z - breadth-pullback-reclaim-v16-dev-4 (ID: 11255173602, Size: 36154775, Expected Digest: sha256:190b5cd17bf584122d3b6a240f382624a754fcd97b8e261791277c384bfb8aab)
+2026-10-02T22:53:35.5935033Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-2b2cc33d-4273-5f32-841a-921daf345270/artifacts/c16632a3e82f976cb887c8ea8947001dc6efc527113e7e27393b5d9627cd5e6a.zip
+2026-10-02T22:53:35.5937809Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-1
+2026-10-02T22:53:35.6100540Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-1b445192-d654-5f9b-8c2f-f574f121a5e8/artifacts/9f52290a3ffc86bbe6e060c57e8ce090f87b78f769bfeb8ca90df646d9a9c13c.zip
+2026-10-02T22:53:35.6103517Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-7
+2026-10-02T22:53:35.6139756Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-fea1613f-702b-5e4b-b564-8145a134cc46/artifacts/d93f512dcd1e0f440c456e2bdbb7f77d5b5af7ce81805d64e67a9fd397ae6fba.zip
+2026-10-02T22:53:35.6142781Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-6
+2026-10-02T22:53:35.6166601Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-a844bc1d-9ebe-5460-86fd-c4d17c4660bf/artifacts/7802c8d76e6a2c5956b220cb3804fa90723b9d441316d12bb620a79a94bbfae7.zip
+2026-10-02T22:53:35.6169644Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-3
+2026-10-02T22:53:35.6186678Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-65445593-5a51-529f-9533-39315793c563/artifacts/8ce167bf8538ebf01ba09b23a24b737143f1a8a5c3466a7145156c2c263476d3.zip
+2026-10-02T22:53:35.6189418Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-0
+2026-10-02T22:53:35.6289580Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-9a7faa9f-cec3-5dff-9ded-a2723f2057ab/artifacts/c0fe2faa55c5bb109c2cf42c3c7719360c1bc5218316a76135117df0a9aa375a.zip
+2026-10-02T22:53:35.6292718Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-2
+2026-10-02T22:53:35.6305622Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-41a0c0b8-fe9d-5517-9405-2687100206e8/artifacts/07c39e1fdd5fd8271a051af7a6d2db056c1c71b58f5051487227c4a001191db3.zip
+2026-10-02T22:53:35.6307389Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-4
+2026-10-02T22:53:35.6355596Z Redirecting to blob download url: https://productionresultssa3.blob.core.windows.net/actions-results/94ef6dda-632c-8820-be7d-306cc5118a36/workflow-job-run-c48d5958-4370-59e7-9214-860dcfa33c22/artifacts/56e7e06dc4a8542b0d3a3de84c371a2e524482b025bdeefd73f396678a5a6e49.zip
+2026-10-02T22:53:35.6357124Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/breadth-pullback-reclaim-v16-dev-5
+2026-10-02T22:53:35.6924130Z (node:2335) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-02T22:53:37.0937624Z SHA256 digest of downloaded artifact is a4909f3895bbe4beca6856ffe937581daa969af113cfe8eb3e1f324a62be15a0
+2026-10-02T22:53:37.0938405Z Artifact download completed successfully.
+2026-10-02T22:53:37.2155812Z SHA256 digest of downloaded artifact is 3ca152f401a99022841c1eb9002c7e31c63796a1c0a44e739896d57dcbdc3ad0
+2026-10-02T22:53:37.2158242Z Artifact download completed successfully.
+2026-10-02T22:53:37.4351386Z SHA256 digest of downloaded artifact is 190b5cd17bf584122d3b6a240f382624a754fcd97b8e261791277c384bfb8aab
+2026-10-02T22:53:37.4352346Z Artifact download completed successfully.
+2026-10-02T22:53:37.5243637Z SHA256 digest of downloaded artifact is 802fd15a99e245314ac5ec1991936263ea4e32297162042e6c32176c45a1cbab
+2026-10-02T22:53:37.5244515Z Artifact download completed successfully.
+2026-10-02T22:53:37.5448206Z SHA256 digest of downloaded artifact is 5a1a3c549f68295c42f996ca919f3438c9877fee17c1fca14f46c111704fe8dd
+2026-10-02T22:53:37.5449269Z Artifact download completed successfully.
+2026-10-02T22:53:37.5544717Z SHA256 digest of downloaded artifact is dc72d4637d211bbd12b08f1712c287b25c3336727f9acc66656e4b8e68dc8efe
+2026-10-02T22:53:37.5546054Z Artifact download completed successfully.
+2026-10-02T22:53:37.6291924Z SHA256 digest of downloaded artifact is 9b26f4ff53bfac4c987e2557aea9d4bfb816055c96e8e5b99f23bfae9ed8c359
+2026-10-02T22:53:37.6292977Z Artifact download completed successfully.
+2026-10-02T22:53:37.7408260Z SHA256 digest of downloaded artifact is a8bd0b4b56df293796c2ed1b77d8e50ea71da160474ae4204a864776c18ba3c8
+2026-10-02T22:53:37.7409433Z Artifact download completed successfully.
+2026-10-02T22:53:37.7410058Z Total of 8 artifact(s) downloaded
+2026-10-02T22:53:37.7416277Z Download artifact has finished successfully
+2026-10-02T22:53:37.7601912Z ##[group]Run set -euo pipefail
+2026-10-02T22:53:37.7602329Z [36;1mset -euo pipefail[0m
+2026-10-02T22:53:37.7602896Z [36;1mpython scripts/breadth_pullback_reclaim_v16.py select --parts dev-parts --out selected-input[0m
+2026-10-02T22:53:37.7603461Z [36;1mpython - <<'SELECT'[0m
+2026-10-02T22:53:37.7603764Z [36;1mimport json,os[0m
+2026-10-02T22:53:37.7604170Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-02T22:53:37.7604808Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-02T22:53:37.7605296Z [36;1mSELECT[0m
+2026-10-02T22:53:37.7673121Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T22:53:37.7673531Z env:
+2026-10-02T22:53:37.7675943Z   GH_TOKEN: ***
+2026-10-02T22:53:37.7676294Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:37.7676787Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:37.7677310Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:37.7677751Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:37.7678182Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:37.7678638Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:37.7679012Z ##[endgroup]
+2026-10-02T22:53:41.2494491Z V16_BREADTH_RECOVERY_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "MARKET_BREADTH_RECOVERY_UNION", "source_context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614", "development_breadth_data_sha256": "781a0b0482a075a9ca70871f77d83711eb2ea75e9a514d2ef0feef129d143b0a", "development_breadth_manifest_sha256": "7ba15fceffad9aed33afb842484b59408213f61d012e2974aa4c57218dbf8129", "source_symbols": 856, "economic_surviving_cells": 0, "rejection_counts": {"2021_day_R_NONPOSITIVE": 96, "2022_net40_R_NONPOSITIVE": 92, "2022_net40_mean_bp_NONPOSITIVE": 90, "2022_day_R_NONPOSITIVE": 96, "N_LT_300": 18, "NET40_MEAN_BP_NONPOSITIVE": 87, "NET40_R_MEAN_NONPOSITIVE": 91, "2021_N": 24, "2023_DATES": 42, "2023_net40_R_NONPOSITIVE": 87, "2023_net40_mean_bp_NONPOSITIVE": 79, "2023_day_R_NONPOSITIVE": 94, "2021_net40_R_NONPOSITIVE": 88, "2021_net40_mean_bp_NONPOSITIVE": 89, "2021_DATES": 24, "2022_N": 12, "2022_DATES": 18, "2023_N": 12, "TOP_SYMBOL_GT_30PCT": 3}, "note": "Frozen global pressure withdrawal and closed recovery experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-02T22:53:41.3403970Z ##[group]Run set -euo pipefail
+2026-10-02T22:53:41.3404388Z [36;1mset -euo pipefail[0m
+2026-10-02T22:53:41.3404700Z [36;1mpython - <<'SAVE'[0m
+2026-10-02T22:53:41.3405007Z [36;1mfrom pathlib import Path[0m
+2026-10-02T22:53:41.3405342Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-02T22:53:41.3405911Z [36;1mp=Path('research/breadth-pullback-reclaim-v16/run-'+os.environ['GITHUB_RUN_ID']+'/development')[0m
+2026-10-02T22:53:41.3406501Z [36;1mshutil.copytree('selected-input',p)[0m
+2026-10-02T22:53:41.3407051Z [36;1mfor name in ['scan_meta.json','exclusions.csv','breadth_manifest.json','source_check.json']:[0m
+2026-10-02T22:53:41.3407658Z [36;1m for i,f in enumerate(sorted(Path('dev-parts').rglob(name))):[0m
+2026-10-02T22:53:41.3408155Z [36;1m  shutil.copyfile(f,p/('full_dev_shard_'+str(i)+'_'+name))[0m
+2026-10-02T22:53:41.3409022Z [36;1m(p/'provenance.json').write_text(json.dumps(dict(run=int(os.environ['GITHUB_RUN_ID']),code_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-02T22:53:41.3410078Z [36;1m source_data_run=36095439671,cells=96,sha256={str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file()}),indent=2))[0m
+2026-10-02T22:53:41.3410791Z [36;1mSAVE[0m
+2026-10-02T22:53:41.3474550Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T22:53:41.3474952Z env:
+2026-10-02T22:53:41.3477359Z   GH_TOKEN: ***
+2026-10-02T22:53:41.3477710Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.3478215Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:41.3478695Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.3479133Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.3479567Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.3480026Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:41.3480408Z ##[endgroup]
+2026-10-02T22:53:41.4346307Z ##[group]Run set -euo pipefail
+2026-10-02T22:53:41.4346715Z [36;1mset -euo pipefail[0m
+2026-10-02T22:53:41.4347074Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-02T22:53:41.4347614Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-02T22:53:41.4348257Z [36;1mgit checkout -b "research-breadth-pullback-reclaim-v16-dev-37074366568"[0m
+2026-10-02T22:53:41.4348880Z [36;1mgit add "research/breadth-pullback-reclaim-v16/run-37074366568/development"[0m
+2026-10-02T22:53:41.4349487Z [36;1mgit commit -m "Preserve V16 dev before subsequent research stages"[0m
+2026-10-02T22:53:41.4349945Z [36;1mgit push origin HEAD[0m
+2026-10-02T22:53:41.4414341Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T22:53:41.4414749Z env:
+2026-10-02T22:53:41.4417153Z   GH_TOKEN: ***
+2026-10-02T22:53:41.4417508Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.4418036Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:41.4418518Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.4418953Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.4419387Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:41.4419820Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:41.4420196Z ##[endgroup]
+2026-10-02T22:53:41.6252104Z Switched to a new branch 'research-breadth-pullback-reclaim-v16-dev-37074366568'
+2026-10-02T22:53:41.8312237Z [research-breadth-pullback-reclaim-v16-dev-37074366568 be1c065] Preserve V16 dev before subsequent research stages
+2026-10-02T22:53:41.8313183Z  51 files changed, 41375 insertions(+)
+2026-10-02T22:53:41.8314136Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-0/independent_candidates.csv.gz
+2026-10-02T22:53:41.8316050Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-0/scan_meta.json
+2026-10-02T22:53:41.8317201Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-1/independent_candidates.csv.gz
+2026-10-02T22:53:41.8318228Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-1/scan_meta.json
+2026-10-02T22:53:41.8319246Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-2/independent_candidates.csv.gz
+2026-10-02T22:53:41.8320263Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-2/scan_meta.json
+2026-10-02T22:53:41.8321596Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-3/independent_candidates.csv.gz
+2026-10-02T22:53:41.8322630Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-3/scan_meta.json
+2026-10-02T22:53:41.8323948Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-4/independent_candidates.csv.gz
+2026-10-02T22:53:41.8324809Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-4/scan_meta.json
+2026-10-02T22:53:41.8325626Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-5/independent_candidates.csv.gz
+2026-10-02T22:53:41.8326449Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-5/scan_meta.json
+2026-10-02T22:53:41.8327267Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-6/independent_candidates.csv.gz
+2026-10-02T22:53:41.8328078Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-6/scan_meta.json
+2026-10-02T22:53:41.8328891Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-7/independent_candidates.csv.gz
+2026-10-02T22:53:41.8329717Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/dev-7/scan_meta.json
+2026-10-02T22:53:41.8330688Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/development_policy_cells.csv
+2026-10-02T22:53:41.8331891Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_0_breadth_manifest.json
+2026-10-02T22:53:41.8332801Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_0_exclusions.csv
+2026-10-02T22:53:41.8333657Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_0_scan_meta.json
+2026-10-02T22:53:41.8334517Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_0_source_check.json
+2026-10-02T22:53:41.8335408Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_1_breadth_manifest.json
+2026-10-02T22:53:41.8336328Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_1_exclusions.csv
+2026-10-02T22:53:41.8337186Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_1_scan_meta.json
+2026-10-02T22:53:41.8338041Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_1_source_check.json
+2026-10-02T22:53:41.8338933Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_2_breadth_manifest.json
+2026-10-02T22:53:41.8339799Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_2_exclusions.csv
+2026-10-02T22:53:41.8340649Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_2_scan_meta.json
+2026-10-02T22:53:41.8341704Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_2_source_check.json
+2026-10-02T22:53:41.8342757Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_3_breadth_manifest.json
+2026-10-02T22:53:41.8343622Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_3_exclusions.csv
+2026-10-02T22:53:41.8344448Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_3_scan_meta.json
+2026-10-02T22:53:41.8345294Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_3_source_check.json
+2026-10-02T22:53:41.8346171Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_4_breadth_manifest.json
+2026-10-02T22:53:41.8347036Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_4_exclusions.csv
+2026-10-02T22:53:41.8347862Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_4_scan_meta.json
+2026-10-02T22:53:41.8348891Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_4_source_check.json
+2026-10-02T22:53:41.8349768Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_5_breadth_manifest.json
+2026-10-02T22:53:41.8350629Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_5_exclusions.csv
+2026-10-02T22:53:41.8351777Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_5_scan_meta.json
+2026-10-02T22:53:41.8352639Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_5_source_check.json
+2026-10-02T22:53:41.8353558Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_6_breadth_manifest.json
+2026-10-02T22:53:41.8354415Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_6_exclusions.csv
+2026-10-02T22:53:41.8355396Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_6_scan_meta.json
+2026-10-02T22:53:41.8356268Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_6_source_check.json
+2026-10-02T22:53:41.8357143Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_7_breadth_manifest.json
+2026-10-02T22:53:41.8358008Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_7_exclusions.csv
+2026-10-02T22:53:41.8358848Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_7_scan_meta.json
+2026-10-02T22:53:41.8359697Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/full_dev_shard_7_source_check.json
+2026-10-02T22:53:41.8360506Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/provenance.json
+2026-10-02T22:53:41.8361564Z  create mode 100644 research/breadth-pullback-reclaim-v16/run-37074366568/development/selection.json
+2026-10-02T22:53:45.0965122Z remote: 
+2026-10-02T22:53:45.0966002Z remote: Create a pull request for 'research-breadth-pullback-reclaim-v16-dev-37074366568' on GitHub by visiting:        
+2026-10-02T22:53:45.0967201Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-breadth-pullback-reclaim-v16-dev-37074366568        
+2026-10-02T22:53:45.0968026Z remote: 
+2026-10-02T22:53:45.0977179Z To https://github.com/duuu-hub/bb-scanner
+2026-10-02T22:53:45.0978103Z  * [new branch]      HEAD -> research-breadth-pullback-reclaim-v16-dev-37074366568
+2026-10-02T22:53:45.1080663Z ##[group]Run actions/upload-artifact@v4
+2026-10-02T22:53:45.1081356Z with:
+2026-10-02T22:53:45.1081652Z   name: breadth-pullback-reclaim-v16-selected
+2026-10-02T22:53:45.1082041Z   path: selected-input/
+2026-10-02T22:53:45.1082321Z   retention-days: 30
+2026-10-02T22:53:45.1082611Z   compression-level: 0
+2026-10-02T22:53:45.1082881Z   if-no-files-found: warn
+2026-10-02T22:53:45.1083162Z   overwrite: false
+2026-10-02T22:53:45.1083424Z   include-hidden-files: false
+2026-10-02T22:53:45.1083706Z env:
+2026-10-02T22:53:45.1086096Z   GH_TOKEN: ***
+2026-10-02T22:53:45.1086443Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:45.1086935Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T22:53:45.1087466Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:45.1087907Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:45.1088375Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T22:53:45.1088814Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T22:53:45.1089189Z ##[endgroup]
+2026-10-02T22:53:45.2740056Z (node:2379) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T22:53:45.2742148Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T22:53:45.2858310Z With the provided path, there will be 18 files uploaded
+2026-10-02T22:53:45.2864195Z Artifact name is valid!
+2026-10-02T22:53:45.2864783Z Root directory input is valid!
+2026-10-02T22:53:45.5117370Z Beginning upload of artifact content to blob storage
+2026-10-02T22:53:45.5561619Z (node:2379) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-02T22:53:45.5949786Z Uploaded bytes 226681
+2026-10-02T22:53:45.6119287Z Finished uploading artifact content to blob storage!
+2026-10-02T22:53:45.6120436Z SHA256 digest of uploaded artifact zip is 905807f568ffd3566474fe5b46d231613ff9652769185c9653fe741770937050
+2026-10-02T22:53:45.6122352Z Finalizing artifact upload
+2026-10-02T22:53:45.8342212Z Artifact breadth-pullback-reclaim-v16-selected.zip successfully finalized. Artifact ID 11256089561
+2026-10-02T22:53:45.8343899Z Artifact breadth-pullback-reclaim-v16-selected has been successfully uploaded! Final size is 226681 bytes. Artifact ID is 11256089561
+2026-10-02T22:53:45.8350733Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37074366568/artifacts/11256089561
+2026-10-02T22:53:45.8519474Z Post job cleanup.
+2026-10-02T22:53:45.9748951Z (node:2391) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T22:53:45.9749944Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T22:53:45.9933184Z Post job cleanup.
+2026-10-02T22:53:46.0850307Z [command]/usr/bin/git version
+2026-10-02T22:53:46.0911674Z git version 2.55.0
+2026-10-02T22:53:46.0951763Z Temporarily overriding HOME='/home/runner/work/_temp/b2da42ea-b930-432c-abc0-143cbba5f17f' before making global git config changes
+2026-10-02T22:53:46.0953560Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T22:53:46.0959576Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T22:53:46.1000620Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T22:53:46.1039228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T22:53:46.1350376Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T22:53:46.1385635Z http.https://github.com/.extraheader
+2026-10-02T22:53:46.1398157Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-02T22:53:46.1435387Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T22:53:46.1776138Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T22:53:46.1848273Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T22:53:46.2326905Z Evaluate and set job outputs
+2026-10-02T22:53:46.2332453Z Set output 'selected_count'
+2026-10-02T22:53:46.2334644Z Cleaning up orphan processes
+2026-10-02T22:53:46.2626531Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
