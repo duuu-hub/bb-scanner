@@ -282,3 +282,13 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Implementation last commit before trigger: `2002f85d5914c0803a1ba15a3c3f19452d385893`.
 - Trigger commit: `fb42a7154df6c10ad7df412d9ace07065bf651f5`.
 - Audit state: trigger push is confirmed; Actions run ID and actual validation result are still pending discovery. Do not claim the workflow executed and do not launch a duplicate until the run/log is found.
+
+
+## 2026-10-03 — V15 run 1 validation failure and test-only repair
+
+- Actual run [37019476663](https://github.com/duuu-hub/bb-scanner/actions/runs/37019476663) reached validation only.
+- Actual log: 416 registered tests, 415 passed, 1 failed, 0 errors in 48.051 s. Every market stage was skipped; this run produced no strategy outcome.
+- The failed assertion retained V14's 4% 16-bar count expectation. Under the frozen V15 2% threshold, returns `[-4%,-3%,+4%]` correctly produce down counts `[1,1,0]`, not `[1,0,0]`.
+- Failure evidence: `research/breadth-expansion-continuation-v15/V15_RUN1_FAILURE.json`; complete-evidence branch `research-breadth-expansion-continuation-v15-evidence-37019476663`.
+- Only the assertion was corrected at `e67900eae2f8742488daab1665562cef2837cd42`; no signal, cost, chronology, selection, or account parameter changed.
+- Retry trigger: `fe7775f16203282a4574173202624dc70ca8acfa`. Its Actions run ID is pending discovery; do not launch another duplicate.
