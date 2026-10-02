@@ -1,0 +1,5 @@
+# Implementation audit contract
+
+V14 PLAN commit77b9dc2b54cd58b9c5d98c5a9a59e5c4522924b2 precedes signal/map code. Frozen context/baseline byte-identical to V13. Counts are integer per-horizon denominators; all original eight source shards and the full856 catalogue required. Include prior bar at each stage boundary solely for already available previous state. A source too new for DEV is also excluded from GATE breadth/signals, matching fixed common universe. Exact bar alignment, no fill. Structural stop current/prior five closed bars and priorATR only; actual next OPEN sets risk. All96 configurations preserved.
+
+Canonical resolver, official1m provenance, shared development screens, account replay and strict growth gates retain prior semantics. Global breadth scan provenance carries frozen data and manifest SHA and copies complete breadth artifacts; selection requires identical global SHA across all8 scans. Independent V13 original8 binary hash/arithmetic audit gates the entire V14 map/market graph. Synthetic tests never establish profitability. No main/order/state changes. Source caches verified before use; no failed scans treated complete.

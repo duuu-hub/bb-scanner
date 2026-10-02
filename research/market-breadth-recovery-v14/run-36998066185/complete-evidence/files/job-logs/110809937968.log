@@ -1,0 +1,355 @@
+﻿2026-10-02T10:56:58.5324151Z Current runner version: '2.337.0'
+2026-10-02T10:56:58.5355031Z ##[group]Runner Image Provisioner
+2026-10-02T10:56:58.5356191Z Hosted Compute Agent
+2026-10-02T10:56:58.5357021Z Version: 20260901.588
+2026-10-02T10:56:58.5357902Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-02T10:56:58.5358786Z Build Date: 2026-09-01T19:56:44Z
+2026-10-02T10:56:58.5359702Z Worker ID: {3cd2c5e5-6f6c-4c24-a9f2-12a01e8beeb2}
+2026-10-02T10:56:58.5360600Z Azure Region: eastus
+2026-10-02T10:56:58.5361256Z ##[endgroup]
+2026-10-02T10:56:58.5363000Z ##[group]Operating System
+2026-10-02T10:56:58.5363756Z Ubuntu
+2026-10-02T10:56:58.5364520Z 24.04.5
+2026-10-02T10:56:58.5365271Z LTS
+2026-10-02T10:56:58.5365916Z ##[endgroup]
+2026-10-02T10:56:58.5366599Z ##[group]Runner Image
+2026-10-02T10:56:58.5367463Z Image: ubuntu-24.04
+2026-10-02T10:56:58.5368227Z Version: 20260927.320.1
+2026-10-02T10:56:58.5369823Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-02T10:56:58.5371847Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-02T10:56:58.5373097Z ##[endgroup]
+2026-10-02T10:56:58.5374663Z ##[group]GITHUB_TOKEN Permissions
+2026-10-02T10:56:58.5377305Z Actions: read
+2026-10-02T10:56:58.5378021Z Contents: write
+2026-10-02T10:56:58.5378763Z Metadata: read
+2026-10-02T10:56:58.5379454Z ##[endgroup]
+2026-10-02T10:56:58.5382093Z Secret source: Actions
+2026-10-02T10:56:58.5383385Z Cache mode: write
+2026-10-02T10:56:58.5384305Z Prepare workflow directory
+2026-10-02T10:56:58.5967734Z Prepare all required actions
+2026-10-02T10:56:58.6026472Z Getting action download info
+2026-10-02T10:56:58.8247590Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-02T10:56:58.9491354Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-02T10:56:59.1181919Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-02T10:56:59.3258191Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-02T10:56:59.6495377Z Complete job name: breadth_development
+2026-10-02T10:56:59.7091836Z ##[group]Run actions/checkout@v4
+2026-10-02T10:56:59.7092589Z with:
+2026-10-02T10:56:59.7092976Z   repository: duuu-hub/bb-scanner
+2026-10-02T10:56:59.7096128Z   token: ***
+2026-10-02T10:56:59.7096500Z   ssh-strict: true
+2026-10-02T10:56:59.7097084Z   ssh-user: git
+2026-10-02T10:56:59.7097491Z   persist-credentials: true
+2026-10-02T10:56:59.7097910Z   clean: true
+2026-10-02T10:56:59.7098292Z   sparse-checkout-cone-mode: true
+2026-10-02T10:56:59.7098733Z   fetch-depth: 1
+2026-10-02T10:56:59.7099105Z   fetch-tags: false
+2026-10-02T10:56:59.7099667Z   show-progress: true
+2026-10-02T10:56:59.7100147Z   lfs: false
+2026-10-02T10:56:59.7100515Z   submodules: false
+2026-10-02T10:56:59.7100912Z   set-safe-directory: true
+2026-10-02T10:56:59.7101335Z   allow-unsafe-pr-checkout: false
+2026-10-02T10:56:59.7102058Z env:
+2026-10-02T10:56:59.7105070Z   GH_TOKEN: ***
+2026-10-02T10:56:59.7105442Z ##[endgroup]
+2026-10-02T10:56:59.7932561Z Syncing repository: duuu-hub/bb-scanner
+2026-10-02T10:56:59.7934953Z ##[group]Getting Git version info
+2026-10-02T10:56:59.7935960Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T10:56:59.7937675Z [command]/usr/bin/git version
+2026-10-02T10:56:59.8046995Z git version 2.55.0
+2026-10-02T10:56:59.8063516Z ##[endgroup]
+2026-10-02T10:56:59.8075717Z Temporarily overriding HOME='/home/runner/work/_temp/2696be84-f7fc-4e8c-82cd-b79f1b49aa34' before making global git config changes
+2026-10-02T10:56:59.8078035Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T10:56:59.8079905Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T10:56:59.8131469Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-02T10:56:59.8133940Z ##[group]Initializing the repository
+2026-10-02T10:56:59.8137208Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T10:56:59.8238055Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-02T10:56:59.8239473Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-02T10:56:59.8240810Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-02T10:56:59.8241885Z hint: call:
+2026-10-02T10:56:59.8242435Z hint:
+2026-10-02T10:56:59.8243139Z hint: 	git config --global init.defaultBranch <name>
+2026-10-02T10:56:59.8244031Z hint:
+2026-10-02T10:56:59.8244862Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-02T10:56:59.8246170Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-02T10:56:59.8247342Z hint:
+2026-10-02T10:56:59.8247921Z hint: 	git branch -m <name>
+2026-10-02T10:56:59.8248600Z hint:
+2026-10-02T10:56:59.8249522Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-02T10:56:59.8251155Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-02T10:56:59.8253407Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-02T10:56:59.8306000Z ##[endgroup]
+2026-10-02T10:56:59.8307793Z ##[group]Disabling automatic garbage collection
+2026-10-02T10:56:59.8309159Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-02T10:56:59.8339016Z ##[endgroup]
+2026-10-02T10:56:59.8340000Z ##[group]Setting up auth
+2026-10-02T10:56:59.8343904Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T10:56:59.8376470Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T10:57:00.1464229Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T10:57:00.1497948Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T10:57:00.1691786Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T10:57:00.1722792Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T10:57:00.1918457Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-02T10:57:00.1956635Z ##[endgroup]
+2026-10-02T10:57:00.1958022Z ##[group]Fetching the repository
+2026-10-02T10:57:00.1967806Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3b309e6b025fe0eb66c8be3ec0dbaad84b7e8344:refs/remotes/origin/research-market-breadth-recovery-v14
+2026-10-02T10:57:01.4252235Z From https://github.com/duuu-hub/bb-scanner
+2026-10-02T10:57:01.4254286Z  * [new ref]         3b309e6b025fe0eb66c8be3ec0dbaad84b7e8344 -> origin/research-market-breadth-recovery-v14
+2026-10-02T10:57:01.4256447Z ##[endgroup]
+2026-10-02T10:57:01.4257195Z ##[group]Determining the checkout info
+2026-10-02T10:57:01.4258050Z ##[endgroup]
+2026-10-02T10:57:01.4263520Z [command]/usr/bin/git sparse-checkout disable
+2026-10-02T10:57:01.4313689Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-02T10:57:01.4342772Z ##[group]Checking out the ref
+2026-10-02T10:57:01.4347212Z [command]/usr/bin/git checkout --progress --force -B research-market-breadth-recovery-v14 refs/remotes/origin/research-market-breadth-recovery-v14
+2026-10-02T10:57:01.6234253Z Switched to a new branch 'research-market-breadth-recovery-v14'
+2026-10-02T10:57:01.7963640Z branch 'research-market-breadth-recovery-v14' set up to track 'origin/research-market-breadth-recovery-v14'.
+2026-10-02T10:57:01.7970822Z ##[endgroup]
+2026-10-02T10:57:01.8011326Z [command]/usr/bin/git log -1 --format=%H
+2026-10-02T10:57:01.8033956Z 3b309e6b025fe0eb66c8be3ec0dbaad84b7e8344
+2026-10-02T10:57:01.8305866Z ##[group]Run actions/setup-python@v5
+2026-10-02T10:57:01.8306138Z with:
+2026-10-02T10:57:01.8306315Z   python-version: 3.12
+2026-10-02T10:57:01.8306503Z   check-latest: false
+2026-10-02T10:57:01.8308395Z   token: ***
+2026-10-02T10:57:01.8308584Z   update-environment: true
+2026-10-02T10:57:01.8308790Z   allow-prereleases: false
+2026-10-02T10:57:01.8308977Z   freethreaded: false
+2026-10-02T10:57:01.8309152Z env:
+2026-10-02T10:57:01.8310876Z   GH_TOKEN: ***
+2026-10-02T10:57:01.8311052Z ##[endgroup]
+2026-10-02T10:57:01.9366385Z ##[group]Installed versions
+2026-10-02T10:57:01.9430589Z (node:2106) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T10:57:01.9431519Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T10:57:01.9432107Z Successfully set up CPython (3.12.14)
+2026-10-02T10:57:01.9432871Z ##[endgroup]
+2026-10-02T10:57:01.9573490Z ##[group]Run set -euo pipefail
+2026-10-02T10:57:01.9573798Z [36;1mset -euo pipefail[0m
+2026-10-02T10:57:01.9574047Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-02T10:57:02.1187310Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T10:57:02.1187649Z env:
+2026-10-02T10:57:02.1189622Z   GH_TOKEN: ***
+2026-10-02T10:57:02.1189877Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:02.1190237Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T10:57:02.1190580Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:02.1190889Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:02.1191190Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:02.1191490Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T10:57:02.1191788Z ##[endgroup]
+2026-10-02T10:57:03.8197224Z Collecting pandas==2.3.3
+2026-10-02T10:57:03.8585556Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-02T10:57:04.3453444Z Collecting numpy==2.3.3
+2026-10-02T10:57:04.3493779Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-02T10:57:04.3681128Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-02T10:57:04.3705115Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-02T10:57:04.3949972Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-02T10:57:04.3978496Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-02T10:57:04.4153174Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-02T10:57:04.4178521Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-02T10:57:04.4369197Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-02T10:57:04.4394434Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-02T10:57:04.4508584Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-02T10:57:04.5309300Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 159.3 MB/s  0:00:00
+2026-10-02T10:57:04.5362208Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-02T10:57:04.8037069Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 61.7 MB/s  0:00:00
+2026-10-02T10:57:04.8065572Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-02T10:57:04.8114664Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-02T10:57:04.8162799Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-02T10:57:04.8359932Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-02T10:57:05.1273804Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-02T10:57:11.3521190Z 
+2026-10-02T10:57:11.3532182Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-02T10:57:11.4130644Z ##[group]Run actions/download-artifact@v4
+2026-10-02T10:57:11.4130883Z with:
+2026-10-02T10:57:11.4131113Z   pattern: market-breadth-recovery-v14-map-development-[0-7]
+2026-10-02T10:57:11.4131384Z   path: maps
+2026-10-02T10:57:11.4131552Z   merge-multiple: false
+2026-10-02T10:57:11.4131747Z   repository: duuu-hub/bb-scanner
+2026-10-02T10:57:11.4131945Z   run-id: 36998066185
+2026-10-02T10:57:11.4132109Z env:
+2026-10-02T10:57:11.4133943Z   GH_TOKEN: ***
+2026-10-02T10:57:11.4134190Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.4134532Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T10:57:11.4134866Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.4135162Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.4135468Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.4135790Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T10:57:11.4136045Z ##[endgroup]
+2026-10-02T10:57:11.5476944Z (node:2142) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T10:57:11.5477828Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T10:57:11.6278439Z Found 9 artifact(s)
+2026-10-02T10:57:11.6279845Z Filtering artifacts by pattern 'market-breadth-recovery-v14-map-development-[0-7]'
+2026-10-02T10:57:11.6286121Z Preparing to download the following artifacts:
+2026-10-02T10:57:11.6287423Z - market-breadth-recovery-v14-map-development-6 (ID: 11222890798, Size: 417454, Expected Digest: sha256:7c3a73a11b02da43f3f82db64872e2026f98fb7be71d513c1e9e90e4f27b41a3)
+2026-10-02T10:57:11.6297575Z - market-breadth-recovery-v14-map-development-1 (ID: 11222875949, Size: 423550, Expected Digest: sha256:3c309c89f35566ec3da53ee3dc6a4a83a5d5c7cd1316d10b224b6d9d3558ff01)
+2026-10-02T10:57:11.6299932Z - market-breadth-recovery-v14-map-development-2 (ID: 11222860949, Size: 421397, Expected Digest: sha256:189c89fbcf2b1a5645b1de5584b534ac34be1ccf67dab1f2d876e4cfd59b3eeb)
+2026-10-02T10:57:11.6302080Z - market-breadth-recovery-v14-map-development-0 (ID: 11222816299, Size: 426033, Expected Digest: sha256:b7ecf88a64d9f19b753535887e777d2f154db2f70ad7f292274ad6769c2669a8)
+2026-10-02T10:57:11.6303921Z - market-breadth-recovery-v14-map-development-4 (ID: 11222667237, Size: 413538, Expected Digest: sha256:4cf31cc31dba23ad5c5b315bd94ca3081417ffb0931cda4fbc4d1fe2ce1905a3)
+2026-10-02T10:57:11.6305759Z - market-breadth-recovery-v14-map-development-3 (ID: 11222637535, Size: 401162, Expected Digest: sha256:cbeca61a9eabc63bd019844e4f5900df27e9cb390e9b05709c539767efa40fda)
+2026-10-02T10:57:11.6307819Z - market-breadth-recovery-v14-map-development-7 (ID: 11222453363, Size: 408160, Expected Digest: sha256:8eabdf7e1c7168d5537a9e0fb05fa855e57d7abb2fa7403d5c1ff45f076d6f8e)
+2026-10-02T10:57:11.6309998Z - market-breadth-recovery-v14-map-development-5 (ID: 11221763718, Size: 436646, Expected Digest: sha256:dcf70009c79b917cffb790f23d437fdc95be7866f6f0b4f88f1aed25d1bb947e)
+2026-10-02T10:57:11.7648756Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-88a32925-de33-5c1c-9200-e5b67e06a359/artifacts/e76105c3e68c0026936ccd124b6d3b20935cb4beba158e6d08c6a1a20f250e34.zip
+2026-10-02T10:57:11.7649911Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-6
+2026-10-02T10:57:11.7809423Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-86450b17-da15-5203-808c-7f9e4529464d/artifacts/4b80c6100f95bfb537f722c03afe7276ca15431afcc7c4391d2a17a0b588c5b6.zip
+2026-10-02T10:57:11.7811287Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-7
+2026-10-02T10:57:11.7856454Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-2f022583-8513-5416-82dc-0aa0674825bd/artifacts/57caeb46a19db69ee80e64f2b8b3c339affaa6b92e0e8bc0e7382786833fb84a.zip
+2026-10-02T10:57:11.7858337Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-2
+2026-10-02T10:57:11.7869691Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-13d44f31-373a-57ff-9c92-7e52cf18a559/artifacts/5052ecc5fd11f05496a9e308289e6c16d783249adcae7f42cc8e5dccca159208.zip
+2026-10-02T10:57:11.7870934Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-0
+2026-10-02T10:57:11.7920496Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-2bf655fa-d9a7-5721-8b2a-2c59ccc71fb6/artifacts/ce54b82265a0afa13440bd04ec4a75cafdfc007dd343e4c18ad8839d79323c17.zip
+2026-10-02T10:57:11.7921799Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-3
+2026-10-02T10:57:11.7943032Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-bbf3d206-9259-5f2d-b63e-3a5132bb54a8/artifacts/87f823478a13927cfcafbc66f04a580f3afcb960cf130f8b4fbf0923760fcb0f.zip
+2026-10-02T10:57:11.7944191Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-4
+2026-10-02T10:57:11.7988274Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-0a791088-70f0-5e73-b297-09f0d166077d/artifacts/be5910e5d11305f04b0ad8b25089c8fb3bca4300b2d52f75b8cb86be13900335.zip
+2026-10-02T10:57:11.7989448Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-5
+2026-10-02T10:57:11.8018662Z Redirecting to blob download url: https://productionresultssa1.blob.core.windows.net/actions-results/4c6d94bb-c57d-866c-adeb-19fded5ca407/workflow-job-run-49ed9392-45d2-5d1b-ab69-0a99726d345f/artifacts/406c9154720a9be52f8848e07b6144c73086756f59ec20fd39e57e218311ba64.zip
+2026-10-02T10:57:11.8020002Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/maps/market-breadth-recovery-v14-map-development-1
+2026-10-02T10:57:11.8051893Z (node:2142) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-02T10:57:11.8197751Z SHA256 digest of downloaded artifact is 7c3a73a11b02da43f3f82db64872e2026f98fb7be71d513c1e9e90e4f27b41a3
+2026-10-02T10:57:11.8198298Z Artifact download completed successfully.
+2026-10-02T10:57:11.8446436Z SHA256 digest of downloaded artifact is 189c89fbcf2b1a5645b1de5584b534ac34be1ccf67dab1f2d876e4cfd59b3eeb
+2026-10-02T10:57:11.8447360Z Artifact download completed successfully.
+2026-10-02T10:57:11.8450196Z SHA256 digest of downloaded artifact is b7ecf88a64d9f19b753535887e777d2f154db2f70ad7f292274ad6769c2669a8
+2026-10-02T10:57:11.8450999Z Artifact download completed successfully.
+2026-10-02T10:57:11.8487513Z SHA256 digest of downloaded artifact is 4cf31cc31dba23ad5c5b315bd94ca3081417ffb0931cda4fbc4d1fe2ce1905a3
+2026-10-02T10:57:11.8488320Z Artifact download completed successfully.
+2026-10-02T10:57:11.8551286Z SHA256 digest of downloaded artifact is cbeca61a9eabc63bd019844e4f5900df27e9cb390e9b05709c539767efa40fda
+2026-10-02T10:57:11.8551790Z Artifact download completed successfully.
+2026-10-02T10:57:11.8594772Z SHA256 digest of downloaded artifact is dcf70009c79b917cffb790f23d437fdc95be7866f6f0b4f88f1aed25d1bb947e
+2026-10-02T10:57:11.8595594Z Artifact download completed successfully.
+2026-10-02T10:57:11.8686746Z SHA256 digest of downloaded artifact is 3c309c89f35566ec3da53ee3dc6a4a83a5d5c7cd1316d10b224b6d9d3558ff01
+2026-10-02T10:57:11.8687393Z Artifact download completed successfully.
+2026-10-02T10:57:11.8866712Z SHA256 digest of downloaded artifact is 8eabdf7e1c7168d5537a9e0fb05fa855e57d7abb2fa7403d5c1ff45f076d6f8e
+2026-10-02T10:57:11.8867571Z Artifact download completed successfully.
+2026-10-02T10:57:11.8868005Z Total of 8 artifact(s) downloaded
+2026-10-02T10:57:11.8872709Z Download artifact has finished successfully
+2026-10-02T10:57:11.9003224Z ##[group]Run set -euo pipefail
+2026-10-02T10:57:11.9003535Z [36;1mset -euo pipefail[0m
+2026-10-02T10:57:11.9003972Z [36;1mpython scripts/market_breadth_v14.py reduce --stage DEV --parts maps --out frozen-breadth[0m
+2026-10-02T10:57:11.9004585Z [36;1mmkdir -p research/market-breadth-recovery-v14/run-36998066185/breadth-development[0m
+2026-10-02T10:57:11.9005195Z [36;1mcp frozen-breadth/* research/market-breadth-recovery-v14/run-36998066185/breadth-development/[0m
+2026-10-02T10:57:11.9005845Z [36;1mcp -r maps research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards[0m
+2026-10-02T10:57:11.9063988Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T10:57:11.9064312Z env:
+2026-10-02T10:57:11.9066282Z   GH_TOKEN: ***
+2026-10-02T10:57:11.9066587Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.9067304Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T10:57:11.9067955Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.9068450Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.9068991Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:11.9069551Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T10:57:11.9069908Z ##[endgroup]
+2026-10-02T10:57:13.4370119Z V14_GLOBAL_BREADTH_FROZEN DEV sources 856 rows 81793 sha256 9521fe0ad191e0215a1919af0d0e2bfc4c46ff67f97f4f8a2849aadbed37c569
+2026-10-02T10:57:13.4945380Z ##[group]Run set -euo pipefail
+2026-10-02T10:57:13.4945701Z [36;1mset -euo pipefail[0m
+2026-10-02T10:57:13.4945976Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-02T10:57:13.4946380Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-02T10:57:13.4947134Z [36;1mgit checkout -b "research-market-breadth-recovery-v14-breadth-development-36998066185"[0m
+2026-10-02T10:57:13.4947700Z [36;1mgit add "research/market-breadth-recovery-v14/run-36998066185/breadth-development"[0m
+2026-10-02T10:57:13.4948237Z [36;1mgit commit -m "Preserve V14 breadth-development before subsequent research stages"[0m
+2026-10-02T10:57:13.4948625Z [36;1mgit push origin HEAD[0m
+2026-10-02T10:57:13.5005046Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-02T10:57:13.5005383Z env:
+2026-10-02T10:57:13.5007473Z   GH_TOKEN: ***
+2026-10-02T10:57:13.5007770Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:13.5008211Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T10:57:13.5008592Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:13.5008934Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:13.5009265Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:13.5009607Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T10:57:13.5009912Z ##[endgroup]
+2026-10-02T10:57:13.5128317Z Switched to a new branch 'research-market-breadth-recovery-v14-breadth-development-36998066185'
+2026-10-02T10:57:13.7459885Z [research-market-breadth-recovery-v14-breadth-development-36998066185 c78dd32] Preserve V14 breadth-development before subsequent research stages
+2026-10-02T10:57:13.7460772Z  34 files changed, 26712 insertions(+)
+2026-10-02T10:57:13.7461296Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/breadth.csv.gz
+2026-10-02T10:57:13.7462244Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/breadth_manifest.json
+2026-10-02T10:57:13.7463773Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-0/breadth_map.csv.gz
+2026-10-02T10:57:13.7464965Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-0/map_meta.json
+2026-10-02T10:57:13.7465948Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-0/source_check.json
+2026-10-02T10:57:13.7467136Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-0/verified_source.json
+2026-10-02T10:57:13.7468151Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-1/breadth_map.csv.gz
+2026-10-02T10:57:13.7469122Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-1/map_meta.json
+2026-10-02T10:57:13.7470090Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-1/source_check.json
+2026-10-02T10:57:13.7471076Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-1/verified_source.json
+2026-10-02T10:57:13.7472073Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-2/breadth_map.csv.gz
+2026-10-02T10:57:13.7473255Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-2/map_meta.json
+2026-10-02T10:57:13.7474277Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-2/source_check.json
+2026-10-02T10:57:13.7475318Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-2/verified_source.json
+2026-10-02T10:57:13.7476323Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-3/breadth_map.csv.gz
+2026-10-02T10:57:13.7477463Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-3/map_meta.json
+2026-10-02T10:57:13.7478501Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-3/source_check.json
+2026-10-02T10:57:13.7479491Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-3/verified_source.json
+2026-10-02T10:57:13.7480503Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-4/breadth_map.csv.gz
+2026-10-02T10:57:13.7481468Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-4/map_meta.json
+2026-10-02T10:57:13.7482428Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-4/source_check.json
+2026-10-02T10:57:13.7483544Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-4/verified_source.json
+2026-10-02T10:57:13.7484528Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-5/breadth_map.csv.gz
+2026-10-02T10:57:13.7485490Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-5/map_meta.json
+2026-10-02T10:57:13.7486451Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-5/source_check.json
+2026-10-02T10:57:13.7487615Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-5/verified_source.json
+2026-10-02T10:57:13.7488611Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-6/breadth_map.csv.gz
+2026-10-02T10:57:13.7489573Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-6/map_meta.json
+2026-10-02T10:57:13.7490534Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-6/source_check.json
+2026-10-02T10:57:13.7491511Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-6/verified_source.json
+2026-10-02T10:57:13.7492552Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-7/breadth_map.csv.gz
+2026-10-02T10:57:13.7493649Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-7/map_meta.json
+2026-10-02T10:57:13.7494626Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-7/source_check.json
+2026-10-02T10:57:13.7495610Z  create mode 100644 research/market-breadth-recovery-v14/run-36998066185/breadth-development/original-map-shards/market-breadth-recovery-v14-map-development-7/verified_source.json
+2026-10-02T10:57:17.0393095Z remote: 
+2026-10-02T10:57:17.0394037Z remote: Create a pull request for 'research-market-breadth-recovery-v14-breadth-development-36998066185' on GitHub by visiting:        
+2026-10-02T10:57:17.0395382Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-market-breadth-recovery-v14-breadth-development-36998066185        
+2026-10-02T10:57:17.0396208Z remote: 
+2026-10-02T10:57:17.0404147Z To https://github.com/duuu-hub/bb-scanner
+2026-10-02T10:57:17.0404909Z  * [new branch]      HEAD -> research-market-breadth-recovery-v14-breadth-development-36998066185
+2026-10-02T10:57:17.0486571Z ##[group]Run actions/upload-artifact@v4
+2026-10-02T10:57:17.0487097Z with:
+2026-10-02T10:57:17.0487363Z   name: market-breadth-recovery-v14-breadth-development
+2026-10-02T10:57:17.0487680Z   path: frozen-breadth/
+2026-10-02T10:57:17.0487905Z   retention-days: 30
+2026-10-02T10:57:17.0488133Z   compression-level: 0
+2026-10-02T10:57:17.0488359Z   if-no-files-found: warn
+2026-10-02T10:57:17.0488595Z   overwrite: false
+2026-10-02T10:57:17.0488818Z   include-hidden-files: false
+2026-10-02T10:57:17.0489068Z env:
+2026-10-02T10:57:17.0491101Z   GH_TOKEN: ***
+2026-10-02T10:57:17.0491393Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:17.0491951Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-02T10:57:17.0492336Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:17.0492683Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:17.0493062Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-02T10:57:17.0493406Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-02T10:57:17.0493702Z ##[endgroup]
+2026-10-02T10:57:17.1877980Z (node:2181) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T10:57:17.1878704Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T10:57:17.1924291Z With the provided path, there will be 2 files uploaded
+2026-10-02T10:57:17.1947637Z Artifact name is valid!
+2026-10-02T10:57:17.1948464Z Root directory input is valid!
+2026-10-02T10:57:17.3846548Z Beginning upload of artifact content to blob storage
+2026-10-02T10:57:17.4092925Z (node:2181) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-02T10:57:17.4944627Z Uploaded bytes 584090
+2026-10-02T10:57:17.5094967Z Finished uploading artifact content to blob storage!
+2026-10-02T10:57:17.5095633Z SHA256 digest of uploaded artifact zip is 5f057fdcf8d940f77f1e110c4f4b5d4be16a113815448d0595779916a7ea7a3e
+2026-10-02T10:57:17.5096630Z Finalizing artifact upload
+2026-10-02T10:57:17.7418557Z Artifact market-breadth-recovery-v14-breadth-development.zip successfully finalized. Artifact ID 11221843701
+2026-10-02T10:57:17.7419413Z Artifact market-breadth-recovery-v14-breadth-development has been successfully uploaded! Final size is 584090 bytes. Artifact ID is 11221843701
+2026-10-02T10:57:17.7424631Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/36998066185/artifacts/11221843701
+2026-10-02T10:57:17.7570350Z Post job cleanup.
+2026-10-02T10:57:17.8544314Z (node:2193) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-02T10:57:17.8544963Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-02T10:57:17.8709867Z Post job cleanup.
+2026-10-02T10:57:17.9448618Z [command]/usr/bin/git version
+2026-10-02T10:57:17.9485557Z git version 2.55.0
+2026-10-02T10:57:17.9516396Z Temporarily overriding HOME='/home/runner/work/_temp/f2eb9fbb-6877-4400-88eb-0e94098f46e9' before making global git config changes
+2026-10-02T10:57:17.9517889Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-02T10:57:17.9521827Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-02T10:57:17.9560610Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-02T10:57:17.9604231Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-02T10:57:17.9873527Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-02T10:57:17.9903006Z http.https://github.com/.extraheader
+2026-10-02T10:57:17.9912342Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-02T10:57:17.9945391Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-02T10:57:18.0166641Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-02T10:57:18.0202451Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-02T10:57:18.0550560Z Cleaning up orphan processes
+2026-10-02T10:57:18.0782007Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
