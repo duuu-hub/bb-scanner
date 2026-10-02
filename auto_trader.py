@@ -65,7 +65,15 @@ def telegram_send(text: str) -> bool:
 
 
 def notify(cfg: dict, text: str) -> None:
+    """Telegram policy: only virtual-position close results are user-facing.
+
+    Demo fills/rejects/errors/cancels remain in the execution log and state,
+    but are intentionally silent on Telegram.
+    """
     if not bool(cfg.get("telegram_trade_notifications", True)):
+        return
+    if "가상포지션 종료" not in text:
+        print("[INFO] Telegram suppressed by signal/shadow-result-only policy.")
         return
     try:
         telegram_send(text)
