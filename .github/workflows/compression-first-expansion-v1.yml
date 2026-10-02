@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
       - name: Compile and chronology smoke
         run: |
           python -m py_compile scripts/compression_first_expansion_v1.py scripts/compression_first_expansion_v1_merge.py
