@@ -71,56 +71,51 @@ def find_entry(raw, ref_ts: int, ref_price: float, depth_pct: float):
     return {"status":"NO_SETUP"}
 
 def replay_depth(events, raw_paths, depth_pct: float, split: str):
-    a = events[events["split"].eq(split)].sort_values(["entry_ts","symbol"])
-    busy = {}
+    a = events[events["split"].eq(split)].sort_values(["symbol","entry_ts"])
     gross_vals = []
     statuses = Counter()
     misc = Counter()
     bars_to_entry = []
     accepted_ts = []
 
-    cache_sym = None
-    raw = None
-    for row in a.itertuples(index=False):
-        sym = row.symbol
-        sig_ref_ts = int(row.entry_ts)
-        if sig_ref_ts < busy.get(sym, -1):
-            misc["overlap_skips"] += 1
+    for sym, g in a.groupby("symbol", sort=True):
+        p = raw_paths.get(sym)
+        if p is None:
+            misc["ENTRY_MISMATCH"] += len(g)
             continue
-
-        # Reserve the setup window so overlapping signals cannot create duplicate setups.
-        setup_deadline = sig_ref_ts + SETUP_BARS * BAR_MS
-        busy[sym] = setup_deadline
-
-        if cache_sym != sym:
-            p = raw_paths.get(sym)
-            if p is None:
-                misc["ENTRY_MISMATCH"] += 1
+        raw = base.load_raw_symbol(p)
+        busy_until = -1
+        for row in g.itertuples(index=False):
+            sig_ref_ts = int(row.entry_ts)
+            if sig_ref_ts < busy_until:
+                misc["overlap_skips"] += 1
                 continue
-            raw = base.load_raw_symbol(p)
-            cache_sym = sym
 
-        ent = find_entry(raw, sig_ref_ts, float(row.entry), depth_pct)
-        st = ent["status"]
-        if st == "NO_SETUP":
-            misc["no_setup"] += 1
-            continue
-        if st != "ENTRY":
-            misc[st] += 1
-            continue
+            # Reserve setup window so nearby fresh-transition signals cannot duplicate one setup.
+            setup_deadline = sig_ref_ts + SETUP_BARS * BAR_MS
+            busy_until = setup_deadline
 
-        rs = base.event_outcomes(sym, raw, ent["entry_ts"], ent["entry"], SL_PCT)
-        rec = rs[HOLD_LABEL]
-        rst = rec.get("status")
-        if rst in ("DATA_GAP","ENTRY_MISMATCH","EXIT_MISMATCH") or "gross_pct" not in rec:
-            misc[rst] += 1
-            continue
+            ent = find_entry(raw, sig_ref_ts, float(row.entry), depth_pct)
+            st = ent["status"]
+            if st == "NO_SETUP":
+                misc["no_setup"] += 1
+                continue
+            if st != "ENTRY":
+                misc[st] += 1
+                continue
 
-        busy[sym] = int(rec["exit_ts"])
-        gross_vals.append(float(rec["gross_pct"]))
-        statuses[rst] += 1
-        bars_to_entry.append(int(ent["bars_to_entry"]))
-        accepted_ts.append(int(ent["entry_ts"]))
+            rs = base.event_outcomes(sym, raw, ent["entry_ts"], ent["entry"], SL_PCT)
+            rec = rs[HOLD_LABEL]
+            rst = rec.get("status")
+            if rst in ("DATA_GAP","ENTRY_MISMATCH","EXIT_MISMATCH") or "gross_pct" not in rec:
+                misc[rst] += 1
+                continue
+
+            busy_until = int(rec["exit_ts"])
+            gross_vals.append(float(rec["gross_pct"]))
+            statuses[rst] += 1
+            bars_to_entry.append(int(ent["bars_to_entry"]))
+            accepted_ts.append(int(ent["entry_ts"]))
 
     return gross_vals, statuses, misc, bars_to_entry, accepted_ts
 
