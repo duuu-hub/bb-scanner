@@ -1,0 +1,42 @@
+name: Extreme Extension NextOpen Sweep
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_extension_nextopen_sweep_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download frozen 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          mkdir -p pump_data
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Run sweep
+        run: |
+          rm -rf extreme_nextopen_sweep
+          python research/extreme_extension_nextopen_sweep.py --data-root pump_data --out extreme_nextopen_sweep
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extreme-nextopen-sweep-${{ github.run_id }}
+          path: extreme_nextopen_sweep/
+          retention-days: 30
+          compression-level: 6
