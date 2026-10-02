@@ -129,7 +129,7 @@ def main():
                    "ret40":ym40["return_pct"],"mdd40":ym40["mdd_pct"],"pf40":ym40["pf"]})
 
  s=pd.DataFrame(rows);ydf=pd.DataFrame(yearly)
- both=s[s.mode=="BOTH"].copy()
+ both=s[s["mode"]=="BOTH"].copy()
 
  # Registered acceptance gates.
  both["base_gate"]=(both.exec_n>=700)&(both.exec_per_day>=.45)&(both.pf20>=1.08)&(both.pf40>=1.00)&\
