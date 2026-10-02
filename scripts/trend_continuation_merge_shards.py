@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-KEY=["lookback","tail","threshold_pct","sl_pct","time_limit","cost_bp","split"]
+KEY=["lookback","tail","threshold_pct","tp_pct","sl_pct","time_limit","cost_bp","split"]
 SUMCOLS=["n","raw_signals","overlap_skips","excluded","tp_n","sl_n","time_n","win_n",
          "sum_net_pct","gross_profit_net_pct","gross_loss_abs_net_pct"]
 
@@ -21,7 +21,7 @@ def main():
     g["pf_net"]=np.where(g.gross_loss_abs_net_pct>0,g.gross_profit_net_pct/g.gross_loss_abs_net_pct,np.nan)
     g.to_csv("merged_cells.csv",index=False)
 
-    k=["lookback","tail","threshold_pct","sl_pct","time_limit","cost_bp"]
+    k=["lookback","tail","threshold_pct","tp_pct","sl_pct","time_limit","cost_bp"]
     tr=g[(g.split=="TRAIN")&(g.n>=100)].copy()
     tr=tr.sort_values(["avg_net_pct","pf_net","n"],ascending=[False,False,False]).head(50)
     paired=[]
