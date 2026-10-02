@@ -51,7 +51,7 @@ jobs:
           for rr in bfrows:
               sym=rr["symbol"]; base=float(rr["base_x"])
               base_ts=int(float(rr["base_entry_ts"])); sig_ts=int(float(rr["signal_ts"]))
-              frozen=float(rr["break_level"]); prior_peak=float(rr["peak_at_confirm"])
+              target_frozen=float(rr["break_level"]); prior_peak=float(rr["peak_at_confirm"])
               data=[]
               with gzip.open(paths[sym],"rt",encoding="utf-8",newline="") as f:
                   rd=csv.DictReader(f)
@@ -78,7 +78,7 @@ jobs:
                           rebound=True;reb_high=h
                   else:
                       reb_high=max(reb_high,h)
-                      if c<frozen:
+                      if c<state_frozen:
                           if running_peak>low:
                               retr=(reb_high-low)/(running_peak-low)*100
                           break
