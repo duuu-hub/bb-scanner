@@ -21,6 +21,26 @@ def atr(h,l,c,n=14):
  tr=np.maximum(h-l,np.maximum(abs(h-prev),abs(l-prev)))
  return pd.Series(tr).ewm(alpha=1/n,adjust=False,min_periods=n).mean().to_numpy()
 
+def find_pullback_trigger(side,s0,end,imp_high,imp_low,imp_range,A,o,h,l,c):
+ pull_ext=None;pull_depth=np.nan
+ for k in range(s0,end):
+  if side=="long":
+   depth=(imp_high-float(l[k]))/imp_range
+   if depth>PULL_MAX:return None,None,np.nan,True
+   if depth<PULL_MIN:continue
+   pull_ext=float(l[k]) if pull_ext is None else min(pull_ext,float(l[k]))
+   if k<=s0:continue
+   ok=(c[k]>o[k] and (c[k]-o[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]>h[k-1])
+  else:
+   depth=(float(h[k])-imp_low)/imp_range
+   if depth>PULL_MAX:return None,None,np.nan,True
+   if depth<PULL_MIN:continue
+   pull_ext=float(h[k]) if pull_ext is None else max(pull_ext,float(h[k]))
+   if k<=s0:continue
+   ok=(c[k]<o[k] and (o[k]-c[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]<l[k-1])
+  if ok:return k,pull_ext,float(depth),False
+ return None,pull_ext,pull_depth,False
+
 def enter_trade(symbol,t,o,h,l,c,start,side,A,sl_mode,pull_ext=None):
  fill=float(o[start])
  if sl_mode=="atr":
@@ -76,26 +96,8 @@ def eval_symbol(symbol,t,o,h,l,c):
     candidates.append(("CONFIRM_ATR",k+1,"atr",None,k,np.nan));break
 
   # C/D. Corrected pullback: once retracement exceeds 65%, this impulse is INVALID forever.
-  pull_ext=None;pull_depth=np.nan;invalid=False;trigger=None
-  for k in range(s0,end):
-   if side=="long":
-    depth=(imp_high-float(l[k]))/imp_range
-    if depth>PULL_MAX:
-     invalid=True;break
-    if depth<PULL_MIN:continue
-    pull_ext=float(l[k]) if pull_ext is None else min(pull_ext,float(l[k]))
-    if k<=s0:continue
-    ok=(c[k]>o[k] and (c[k]-o[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]>h[k-1])
-   else:
-    depth=(float(h[k])-imp_low)/imp_range
-    if depth>PULL_MAX:
-     invalid=True;break
-    if depth<PULL_MIN:continue
-    pull_ext=float(h[k]) if pull_ext is None else max(pull_ext,float(h[k]))
-    if k<=s0:continue
-    ok=(c[k]<o[k] and (o[k]-c[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]<l[k-1])
-   if ok:
-    trigger=k;pull_depth=float(depth);break
+  trigger,pull_ext,pull_depth,invalid=find_pullback_trigger(
+   side,s0,end,imp_high,imp_low,imp_range,A,o,h,l,c)
   if not invalid and trigger is not None:
    candidates.append(("PULLBACK_ATR",trigger+1,"atr",pull_ext,trigger,pull_depth))
    candidates.append(("PULLBACK_STRUCT",trigger+1,"struct",pull_ext,trigger,pull_depth))
