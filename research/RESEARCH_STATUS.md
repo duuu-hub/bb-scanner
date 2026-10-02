@@ -305,3 +305,14 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Durable audit: `research/breadth-expansion-continuation-v15/V15_ACTUAL_REJECTION.json` at `fdc689b6be16a50ff244982ab4012d160f8c0a1d`.
 - V16 was preregistered before implementation/outcomes at `0f16d614794396ecf7b7cbec3af6b9af138b7792` on `research-breadth-pullback-reclaim-v16`.
 - V16 is economically distinct: it does not enter the breadth impulse immediately. It requires a later controlled first pullback and a still-later closed-bar reclaim, explicitly forbidding same-bar touch/reclaim assumptions. Frozen grid remains 16 entries and 96 policies.
+
+
+## 2026-10-03 — V16 implementation and first trigger handoff
+
+- Preregistered branch: `research-breadth-pullback-reclaim-v16`; preregistration commit `0f16d614794396ecf7b7cbec3af6b9af138b7792`.
+- Implemented the frozen 16-entry / 96-policy breadth-impulse → separate controlled first-pullback → still-later reclaim state machine. Same-bar touch/reclaim is forbidden; invalidation, pullback/reclaim windows, favorable-gap exclusion, adverse-gap retention, and stop bounds are explicit.
+- Added 42 V16-specific tests and registered 458 total regression tests. This is a registration count only until the Actions log confirms execution.
+- Preserved the eight-shard global breadth map/reduce, canonical official Binance 1m scans, DEV-first selection, conditional seen-2024 gate/accounts, and complete-evidence archive.
+- Final implementation commit before trigger: `6b8ddcdc97090fcbf2a8030f56497f256c2f8118`.
+- Exactly one trigger was pushed at commit `11d1d8c6aeda6b7da41d5a937a74ff796a9f531f`.
+- Audit state: Actions run ID and actual validation result are pending discovery. Do not claim execution, do not treat registered tests as passed, and do not launch a duplicate.
