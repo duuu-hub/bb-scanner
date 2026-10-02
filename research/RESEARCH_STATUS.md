@@ -7,22 +7,22 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V10 actual run36966622286/code18270ece2a1923591e14ae706ce9b91e79ddd76a:
-validation/8DEV/selection SUCCESS;340491 parameterized outcomes across96 cells,
-zero survivors;GATE/accounts skipped. All96 global net40 price and R means are
-negative. R is negative in every cell in both2022 and2023; equal-active-date R
-negative in every2023 cell. Best cell: short,W1344,z3,FLOW55,H96,TP2,
-N1278/194symbols,-9.5794bp,-.04375R,PF.946. Sources856/prior256 hashes;
-159DATA_GAP exclusions;814 official minute checksums. Saved cells/metas/source
-checks/exclusions audited. Full original ledgers await existing preserve_cycle.
-Daily account +0.7%-2% remains unmet.
+V11 actual run36980518301/code7f7c3b517978e3401e80d1d2f9fafea01cc048d1:
+validation/8DEV/selection/preserve SUCCESS;96 cells/37064 overlapping outcomes,
+ZERO candidates/accounts;gate/accounts skipped. All96 net40 price/R negative;
+all2022/2023 R and equal-active-date R negative. Best -28.0354bp/-0.18367R/PF.78213.
+Seven gross-positive cells became zero net-positive after45.3727-48.9334bp deductions.
+Original8 compressed ledgers byte/hash/arithmetic and all96 cells audit PASS.
+Full archive2611 files/1134733117 bytes atbf0127ad77d88862af9321a8642acac814d76cf0.
+751 raw official1m ZIPs vs752 checksum records:malformed BNX2022-06 raw bytes
+were not retained by old helper;52 outcomes/3 unique entry events excluded.
+Recovery of that exact-hash malformed ZIP is pending V12 validation,no market rerun.
 
-V11 distinct aggressive taker-flow cascade continuation was preregistered at commit 1ffcce44d054adb42a0cff620f8381cfa388b4e2 and is being implemented
-on branch research-aggressive-flow-cascade-v11 before code or market outcomes.
-It targets short-lived order-flow persistence after an idiosyncratic high-volume
-breakout, rather than V3 shock reversal,V4 compression breakout,V6 BTC lag,
-V9 daily leader momentum or V10 level residual reversion.16entry configs/
-96DEV cells planned; implementation lease through2026-10-02T07:11:06Z.
+V12 taker absorption release distinct hypothesis preregistered BEFORE code at
+c8741743ecff8573c0994878557db38698e14267,branch research-taker-absorption-release-v12.
+Setup:one-sided high-volume executed flow with flat price, then opposite range
+release;16entries/96DEV cells fixed. Implementation/tests/actual launch pending.
+Lease through2026-10-02T11:56:00Z. Daily whole-account+0.7%-2% remains unmet.
 
 ## Completed failures and durable assets
 - V10 actual36966622286:16entries/96cells/340491outcomes,all96 global net40 price/R negative,zero selected/accounts. Best -9.5794bp/-0.04375R/PF.946/N1278;2022 and2023 all96 R negative,2023 all96 equal-dateR negative. DEV branch research-residual-reversion-v10-dev-36966622286 commit 8d0f1aa84b5aacf432ea688e3f26b165f11f4b87. Full evidence preservation still running; raw original ledger audit pending.
