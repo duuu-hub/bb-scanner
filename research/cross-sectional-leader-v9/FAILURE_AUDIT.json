@@ -4,7 +4,7 @@
   "code_commit": "2e1bb92891c2c480028c075b30afe91275cc0c43",
   "development_branch": "research-cross-sectional-leader-v9-dev-36955250542",
   "development_commit": "8ee2ea6255e914329032496bd14be07a70cece0e",
-  "audit_scope": "Saved original 96-cell statistics, 8 source/scan metadata and all exclusions. Raw ledger means and full-archive byte audit remain a separate pending check; no market rerun.",
+  "audit_scope": "Saved original 96-cell statistics, 8 source/scan metadata and all exclusions; durable archive manifest/git file-size audit complete. Original raw ledger means/byte hashes pending the V10 validation audit; entire archive byte hashes not independently recomputed.",
   "cells": 96,
   "source_files": 856,
   "prior_hashes_matched": 256,
@@ -275,5 +275,26 @@
     2.0
   ],
   "goal_met": false,
-  "history": "V1-V9 were adaptively explored; not independent evidence. Transfer-only added newlines were removed after matching every original provenance hash; original git bytes unchanged."
+  "history": "V1-V9 were adaptively explored; not independent evidence. Transfer-only added newlines were removed after matching every original provenance hash; original git bytes unchanged.",
+  "durable_archive": {
+    "status": "V9_DURABLE_ARCHIVE_MANIFEST_GIT_SIZE_AUDIT_PASS",
+    "observed_at": "2026-10-02T04:52:37Z",
+    "actual_run": 36955250542,
+    "preserve_job": 110702789316,
+    "preserve_conclusion": "success",
+    "branch": "research-cross-sectional-leader-v9-evidence-36955250542",
+    "commit": "d64413ffdd50f2dbfaa16bf89e8aa1e6d63cb10a",
+    "tree": "7531777c8ae5fd8572a1390487bd1e939dd55ed3",
+    "path": "research/cross-sectional-leader-v9/run-36955250542/complete-evidence",
+    "manifest_file_count": 1764,
+    "manifest_original_bytes": 777727705,
+    "git_tree_truncated": false,
+    "all_manifest_file_sizes_match_git_tree": true,
+    "actual_log_proof": [
+      "2026-10-02T04:23:13.9954256Z EVIDENCE_ARCHIVED V9-complete-or-partial 1764 files 777727705 bytes",
+      "2026-10-02T04:24:34.0447382Z  * [new branch]      HEAD -> research-cross-sectional-leader-v9-evidence-36955250542"
+    ],
+    "scope": "Original durable manifest and recursive git tree read directly; all 1764 file sizes reconcile. Full archive byte SHA256s have not all been independently recomputed.",
+    "original_ledger_arithmetic": "PENDING actual V10 validate job immutable 8-blob byte/hash and 96-cell arithmetic audit; no market rerun."
+  }
 }

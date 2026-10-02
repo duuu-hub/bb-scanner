@@ -1,0 +1,136 @@
+{
+  "recorded_at": "2026-10-02T04:52:37Z",
+  "economic_plan_commit": "a42078eb11baa5442e4009a3e96a9e64f4665fce",
+  "economic_parameters_changed_after_plan": false,
+  "market_execution_attempts": 0,
+  "planned_entry_configs": 16,
+  "planned_development_cells": 96,
+  "completed_market_cells": 0,
+  "local_full_unit_tests": {
+    "status": "PASS",
+    "tests": 261,
+    "duration_seconds": 19.195,
+    "log": "preexecution/local-unit-tests.log"
+  },
+  "local_new_unit_tests": {
+    "status": "PASS",
+    "tests": 29,
+    "log": "preexecution/new-unit-tests.log"
+  },
+  "local_chronology_smoke": {
+    "status": "DEPENDENCY_FAILURE_NOT_PASS",
+    "missing": "numba",
+    "log": "preexecution/local-chronology-smoke.log"
+  },
+  "static_workflow_validation": {
+    "status": "PASS",
+    "yaml_graph_and_gating": true,
+    "bash_n_steps": 21,
+    "python_heredocs_parsed": 5
+  },
+  "fixture_failures": [
+    {
+      "attempt": "initial 28 new tests",
+      "failures": 2,
+      "cause": [
+        "cooldown fixture accidentally used adjacent signal onsets",
+        "2023 synthetic year fixture crossed into 2024"
+      ],
+      "repair": "correct independent fixture timestamps; no economic parameter changes",
+      "raw_log": "not saved locally; actual tool output observed"
+    },
+    {
+      "attempt": "29-test source-file pipeline addition",
+      "errors": 1,
+      "cause": "synthetic CSV used taker_buy_quote_volume instead of authoritative taker_buy_quote",
+      "repair": "fix synthetic source column; market loader unchanged",
+      "raw_log": "preexecution/synthetic-fixture-column-failure.log"
+    }
+  ],
+  "actual_actions_required_before_market_scan": [
+    "V9 immutable original byte/SHA256/financial-arithmetic audit",
+    "261 unit tests",
+    "existing pinned-numba chronology smoke",
+    "synthetic eight-shard scan and 96-cell selection"
+  ],
+  "not_claimed": [
+    "Local chronology smoke pass",
+    "Actual V10 market execution before run evidence",
+    "V10 profitability",
+    "Daily target achievement",
+    "Clean holdout"
+  ],
+  "files": {
+    "scripts/residual_reversion_v10.py": {
+      "bytes": 23583,
+      "sha256": "93f5e0761f57c4da58f40ef9d0cfad1d7ad5b3bf30e90c760d73ac49946b21ba"
+    },
+    "scripts/audit_v9_original_ledgers.py": {
+      "bytes": 5656,
+      "sha256": "0205be4c7bfd43e78c096b7fa7e87e287ddde3b90e0b0e2e35773430d9074834"
+    },
+    "tests/test_residual_reversion_v10.py": {
+      "bytes": 16857,
+      "sha256": "aa4d3a77105babfff90b8d43a1850c6a11b8615db415e787a420ea86dc09cf27"
+    },
+    ".github/workflows/residual-reversion-v10.yml": {
+      "bytes": 17404,
+      "sha256": "1700466f0375de1a7c7543424a9bf3bcc326d24e65cd8ce35b5cb00420f7b843"
+    },
+    "research/residual-reversion-v10/PLAN.md": {
+      "bytes": 9154,
+      "sha256": "b535687ba50b594b01ca00dc2de04079ef8a9c46e79e395f9827e60fb1c81c16"
+    },
+    "research/residual-reversion-v10/IMPLEMENTATION_CONTRACT.md": {
+      "bytes": 3877,
+      "sha256": "4c609e312bd4da59c25c2cfe00c2e621076fa43eb2619ffc1f4f4d3a698d99a3"
+    },
+    "research/residual-reversion-v10/FROZEN_INPUT_HASHES.json": {
+      "bytes": 25644,
+      "sha256": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f"
+    },
+    "research/residual-reversion-v10/FROZEN_CONTEXT.json": {
+      "bytes": 72283,
+      "sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614"
+    },
+    "research/cross-sectional-leader-v9/SAVED_ORIGINAL_LEDGER_INPUTS.json": {
+      "bytes": 3376,
+      "sha256": "84ec6f934bf4e38b931465a658f8e93152932b987d8f7791253dc8cdcb281ac8"
+    },
+    "research/cross-sectional-leader-v9/saved-development/development_policy_cells.csv": {
+      "bytes": 65449,
+      "sha256": "b9eecd04ebf076c5ef6851581afef28104ac9959cf8764506efe665746d0a5c6"
+    },
+    "research/cross-sectional-leader-v9/ARCHIVE_AUDIT.json": {
+      "bytes": 1192,
+      "sha256": "d2577139b314ee5b0835e477ac9ee1f2867d64878fa1ff11234ba2bd370f2541"
+    },
+    ".research/residual-reversion-v10-run": {
+      "bytes": 271,
+      "sha256": "d97e24b914597cc265d2feaaced6820965d30f38fcd2d3c824ae95d2fc78fb3c"
+    },
+    "research/cross-sectional-leader-v9/FAILURE_AUDIT.json": {
+      "bytes": 13125,
+      "sha256": "62c3a864a3a3902c4cccc9416655b1fe672fb6c825ef9a52d7af62f63b5821f3"
+    }
+  },
+  "logs": {
+    "research/residual-reversion-v10/preexecution/synthetic-fixture-column-failure.log": {
+      "bytes": 8270,
+      "sha256": "24019268c5b16f001c6242700711f048a17b90cebb8afe60351653d3cffc0ee6"
+    },
+    "research/residual-reversion-v10/preexecution/local-unit-tests.log": {
+      "bytes": 39559,
+      "sha256": "a50990592ff6d8e67589d61f6b39f726927c4fa0ef2716596a4782788b4645cd"
+    },
+    "research/residual-reversion-v10/preexecution/new-unit-tests.log": {
+      "bytes": 7521,
+      "sha256": "53da72398f284167c5c1b29aae3e0ed92532187d3a69601ccdd69c4ac3005fd0"
+    },
+    "research/residual-reversion-v10/preexecution/local-chronology-smoke.log": {
+      "bytes": 301,
+      "sha256": "0a5c480fb4dae09307478c8ccf99237a1a5465b979c073f30739c1f55c1b05a3"
+    }
+  },
+  "v10_market_outcomes_examined": false
+}
