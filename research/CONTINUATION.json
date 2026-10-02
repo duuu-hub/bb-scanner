@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-02T22:49:00Z",
+  "updated_at": "2026-10-02T22:50:00Z",
   "interactive_lease": null,
   "current_branch": "research-breadth-pullback-reclaim-v16",
   "current_run": 37074366568,
   "current_workflow": ".github/workflows/breadth-pullback-reclaim-v16.yml",
   "current_plan": "research/breadth-pullback-reclaim-v16/PLAN.md",
-  "latest_research_checkpoint": "V16_RETRY_RUN_37074366568_IN_PROGRESS",
+  "latest_research_checkpoint": "V16_RUN_37074366568_VALIDATION_458_OF_458_PASS_8_DEV_MAPS_ACTIVE",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -250,8 +250,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Follow existing V16 retry run 37074366568; do not launch a duplicate. Read actual validation log after completion, then follow map/reduce/canonical DEV stages if validation passes.",
-  "phase": "V16_RETRY_RUN_ACTIVE",
+  "next_action": "Follow existing V16 run 37074366568; do not launch a duplicate. Read all 8 DEV breadth-map logs/artifacts, then reduction, all 8 canonical scans, selection and evidence. Do not claim profitability from validation.",
+  "phase": "V16_RETRY_VALIDATION_SUCCESS_DEV_MAPS_ACTIVE",
   "last_failure": {
     "version": "V16",
     "run": 37074012724,
@@ -387,7 +387,7 @@
     "test_fixture_repair_commit": "eb360c6bc81fcb4ad9bdf5494dd6b2143803dabe",
     "retry_trigger_commit": "217a46b0e752800b70115eb9a63528d809242ce6",
     "run_id": 37074366568,
-    "state": "IN_PROGRESS"
+    "state": "VALIDATION_SUCCESS_8_DEV_MAPS_ACTIVE"
   },
   "v8_attempt_failures": [
     {
@@ -3503,7 +3503,7 @@
       "policies": 96,
       "execution_attempts": 2,
       "market_outcomes": 0,
-      "state": "RETRY_IN_PROGRESS",
+      "state": "VALIDATION_SUCCESS_8_DEV_MAPS_ACTIVE",
       "implementation_last_commit": "6b8ddcdc97090fcbf2a8030f56497f256c2f8118",
       "trigger_commit": "11d1d8c6aeda6b7da41d5a937a74ff796a9f531f",
       "workflow": ".github/workflows/breadth-pullback-reclaim-v16.yml",
@@ -3520,7 +3520,23 @@
       "run1_evidence_branch": "research-breadth-pullback-reclaim-v16-evidence-37074012724",
       "test_fixture_repair_commit": "eb360c6bc81fcb4ad9bdf5494dd6b2143803dabe",
       "retry_trigger_commit": "217a46b0e752800b70115eb9a63528d809242ce6",
-      "retry_run": 37074366568
+      "retry_run": 37074366568,
+      "validation_job": 111060825788,
+      "validation_tests": 458,
+      "validation_status": "SUCCESS"
     }
+  },
+  "completed_v16_validation": {
+    "run": 37074366568,
+    "job_id": 111060825788,
+    "status": "SUCCESS",
+    "tests": 458,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 59.852,
+    "frozen_input_contract": "PASS_256_PRIOR_HASHES_856_SOURCE_FILES",
+    "saved_v13_audit": "PASS",
+    "canonical_chronology_smoke": "PASS",
+    "source": "Actual Actions job log read; validation is not market profit"
   }
 }
