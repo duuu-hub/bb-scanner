@@ -7,7 +7,6 @@ on:
       - '.research/extreme_pump_cycle_stats_run'
       - 'research/extreme_pump_cycles.py'
       - 'scripts/trend_continuation_first_touch.py'
-      - 'scripts/trend_continuation_build_events.py'
       - 'scripts/trend_continuation_merge_shards.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
@@ -39,50 +38,18 @@ jobs:
             -n rank5-binance-um-15m-5y-data-shard-5 \
             -n rank5-binance-um-15m-5y-data-shard-6 \
             -n rank5-binance-um-15m-5y-data-shard-7
-          find pump_data -name '*USDT.csv.gz' | wc -l
       - name: Compute cycle statistics
         run: |
           rm -rf pump_cycle_result
           python research/extreme_pump_cycles.py --data-root pump_data --out pump_cycle_result
-      - name: Upload compact result
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: extreme-pump-cycle-stats-${{ github.run_id }}
           path: pump_cycle_result/
           retention-days: 30
           compression-level: 6
 
-  continuation-events:
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install pandas==2.3.3 numpy==2.3.3
-      - name: Download prepared 5Y continuation parts from prior run
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p prior_parts
-          gh run download 36884853754 -R ${{ github.repository }} \
-            -p 'trend-continuation-part-*' -D prior_parts
-          find prior_parts -name '*.csv.gz' | wc -l
-      - name: Build global cross-sectional event table once
-        run: |
-          python scripts/trend_continuation_build_events.py \
-            --parts prior_parts \
-            --out continuation_events.csv.gz
-      - uses: actions/upload-artifact@v4
-        with:
-          name: trend-continuation-global-events
-          path: continuation_events.csv.gz
-          retention-days: 30
-          compression-level: 0
-
-  continuation-replay:
-    needs: continuation-events
+  wide-sl-replay:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -96,10 +63,14 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pandas==2.3.3 numpy==2.3.3
-      - uses: actions/download-artifact@v4
-        with:
-          name: trend-continuation-global-events
-          path: events
+      - name: Download frozen global continuation events
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p events
+          gh run download 36934882492 -R ${{ github.repository }} \
+            -n trend-continuation-global-events -D events
+          ls -lh events/continuation_events.csv.gz
       - name: Download raw source shard ${{ matrix.shard }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -108,7 +79,7 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay shard with canonical 1m chronology
+      - name: Replay wide-SL shard with canonical 1m chronology
         run: |
           rm -rf shard_result
           python scripts/trend_continuation_first_touch.py \
@@ -119,15 +90,15 @@ jobs:
             --out shard_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-replay-shard-${{ matrix.shard }}
+          name: trend-continuation-wide-sl-shard-${{ matrix.shard }}
           path: |
             shard_result/cells.csv
             shard_result/summary.json
           retention-days: 30
           compression-level: 6
 
-  continuation-merge:
-    needs: continuation-replay
+  wide-sl-merge:
+    needs: wide-sl-replay
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -138,13 +109,13 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-replay-shard-*
+          pattern: trend-continuation-wide-sl-shard-*
           path: shard_results
       - name: Merge exact aggregate metrics
         run: python scripts/trend_continuation_merge_shards.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-merged-${{ github.run_id }}
+          name: trend-continuation-wide-sl-merged-${{ github.run_id }}
           path: |
             merged_cells.csv
             merged_summary.json
