@@ -1,0 +1,82 @@
+{
+  "experiment_id": "compression_first_expansion_v1_train",
+  "hypothesis": "After a causal 15m volatility compression, the first confirmed close outside the prior 4h box with a large expansion candle has positive directional continuation expectancy after costs.",
+  "registered_before_outcome": true,
+  "registered_from_head": "6bb7b8f581831c65d26f762ed66bedd3b476edd8",
+  "data": {
+    "source_run": 36095439671,
+    "market": "Binance USD-M USDT perpetual",
+    "timeframe": "15m parent + official Binance 1m chronology",
+    "date_selection": "TRAIN only: entry and exit must both be before 2025-01-01T00:00:00Z",
+    "validation": "2025-2026 repository period is seen validation and will not be read in this TRAIN discovery run",
+    "universe": "all symbol files present in frozen source artifact",
+    "point_in_time_universe_status": "unknown; survivorship/listing eligibility must be audited before any VALIDATED_CANDIDATE claim"
+  },
+  "signal": {
+    "compression": "ATR16 / ATR96 measured using bars ending at i-1",
+    "compression_ratio_grid": [
+      0.65,
+      0.8
+    ],
+    "box": "high/low of prior 16 completed 15m bars",
+    "first_breakout_guard": "previous close must still be inside its own prior-16-bar box",
+    "breakout": "bar i close outside prior box in breakout direction",
+    "expansion_range_grid_atr16": [
+      1.5,
+      2
+    ],
+    "body_to_range_min": 0.6,
+    "entry": "next 15m open i+1",
+    "direction": [
+      "LONG",
+      "SHORT"
+    ]
+  },
+  "exit_grid": {
+    "stop_atr96": [
+      1,
+      1.5
+    ],
+    "target_r": [
+      1.5,
+      2.5
+    ],
+    "max_hold_hours": 8,
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "execution": {
+    "canonical_engine": "scripts/sweep_reclaim_research.py::trade",
+    "chronology": "AGENTS.md section 11 canonical Binance 1m collision resolution",
+    "costs_round_trip_bp": [
+      20,
+      40
+    ],
+    "funding": "excluded",
+    "slippage": "represented only by stated all-in cost stress; no separate slippage model"
+  },
+  "portfolio": {
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false,
+    "candidate_priority": "expansion_strength descending then compression_strength then symbol"
+  },
+  "selection": {
+    "dataset": "TRAIN 2021-2024 only",
+    "minimum_executable_trades": 700,
+    "minimum_exec_per_day": 0.45,
+    "primary": "account return subject to robustness gates",
+    "robustness_gates": [
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD <= 35%",
+      "positive return at 20bp and 40bp",
+      "not an isolated peak: at least two adjacent grid configurations in same direction with PF20 > 1.03 and positive 20bp account return"
+    ],
+    "next_step": "freeze a stable TRAIN region before any 2025-2026 validation run"
+  },
+  "classification": "EXPLORATORY"
+}
