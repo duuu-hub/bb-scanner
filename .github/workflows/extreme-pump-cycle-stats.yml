@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_cpr_quality_filter.py'
-      - 'scripts/trend_continuation_cpr_quality_merge.py'
+      - 'scripts/trend_continuation_cpr_structure.py'
+      - 'scripts/trend_continuation_cpr_structure_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  quality-replay:
+  structure-replay:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -42,24 +42,24 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay signal-quality filters
+      - name: Replay signal-candle structure filters
         run: |
-          rm -rf quality_result
-          python scripts/trend_continuation_cpr_quality_filter.py \
+          rm -rf structure_result
+          python scripts/trend_continuation_cpr_structure.py \
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --out quality_result
+            --out structure_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-quality-shard-${{ matrix.shard }}
+          name: trend-continuation-structure-shard-${{ matrix.shard }}
           path: |
-            quality_result/cells.csv
-            quality_result/summary.json
+            structure_result/cells.csv
+            structure_result/summary.json
           retention-days: 30
           compression-level: 6
 
-  quality-merge:
-    needs: quality-replay
+  structure-merge:
+    needs: structure-replay
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -70,13 +70,13 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-quality-shard-*
+          pattern: trend-continuation-structure-shard-*
           path: shard_results
-      - name: Merge quality-filter metrics
-        run: python scripts/trend_continuation_cpr_quality_merge.py
+      - name: Merge structure-filter metrics
+        run: python scripts/trend_continuation_cpr_structure_merge.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-quality-merged-${{ github.run_id }}
+          name: trend-continuation-structure-merged-${{ github.run_id }}
           path: |
             merged_cells.csv
             merged_summary.json
