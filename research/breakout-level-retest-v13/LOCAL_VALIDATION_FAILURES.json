@@ -1,0 +1,18 @@
+[
+  {
+    "phase": "V13_LOCAL_PREMARKET_VALIDATION",
+    "attempt": 1,
+    "command": "python -m unittest discover -s tests -p test_breakout_level_retest_v13.py -v",
+    "tests_run": 31,
+    "failures": 1,
+    "seconds": 2.249,
+    "failed_test": "test_real_frozen_catalogue_has856_and256_hashes",
+    "actual_baseline_sha256": "05eccad895829ffcfc66d2d10019d4378668dfc2444a6e2ebf26b680abada424",
+    "expected_baseline_sha256": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f",
+    "cause": "Local text patch added a terminal newline to immutable baseline bytes. Git preregistered blobs were copied byte-for-byte from V12 and unaffected.",
+    "repair": "Copy both immutable local context files byte-for-byte from V12, preserving terminal bytes; no rules or thresholds changed.",
+    "market_execution": false,
+    "new_economic_hypotheses": 0,
+    "output_limit": "Initial tool stdout truncated; exact failure trace and run count were visible, no claim of complete initial stdout retention."
+  }
+]
