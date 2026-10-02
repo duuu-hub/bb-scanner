@@ -1,0 +1,57 @@
+name: Short Continuation Macro Regime V5
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/short_continuation_macro_regime_v5_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Smoke
+        run: |
+          python -m py_compile scripts/short_continuation_macro_regime_v5.py scripts/short_continuation_robustness_v3.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import scripts.short_continuation_macro_regime_v5 as s
+          assert "BASE" in s.FILTERS
+          assert "BREADTH70" in s.FILTERS
+          assert s.MIN_DEV_EXEC==300
+          print("MACRO_REGIME_V5_SMOKE_PASS")
+          PY
+      - name: Download frozen horizon V2 final artifact
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p source
+          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D source
+          test -f source/short_continuation_horizon_all.csv.gz
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Run macro regime audit
+        run: |
+          python scripts/short_continuation_macro_regime_v5.py \
+            --input source/short_continuation_horizon_all.csv.gz \
+            --data data \
+            --out macro_regime_v5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-continuation-macro-regime-v5-final
+          path: macro_regime_v5/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
