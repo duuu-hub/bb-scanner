@@ -1,0 +1,48 @@
+name: Long Mirror Merge Only V1
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/long_mirror_merge_only_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Smoke merge code
+        run: python -m py_compile scripts/long_short_continuation_combo_v1.py
+      - name: Download completed long mirror shards
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p long_artifacts
+          gh run download 36974905362 -R \${{ github.repository }} -p 'long-mirror-continuation-v1-*' -D long_artifacts
+          find long_artifacts -name 'long_continuation_mirror_*.csv.gz' | wc -l
+          test "$(find long_artifacts -name 'long_continuation_mirror_*.csv.gz' | wc -l)" -eq 6
+      - name: Download frozen short horizon artifact
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p short_source
+          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D short_source
+          test -f short_source/short_continuation_horizon_all.csv.gz
+      - name: Merge long and short
+        run: |
+          python scripts/long_short_continuation_combo_v1.py \
+            --long long_artifacts \
+            --short short_source/short_continuation_horizon_all.csv.gz \
+            --out mirror_combo_v1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: long-mirror-continuation-v1-final-fixed
+          path: mirror_combo_v1/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
