@@ -66,9 +66,9 @@ def main():
  if not lfs:raise RuntimeError("no long shards")
  L=pd.concat([pd.read_csv(x) for x in lfs],ignore_index=True);L["strategy"]="LONG"
  S=pd.read_csv(a.short,compression="gzip");S=S[S.hours==16].copy();S["strategy"]="SHORT"
- keep=[c for c in S.columns if c in L.columns or c in ("strategy","hours","config")]
- S=S[[c for c in L.columns if c in S.columns]+["strategy"]]
- cols=sorted(set(L.columns)&set(S.columns))
+ # Use each shared column exactly once. Both ledgers already contain strategy.
+ cols=[c for c in L.columns if c in S.columns]
+ if len(cols)!=len(set(cols)):raise RuntimeError("duplicate shared column names")
  d=pd.concat([L[cols],S[cols]],ignore_index=True)
  if d.duplicated(["strategy","symbol","impulse_time","entry_time"]).any():raise RuntimeError("duplicates")
  d["dt"]=pd.to_datetime(d.entry_time,unit="ms",utc=True);d["year"]=d.dt.dt.year
