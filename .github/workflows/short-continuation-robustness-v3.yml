@@ -43,10 +43,10 @@ jobs:
           PY
       - name: Download frozen horizon V2 final artifact
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p source
-          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D source
+          gh run download 36963458040 -R ${{ github.repository }} -n short-continuation-horizon-v2-final -D source
           test -f source/short_continuation_horizon_all.csv.gz
       - name: Run robustness audit
         run: |
