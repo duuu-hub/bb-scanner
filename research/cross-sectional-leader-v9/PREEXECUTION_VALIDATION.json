@@ -1,0 +1,76 @@
+{
+  "stage": "BEFORE_ANY_V9_MARKET_EXECUTION",
+  "preregistered_plan_commit": "53fea7dd385bdd1ec7048f58be23087f5168158a",
+  "tests": {
+    "local_full": 232,
+    "local_v9": 33,
+    "result": "PASS",
+    "unit_log_sha256": "08f4f3bf55d65967330af977f76a49b3c4d38969272f1c3bcca9c2ced4e05154"
+  },
+  "local_chronology_smoke": {
+    "status": "NOT_RUN_TO_COMPLETION",
+    "reason": "Local environment lacks numba; Actions validate job installs pinned numba==0.62.1 and must actually pass chronology smoke before DEV.",
+    "log_sha256": "0a5c480fb4dae09307478c8ccf99237a1a5465b979c073f30739c1f55c1b05a3"
+  },
+  "implementation_check_repairs": [
+    {
+      "check": 1,
+      "tests": 32,
+      "errors": 2,
+      "cause": "Reducer fixtures used 1970 timestamps outside DEV; corrected synthetic timestamps only."
+    },
+    {
+      "check": 2,
+      "tests": 33,
+      "failures": 1,
+      "cause": "In-memory smoke excluded final synthetic daily close but file-stage smoke used fixed DEV boundary; aligned fixture stage boundary. No policy tuning."
+    },
+    {
+      "check": 3,
+      "tests": 33,
+      "status": "PASS"
+    },
+    {
+      "check": 4,
+      "tests": 232,
+      "status": "PASS"
+    }
+  ],
+  "workflow": {
+    "jobs": 10,
+    "maximum_instances": 38,
+    "embedded_shell_checks": 32,
+    "order": "8DEV maps -> frozen global DEV ranks -> 8DEV scans -> frozen selection -> conditional GATE maps/ranks/scans -> strict account -> always preserve",
+    "cancel_in_progress": false,
+    "unrelated_workflows_modified": false,
+    "explicit_research_test_files": [
+      "test_btc_factor_lag_v6.py",
+      "test_compression_expansion_v4.py",
+      "test_cross_sectional_leader_v9.py",
+      "test_day_edge_canonical.py",
+      "test_day_edge_lab.py",
+      "test_funding_crowding_v7.py",
+      "test_liquidity_sweep_v5.py",
+      "test_premium_absorption_v8.py",
+      "test_relative_pullback_v1.py",
+      "test_research_evidence_archive.py",
+      "test_saved_calendar_audit.py",
+      "test_shock_confirmation_v3.py"
+    ],
+    "unrelated_live_test_execution": false
+  },
+  "immutable_baseline_sha256": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f",
+  "sha256": {
+    "scripts/cross_sectional_ranks_v9.py": "39d4db315b16b6b5ef15590e97d30d2d3784d05efccc34e1be480143291c71b0",
+    "scripts/cross_sectional_leader_v9.py": "c5dc56302180d783bb7b479a331e3c5e2930a1208d9b34cd387ca111c4d58435",
+    "tests/test_cross_sectional_leader_v9.py": "a98bbe1fef23bb1cc63497985e336249e46bf4360ba9f4e8b9d6c058a8920e2f",
+    ".github/workflows/cross-sectional-leader-v9.yml": "4a671545cb53026e53162f94aa6ace60ceff18b6894785e31350688410b3eadc",
+    "research/cross-sectional-leader-v9/PLAN.md": "d71ce2f5d3f8b75ddc4e4826b0cd1f975c232bc14a3a9c1f9571e4ce6d333ccd",
+    "research/cross-sectional-leader-v9/IMPLEMENTATION_CONTRACT.md": "bd934eb6a313304d451089bdfb47f1b5d5b18337f117fe8b74d7379639ade3e8",
+    "research/cross-sectional-leader-v9/FROZEN_INPUT_HASHES.json": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f",
+    "tests/test_saved_calendar_audit.py": "31e9281edfc31923f0ffdd968f372fdc3d7a2031d5aa135a66d73ca6da41d291"
+  },
+  "market_outcomes_available": false,
+  "profitability_claim": false,
+  "trial_semantics": "Implementation checks are not additional economic hypotheses or market execution attempts."
+}
