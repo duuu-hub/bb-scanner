@@ -1,0 +1,105 @@
+name: Extreme BF Reclaim Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_reclaim_audit_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prior fire results and frozen 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire pump_data
+          mkdir -p fire pump_data
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Audit BF false-death reclaims
+        run: |
+          python - <<'PY'
+          import csv,gzip,json
+          from pathlib import Path
+          DAY=86400000
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          bf=[r for r in rows if float(r["base_x"])==20.0 and r["candidate"]=="BF_DD15_B10"]
+          print("BF20_EVENTS",len(bf))
+          bysym={r["symbol"]:r for r in bf}
+          paths={}
+          for p in Path("pump_data").rglob("*USDT.csv.gz"):
+              paths[p.name.replace(".csv.gz","")]=p
+          out=[]
+          for sym,r in sorted(bysym.items()):
+              p=paths.get(sym)
+              if not p:
+                  out.append({"symbol":sym,"error":"missing_data"}); continue
+              sig=int(float(r["signal_ts"]))
+              old_peak=float(r["peak_at_confirm"])
+              data=[]
+              with gzip.open(p,"rt",encoding="utf-8",newline="") as f:
+                  rd=csv.DictReader(f)
+                  for x in rd:
+                      ts=int(x["open_time"])
+                      if ts<sig: continue
+                      if ts>sig+60*DAY: break
+                      data.append((ts,float(x["open"]),float(x["high"]),float(x["low"]),float(x["close"])))
+              def audit(horizon_days):
+                  sub=[x for x in data if x[0]<=sig+horizon_days*DAY]
+                  if not sub:return None
+                  reclaim=[x for x in sub if x[2]>old_peak]
+                  maxhi=max(x[2] for x in sub)
+                  if reclaim:
+                      first=reclaim[0]
+                      return {
+                        "reclaimed":True,
+                        "hours_to_reclaim":round((first[0]-sig)/3600000,2),
+                        "first_reclaim_high_pct_over_old_peak":round((first[2]/old_peak-1)*100,2),
+                        "max_high_pct_over_old_peak":round((maxhi/old_peak-1)*100,2),
+                      }
+                  return {"reclaimed":False,"hours_to_reclaim":None,"first_reclaim_high_pct_over_old_peak":None,
+                          "max_high_pct_over_old_peak":round((maxhi/old_peak-1)*100,2)}
+              rec={
+                "symbol":sym,
+                "base_entry_ts":int(float(r["base_entry_ts"])),
+                "bf_signal_ts":sig,
+                "old_peak":old_peak,
+                "bf_entry":float(r["signal_entry"]),
+                "old_peak_vs_bf_entry_pct":round((old_peak/float(r["signal_entry"])-1)*100,2),
+                "d7_net40_pct":round(float(r["d7_net40_pct"]),2),
+                "d7_mae_pct":round(float(r["d7_mae_pct"]),2),
+                "h7":audit(7),"h14":audit(14),"h30":audit(30),"h60":audit(60)
+              }
+              out.append(rec)
+          for h in ("h7","h14","h30","h60"):
+              valid=[x for x in out if h in x and x[h]]
+              rr=[x for x in valid if x[h]["reclaimed"]]
+              print("SUMMARY",h,json.dumps({
+                "bf_events":len(valid),
+                "reclaimed_count":len(rr),
+                "reclaimed_pct":round(100*len(rr)/len(valid),2) if valid else None,
+                "symbols":[x["symbol"] for x in rr]
+              }))
+          print("DETAILS")
+          for x in out:
+              print(json.dumps(x,ensure_ascii=False))
+          Path("bf_reclaim_audit.json").write_text(json.dumps(out,indent=2),encoding="utf-8")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extreme-bf-reclaim-audit-${{ github.run_id }}
+          path: bf_reclaim_audit.json
+          retention-days: 30
