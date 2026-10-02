@@ -1,0 +1,107 @@
+{
+  "experiment_id": "compression_first_expansion_rejection_v3_train",
+  "classification": "EXPLORATORY",
+  "generation_reason": "V2 retest limit improved V1 materially but remained negative net of costs. V3 keeps the same SHORT compression/breakout event and adds a causal post-retest rejection confirmation before entry.",
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "registration_base_head": "e11d01a3bf49077f982d4f42bb0784e7728b9a0c",
+  "parent_v1_run": 36996299502,
+  "parent_v2_final_run": 37067402420,
+  "data": {
+    "source_run": 36095439671,
+    "market": "Binance USD-M USDT perpetual",
+    "timeframe": "15m parent + official Binance 1m chronology for exit collisions",
+    "train": "2021-01-01 through 2024-12-31 UTC",
+    "validation": "2025-2026 SEEN validation; not read by this TRAIN run",
+    "universe": "all symbol files in frozen source artifacts",
+    "point_in_time_universe_status": "unknown; survivorship/listing eligibility audit required before VALIDATED_CANDIDATE"
+  },
+  "signal": {
+    "side": "SHORT",
+    "compression": "ATR16/ATR96 <= 0.65, using data completed before signal bar",
+    "box": "prior 16 completed 15m bars",
+    "first_breakout_guard": "previous close inside its own prior-16-bar box",
+    "breakout": "signal bar close < prior box low",
+    "expansion": "signal bar range >= 2.0 * ATR16",
+    "body_to_range_min": 0.6
+  },
+  "retest": {
+    "level": "signal_close + retrace_fraction*(box_low-signal_close)",
+    "retrace_fraction_grid": [
+      0.25,
+      0.5,
+      1
+    ],
+    "retest_ttl_bars_grid": [
+      4,
+      8
+    ],
+    "retest_touch": "first post-signal 15m bar with high >= retest level; only completed-bar information is used for later confirmation"
+  },
+  "confirmation": {
+    "modes": [
+      "SIGNAL_CLOSE",
+      "RETEST_LOW"
+    ],
+    "SIGNAL_CLOSE": "after retest touch, first completed 15m bar with close < original signal close",
+    "RETEST_LOW": "after retest touch, first completed 15m bar with close < low of the first retest-touch bar",
+    "confirm_ttl_bars_grid": [
+      2,
+      4
+    ],
+    "entry": "next 15m bar OPEN after confirmation bar; taker/open fill",
+    "no_confirmation": "no trade"
+  },
+  "exits": {
+    "stop_distance_atr96_grid": [
+      1,
+      1.5
+    ],
+    "target_r_grid": [
+      1.5,
+      2.5
+    ],
+    "max_hold_bars": 32,
+    "max_hold_hours_label": 8,
+    "time_exit": "close of final allowed 15m bar, V1/V2-compatible",
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "execution": {
+    "chronology": "AGENTS.md section 11 canonical official Binance 1m resolution for same-parent-bar TP/SL ambiguity",
+    "entry_chronology": "entry occurs only at a bar open after confirmation; no pre-entry exit touch counts",
+    "costs_round_trip_all_in_bp": [
+      20,
+      40
+    ],
+    "funding": "excluded"
+  },
+  "portfolio": {
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false,
+    "priority": "entry_time asc, expansion_strength desc, compression_strength desc, symbol asc"
+  },
+  "grid_count": 96,
+  "selection": {
+    "dataset": "TRAIN only",
+    "min_executable_trades": 400,
+    "min_exec_per_day": 0.27,
+    "gates": [
+      "ret20 > 0",
+      "ret40 > 0",
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD20 <= 35%",
+      "at least 3/4 calendar years positive at 20bp",
+      "worst calendar-year PF20 >= 0.85",
+      "at least one adjacent grid config PF20 > 1.03 and ret20 > 0"
+    ],
+    "ranking": "ret20 desc, MDD20 asc, PF40 desc, executable N desc",
+    "if_pass": "freeze robust TRAIN region before revealing 2025-2026 validation",
+    "if_fail": "preserve failure; do not mine validation"
+  }
+}
