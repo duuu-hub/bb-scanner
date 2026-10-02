@@ -1,0 +1,87 @@
+{
+  "experiment_id": "btc_impulse_alt_lag_catchup_v1_train",
+  "classification": "EXPLORATORY",
+  "hypothesis": "A strong completed BTC 1h impulse propagates with delay to some alts. Entering lagging alts in BTC's direction at the next 15m open may capture short-horizon catch-up after costs.",
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "registration_base_head": "739bf095e1eaf475b5d145d38633721fef7cb0e4",
+  "data": {
+    "source_run": 36095439671,
+    "market": "Binance USD-M USDT perpetual",
+    "parent_data": "15m OHLC, resampled causally to exact UTC 1h bars",
+    "train": "2021-01-01 through 2024-12-31 UTC",
+    "validation": "2025-2026 SEEN validation; not read in this TRAIN run",
+    "universe": "all non-BTC symbol files in frozen source artifacts",
+    "point_in_time_universe_status": "unknown",
+    "liquidity_filter": "unavailable/unknown from current frozen OHLC interface; no liquidity claim allowed"
+  },
+  "signal": {
+    "leader": "BTCUSDT",
+    "btc_impulse": "completed BTC 1h range / BTC prior ATR14 >= 1.5 and body/range >= 0.60",
+    "direction": "BTC 1h close > open => LONG alts; close < open => SHORT alts",
+    "btc_norm_move": "directional BTC body / prior BTC ATR14",
+    "alt_norm_move": "BTC-directional alt 1h body / prior alt ATR14",
+    "alt_lag_floor": -0.25,
+    "alt_lag_max_grid": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "minimum_alt_history_1h_bars": 672,
+    "order_live": "next 15m OPEN after the completed BTC/alt 1h signal bar",
+    "event_ranking": "within each BTC event choose largest normalized lag gap (btc_norm_move-alt_norm_move), then symbol"
+  },
+  "portfolio_grid": {
+    "top_k_per_btc_event": [
+      3,
+      6
+    ],
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false
+  },
+  "exits": {
+    "stop_atr1h_grid": [
+      1,
+      1.5
+    ],
+    "target_r_grid": [
+      1.5,
+      2.5
+    ],
+    "max_hold_hours_grid": [
+      4,
+      8
+    ],
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "execution": {
+    "canonical_engine": "scripts/sweep_reclaim_research.py::trade",
+    "chronology": "AGENTS.md section 11 official Binance 1m collision resolution",
+    "costs_round_trip_all_in_bp": [
+      20,
+      40
+    ],
+    "funding": "excluded"
+  },
+  "selection": {
+    "min_executable_trades": 500,
+    "min_exec_per_day": 0.34,
+    "gates": [
+      "ret20 > 0",
+      "ret40 > 0",
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD20 <= 35%",
+      "at least 3/4 calendar years positive at 20bp",
+      "worst calendar-year PF20 >= 0.85",
+      "at least one adjacent grid config PF20 > 1.03 and ret20 > 0"
+    ],
+    "ranking": "ret20 desc, MDD20 asc, PF40 desc, executable N desc",
+    "validation_rule": "freeze TRAIN stable region before revealing 2025-2026"
+  }
+}
