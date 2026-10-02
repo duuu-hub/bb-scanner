@@ -1,0 +1,81 @@
+name: Extreme BF True vs Fake Death
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_true_fake_compare_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire && mkdir fire
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+      - name: Compare true vs fake death
+        run: |
+          python - <<'PY'
+          import csv,json,statistics
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          ev={}
+          for r in rows:
+              if float(r["base_x"])!=20.0: continue
+              k=(r["symbol"],r["base_entry_ts"])
+              ev.setdefault(k,{})[r["candidate"]]=r
+
+          recs=[]
+          for k,v in ev.items():
+              bf=v.get("BF_DD15_B10")
+              base=v.get("BASE_IMMEDIATE")
+              if not bf or not base or not bf.get("d7_mae_pct"): continue
+              entry=float(bf["signal_entry"]); peak=float(bf["peak_at_confirm"])
+              need=(peak/entry-1)*100
+              mae7=float(bf["d7_mae_pct"])
+              fake=mae7>need
+              dd=v.get("DD30")
+              dd_before_bf=bool(dd and float(dd["signal_ts"])<=float(bf["signal_ts"]))
+              recs.append({
+                "symbol":k[0],
+                "type":"FAKE_RECLAIM" if fake else "TRUE_NO_RECLAIM",
+                "hours_20x_to_bf":float(bf["hours_after_base"]),
+                "drop_peak_to_bf_entry_pct":need,
+                "base7_ret":float(base["d7_net40_pct"]),
+                "base7_mae":float(base["d7_mae_pct"]),
+                "bf7_ret":float(bf["d7_net40_pct"]),
+                "bf7_mae":mae7,
+                "dd30_before_or_at_bf":dd_before_bf,
+                "dd30_exists":bool(dd),
+                "dd30_hours":float(dd["hours_after_base"]) if dd else None
+              })
+          def agg(xs):
+              def med(k): return statistics.median([x[k] for x in xs])
+              def mean(k): return sum(x[k] for x in xs)/len(xs)
+              return {
+                "n":len(xs),
+                "symbols":[x["symbol"] for x in xs],
+                "hours_20x_to_bf_mean":round(mean("hours_20x_to_bf"),2),
+                "hours_20x_to_bf_median":round(med("hours_20x_to_bf"),2),
+                "drop_peak_to_bf_entry_mean_pct":round(mean("drop_peak_to_bf_entry_pct"),2),
+                "drop_peak_to_bf_entry_median_pct":round(med("drop_peak_to_bf_entry_pct"),2),
+                "base7_ret_mean_pct":round(mean("base7_ret"),2),
+                "base7_mae_mean_pct":round(mean("base7_mae"),2),
+                "bf7_ret_mean_pct":round(mean("bf7_ret"),2),
+                "bf7_mae_mean_pct":round(mean("bf7_mae"),2),
+                "dd30_before_or_at_bf_count":sum(x["dd30_before_or_at_bf"] for x in xs),
+                "dd30_exists_count":sum(x["dd30_exists"] for x in xs)
+              }
+          fake=[x for x in recs if x["type"]=="FAKE_RECLAIM"]
+          true=[x for x in recs if x["type"]=="TRUE_NO_RECLAIM"]
+          print("AGG_FAKE",json.dumps(agg(fake),ensure_ascii=False))
+          print("AGG_TRUE",json.dumps(agg(true),ensure_ascii=False))
+          print("DETAILS")
+          for x in sorted(recs,key=lambda z:(z["type"],z["hours_20x_to_bf"])):
+              print(json.dumps(x,ensure_ascii=False))
+          PY
