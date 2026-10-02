@@ -1,0 +1,105 @@
+name: Compression Retest V2 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/compression_first_expansion_retest_v2_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile and canonical chronology smoke
+        run: |
+          python -m py_compile scripts/compression_first_expansion_retest_v2.py scripts/compression_first_expansion_retest_v2_merge.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          import numpy as np
+          import scripts.compression_first_expansion_retest_v2 as s
+          t=np.arange(4,dtype=np.int64)*900000
+          o=np.array([98.,98.5,99.,99.])
+          h=np.array([99.,100.2,100.3,100.1])
+          x=s.first_retest_fill(t,o,h,0,100.,4)
+          assert x["bar"]==1 and x["fill"]==100. and not x["is_taker"]
+          o2=o.copy();o2[0]=101.
+          x=s.first_retest_fill(t,o2,h,0,100.,4)
+          assert x["bar"]==0 and x["fill"]==101. and x["is_taker"]
+          assert s.first_retest_fill(t,o,h,0,101.,2) is None
+          assert s.COMP_MAX==.65 and s.EXP_MIN==2.0
+          assert s.RETRACE==(.25,.50,1.00) and s.TTL_BARS==(2,4,8)
+          assert len(s.CONFIGS)==36
+          print("COMPRESSION_RETEST_V2_ENTRY_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay V2 TRAIN shard
+        run: |
+          python scripts/compression_first_expansion_retest_v2.py \
+            --data data \
+            --shard \${{ matrix.shard }} \
+            --shards 12
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-retest-v2-\${{ matrix.shard }}
+          path: |
+            compression_retest_v2_\${{ matrix.shard }}.csv.gz
+            compression_retest_v2_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: compression-retest-v2-*
+          path: artifacts
+      - name: Verify all shards
+        run: |
+          test "$(find artifacts -name 'compression_retest_v2_*.csv.gz' | wc -l)" -eq 12
+          test "$(find artifacts -name 'compression_retest_v2_meta_*.json' | wc -l)" -eq 12
+      - name: Merge TRAIN only
+        run: |
+          python scripts/compression_first_expansion_retest_v2_merge.py \
+            --input artifacts \
+            --out compression_retest_v2_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-retest-v2-train-final
+          path: compression_retest_v2_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
