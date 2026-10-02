@@ -12,8 +12,10 @@ code 18270ece2a1923591e14ae706ce9b91e79ddd76a, PLAN a42078eb11baa5442e4009a3e96a
 Completed validation job110711667904:261 tests, chronology/canonical smoke,
 frozen256/856 input contract and synthetic8-shard/96-cell pipeline PASS.
 Actual completed log read and preserved at research/residual-reversion-v10/run-36966622286/validation-job-110711667904.log.
-At 2026-10-02T04:57:16Z, three DEV jobs active and five queued; no completed
-V10 market results yet. No duplicate run. Implementation lease released.
+First actual shard7 completed:34285 parameterized outcomes/23 chronology
+exclusions, source107 files/28 prior hashes verified in its actual log.
+Remaining seven shards active at the last observation; full96-cell selection
+and account results pending. No duplicate run. Implementation lease released.
 Fixed16 entries /96 DEV cells; unhedged relative log-price residual/AR1 reversion.
 GATE/accounts depend on frozen DEV selection. Daily account +0.7%-2% is unmet.
 
@@ -218,3 +220,7 @@ V10 actual validation handoff 2026-10-02T04:57:16Z: run36966622286/code18270ece2
 261 tests, chronology/invariants and synthetic pipeline PASS. Original V9
 byte/ledger arithmetic PASS; full validation log durably retained.3 actual DEV
 jobs active/5queued; market cells not yet available. No duplicate execution.
+
+V10 partial actual scan 2026-10-02T05:03:36Z:shard7 SUCCESS,34285 parameterized outcomes,
+23 chronology exclusions; actual full job log preserved. Remaining7 active;
+all96-cell/growth/target evidence pending. Exclusion reasons require saved metadata.
