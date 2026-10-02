@@ -117,7 +117,7 @@ def main():
     a=ap.parse_args(); out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
 
     e=pd.read_csv(a.events_in,compression="infer")
-    e=e[e.lookback.eq("8h") & np.isclose(e.tail.astype(float),0.10) & np.isclose(e.threshold_pct.astype(float),20.0)].copy()
+    e=e[e["lookback"].eq("8h") & np.isclose(e["tail"].astype(float),0.10) & np.isclose(e["threshold_pct"].astype(float),20.0)].copy()
     e["ts"]=e.ts.astype("int64"); e["entry_ts"]=e.entry_ts.astype("int64")
     if "split" not in e: e["split"]=e.ts.map(base.split_name)
 
