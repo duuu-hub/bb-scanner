@@ -1,0 +1,137 @@
+name: Extreme Extension Fire Postcheck
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_extension_fire_postcheck_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  postcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire-pattern artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire
+          mkdir -p fire
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+          find fire -maxdepth 2 -type f -print
+      - name: Integrity and hybrid analysis
+        run: |
+          python - <<'PY'
+          import csv,json,math
+          from pathlib import Path
+          p=Path("fire")
+          s=json.loads((p/"summary.json").read_text())
+          rows=list(csv.DictReader((p/"trades.csv").open()))
+          num=lambda r,k: None if r.get(k) in (None,"") else float(r[k])
+          checks=[]
+          def ck(name,cond):
+              checks.append((name,bool(cond)))
+              if not cond: print("FAIL",name)
+          bases=[5.0,7.5,10.0,15.0,20.0,25.0,30.0]
+          counts=[s["base_event_counts"][str(x)] for x in bases]
+          ck("01_base_counts_monotone",all(counts[i]>=counts[i+1] for i in range(len(counts)-1)))
+          ck("02_symbols_856",s["symbols_total"]==856)
+          ck("03_rows_nonempty",len(rows)>0)
+          ck("04_positive_entries",all(num(r,"signal_entry")>0 for r in rows))
+          ck("05_causal_signal_ts",all(num(r,"signal_ts")>=num(r,"base_entry_ts") for r in rows))
+          ck("06_nonbase_after_base",all(r["candidate"]=="BASE_IMMEDIATE" or num(r,"signal_ts")>num(r,"base_entry_ts") for r in rows))
+          ck("07_base_same_ts",all(r["candidate"]!="BASE_IMMEDIATE" or num(r,"signal_ts")==num(r,"base_entry_ts") for r in rows))
+          ck("08_hours_match",all(abs(num(r,"hours_after_base")-(num(r,"signal_ts")-num(r,"base_entry_ts"))/3600000)<1e-9 for r in rows))
+          ck("09_hours_nonnegative",all(num(r,"hours_after_base")>=0 for r in rows))
+          ck("10_known_base",all(num(r,"base_x") in bases for r in rows))
+          ck("11_split_valid",all(r["split"] in ("train_2021_2024","holdout_2025_2026") for r in rows))
+          ck("12_year_split_match",all((int(float(r["signal_year"]))<=2024)==(r["split"]=="train_2021_2024") for r in rows))
+          keys=[(r["symbol"],r["base_x"],r["trough_ts"],r["base_entry_ts"],r["candidate"]) for r in rows]
+          ck("13_no_duplicate_candidate_event",len(keys)==len(set(keys)))
+          for d,nm in [(1,"14"),(3,"15"),(7,"16")]:
+              vals=[r for r in rows if r.get(f"d{d}_gross_pct") not in (None,"")]
+              ck(nm+"_net40_exact",all(abs(num(r,f"d{d}_gross_pct")-num(r,f"d{d}_net40_pct")-0.4)<1e-8 for r in vals))
+          ck("17_mae_nonnegative",all(num(r,k)>=0 for r in rows for k in ("d1_mae_pct","d3_mae_pct","d7_mae_pct") if r.get(k) not in (None,"")))
+          ck("18_bf_has_breaklevel",all(r["candidate"][:3]!="BF_" or r.get("break_level") not in (None,"") for r in rows))
+          ck("19_d24_has_breaklevel",all(not r["candidate"].startswith("D24_") or r.get("break_level") not in (None,"") for r in rows))
+          ck("20_mom_has_breaklevel",all(not r["candidate"].startswith("MOM4H_") or r.get("break_level") not in (None,"") for r in rows))
+          ck("21_candidate_known",all(r["candidate"] in s["candidates"] for r in rows))
+          # summary consistency checks across every candidate/base
+          sum_n_ok=True; cap_ok=True; split_ok=True; win_ok=True; mae_ok=True
+          for c,v in s["candidates"].items():
+              for b in bases:
+                  x=v[str(b)]
+                  a=x["all"];tr=x["train_2021_2024"];ho=x["holdout_2025_2026"]
+                  if a.get("n",0)!=tr.get("n",0)+ho.get("n",0): split_ok=False
+                  if a.get("n",0)>s["base_event_counts"][str(b)]: cap_ok=False
+                  for q in (a,tr,ho):
+                      if q.get("n",0):
+                          if not (0<=q["win_rate_pct"]<=100): win_ok=False
+                          if q["mae_max_pct"]<0: mae_ok=False
+          ck("22_summary_split_sum",split_ok)
+          ck("23_candidate_n_le_base",cap_ok)
+          ck("24_win_bounds",win_ok)
+          ck("25_summary_mae_nonnegative",mae_ok)
+          ck("26_base_immediate_present","BASE_IMMEDIATE" in s["candidates"])
+          ck("27_primary_candidates_present",all(x in s["candidates"] for x in ("BF_DD15_B5","BF_DD15_B10","DD30")))
+          ck("28_cost_definition",s["definition"]["cost"]=="40bp round-trip")
+          ck("29_funding_excluded",s["definition"]["funding_included"] is False)
+          ck("30_entry_next_open","next 15m OPEN" in s["definition"]["entry"])
+          assert all(v for _,v in checks),[n for n,v in checks if not v]
+          print("CHECKS_PASS 30/30")
+
+          # Event lookup and hybrid: total 5% notional budget.
+          by={}
+          for r in rows:
+              k=(r["symbol"],float(r["base_x"]),r["trough_ts"],r["base_entry_ts"])
+              by.setdefault(k,{})[r["candidate"]]=r
+          schemes={
+            "IMM5":{"BASE_IMMEDIATE":5.0},
+            "PROBE1_BF15B5_4":{"BASE_IMMEDIATE":1.0,"BF_DD15_B5":4.0},
+            "PROBE1_BF15B10_4":{"BASE_IMMEDIATE":1.0,"BF_DD15_B10":4.0},
+            "PROBE1_DD30_4":{"BASE_IMMEDIATE":1.0,"DD30":4.0},
+            "PROBE1_BF15B5_2_DD30_2":{"BASE_IMMEDIATE":1.0,"BF_DD15_B5":2.0,"DD30":2.0},
+          }
+          print("HYBRID_RESULTS")
+          for b in (10.0,15.0,20.0,30.0):
+              events=[v for k,v in by.items() if k[1]==b and "BASE_IMMEDIATE" in v]
+              for name,weights in schemes.items():
+                  pnls=[];stresses=[];gross_used=[];add_hits=0
+                  for ev in events:
+                      pnl=0.0;stress=0.0;used=0.0;has_add=False
+                      for cand,w in weights.items():
+                          r=ev.get(cand)
+                          if r is None or r.get("d7_net40_pct") in (None,""):continue
+                          pnl += w*float(r["d7_net40_pct"])/100.0
+                          stress += w*float(r["d7_mae_pct"])/100.0
+                          used += w
+                          if cand!="BASE_IMMEDIATE":has_add=True
+                      pnls.append(pnl);stresses.append(stress);gross_used.append(used)
+                      add_hits += int(has_add)
+                  if not pnls:continue
+                  print(json.dumps({
+                    "base_x":b,"scheme":name,"events":len(pnls),
+                    "add_event_coverage_pct":100*add_hits/len(pnls),
+                    "sum_account_pnl_pct":sum(pnls),
+                    "mean_event_account_pnl_pct":sum(pnls)/len(pnls),
+                    "event_win_rate_pct":100*sum(x>0 for x in pnls)/len(pnls),
+                    "worst_event_account_pnl_pct":min(pnls),
+                    "max_mae_stress_upper_pct":max(stresses),
+                    "mean_notional_used_pct":sum(gross_used)/len(gross_used),
+                  },ensure_ascii=False))
+          print("SELECTED_EVENT_ROWS_BASE15")
+          for k,ev in sorted(by.items()):
+              if k[1]!=15.0:continue
+              out={"symbol":k[0]}
+              for cand in ("BASE_IMMEDIATE","BF_DD15_B5","BF_DD15_B10","DD30"):
+                  r=ev.get(cand)
+                  if r:
+                      out[cand]={
+                        "hours":round(float(r["hours_after_base"]),2),
+                        "d7_net40":round(float(r["d7_net40_pct"]),2) if r.get("d7_net40_pct") else None,
+                        "d7_mae":round(float(r["d7_mae_pct"]),2) if r.get("d7_mae_pct") else None,
+                      }
+              print(json.dumps(out,ensure_ascii=False))
+          PY
