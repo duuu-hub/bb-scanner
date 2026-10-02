@@ -38,7 +38,7 @@ jobs:
           rows=list(csv.DictReader(open("fire/trades.csv")))
           paths={p.name.replace(".csv.gz",""):p for p in Path("pump_data").rglob("*USDT.csv.gz")}
           targets=[10.0,15.0,20.0]
-          src=[r for r in rows if float(r["base_x"]) in targets and r["candidate"]=="BF_DD15_B10"]
+          src=[r for r in rows if float(r["base_x"]) in targets and r["candidate"]=="BF_DD15_B10" and r.get("d7_net40_pct") not in (None,"") and r.get("d7_mae_pct") not in (None,"")]
           out=[]
           for rr in src:
               sym=rr["symbol"]; base=float(rr["base_x"])
