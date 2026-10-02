@@ -1,0 +1,68 @@
+name: Extreme Fire Add-on Sizing
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_fire_addon_sizing_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire-pattern artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire
+          mkdir -p fire
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+      - name: Calculate base 5 plus add-on sizing
+        run: |
+          python - <<'PY'
+          import csv,json
+          from pathlib import Path
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          by={}
+          for r in rows:
+              k=(r["symbol"],float(r["base_x"]),r["trough_ts"],r["base_entry_ts"])
+              by.setdefault(k,{})[r["candidate"]]=r
+
+          schemes={}
+          for add in (2.5,5.0,7.5,10.0):
+              schemes[f"BASE5_BF15B5_ADD{add:g}"]={"BASE_IMMEDIATE":5.0,"BF_DD15_B5":add}
+              schemes[f"BASE5_BF15B10_ADD{add:g}"]={"BASE_IMMEDIATE":5.0,"BF_DD15_B10":add}
+              schemes[f"BASE5_DD30_ADD{add:g}"]={"BASE_IMMEDIATE":5.0,"DD30":add}
+          schemes["BASE5_BF15B10_ADD5_DD30_ADD5"]={"BASE_IMMEDIATE":5.0,"BF_DD15_B10":5.0,"DD30":5.0}
+          schemes["BASE5_BF15B5_ADD2.5_DD30_ADD2.5"]={"BASE_IMMEDIATE":5.0,"BF_DD15_B5":2.5,"DD30":2.5}
+
+          print("ADDON_RESULTS")
+          for b in (10.0,15.0,20.0,30.0):
+              events=[(k,v) for k,v in by.items() if k[1]==b and "BASE_IMMEDIATE" in v]
+              for name,weights in schemes.items():
+                  pnls=[];stresses=[];used=[];coverage=0
+                  for k,ev in events:
+                      pnl=0;stress=0;notional=0;added=False
+                      for cand,w in weights.items():
+                          r=ev.get(cand)
+                          if not r or not r.get("d7_net40_pct"): continue
+                          pnl += w*float(r["d7_net40_pct"])/100
+                          stress += w*float(r["d7_mae_pct"])/100
+                          notional += w
+                          if cand!="BASE_IMMEDIATE": added=True
+                      pnls.append(pnl);stresses.append(stress);used.append(notional);coverage+=added
+                  print(json.dumps({
+                    "base_x":b,"scheme":name,"events":len(events),
+                    "addon_coverage_pct":100*coverage/len(events),
+                    "sum_account_pnl_pct":sum(pnls),
+                    "mean_event_pnl_pct":sum(pnls)/len(pnls),
+                    "event_win_rate_pct":100*sum(x>0 for x in pnls)/len(pnls),
+                    "worst_event_pnl_pct":min(pnls),
+                    "max_mae_stress_upper_pct":max(stresses),
+                    "mean_notional_used_pct":sum(used)/len(used),
+                    "max_notional_pct":max(used)
+                  }))
+          PY
