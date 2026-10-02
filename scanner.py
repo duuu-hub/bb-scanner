@@ -731,28 +731,13 @@ def telegram_send(text):
 
 
 def build_alert(candidate, reason, strategy_code=None):
-    """Compact actionable Telegram alert.
-
-    First/new signals show only entry, TP, SL and time limit.
-    Re-scans show only previous scan price -> current price.
-    Detailed BB diagnostics remain in logs/paper_signals, not Telegram.
-    """
+    """Build a Telegram message for a newly emitted trading signal only."""
     symbol = candidate["symbol"]
     ticker = candidate["ticker"]
     strategy_code = strategy_code or primary_strategy(candidate)
     cfg = STRATEGY_RULES[strategy_code]
     levels = trade_levels(candidate, strategy_code)
     price = ticker.get("last_price")
-    prev_scan_price = candidate.get("previous_scan_price")
-    streak = int(candidate.get("streak", 1))
-
-    if streak >= 2 and prev_scan_price and price:
-        move = (float(price) / float(prev_scan_price) - 1.0) * 100.0
-        return (
-            f"🔁 {symbol} 재스캔\n"
-            f"지난스캔가 {fmt_price(float(prev_scan_price))} → 현재가 {fmt_price(float(price))} "
-            f"({move:+.2f}%)"
-        )
 
     direction = cfg["direction"]
     icon = "🟢" if direction == "LONG" else "🔴"
@@ -762,7 +747,7 @@ def build_alert(candidate, reason, strategy_code=None):
     return "\n".join(
         [
             f"{icon} {direction} · {strategy_code} · {symbol}",
-            f"진입가 {fmt_price(float(levels['entry'])) if 'entry' in levels else fmt_price(float(price))}",
+            f"진입가 {fmt_price(float(price))}",
             f"TP {fmt_price(float(levels['tp']))}",
             f"SL {fmt_price(float(levels['sl']))}",
             f"TIME LIMIT {fmt_horizon(cfg['horizon_min'])}",
@@ -862,55 +847,21 @@ def telegram_send_batched(messages, max_chars=3800):
 
 
 def alert_events(candidate, previous):
-    """Return Candidate-1 Telegram events.
+    """Return Telegram events only when a strategy becomes newly active.
 
-    Every newly-active sub-strategy is emitted separately, matching the
-    six-strategy backtest where duplicate/opposite-direction signals can coexist.
-    Status-only repeats emit one update for the current primary strategy.
+    Re-scan/status updates, streak confirmations, stage changes, and
+    price-move reminders remain in state/logs but are not sent to Telegram.
     """
     current_codes = candidate.get("strategies", [])
     if not current_codes:
         return []
-
-    stage = candidate["stage"]
-    price = candidate["ticker"].get("last_price")
 
     if previous is None:
         return [(code, "신규 진입신호") for code in current_codes]
 
     prev_codes = set(previous.get("active_strategies", []))
     new_codes = [code for code in current_codes if code not in prev_codes]
-    if new_codes:
-        return [(code, f"신규 전략 {code}") for code in new_codes]
-
-    primary = primary_strategy(candidate)
-    if not primary:
-        return []
-
-    prev_stage = int(previous.get("stage", 0))
-    if stage > prev_stage:
-        return [(primary, f"단계 상승 {prev_stage}/7 → {stage}/7")]
-
-    if int(candidate.get("streak", 1)) == 2:
-        return [(primary, "2회 연속 확인 · 추가진입 아님")]
-
-    last_alert_price = previous.get("last_alert_price")
-    if (
-        stage == prev_stage
-        and price
-        and last_alert_price
-        and float(last_alert_price) > 0
-    ):
-        signed_move = (price / float(last_alert_price) - 1.0) * 100.0
-        if abs(signed_move) >= RE_ALERT_PRICE_MOVE_PCT:
-            return [
-                (
-                    primary,
-                    f"이전 알림가 대비 {signed_move:+.2f}% · 상태갱신",
-                )
-            ]
-
-    return []
+    return [(code, f"신규 전략 {code}") for code in new_codes]
 
 
 def wait_for_quarter_boundary():
@@ -1213,10 +1164,6 @@ def main():
             f"API 오류: {errors}"
         )
         print(summary)
-        try:
-            telegram_send(summary)
-        except Exception as exc:
-            print(f"[ERROR] Telegram manual summary failed: {exc}")
 
     state = {
         "symbols": new_symbols_state,
