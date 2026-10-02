@@ -180,16 +180,22 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Implement and test the frozen V9 rank map/reduce and next-day resumption engine,
-then execute one actual Actions workflow. Verify exact prior-midnight availability,
-shard-order-invariant ranks, >=30-name universe, one/two-day persistence, all96
-cells, canonical1m exits, annual selection and account/calendar invariants. Read
-actual logs/artifacts; if rejected, preserve the numeric failure and preregister
-a genuinely new mechanism. If provisional survivor, freeze before neighbours,
-stress/delays/time blocks/seen recent comparisons and future observations.
+V9 implementation is committed and actual run36955250542 exists. As of
+2026-10-02 02:25:11 UTC, its validation job110676681938 remains QUEUED and no
+execution steps/logs or market outcomes are available. Resume by checking this
+same run, never starting a duplicate. Actual chronology validation must pass
+before the8 DEV maps; audit persisted global rank rows/hashes before96 DEV exit
+cells. Read actual selection/artifacts and conditionally check frozen GATE/
+accounts. If rejected, preserve the numeric failure and preregister, implement,
+test and execute a genuinely new mechanism. Provisional survivors require fixed
+neighbours, stress, real delays, time dependence and new forward observations.
 
 ## V9 execution handoff — 2026-10-02 02:21 UTC
 
 Follow actual run36955250542 and avoid duplicate execution. Record actual
 validation/rank/scan completion only after reading job logs. Future stage/result
 locations in CONTINUATION.json are expected locations, not completed evidence.
+
+Queue observation 2026-10-02 02:25:11 UTC: V9 validation is queued. Repository
+read-only inventory showed10 in-progress runs and10 queued runs at02:24 UTC;
+this does not establish a quota/capacity cause. Unrelated work is unchanged.
