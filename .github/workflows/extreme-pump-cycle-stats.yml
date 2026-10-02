@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_cpr_limit.py'
-      - 'scripts/trend_continuation_cpr_merge.py'
+      - 'scripts/trend_continuation_cpr_quality_filter.py'
+      - 'scripts/trend_continuation_cpr_quality_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  cpr-replay:
+  quality-replay:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -34,7 +34,6 @@ jobs:
           mkdir -p events
           gh run download 36934882492 -R ${{ github.repository }} \
             -n trend-continuation-global-events -D events
-          ls -lh events/continuation_events.csv.gz
       - name: Download raw source shard ${{ matrix.shard }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -43,24 +42,24 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay CPR direct-limit shard
+      - name: Replay signal-quality filters
         run: |
-          rm -rf cpr_result
-          python scripts/trend_continuation_cpr_limit.py \
+          rm -rf quality_result
+          python scripts/trend_continuation_cpr_quality_filter.py \
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --out cpr_result
+            --out quality_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-cpr-limit-shard-${{ matrix.shard }}
+          name: trend-continuation-quality-shard-${{ matrix.shard }}
           path: |
-            cpr_result/cells.csv
-            cpr_result/summary.json
+            quality_result/cells.csv
+            quality_result/summary.json
           retention-days: 30
           compression-level: 6
 
-  cpr-merge:
-    needs: cpr-replay
+  quality-merge:
+    needs: quality-replay
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -71,13 +70,13 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-cpr-limit-shard-*
+          pattern: trend-continuation-quality-shard-*
           path: shard_results
-      - name: Merge CPR metrics
-        run: python scripts/trend_continuation_cpr_merge.py
+      - name: Merge quality-filter metrics
+        run: python scripts/trend_continuation_cpr_quality_merge.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-cpr-limit-merged-${{ github.run_id }}
+          name: trend-continuation-quality-merged-${{ github.run_id }}
           path: |
             merged_cells.csv
             merged_summary.json
