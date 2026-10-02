@@ -1,0 +1,159 @@
+{
+  "recorded_at": "2026-10-02T05:22:34Z",
+  "economic_plan_commit": "1ffcce44d054adb42a0cff620f8381cfa388b4e2",
+  "economic_parameters_changed_after_plan": false,
+  "v11_market_outcomes_examined": false,
+  "market_execution_attempts": 0,
+  "planned_entry_configs": 16,
+  "planned_development_cells": 96,
+  "completed_market_cells": 0,
+  "local_full_unit_tests": {
+    "status": "PASS",
+    "tests": 281,
+    "duration_seconds": 22.232,
+    "log": "preexecution/local-unit-tests.log"
+  },
+  "local_new_unit_tests": {
+    "status": "PASS",
+    "tests": 20,
+    "duration_seconds": 3.21,
+    "log": "preexecution/new-unit-tests.log"
+  },
+  "local_synthetic_pipeline": {
+    "status": "PASS",
+    "shards": 8,
+    "cells": 96,
+    "market_profitability_claim": false,
+    "log": "preexecution/local-synthetic-pipeline.log"
+  },
+  "local_chronology_smoke": {
+    "status": "DEPENDENCY_FAILURE_NOT_PASS",
+    "missing": "numba",
+    "log": "preexecution/local-chronology-smoke.log"
+  },
+  "static_workflow_validation": {
+    "status": "PASS",
+    "yaml_graph_and_gating": true,
+    "bash_n_steps": 20,
+    "python_heredocs_parsed": 5,
+    "expected_ci_tests": 281
+  },
+  "finalization": {
+    "marker_added_after_tests_and_static_validation": true,
+    "marker_sha256": "6c4f36acae65510346907235448a8de42128f96dbc64802d40c18f294b3ca441",
+    "workflow_bash_steps_rechecked": 20,
+    "workflow_python_heredocs_rechecked": 5,
+    "workflow_graph_rechecked": true,
+    "source_and_test_ast_rechecked": true,
+    "test_logs_rechecked": {
+      "new": 20,
+      "full": 281,
+      "synthetic_shards": 8,
+      "synthetic_cells": 96
+    },
+    "economic_code_changed_after_281_test_pass": false
+  },
+  "fixture_failures": [
+    {
+      "attempt": "first20-test run",
+      "failures": 1,
+      "cause": "TP fixture expected targets from a2.0-point stop while the preregistered/implemented actual stop distance was1.5 points",
+      "repair": "correct expected TP15/TP25 fixture values; implementation and economics unchanged",
+      "raw_log": "observed in actual local tool output; not reconstructed into a file"
+    }
+  ],
+  "environment_events": [
+    {
+      "event": "temporary synthetic output cleanup command rejected by execution policy",
+      "impact": "none; used a new isolated temporary path and actual synthetic pipeline passed",
+      "economic_change": false
+    },
+    {
+      "event": "first final workflow-inspection helper misparsed a Python heredoc delimiter containing output redirection",
+      "impact": "none; corrected the inspection-only regex and all 20 Bash blocks plus all 5 embedded Python blocks passed",
+      "economic_change": false
+    },
+    {
+      "event": "first synthetic-log inspection expected a redundant cells field not emitted by the final PASS line",
+      "impact": "none; verified eight scan completions, selection cells_examined=96 and all96_cells_preserved=true from the actual saved log",
+      "economic_change": false
+    }
+  ],
+  "actual_actions_required_before_market_scan": [
+    "281 tests",
+    "pinned-numba chronology and canonical invariants",
+    "frozen256/full856 source contract",
+    "synthetic8-shard/96-cell pipeline"
+  ],
+  "not_claimed": [
+    "Local chronology smoke pass",
+    "Actual V11 market execution before Actions log",
+    "V11 profitability",
+    "Daily target achievement",
+    "Clean holdout"
+  ],
+  "files": {
+    ".research/aggressive-flow-cascade-v11-run": {
+      "bytes": 277,
+      "sha256": "6c4f36acae65510346907235448a8de42128f96dbc64802d40c18f294b3ca441"
+    },
+    "scripts/aggressive_flow_cascade_v11.py": {
+      "bytes": 22160,
+      "sha256": "4618f0b31cb518d74a1565a8d1229c26ada1f9f18e49eb62468d63db33cc2a47"
+    },
+    "tests/test_aggressive_flow_cascade_v11.py": {
+      "bytes": 13108,
+      "sha256": "1358c6af2c576b81809711c5c96ab8f23db9a7d6b9e902213a9bd489bc04e9a6"
+    },
+    ".github/workflows/aggressive-flow-cascade-v11.yml": {
+      "bytes": 16775,
+      "sha256": "8b92e6ba791912c4476a8aab1d9823205b04ef7fea7955996dbfcc967167e5d0"
+    },
+    "research/aggressive-flow-cascade-v11/PLAN.md": {
+      "bytes": 10082,
+      "sha256": "ad889268ba0fd7079cc439005411effe4e02e575a06241230c7a86661cf836c2"
+    },
+    "research/aggressive-flow-cascade-v11/IMPLEMENTATION_CONTRACT.md": {
+      "bytes": 2997,
+      "sha256": "65e3a7cb12bf381e8d3712007f904b9698691687995f523fc2d93f927282cd79"
+    },
+    "research/aggressive-flow-cascade-v11/FROZEN_INPUT_HASHES.json": {
+      "bytes": 25644,
+      "sha256": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f"
+    },
+    "research/aggressive-flow-cascade-v11/FROZEN_CONTEXT.json": {
+      "bytes": 72283,
+      "sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614"
+    },
+    "research/aggressive-flow-cascade-v11/PREREGISTRATION.json": {
+      "bytes": 632,
+      "sha256": "db1cbd97daf99c4b78630f5569c37ab6ca46f1736622c1d42d0aada54b457619"
+    },
+    "research/residual-reversion-v10/FAILURE_AUDIT.json": {
+      "bytes": 15215,
+      "sha256": "76c3468621bb52a61e5985ce1fe23b00fd6fd8966c52870821e9efa940c923e3"
+    },
+    "research/residual-reversion-v10/FAILURE_AUDIT.md": {
+      "bytes": 1563,
+      "sha256": "d14c6ed9882fa91b3e7583743203ebe05a6865cba0236b31c5d50ec3519f54d4"
+    }
+  },
+  "logs": {
+    "research/aggressive-flow-cascade-v11/preexecution/local-chronology-smoke.log": {
+      "bytes": 301,
+      "sha256": "0a5c480fb4dae09307478c8ccf99237a1a5465b979c073f30739c1f55c1b05a3"
+    },
+    "research/aggressive-flow-cascade-v11/preexecution/local-synthetic-pipeline.log": {
+      "bytes": 1947,
+      "sha256": "5c711816d0dd6c021dfabfbf8654a77c0ff7a60f88e449680391cb15b60cea20"
+    },
+    "research/aggressive-flow-cascade-v11/preexecution/local-unit-tests.log": {
+      "bytes": 83716,
+      "sha256": "9f11a3a8ed4269fcc8ba4c3f02048d1950720315ef14e2b255b83124a6c38790"
+    },
+    "research/aggressive-flow-cascade-v11/preexecution/new-unit-tests.log": {
+      "bytes": 10724,
+      "sha256": "5c54d6915d83a0a8e95b9f80025243e44c6bfd746bf6202ca358e68c7100bda7"
+    }
+  }
+}
