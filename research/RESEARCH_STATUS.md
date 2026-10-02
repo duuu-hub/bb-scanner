@@ -256,3 +256,7 @@ V14 preregistration77b9dc2b54cd58b9c5d98c5a9a59e5c4522924b2 on research-market-b
 
 ## 2026-10-02T10:46:31Z V14 actual run launched
 Exactly one research run[36997190420](https://github.com/duuu-hub/bb-scanner/actions/runs/36997190420),codea69d51067a21a8cc8dcb144fe671c8576cf381d3,prereg77b9dc2b54cd58b9c5d98c5a9a59e5c4522924b2. Actual validation job110806509575 executing independent saved V13 original ledger audit; pinned376 tests/chronology/invariants/global32source8map8scan smoke required before any V14 market. Local explicit376/22.525s and isolated synthetic graph passed; initial incomplete checkpoint failure and validator stdout limitation preserved. No V14 profitability/goal claim. Continue this run without another marker. Expected result paths in CONTINUATION; not yet a saved result.
+
+
+## V14 run1 execution failure before economic outcomes
+Run36997190420 validation passed actual376/23.242s plus independent V13 raw145968 cost/R/hash audit. Full856 global8maps/reducer passed and saved. Eight canonical scan jobs failed; first110807272688 proves SameFileError copying dev-0/source_check.json to itself. No V14 market policy outcomes or economic rejection. Evidence preserved277files/21965024bytes at faeb20b5eb8cc052c973616f31cb8632e064d764. Repair input/output identity handling and real same-directory integration; parameters unchanged,new economic discovery count0. Continue repair on same research branch.
