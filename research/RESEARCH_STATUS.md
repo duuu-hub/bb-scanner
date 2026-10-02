@@ -9,20 +9,19 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 V9 actual run36955250542/code2e1bb92891c2c480028c075b30afe91275cc0c43:
 232-test validation/canonical chronology/invariants PASS; all8 real DEV daily
-rank-map jobs SUCCESS; global reducer and durable rank preservation SUCCESS.
-Actual logs and the saved manifest were read 2026-10-02T03:45:29Z.856 original
-processed source files checked; all256 prior frozen CSV hashes matched. The8
-map counts reconcile to82,191 symbol/date rank observations across821 UTC
-rank dates, minimum eligible universe30, no low-universe dates excluded.
-These are prior-day rank observations, not executable trades or profits.
-
+rank maps and global reducer/durable rank preservation SUCCESS. Ranks comprise
+82,191 symbol/date observations across821 UTC rank dates, not trades/profits.
+All856 processed source files and256 prior frozen hashes previously verified.
 Rank branch research-cross-sectional-leader-v9-ranks-development-36955250542,
-commit29cef4098a66750cf7df94fb7c797e156ffff02e, path
-research/cross-sectional-leader-v9/run-36955250542/ranks-development;
-rank CSV SHA256254fc4035dc8d5e19e650e9336bfe31de58a1037cdc0a88cc1fee4b50a3dd355.
-Preregistration remains53fea7dd385bdd1ec7048f58be23087f5168158a.
-The16 entries/96 fixed exit policy cells are now queued in8 DEV scan jobs.
-No V9 policy outcome, selected/account result or daily-goal evidence exists yet.
+commit29cef4098a66750cf7df94fb7c797e156ffff02e; preregistration53fea7dd385bdd1ec7048f58be23087f5168158a.
+
+Actual exit-scan progress read 2026-10-02T04:14:43Z: seven of eight DEV shards
+SUCCESS with artifact uploads and actual completed logs audited. Partial totals
+191,500 resolved parameterized outcomes and38 chronology exclusions. Shard0
+job110695502433 is still executing the canonical scan. These partial counts are
+not executable account trades and do not establish profitability. Combined96
+policy cells, exclusion breakdown and selection are pending. No account result
+or daily-goal evidence exists yet. No duplicate execution or unrelated change.
 Whole-account daily+0.7%–2% remains unproved and unmet.
 
 ## Completed failures and durable assets
@@ -175,11 +174,11 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Audit the8 DEV exit scan jobs on the existing run36955250542; no duplicate
-execution. Daily maps/global rank hash are already verified and saved before
-exit outcomes. On completion read all96 cells and exclusions directly. Freeze
-selection before seen2024 GATE/accounts. If rejected, preserve numeric causes
-and proceed to a preregistered new economic mechanism with implementation,
+Follow the existing run36955250542 and remaining DEV shard0. On completion
+read its actual log and saved combined96 policy cells/selection directly,
+reconcile source hashes and chronology exclusions, and verify the full durable
+archive. Freeze before seen2024 GATE/accounts. If rejected, preserve numeric
+causes and proceed with a preregistered new economic hypothesis, implementation,
 tests and actual execution. Provisional survivors still require fixed
 neighbours, stress, actual delays, time dependence and fresh forward evidence.
 
@@ -198,3 +197,6 @@ queued. No duplicate execution launched and no unrelated workflow changed.
 
 V9 rank audit 2026-10-02T03:45:29Z: all8 maps+reducer+rank preservation SUCCESS;
 82,191 saved ranks/821UTC dates. Eight exit-scan jobs queued; no profit claim.
+
+V9 partial exit audit 2026-10-02T04:14:43Z:7/8DEV shards SUCCESS with actual logs/artifacts;
+191,500 parameterized outcomes,38 exclusions; shard0 active, combined cells pending.
