@@ -271,3 +271,14 @@ Full V13 original8 SHA/cost/R/annual all96 audit saved centrally research/breako
 V14 repair run[36998066185](https://github.com/duuu-hub/bb-scanner/actions/runs/36998066185) completed: pinned377 tests, all8DEV canonical scans and selection SUCCESS; gate/accounts skipped because zero of96 policies survived. N291--1778/symbols126--185; net40 means -123.121048..+4.083955bp, R -0.339145..-0.016948, PF0.360349..1.023408.92/96 price means non-positive and96/96 R means non-positive. Best price cell N1778,+4.083955bp,R-.030562,PF1.023408; all three annual R means negative. Best R cell N713,+2.808992bp,R-.016948,PF1.016830. All48 SHORT cells price-negative. Original development and complete evidence retained on research-market-breadth-recovery-v14-dev-36998066185 and research-market-breadth-recovery-v14-evidence-36998066185. No account/daily-target success.
 
 Distinct V15 breadth-expansion continuation preregistered before code/outcomes at commit1092fd6cbc84acbd0f42fc6408ad717bdc81f7f5 on research-breadth-expansion-continuation-v15. It tests newly expanding market-wide directional participation plus local momentum continuation (16entries/96policies), not V14 pressure-withdrawal reversal or parameter repair. Implementation/tests/actual launch pending; execution attempts0 and market outcomes0.
+
+
+## 2026-10-02 — V15 implementation and first trigger handoff
+
+- Distinct preregistered hypothesis: whole-market directional breadth expansion plus same-direction local momentum continuation.
+- Frozen implementation branch: `research-breadth-expansion-continuation-v15`.
+- Added exact 16-entry / 96-policy implementation, 39 new signal/global-artifact tests, and a 416-test registered regression validator.
+- Frozen sources remain source run `36095439671` plus BTC artifact run `36858492497`; the V15 workflow retains the eight-shard map/reduce, canonical Binance 1m exit scan, DEV-first selection, conditional 2024 gate, account constraints, and complete-evidence preservation.
+- Implementation last commit before trigger: `2002f85d5914c0803a1ba15a3c3f19452d385893`.
+- Trigger commit: `fb42a7154df6c10ad7df412d9ace07065bf651f5`.
+- Audit state: trigger push is confirmed; Actions run ID and actual validation result are still pending discovery. Do not claim the workflow executed and do not launch a duplicate until the run/log is found.
