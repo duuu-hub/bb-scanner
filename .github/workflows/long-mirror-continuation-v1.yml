@@ -44,18 +44,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - name: Download frozen data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Replay mirror long
-        run: python scripts/long_continuation_mirror_v1.py --data data --shard \${{ matrix.shard }} --shards 6
+        run: python scripts/long_continuation_mirror_v1.py --data data --shard ${{ matrix.shard }} --shards 6
       - uses: actions/upload-artifact@v4
         with:
-          name: long-mirror-continuation-v1-\${{ matrix.shard }}
+          name: long-mirror-continuation-v1-${{ matrix.shard }}
           path: |
-            long_continuation_mirror_\${{ matrix.shard }}.csv.gz
-            long_continuation_mirror_meta_\${{ matrix.shard }}.json
+            long_continuation_mirror_${{ matrix.shard }}.csv.gz
+            long_continuation_mirror_meta_${{ matrix.shard }}.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -75,10 +75,10 @@ jobs:
           path: long_artifacts
       - name: Download frozen short horizon artifact
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p short_source
-          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D short_source
+          gh run download 36963458040 -R ${{ github.repository }} -n short-continuation-horizon-v2-final -D short_source
           test -f short_source/short_continuation_horizon_all.csv.gz
       - name: Combine long and short
         run: |
