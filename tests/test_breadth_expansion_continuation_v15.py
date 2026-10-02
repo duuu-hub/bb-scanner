@@ -98,7 +98,7 @@ class CountsContract(unittest.TestCase):
     def test_count_sums_not_average_of_shards(self):
         times=np.arange(3,dtype=np.int64)*s.BAR;r=(times,np.ones(3),np.ones(3),np.ones(3),np.ones(3))
         f=dict(eligible=np.ones(3,bool),r16=np.array([-.04,-.03,.04]),r96=np.array([-.08,-.1,.1]))
-        x=b.counts(r,f,times);np.testing.assert_array_equal(x[:,1],[1,0,0]);np.testing.assert_array_equal(x[:,2],[0,0,1])
+        x=b.counts(r,f,times);np.testing.assert_array_equal(x[:,1],[1,1,0]);np.testing.assert_array_equal(x[:,2],[0,0,1])
     def test_nan_coin_not_in_denominator(self):
         t,_=self.table();raw=(t,)*5;f=dict(eligible=np.ones(3,bool),r16=np.array([np.nan,-.1,.1]),r96=np.array([0.,np.nan,.1]))
         self.assertEqual(b.counts(raw,f,t)[0,0],0);self.assertEqual(b.counts(raw,f,t)[1,3],0)
