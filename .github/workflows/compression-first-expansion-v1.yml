@@ -1,0 +1,97 @@
+name: Compression First Expansion V1 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/compression_first_expansion_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - name: Compile and chronology smoke
+        run: |
+          python -m py_compile scripts/compression_first_expansion_v1.py scripts/compression_first_expansion_v1_merge.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("scripts/sweep_reclaim_research.py").read_text()
+          assert "def trade(" in src
+          assert "entrybar_exit(symbol,int(t[start]),side,tp,sl)" in src
+          assert "ex.established(symbol,int(t[k]),side,tp,sl)" in src
+          assert "((fill-xp)/fill)" in src
+          print("COMPRESSION_V1_SHARED_ENGINE_INVARIANTS_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay TRAIN shard
+        run: |
+          python scripts/compression_first_expansion_v1.py \
+            --data data \
+            --shard \${{ matrix.shard }} \
+            --shards 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-first-expansion-v1-\${{ matrix.shard }}
+          path: |
+            compression_first_expansion_v1_\${{ matrix.shard }}.csv.gz
+            compression_first_expansion_v1_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: compression-first-expansion-v1-*
+          path: artifacts
+      - name: Verify all shards
+        run: |
+          test "$(find artifacts -name 'compression_first_expansion_v1_*.csv.gz' | wc -l)" -eq 8
+          test "$(find artifacts -name 'compression_first_expansion_v1_meta_*.json' | wc -l)" -eq 8
+      - name: Merge TRAIN only
+        run: |
+          python scripts/compression_first_expansion_v1_merge.py \
+            --input artifacts \
+            --out compression_first_expansion_v1_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-first-expansion-v1-train-final
+          path: compression_first_expansion_v1_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
