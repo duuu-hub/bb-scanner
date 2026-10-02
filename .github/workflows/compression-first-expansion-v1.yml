@@ -46,22 +46,22 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3 requests
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Replay TRAIN shard
         run: |
           python scripts/compression_first_expansion_v1.py \
             --data data \
-            --shard \${{ matrix.shard }} \
+            --shard ${{ matrix.shard }} \
             --shards 8
       - uses: actions/upload-artifact@v4
         with:
-          name: compression-first-expansion-v1-\${{ matrix.shard }}
+          name: compression-first-expansion-v1-${{ matrix.shard }}
           path: |
-            compression_first_expansion_v1_\${{ matrix.shard }}.csv.gz
-            compression_first_expansion_v1_meta_\${{ matrix.shard }}.json
+            compression_first_expansion_v1_${{ matrix.shard }}.csv.gz
+            compression_first_expansion_v1_meta_${{ matrix.shard }}.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
