@@ -1,0 +1,71 @@
+{
+  "strategy_id": "short_continuation_forward_freeze_v1",
+  "frozen_at_utc": "2026-10-02T06:52:00Z",
+  "branch": "research-rank5-binance-15m-5y",
+  "source_dataset_run": 36095439671,
+  "candidate": {
+    "side": "SHORT",
+    "signal": "completed H1 bearish impulse >= 2.0 ATR14 with body/range >= 0.60",
+    "h4_filter": "last closed H4 EMA20 < EMA50 and H4 close < EMA20",
+    "entry": "immediate next 15m open after completed H1 impulse",
+    "stop": "2.0 x H1 ATR14 above entry",
+    "target": "3.0R",
+    "max_hold_hours": 16,
+    "canonical_intrabar": "15m collision -> Binance 1m chronology; same 1m both-touch => LOSS",
+    "cost_round_trip_bp": 20
+  },
+  "portfolio": {
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false,
+    "candidate_priority": "impulse_atr descending, then symbol",
+    "chronology": "exit_time == new entry_time remains occupied at that bar open; same-bar entry occurs before its exit is booked"
+  },
+  "frozen_backtest": {
+    "n": 2306,
+    "return_pct": 28.07,
+    "mdd_pct": 34.27,
+    "pf20": 1.032,
+    "max_losing_streak": 31
+  },
+  "robustness_flags": {
+    "leave_out_2022": {
+      "return_pct": -8.35,
+      "pf20": 0.984
+    },
+    "leave_out_2025": {
+      "return_pct": -1.51,
+      "pf20": 0.998
+    },
+    "leave_out_2022_and_2025": {
+      "return_pct": -29.52,
+      "pf20": 0.917
+    },
+    "rolling_pf_gt1_pct": {
+      "3m": 58.6,
+      "6m": 65.5,
+      "12m": 77.6
+    },
+    "month_block_bootstrap_p_pf_gt1_pct": {
+      "ALL": 79.4,
+      "DEV": 73.8,
+      "VALID": 62.9,
+      "EVAL": 65.4
+    }
+  },
+  "rejected_refinements": [
+    "pullback requirement",
+    "rolling shadow kill-switch",
+    "H4/daily bearish breadth filters",
+    "BTC daily EMA regime",
+    "BTC/market 30d return filters",
+    "exact mirror LONG continuation"
+  ],
+  "forward_rule": [
+    "Do not tune signal, stop, target, horizon, or portfolio constraints using future observations.",
+    "All observations after this freeze are forward evidence.",
+    "Record theoretical entry and actual executable/fill price separately.",
+    "Keep rejected variants separate from the frozen strategy."
+  ]
+}
