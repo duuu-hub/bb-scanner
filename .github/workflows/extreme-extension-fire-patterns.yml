@@ -1,0 +1,42 @@
+name: Extreme Extension Fire Patterns
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_extension_fire_patterns_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download frozen 5Y shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p pump_data
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Run chart fire-pattern research
+        run: |
+          rm -rf extreme_fire_patterns
+          python research/extreme_extension_fire_patterns.py --data-root pump_data --out extreme_fire_patterns
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extreme-fire-patterns-${{ github.run_id }}
+          path: extreme_fire_patterns/
+          retention-days: 30
+          compression-level: 6
