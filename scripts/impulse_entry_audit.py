@@ -29,14 +29,12 @@ def find_pullback_trigger(side,s0,end,imp_high,imp_low,imp_range,A,o,h,l,c):
    if depth>PULL_MAX:return None,None,np.nan,True
    if depth<PULL_MIN:continue
    pull_ext=float(l[k]) if pull_ext is None else min(pull_ext,float(l[k]))
-   if k<=s0:continue
    ok=(c[k]>o[k] and (c[k]-o[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]>h[k-1])
   else:
    depth=(float(h[k])-imp_low)/imp_range
    if depth>PULL_MAX:return None,None,np.nan,True
    if depth<PULL_MIN:continue
    pull_ext=float(h[k]) if pull_ext is None else max(pull_ext,float(h[k]))
-   if k<=s0:continue
    ok=(c[k]<o[k] and (o[k]-c[k])>=MIN_CONFIRM_BODY_ATR*A and c[k]<l[k-1])
   if ok:return k,pull_ext,float(depth),False
  return None,pull_ext,pull_depth,False
