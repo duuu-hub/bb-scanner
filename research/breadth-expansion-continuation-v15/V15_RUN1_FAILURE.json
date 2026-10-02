@@ -1,0 +1,42 @@
+{
+  "version": "V15",
+  "run": 37019476663,
+  "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37019476663",
+  "trigger_commit": "fb42a7154df6c10ad7df412d9ace07065bf651f5",
+  "validation_job": 110878539127,
+  "status": "VALIDATION_FAILED_NO_MARKET_EXECUTION",
+  "registered_tests": 416,
+  "passed": 415,
+  "failures": 1,
+  "errors": 0,
+  "duration_seconds": 48.051,
+  "failure": {
+    "test": "test_breadth_expansion_continuation_v15.CountsContract.test_count_sums_not_average_of_shards",
+    "actual": [
+      1,
+      1,
+      0
+    ],
+    "expected": [
+      1,
+      0,
+      0
+    ],
+    "cause": "V14 test expectation retained after V15 16-bar shock threshold changed from 4% to 2%; -3% correctly counts as down under V15.",
+    "classification": "TEST_EXPECTATION_MIGRATION_ERROR_NOT_MARKET_DISCOVERY"
+  },
+  "downstream": {
+    "map_development": "skipped",
+    "breadth_development": "skipped",
+    "development": "skipped",
+    "selection": "skipped",
+    "gate": "skipped",
+    "accounts": "skipped"
+  },
+  "validation_artifact": {
+    "id": 11231563669,
+    "sha256": "7aeb9bb1c6f0a6bdc0153180a10cef65d75c5d692b1c284d1611a68b00fe0833"
+  },
+  "evidence_branch": "research-breadth-expansion-continuation-v15-evidence-37019476663",
+  "correction": "Change only expected down16 counts to [1,1,0]; no strategy parameter or market rule changes."
+}
