@@ -334,3 +334,18 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Actual validation job `111060825788`: frozen input contract passed (256 prior hashes / 856 source files); independent saved V13 audit passed; 458/458 tests passed in 59.852 s; canonical chronology smoke passed.
 - All eight DEV breadth-map jobs are now active. This establishes implementation validation only, not market profitability, account growth, or daily-target achievement.
 - Continue the existing run through map/reduce, eight canonical scans, selection, and evidence; do not launch a duplicate.
+
+
+## 2026-10-03 — V16 actual rejection; V17 preregistration
+
+- Actual V16 retry run: [37074366568](https://github.com/duuu-hub/bb-scanner/actions/runs/37074366568), code `217a46b0e752800b70115eb9a63528d809242ce6`.
+- Log-backed execution: 458/458 validation tests passed; all eight global breadth maps, reduction, all eight canonical Binance 1m DEV scans, selection, and complete-evidence preservation succeeded.
+- Result: 96 cells examined, zero survivors; 2024 gate and accounts were correctly skipped.
+- 122,718 parameterized resolved outcomes. N range 95–3,743; symbols 68–214; net40 mean -87.6113 to +15.6357 bp; net40 R -0.33857 to +0.05203; PF 0.4518–1.1867.
+- Only 9/96 cells had positive mean bp and 5/96 positive net40 R. No SHORT cell had positive global net40 R.
+- The dominant failure was calendar distribution: all 96 cells had non-positive day R in 2021 and 2022; 94/96 were non-positive in 2023.
+- Best mean-bp cell `RECLAIM_S-1_H96_B10_D10__H16__TP2`: N=328, +15.6357 bp, PF 1.1867, but R=-0.03069 and yearly R -0.1893/+0.0727/-0.2060.
+- Best-R cell `RECLAIM_S+1_H96_B20_D05__H48__TRAIL`: N=477, +13.0131 bp, PF 1.0899, R=+0.05203, but 2022 R=-0.06071 and day R -0.06154/-0.13296/+0.00718.
+- Full evidence: 963 files / 342,209,447 bytes, branch `research-breadth-pullback-reclaim-v16-evidence-37074366568`, commit `62efcc275b981621c7655a85c6cb4db714ef6685`. Failure audit is preserved on the V17 branch.
+- V17 was preregistered before code/outcomes at `34f8a1dea44b09ce3720e6bed676ef4d7d1d33bb` on `research-session-vwap-failed-auction-v17`.
+- V17 is economically distinct: fixed 00:00/08:00/16:00 UTC session-VWAP failed-auction reversal after ATR displacement, volume climax, and a separate closed confirmation. It uses no breadth, premium, taker-flow, or cross-sectional residual trigger. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies. Implementation and execution are pending.
