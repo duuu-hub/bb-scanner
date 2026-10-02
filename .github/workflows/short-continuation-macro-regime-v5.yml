@@ -31,17 +31,17 @@ jobs:
           PY
       - name: Download frozen horizon V2 final artifact
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p source
-          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D source
+          gh run download 36963458040 -R ${{ github.repository }} -n short-continuation-horizon-v2-final -D source
           test -f source/short_continuation_horizon_all.csv.gz
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Run macro regime audit
         run: |
           python scripts/short_continuation_macro_regime_v5.py \
