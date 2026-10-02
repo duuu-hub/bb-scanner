@@ -53,22 +53,22 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Extract TRAIN lag features
         run: |
           python scripts/btc_impulse_alt_lag_features_v1.py \
             --data data \
-            --shard \${{ matrix.shard }} \
+            --shard ${{ matrix.shard }} \
             --shards 12
       - uses: actions/upload-artifact@v4
         with:
-          name: btc-lag-features-v1-\${{ matrix.shard }}
+          name: btc-lag-features-v1-${{ matrix.shard }}
           path: |
-            btc_lag_features_\${{ matrix.shard }}.csv.gz
-            btc_lag_features_meta_\${{ matrix.shard }}.json
+            btc_lag_features_${{ matrix.shard }}.csv.gz
+            btc_lag_features_meta_${{ matrix.shard }}.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
@@ -92,10 +92,10 @@ jobs:
           test "$(find feature_artifacts -name 'btc_lag_features_meta_*.json' | wc -l)" -eq 12
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Select laggards before outcomes and evaluate TRAIN
         run: |
           python scripts/btc_impulse_alt_lag_catchup_v1_merge.py \
