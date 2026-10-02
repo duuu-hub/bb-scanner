@@ -247,3 +247,8 @@ V11 actual launch 2026-10-02T07:49Z: run36980518301/code7f7c3b517978e3401e80d1d2
 actual validation job110753756045 SUCCESS: frozen256/full856 source contract,
 281 tests, chronology/canonical invariants and synthetic8/all96 PASS. Eight real
 DEV shards queued. Market/account outcomes unavailable; no profit/target claim.
+
+
+## 2026-10-02 V13 actual rejection; V14 preregistration
+V13 run36992677948 completed actual338 tests/all8DEV/selection/preserve:145968 overlapping rows,96/96 cost40 price/R negative,54 N>=300,zero candidates/accounts. All24 DATA_GAP exclusions/two unique IOTA/YFI events saved. Evidence commit6f3766792984f15d2a1422f6672d7a06be8f3b7e(2693files/1209702764bytes); full tree sizes checked. Original binary >=1MiB connector blocked independent arithmetic, runner audit required before V14 market; no pending pass claim.
+V14 preregistration77b9dc2b54cd58b9c5d98c5a9a59e5c4522924b2 on research-market-breadth-recovery-v14: synchronized shock fraction withdrawal+closed local recovery; exact16/96 global8-map/reduce. Implementation/test/actual execution pending. No daily-goal survivor; no main/order/watcher/unrelated automation changes.
