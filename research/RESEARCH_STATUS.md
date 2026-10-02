@@ -7,29 +7,25 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V10 [actual run 36966622286](https://github.com/duuu-hub/bb-scanner/actions/runs/36966622286),
-code 18270ece2a1923591e14ae706ce9b91e79ddd76a, PLAN a42078eb11baa5442e4009a3e96a9e64f4665fce.
-Completed validation job110711667904:261 tests, chronology/canonical smoke,
-frozen256/856 input contract and synthetic8-shard/96-cell pipeline PASS.
-Actual completed log read and preserved at research/residual-reversion-v10/run-36966622286/validation-job-110711667904.log.
-First actual shard7 completed:34285 parameterized outcomes/23 chronology
-exclusions, source107 files/28 prior hashes verified in its actual log.
-Remaining seven shards active at the last observation; full96-cell selection
-and account results pending. No duplicate run. Implementation lease released.
-Fixed16 entries /96 DEV cells; unhedged relative log-price residual/AR1 reversion.
-GATE/accounts depend on frozen DEV selection. Daily account +0.7%-2% is unmet.
+V10 actual run36966622286/code18270ece2a1923591e14ae706ce9b91e79ddd76a:
+validation/8DEV/selection SUCCESS;340491 parameterized outcomes across96 cells,
+zero survivors;GATE/accounts skipped. All96 global net40 price and R means are
+negative. R is negative in every cell in both2022 and2023; equal-active-date R
+negative in every2023 cell. Best cell: short,W1344,z3,FLOW55,H96,TP2,
+N1278/194symbols,-9.5794bp,-.04375R,PF.946. Sources856/prior256 hashes;
+159DATA_GAP exclusions;814 official minute checksums. Saved cells/metas/source
+checks/exclusions audited. Full original ledgers await existing preserve_cycle.
+Daily account +0.7%-2% remains unmet.
 
-V9 actual36955250542:96 cells/223218 parameterized outcomes, zero survivors;
-GATE/accounts skipped. Independent original eight-blob byte/hash and all96
-financial/statistics audit PASS in the V10 validation job, without market rerun.
-57 cells positive before costs, only2 after40bp fees/slippage/funding;
-mean per-policy cost drag45.0845-50.4517bp.94/96 net40 price/R negative;
-two small-positive cells fail sample/year, all96 negative2022 R/equal-dateR.
-Full original archive preserved:1764 files/777727705 bytes, commit
-d64413ffdd50f2dbfaa16bf89e8aa1e6d63cb10a. Manifest/git sizes match; not all complete-archive
-byte hashes independently recomputed. Numeric observation: research/cross-sectional-leader-v9/ORIGINAL_LEDGER_AUDIT_OBSERVATION.json.
+V11 distinct aggressive taker-flow cascade continuation is being preregistered
+on branch research-aggressive-flow-cascade-v11 before code or market outcomes.
+It targets short-lived order-flow persistence after an idiosyncratic high-volume
+breakout, rather than V3 shock reversal,V4 compression breakout,V6 BTC lag,
+V9 daily leader momentum or V10 level residual reversion.16entry configs/
+96DEV cells planned; implementation lease through2026-10-02T07:11:06Z.
 
 ## Completed failures and durable assets
+- V10 actual36966622286:16entries/96cells/340491outcomes,all96 global net40 price/R negative,zero selected/accounts. Best -9.5794bp/-0.04375R/PF.946/N1278;2022 and2023 all96 R negative,2023 all96 equal-dateR negative. DEV branch research-residual-reversion-v10-dev-36966622286 commit 8d0f1aa84b5aacf432ea688e3f26b165f11f4b87. Full evidence preservation still running; raw original ledger audit pending.
 - V9 actual36955250542:16entries/96cells/223218outcomes,zero selected/account.
   Net40 price means-63.6210 to+5.3485bp,R-.27166 to+.04636,PF.57707-1.02713.
   Two small-positive cells N153/234,2022negative;all96 2022R negative.
@@ -187,12 +183,10 @@ hash mismatches, never replace universe/prices. Do not rely on old scratch.
 
 ## Next
 
-Follow actual V10 run36966622286; avoid duplicate execution. On completion read
-all eight original DEV scans, all96 cells, raw ledger arithmetic and exclusions;
-then selected candidates' canonical accounts. Preserve originals and failed
-trials. Expected result branches/paths in CONTINUATION are not completed outputs.
-If rejected, record the numerical cause and preregister a distinct V11 economic
-hypothesis before code/tests/actual execution. Daily target remains unmet.
+Honor active V11 lease. Commit the frozen hypothesis/full856 catalogue before
+code, implement causal flow/breakout/source/chronology/account tests and launch
+once. Follow V10 preserve_cycle; audit durable original ledgers when complete.
+No duplicate V10 dispatch, seen-gate tuning or daily-target claim.
 
 ## V9 execution handoff — 2026-10-02 02:21 UTC
 
@@ -224,3 +218,8 @@ jobs active/5queued; market cells not yet available. No duplicate execution.
 V10 partial actual scan 2026-10-02T05:03:36Z:shard7 SUCCESS,34285 parameterized outcomes,
 23 chronology exclusions; actual full job log preserved. Remaining7 active;
 all96-cell/growth/target evidence pending. Exclusion reasons require saved metadata.
+
+V10 final DEV/V11 handoff 2026-10-02T05:11:06Z:all8 scans and selection SUCCESS;
+340491 parameterized outcomes,159 DATA_GAP exclusions,all96 global net40 price/R
+negative,zero selected;gate/accounts skipped. Saved outputs audited. V11 distinct
+aggressive-flow cascade hypothesis preregistration started; no market run yet.
