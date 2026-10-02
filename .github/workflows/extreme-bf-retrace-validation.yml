@@ -1,0 +1,114 @@
+name: Extreme BF Retrace Validation
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_retrace_validation_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prior results and frozen data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire pump_data
+          mkdir -p fire pump_data
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Validate fixed 50pct rebound retrace split
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,statistics
+          from pathlib import Path
+          DAY=86400000
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          paths={p.name.replace(".csv.gz",""):p for p in Path("pump_data").rglob("*USDT.csv.gz")}
+          targets=[10.0,15.0,20.0]
+          src=[r for r in rows if float(r["base_x"]) in targets and r["candidate"]=="BF_DD15_B10"]
+          out=[]
+          for rr in src:
+              sym=rr["symbol"]; base=float(rr["base_x"])
+              base_ts=int(float(rr["base_entry_ts"])); sig_ts=int(float(rr["signal_ts"]))
+              prior_peak=float(rr["peak_at_confirm"]); frozen=float(rr["break_level"])
+              data=[]
+              with gzip.open(paths[sym],"rt",encoding="utf-8",newline="") as f:
+                rd=csv.DictReader(f)
+                for x in rd:
+                  ts=int(x["open_time"])
+                  if ts<base_ts: continue
+                  if ts>sig_ts+7*DAY: break
+                  data.append((ts,float(x["open"]),float(x["high"]),float(x["low"]),float(x["close"])))
+              pre=[x for x in data if x[0]<sig_ts]
+              post=[x for x in data if x[0]>=sig_ts]
+              running_peak=max(pre[0][1],pre[0][2])
+              armed=False; rebound=False; low=None; reb_high=None; retrace=None
+              for x in pre:
+                ts,o,h,l,c=x
+                if h>running_peak:
+                  running_peak=h; armed=False; rebound=False; low=None; reb_high=None
+                dd=max(0,1-c/running_peak)
+                if not armed:
+                  if dd>=0.15:
+                    armed=True; low=l
+                elif not rebound:
+                  low=min(low,l)
+                  if h>=low*1.10 and h<running_peak*0.995:
+                    rebound=True; reb_high=h
+                else:
+                  reb_high=max(reb_high,h)
+                  if c<frozen:
+                    if running_peak>low:
+                      retrace=(reb_high-low)/(running_peak-low)*100
+                    break
+              if retrace is None: continue
+              maxh=max(x[2] for x in post) if post else -1
+              reclaimed=maxh>prior_peak
+              out.append({
+                "symbol":sym,"base_x":base,"retrace_pct":retrace,
+                "bucket":"WEAK_LT50" if retrace<50 else "STRONG_GE50",
+                "reclaimed_7d":reclaimed,
+                "d7_net40_pct":float(rr["d7_net40_pct"]),
+                "d7_mae_pct":float(rr["d7_mae_pct"])
+              })
+          def stats(xs):
+              if not xs:return {"n":0}
+              rets=[x["d7_net40_pct"] for x in xs]; maes=[x["d7_mae_pct"] for x in xs]
+              return {
+                "n":len(xs),
+                "reclaim_count":sum(x["reclaimed_7d"] for x in xs),
+                "reclaim_pct":round(100*sum(x["reclaimed_7d"] for x in xs)/len(xs),2),
+                "mean_ret":round(sum(rets)/len(rets),2),
+                "median_ret":round(statistics.median(rets),2),
+                "win_pct":round(100*sum(x>0 for x in rets)/len(rets),2),
+                "mean_mae":round(sum(maes)/len(maes),2),
+                "median_mae":round(statistics.median(maes),2),
+                "max_mae":round(max(maes),2)
+              }
+          for b in targets:
+              print("BASE",b)
+              bx=[x for x in out if x["base_x"]==b]
+              for bucket in ("WEAK_LT50","STRONG_GE50"):
+                xs=[x for x in bx if x["bucket"]==bucket]
+                print(bucket,json.dumps(stats(xs),ensure_ascii=False))
+          print("POOLED_10_20")
+          for bucket in ("WEAK_LT50","STRONG_GE50"):
+              xs=[x for x in out if x["bucket"]==bucket]
+              print(bucket,json.dumps(stats(xs),ensure_ascii=False))
+          print("DETAILS")
+          for x in sorted(out,key=lambda z:(z["base_x"],z["bucket"],z["symbol"])):
+              print(json.dumps(x,ensure_ascii=False))
+          PY
