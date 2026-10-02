@@ -1,0 +1,54 @@
+name: Extreme BF Quick Reclaim
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_quick_reclaim_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire && mkdir fire
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+      - name: Compute prior-high reclaim from recorded MAE
+        run: |
+          python - <<'PY'
+          import csv,json
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          bf=[r for r in rows if float(r["base_x"])==20.0 and r["candidate"]=="BF_DD15_B10"]
+          print("N",len(bf))
+          for d in (1,3,7):
+              hit=[]
+              for r in bf:
+                  if not r.get(f"d{d}_mae_pct"): continue
+                  entry=float(r["signal_entry"]); peak=float(r["peak_at_confirm"])
+                  need=(peak/entry-1)*100
+                  mae=float(r[f"d{d}_mae_pct"])
+                  if mae > need:
+                      hit.append(r["symbol"])
+              print("RECLAIM",d,len(hit),round(100*len(hit)/len(bf),2),",".join(hit))
+          print("DETAIL")
+          for r in bf:
+              entry=float(r["signal_entry"]);peak=float(r["peak_at_confirm"]);need=(peak/entry-1)*100
+              print(json.dumps({
+                "symbol":r["symbol"],
+                "hours_after_20x":round(float(r["hours_after_base"]),2),
+                "bf_entry":entry,
+                "prior_peak":peak,
+                "rise_needed_to_prior_peak_pct":round(need,2),
+                "d1_mae_pct":round(float(r["d1_mae_pct"]),2) if r.get("d1_mae_pct") else None,
+                "d3_mae_pct":round(float(r["d3_mae_pct"]),2) if r.get("d3_mae_pct") else None,
+                "d7_mae_pct":round(float(r["d7_mae_pct"]),2) if r.get("d7_mae_pct") else None,
+                "d7_net40_pct":round(float(r["d7_net40_pct"]),2) if r.get("d7_net40_pct") else None,
+                "reclaimed_7d":float(r["d7_mae_pct"])>need if r.get("d7_mae_pct") else None
+              }))
+          PY
