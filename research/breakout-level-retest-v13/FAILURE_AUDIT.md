@@ -1,0 +1,5 @@
+# V13 actual failure audit
+
+Run [36992677948](https://github.com/duuu-hub/bb-scanner/actions/runs/36992677948) completed validation(338), all8DEV shards, selection, evidence preservation. 145,968 diagnostic rows; 96/96 net40 mean price and R negative; 54/96 had >=300 rows. Best price -8.61665bp/R-.145894/PF.922/N166; 2022 and2023 all96 price/R negative. All24 DATA_GAP exclusions/two unique IOTA/YFI events remain counted. Zero selected;GATE/accounts skipped. No goal claim.
+
+2693 files/1209702764bytes preserved on research-breakout-level-retest-v13-evidence-36992677948 commit6f3766792984f15d2a1422f6672d7a06be8f3b7e; full tree size check pass. Full original raw ledger arithmetic audit pending runner because connector binary >=1MiB unavailable. V14 validate must run that audit before market; no pending audit represented as pass. Audit report and manifest reference saved. This is a failed local channel-retest hypothesis, not evidence that a global pressure withdrawal rule works. V14 conditions registered separately before its outcomes.
