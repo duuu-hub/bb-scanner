@@ -1,0 +1,176 @@
+name: Extreme BF Internal Structure Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_internal_structure_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire results and frozen shards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire pump_data
+          mkdir -p fire pump_data
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Compare causal internal BF structure
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,math,statistics
+          from pathlib import Path
+          DAY=86400000
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          bfrows=[r for r in rows if float(r["base_x"])==20.0 and r["candidate"]=="BF_DD15_B10"]
+          paths={p.name.replace(".csv.gz",""):p for p in Path("pump_data").rglob("*USDT.csv.gz")}
+
+          def med(xs): return statistics.median(xs) if xs else None
+          def avg(xs): return sum(xs)/len(xs) if xs else None
+          def p(v): return None if v is None else round(v,3)
+
+          recs=[]
+          for rr in bfrows:
+              sym=rr["symbol"]; pth=paths[sym]
+              base_ts=int(float(rr["base_entry_ts"])); sig_ts=int(float(rr["signal_ts"]))
+              prior_peak=float(rr["peak_at_confirm"]); frozen_low=float(rr["break_level"])
+              data=[]
+              fields=None
+              with gzip.open(pth,"rt",encoding="utf-8",newline="") as f:
+                  rd=csv.DictReader(f); fields=rd.fieldnames
+                  for x in rd:
+                      ts=int(x["open_time"])
+                      if ts<base_ts-96*900000: continue
+                      if ts>sig_ts+7*DAY: break
+                      def gv(*names):
+                          for n in names:
+                              if n in x and x[n] not in ("",None): return float(x[n])
+                          return None
+                      data.append({
+                        "ts":ts,"o":float(x["open"]),"h":float(x["high"]),"l":float(x["low"]),"c":float(x["close"]),
+                        "v":gv("volume","Volume","base_volume"),
+                        "qv":gv("quote_volume","quote_asset_volume","Quote asset volume"),
+                        "tb":gv("taker_buy_base_asset_volume","taker_buy_base_volume"),
+                        "tq":gv("taker_buy_quote_asset_volume","taker_buy_quote_volume")
+                      })
+              pre=[x for x in data if base_ts<=x["ts"]<sig_ts]
+              post=[x for x in data if sig_ts<=x["ts"]<=sig_ts+7*DAY]
+              if not pre: continue
+
+              # Reconstruct BF_DD15_B10 exactly enough: first completed close DD15 arms,
+              # then low evolves until a >=10% bounce while under prior running peak,
+              # freeze low, then first completed close below frozen low confirms; next bar open is signal.
+              running_peak=max(pre[0]["o"],pre[0]["h"])
+              armed=False; rebound=False; arm_ts=None; arm_low=None; frozen=None
+              reb_ts=None; reb_high=None; confirm=None; peak_ts=pre[0]["ts"]; peak_val=running_peak
+              for x in pre:
+                  if x["h"]>running_peak:
+                      running_peak=x["h"]; peak_val=running_peak; peak_ts=x["ts"]
+                      armed=False; rebound=False; arm_ts=None; arm_low=None; frozen=None; reb_ts=None; reb_high=None
+                  dd=max(0,1-x["c"]/running_peak)
+                  if not armed:
+                      if dd>=0.15:
+                          armed=True; arm_ts=x["ts"]; arm_low=x["l"]
+                  elif not rebound:
+                      arm_low=min(arm_low,x["l"])
+                      if x["h"]>=arm_low*1.10 and x["h"]<running_peak*0.995:
+                          rebound=True; reb_ts=x["ts"]; reb_high=x["h"]; frozen=arm_low
+                  else:
+                      reb_high=max(reb_high,x["h"])
+                      if x["c"]<frozen:
+                          confirm=x; break
+              if confirm is None:
+                  # fallback: last pre bar is the confirming bar because signal is next OPEN
+                  confirm=pre[-1]
+
+              # future label = prior running high reclaimed within 7d
+              maxh=max(x["h"] for x in post) if post else float("-inf")
+              fake=maxh>prior_peak
+
+              # locate reference bars around stages
+              def nearest(ts):
+                  vals=[x for x in pre if x["ts"]==ts]
+                  return vals[0] if vals else None
+              armbar=nearest(arm_ts) if arm_ts else None
+              rebbar=nearest(reb_ts) if reb_ts else None
+
+              # trailing 24h stats before confirmation
+              trail=[x for x in data if sig_ts-DAY<=x["ts"]<sig_ts]
+              volvals=[x["v"] for x in trail if x["v"] is not None]
+              qvals=[x["qv"] for x in trail if x["qv"] is not None]
+              cvol=confirm["v"]; cqv=confirm["qv"]
+              medv=med(volvals); medq=med(qvals)
+              body=abs(confirm["c"]-confirm["o"])
+              rng=max(confirm["h"]-confirm["l"],1e-12)
+              red=(confirm["c"]-confirm["o"])/confirm["o"]*100
+              close_loc=(confirm["c"]-confirm["l"])/rng # 0=close at low
+
+              peak_to_arm_h=(arm_ts-peak_ts)/3600000 if arm_ts else None
+              arm_to_reb_h=(reb_ts-arm_ts)/3600000 if arm_ts and reb_ts else None
+              reb_to_break_h=(confirm["ts"]-reb_ts)/3600000 if reb_ts else None
+              trough=frozen if frozen else frozen_low
+              retrace=(reb_high-trough)/(prior_peak-trough)*100 if reb_high and prior_peak>trough else None
+              reb_below_peak=(1-reb_high/prior_peak)*100 if reb_high else None
+              break_depth=(frozen_low-confirm["c"])/frozen_low*100 if frozen_low else None
+
+              rec={
+                "symbol":sym,"type":"FAKE_RECLAIM" if fake else "TRUE_NO_RECLAIM",
+                "peak_to_arm_h":peak_to_arm_h,
+                "arm_to_rebound_h":arm_to_reb_h,
+                "rebound_to_break_h":reb_to_break_h,
+                "total_20x_to_bf_h":float(rr["hours_after_base"]),
+                "peak_to_bf_entry_drop_pct":(1-float(rr["signal_entry"])/prior_peak)*100,
+                "rebound_retrace_of_drop_pct":retrace,
+                "rebound_high_below_peak_pct":reb_below_peak,
+                "break_close_depth_below_low_pct":break_depth,
+                "confirm_candle_ret_pct":red,
+                "confirm_body_to_range_pct":body/rng*100,
+                "confirm_close_location_pct":close_loc*100,
+                "confirm_vol_vs_24h_median":cvol/medv if cvol is not None and medv not in (None,0) else None,
+                "confirm_qvol_vs_24h_median":cqv/medq if cqv is not None and medq not in (None,0) else None,
+                "d7_net40_pct":float(rr["d7_net40_pct"]),
+                "d7_mae_pct":float(rr["d7_mae_pct"])
+              }
+              recs.append(rec)
+
+          features=[
+            "peak_to_arm_h","arm_to_rebound_h","rebound_to_break_h","total_20x_to_bf_h",
+            "peak_to_bf_entry_drop_pct","rebound_retrace_of_drop_pct","rebound_high_below_peak_pct",
+            "break_close_depth_below_low_pct","confirm_candle_ret_pct","confirm_body_to_range_pct",
+            "confirm_close_location_pct","confirm_vol_vs_24h_median","confirm_qvol_vs_24h_median"
+          ]
+          fake=[r for r in recs if r["type"]=="FAKE_RECLAIM"]; true=[r for r in recs if r["type"]=="TRUE_NO_RECLAIM"]
+          print("COUNTS",len(fake),len(true))
+          print("SCHEMA_SAMPLE",json.dumps(fields))
+          print("FEATURE_COMPARE")
+          for k in features:
+              fa=[r[k] for r in fake if r[k] is not None and math.isfinite(r[k])]
+              tr=[r[k] for r in true if r[k] is not None and math.isfinite(r[k])]
+              if not fa or not tr: continue
+              # simple separation score = difference in medians normalized by pooled median absolute deviation-ish scale
+              vals=fa+tr; m=med(vals); mad=med([abs(x-m) for x in vals]) or 1e-9
+              score=abs(med(fa)-med(tr))/mad
+              print(json.dumps({
+                "feature":k,"fake_n":len(fa),"true_n":len(tr),
+                "fake_mean":p(avg(fa)),"fake_median":p(med(fa)),
+                "true_mean":p(avg(tr)),"true_median":p(med(tr)),
+                "median_gap_over_MAD":p(score)
+              }))
+          print("DETAILS")
+          for r in sorted(recs,key=lambda z:(z["type"],z["symbol"])):
+              print(json.dumps({k:(round(v,3) if isinstance(v,float) else v) for k,v in r.items()},ensure_ascii=False))
+          PY
