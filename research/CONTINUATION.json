@@ -1,17 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-02T02:11:23Z",
-  "interactive_lease": {
-    "owner": "current_chat_v9_implementation",
-    "started_at": "2026-10-02T02:11:23Z",
-    "expires_at": "2026-10-02T04:11:23Z",
-    "purpose": "Implement and validate preregistered V9 once; avoid concurrent duplicate edits or dispatch."
-  },
+  "updated_at": "2026-10-02T02:21:43Z",
+  "interactive_lease": null,
   "current_branch": "research-cross-sectional-leader-v9",
-  "current_run": null,
-  "current_workflow": "Cross-Sectional Leader V9 Research Cycle (planned)",
+  "current_run": 36955250542,
+  "current_workflow": "Cross-Sectional Leader V9 Research Cycle",
   "current_plan": "research/cross-sectional-leader-v9/PLAN.md",
-  "latest_research_checkpoint": "V8_REJECTED_V9_PREREGISTERED",
+  "latest_research_checkpoint": "V9_IMPLEMENTED_TESTED_ACTUAL_RUN_CREATED",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -136,7 +131,9 @@
     "v8_strict_account_survivors": 0,
     "v9_entry_settings_planned": 16,
     "v9_dev_policy_cells_planned": 96,
-    "v9_execution_attempts": 0
+    "v9_execution_attempts": 1,
+    "v9_entry_settings_executed": 0,
+    "v9_dev_policy_cells_executed": 0
   },
   "goal": {
     "max_hold_days": 7,
@@ -146,8 +143,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Implement and test the frozen V9 cross-sectional daily rank map/reduce, next-day resumption signals, canonical minute exits, selection and account replay. Validate exact prior-midnight chronology, rank determinism/minimum universe, frozen 256-input hashes and all account invariants; then launch one actual Actions run and audit logs/artifacts without retuning.",
-  "phase": "V9_PREREGISTERED_IMPLEMENTING",
+  "next_action": "Inspect actual run36955250542 validation logs; verify pinned dependency canonical chronology before DEV. Audit all8 daily maps and persisted global rank hashes before all96 DEV exit cells. Read selection/artifacts directly, conditionally replay frozen candidates on seen2024 accounts, then preserve failure decomposition and preregister the next economic mechanism if rejected. Do not duplicate an active run.",
+  "phase": "V9_ACTIONS_QUEUED",
   "last_failure": {
     "study": "V8",
     "audited": true,
@@ -194,11 +191,13 @@
     "diagnosis": "Coverage passed, but every one of 96 cells was negative after 40bp in both price and cost-inclusive R. 2021 was negative for every cell and only one 2023 price cell was positive; LONG/SHORT losses were nearly symmetric. No policy earned account replay, so V8 has no account daily-target evidence. V9 changes to a frozen prior-day cross-sectional rank and next-day resumption observable."
   },
   "previous_interactive_lease": {
-    "owner": "current_chat",
-    "expires_at": "2026-10-01T16:44:57.017Z"
+    "owner": "current_chat_v9_implementation",
+    "started_at": "2026-10-02T02:11:23Z",
+    "expires_at": "2026-10-02T04:11:23Z",
+    "purpose": "Implement and validate preregistered V9 once; avoid concurrent duplicate edits or dispatch."
   },
   "plan_commit": "53fea7dd385bdd1ec7048f58be23087f5168158a",
-  "code_commit": null,
+  "code_commit": "2e1bb92891c2c480028c075b30afe91275cc0c43",
   "current_result_locations": {
     "v8_workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/36929463082",
     "v8_development_branch": "research-premium-absorption-v8-dev-36929463082",
@@ -207,7 +206,17 @@
     "v8_evidence_path": "research/premium-absorption-v8/run-36929463082/complete-evidence",
     "v8_failure_audit": "research/premium-absorption-v8/FAILURE_AUDIT.json",
     "v9_plan": "research/cross-sectional-leader-v9/PLAN.md",
-    "v9_frozen_inputs": "research/cross-sectional-leader-v9/FROZEN_INPUT_HASHES.json"
+    "v9_frozen_inputs": "research/cross-sectional-leader-v9/FROZEN_INPUT_HASHES.json",
+    "v9_workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/36955250542",
+    "v9_implementation_contract": "research/cross-sectional-leader-v9/IMPLEMENTATION_CONTRACT.md",
+    "v9_preexecution_validation": "research/cross-sectional-leader-v9/PREEXECUTION_VALIDATION.json",
+    "v9_expected_development_branch": "research-cross-sectional-leader-v9-dev-36955250542",
+    "v9_expected_development_path": "research/cross-sectional-leader-v9/run-36955250542/development",
+    "v9_expected_dev_ranks_branch": "research-cross-sectional-leader-v9-ranks-development-36955250542",
+    "v9_expected_gate_ranks_branch": "research-cross-sectional-leader-v9-ranks-gate-36955250542",
+    "v9_expected_accounts_branch": "research-cross-sectional-leader-v9-results-36955250542",
+    "v9_expected_evidence_branch": "research-cross-sectional-leader-v9-evidence-36955250542",
+    "v9_expected_evidence_path": "research/cross-sectional-leader-v9/run-36955250542/complete-evidence"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -317,12 +326,17 @@
   },
   "current_execution": {
     "study": "V9",
-    "status": "PREREGISTERED_IMPLEMENTATION_NOT_YET_COMMITTED",
+    "attempt": 1,
+    "status": "QUEUED_ACTUAL_ACTIONS_RUN",
     "branch": "research-cross-sectional-leader-v9",
     "plan_commit": "53fea7dd385bdd1ec7048f58be23087f5168158a",
-    "actual_run": null,
+    "code_commit": "2e1bb92891c2c480028c075b30afe91275cc0c43",
+    "actual_run": 36955250542,
+    "actual_validation_job": 110676681938,
     "market_outcomes_available": false,
-    "note": "Economic hypothesis and 16-entry/96-policy grid were committed before implementation or outcomes. No V9 profitability claim."
+    "local_tests": 232,
+    "local_v9_tests": 33,
+    "note": "Actual run and queued validation job read from GitHub. Local tests are implementation evidence only; local canonical smoke lacked numba. Actual pinned-dependency Actions chronology validation and all market outcomes remain pending."
   },
   "v8_attempt_failures": [
     {

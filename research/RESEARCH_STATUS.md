@@ -7,20 +7,28 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V8 repaired actual run 36929463082/code
-c049138866f628bb2de891b81a77b133de13359d completed SUCCESS operationally:
-validation plus all eight DEV shards, selection and full preservation succeeded.
-Actual logs prove the frozen 256-input preflight, 181 tests, canonical chronology/
-invariants and official premium probe. The eight shards produced 531,854 resolved
-parameterized outcomes across 16 entries/96 policies. Selection returned exact
-NO_DEVELOPMENT_POLICY_SURVIVOR; 2024 gate/accounts correctly skipped. This is an
-economic rejection, not success.
+V9 actual Actions run36955250542 was created 2026-10-02 02:21:30 UTC on
+research-cross-sectional-leader-v9 at implementation commit
+2e1bb92891c2c480028c075b30afe91275cc0c43. Validation job110676681938 is QUEUED as of
+2026-10-02 02:21:43 UTC; no V9 market outcomes exist yet. Local 232 research
+tests (33 new V9) passed and the actual 8-file-shard synthetic map/reduce/load/
+scan fixture passed. Local chronology smoke lacks numba; the actual Actions
+validate job installs pinned numba and must pass chronology/invariants before
+any DEV map. This is implementation progress, not trading profitability.
 
-V9 is preregistered before implementation/outcomes on branch
-research-cross-sectional-leader-v9, plan commit
-53fea7dd385bdd1ec7048f58be23087f5168158a. It changes the observable to a
-frozen prior-day global rank of coin-minus-BTC 24h performance and tests
-next-day intraday resumption. No V9 run or profitability result exists yet.
+Preregistration remains commit53fea7dd385bdd1ec7048f58be23087f5168158a.
+16 entries x 2 holds x 3 exits = 96 fixed policy cells. The workflow preserves
+all8 DEV daily maps/global ranks on a separate rank result branch BEFORE exit
+outcomes; GATE maps/ranks are conditional on frozen DEV selection. Full source
+hashes, official1m inputs, exclusions, all cells, account curves and actual job
+logs are archived even for failed stages. V9 adds an explicit DEV2021/2022/2023
+and GATE2024 account gate; all KST calendar days remain counted. Expected result
+branches/paths are listed in CONTINUATION.json and are not yet claimed to exist.
+
+V8 run36929463082 completed and was audited/rejected: all96 cost-adjusted
+price/R means negative; zero selected policy and zero account replay. Complete
+failure evidence remains in the branches below. The whole-account daily goal
+remains unproved and unmet.
 
 ## Completed failures and durable assets
 - V8 actual run36929463082/codec049138866f628bb2de891b81a77b133de13359d:
@@ -179,3 +187,9 @@ cells, canonical1m exits, annual selection and account/calendar invariants. Read
 actual logs/artifacts; if rejected, preserve the numeric failure and preregister
 a genuinely new mechanism. If provisional survivor, freeze before neighbours,
 stress/delays/time blocks/seen recent comparisons and future observations.
+
+## V9 execution handoff — 2026-10-02 02:21 UTC
+
+Follow actual run36955250542 and avoid duplicate execution. Record actual
+validation/rank/scan completion only after reading job logs. Future stage/result
+locations in CONTINUATION.json are expected locations, not completed evidence.
