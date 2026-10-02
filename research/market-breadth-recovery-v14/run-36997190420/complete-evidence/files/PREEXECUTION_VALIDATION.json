@@ -1,0 +1,41 @@
+{
+  "status": "LOCAL_TESTS_PASS_ACTUAL_PINNED_CI_PENDING",
+  "prereg_commit": "77b9dc2b54cd58b9c5d98c5a9a59e5c4522924b2",
+  "local_python": "3.12.14",
+  "local_tests": 376,
+  "new_tests": 38,
+  "full_log": "explicit-final-suite.log",
+  "new_log": "recheck-new-tests.log",
+  "synthetic_only": true,
+  "global_map_shards": 8,
+  "synthetic_source_files": 32,
+  "synthetic_scans": 8,
+  "synthetic96_cells_preserved": true,
+  "actual_market_execution": false,
+  "v13_full_original_binary_audit": "NOT_RUN_LOCAL_CI_REQUIRED_BEFORE_MAP",
+  "local_numba_validation": "NOT_RUN_MISSING_LOCAL_PACKAGE_PINNED_CI_REQUIRED",
+  "local_failures": [
+    {
+      "stage": "LOCAL_SYNTHETIC_GLOBAL_MAP_REDUCE",
+      "observed": "ValueError altered/incomplete breadth map; observed shard checkpoint complete false",
+      "log": "local-synthetic-smoke.log",
+      "market_execution": false,
+      "economic_trial_increment": 0,
+      "root_cause": "Not reproduced in isolated final execution; checkpoint publication strengthened with atomic data/metadata replaces; full global CLI smoke required on CI.",
+      "repair": "Atomic map data/metadata publish; isolated eight-map/reduce/scan/select PASS"
+    }
+  ],
+  "economic_hypothesis_attempt": 1,
+  "market_trial_attempt": 0,
+  "workflow_dag_and_bash_syntax": "PASS",
+  "sha256": {
+    "scripts/market_breadth_v14.py": "9eab691c3acd9cf22522d9fadd92438b7bd59b3e797c32e0ed3b0b28e982b79b",
+    "scripts/market_breadth_recovery_v14.py": "03af07d78d490122821ffd387c2ae951de7067f81944adfff1dd0db86a5f5298",
+    "scripts/audit_breakout_retest_v13.py": "444267d2b21a4afc85cf12412095ad6e666fc6b5eb5f77d7211883a6aa13e564",
+    "scripts/validate_market_breadth_v14.py": "5d8d01deee3999b98ff7634e33b9d1c04f4747ee3402b28bdd4707d5d0ee904e",
+    "tests/test_market_breadth_recovery_v14.py": "5f35e66c143247ab3cb6c014682d52ce6b2fd5d844f06debaf92a69b3f45083a",
+    ".github/workflows/market-breadth-recovery-v14.yml": "92a3a5cc3ab1fc277393a040b5c17ac51204dd80f4277833c7de493057a19bcf"
+  },
+  "local_seconds": 22.525,
+  "validator_log_capture_limitation": "One redirected validator log contained only FROZEN marker; independently composed explicit stream suite actually logged376/22.525/OK. Harness now uses original stderr and explicit before/after markers; pinned CI validation still required."
+}
