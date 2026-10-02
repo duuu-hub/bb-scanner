@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_cpr_structure.py'
-      - 'scripts/trend_continuation_cpr_structure_merge.py'
+      - 'scripts/trend_continuation_body70_validate.py'
+      - 'scripts/trend_continuation_body70_validate_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  structure-replay:
+  body70-validate:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -42,24 +42,28 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay signal-candle structure filters
+      - name: Run frozen BODY70 validation
         run: |
-          rm -rf structure_result
-          python scripts/trend_continuation_cpr_structure.py \
+          rm -rf body70_result
+          python scripts/trend_continuation_body70_validate.py \
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --out structure_result
+            --out body70_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-structure-shard-${{ matrix.shard }}
+          name: body70-validation-shard-${{ matrix.shard }}
           path: |
-            structure_result/cells.csv
-            structure_result/summary.json
+            body70_result/trades.csv.gz
+            body70_result/summary.json
+            body70_result/summary_rows.json
+            body70_result/yearly.csv
+            body70_result/recent_windows.csv
+            body70_result/symbol_stats.csv
           retention-days: 30
           compression-level: 6
 
-  structure-merge:
-    needs: structure-replay
+  body70-merge:
+    needs: body70-validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -70,15 +74,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-structure-shard-*
+          pattern: body70-validation-shard-*
           path: shard_results
-      - name: Merge structure-filter metrics
-        run: python scripts/trend_continuation_cpr_structure_merge.py
+      - name: Merge BODY70 validation
+        run: python scripts/trend_continuation_body70_validate_merge.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-structure-merged-${{ github.run_id }}
+          name: body70-validation-merged-${{ github.run_id }}
           path: |
-            merged_cells.csv
+            merged_trades.csv.gz
             merged_summary.json
+            merged_yearly.csv
+            merged_recent_windows.csv
+            merged_symbol_stats.csv
           retention-days: 30
           compression-level: 6
