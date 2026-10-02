@@ -1,0 +1,86 @@
+{
+  "version": "V15",
+  "run": 37025951533,
+  "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37025951533",
+  "code_commit": "fe7775f16203282a4574173202624dc70ca8acfa",
+  "status": "NO_DEVELOPMENT_POLICY_SURVIVOR",
+  "tests": {
+    "registered": 416,
+    "conclusion": "PASS"
+  },
+  "execution": {
+    "map_shards": 8,
+    "map_success": 8,
+    "breadth_reduction": "PASS",
+    "canonical_dev_shards": 8,
+    "canonical_dev_success": 8,
+    "cells": 96,
+    "selected": 0,
+    "gate": "SKIPPED",
+    "accounts": "SKIPPED"
+  },
+  "source": {
+    "data_run": 36095439671,
+    "symbols": 856,
+    "context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614",
+    "breadth_sha256": "781a0b0482a075a9ca70871f77d83711eb2ea75e9a514d2ef0feef129d143b0a",
+    "cells_sha256": "e7a452414cca06eaf947de9a4488c7dbc63442cd149e5e6b94d872525ae2807f",
+    "selection_sha256": "53e8adf69d841cc4c25e05993b964a391585e4618f3a21dcd3f10ea831a6dbc6"
+  },
+  "ranges": {
+    "n": [
+      225,
+      15500
+    ],
+    "symbols": [
+      116,
+      238
+    ],
+    "net40_mean_bp": [
+      -74.7410612831971,
+      13.858436736959092
+    ],
+    "net40_R_mean": [
+      -0.20747765327792853,
+      -0.028145696213134303
+    ],
+    "net40_pf": [
+      0.4803079437193312,
+      1.0819622013466683
+    ],
+    "win_pct": [
+      30.06930471719204,
+      43.529893529893535
+    ]
+  },
+  "best": {
+    "policy": "EXPAND_S+1_H96_B10_PRICE_ONLY__H48__TP2",
+    "n": 476,
+    "symbols": 154,
+    "net40_mean_bp": 13.858436736959092,
+    "net40_R_mean": -0.028145696213134303,
+    "pf": 1.0819622013466683,
+    "win_pct": 42.436974789915965,
+    "year_2021_R": 0.08870931112705532,
+    "year_2022_R": -0.18048122371343941,
+    "year_2023_R": 0.10115672271145366,
+    "calendar_day_R": {
+      "year_2021": -0.07812857887398918,
+      "year_2022": -0.19026440821527765,
+      "year_2023": -0.03573975199483272
+    }
+  },
+  "rejection_counts": {
+    "NET40_MEAN_BP_NONPOSITIVE": 93,
+    "NET40_R_MEAN_NONPOSITIVE": 96,
+    "N_LT_300": 6,
+    "TOP_SYMBOL_GT_30PCT": 8
+  },
+  "diagnosis": [
+    "Immediate entry after breadth expansion has negative risk-adjusted expectancy in every cell.",
+    "The best gross-looking long 96-bar cell is regime-unstable: 2022 R is sharply negative and all three calendar-day R values are negative.",
+    "Short 16-bar expansion is especially adverse: group mean net bp is about -65 to -66, consistent with chasing local exhaustion or crash-rebound risk."
+  ],
+  "result_branch": "research-breadth-expansion-continuation-v15-dev-37025951533",
+  "evidence_branch": "research-breadth-expansion-continuation-v15-evidence-37025951533"
+}
