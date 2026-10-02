@@ -1,0 +1,54 @@
+name: Extreme Loss Scenario Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_loss_scenario_audit_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  calc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fire artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire && mkdir fire
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+      - name: Compute loss scenarios
+        run: |
+          python - <<'PY'
+          import csv,json
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          targets={"ARUSDT","INJUSDT","LABUSDT","USUSDT","ZECUSDT"}
+          by={}
+          for r in rows:
+              if float(r["base_x"])!=20.0 or r["symbol"] not in targets: continue
+              by.setdefault(r["symbol"],{})[r["candidate"]]=r
+          for sym in sorted(targets):
+              ev=by.get(sym,{})
+              out={"symbol":sym}
+              total=0.0
+              used=0.0
+              for cand,label in [("BASE_IMMEDIATE","base5"),("BF_DD15_B10","bf5"),("DD30","dd30_5")]:
+                  r=ev.get(cand)
+                  if not r or not r.get("d7_net40_pct"): 
+                      out[label]=None
+                      continue
+                  ret=float(r["d7_net40_pct"])
+                  pnl=5.0*ret/100.0
+                  out[label]={
+                    "ret_pct":round(ret,2),
+                    "account_pnl_pct":round(pnl,3),
+                    "hours_after_20x":round(float(r["hours_after_base"]),2),
+                    "mae_pct":round(float(r["d7_mae_pct"]),2)
+                  }
+                  total+=pnl; used+=5.0
+              out["total_account_pnl_pct"]=round(total,3)
+              out["max_notional_used_pct"]=used
+              print(json.dumps(out,ensure_ascii=False))
+          PY
