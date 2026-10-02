@@ -1,0 +1,103 @@
+name: Extreme BF Retrace Definition Check
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.research/extreme_bf_retrace_definition_check_run'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prior results and frozen data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf fire pump_data
+          mkdir -p fire pump_data
+          gh run download 36975297135 -D fire -n extreme-fire-patterns-36975297135
+          gh run download 36095439671 -D pump_data \
+            -n rank5-binance-um-15m-5y-data-shard-0 \
+            -n rank5-binance-um-15m-5y-data-shard-1 \
+            -n rank5-binance-um-15m-5y-data-shard-2 \
+            -n rank5-binance-um-15m-5y-data-shard-3 \
+            -n rank5-binance-um-15m-5y-data-shard-4 \
+            -n rank5-binance-um-15m-5y-data-shard-5 \
+            -n rank5-binance-um-15m-5y-data-shard-6 \
+            -n rank5-binance-um-15m-5y-data-shard-7
+      - name: Compare first-bounce vs max-bounce retrace definitions
+        run: |
+          python - <<'PY'
+          import csv,gzip,json,statistics
+          from pathlib import Path
+          DAY=86400000
+          BASES=[10.0,15.0,20.0]; THRS=[40,45,50,55,60]
+          rows=list(csv.DictReader(open("fire/trades.csv")))
+          paths={p.name.replace(".csv.gz",""):p for p in Path("pump_data").rglob("*USDT.csv.gz")}
+          src=[r for r in rows if float(r["base_x"]) in BASES and r["candidate"]=="BF_DD15_B10" and r.get("d7_net40_pct") not in (None,"") and r.get("d7_mae_pct") not in (None,"")]
+          out=[]
+          for rr in src:
+              sym=rr["symbol"]; base=float(rr["base_x"]); base_ts=int(float(rr["base_entry_ts"])); sig_ts=int(float(rr["signal_ts"]))
+              frozen=float(rr["break_level"]); prior_peak=float(rr["peak_at_confirm"])
+              data=[]
+              with gzip.open(paths[sym],"rt",encoding="utf-8",newline="") as f:
+                  rd=csv.DictReader(f)
+                  for x in rd:
+                      ts=int(x["open_time"])
+                      if ts<base_ts: continue
+                      if ts>sig_ts+7*DAY: break
+                      data.append((ts,float(x["open"]),float(x["high"]),float(x["low"]),float(x["close"])))
+              pre=[x for x in data if x[0]<sig_ts]; post=[x for x in data if x[0]>=sig_ts]
+              if not pre: continue
+              running_peak=max(pre[0][1],pre[0][2])
+              armed=False; rebounded=False; low=None
+              first_high=None; max_high=None; first_retr=None; max_retr=None
+              for ts,o,h,l,c in pre:
+                  if h>running_peak:
+                      running_peak=h;armed=False;rebounded=False;low=None;first_high=None;max_high=None
+                  dd=max(0,1-c/running_peak)
+                  if not armed:
+                      if dd>=0.15:
+                          armed=True;low=l
+                  elif not rebounded:
+                      low=min(low,l)
+                      if h>=low*1.10 and h<running_peak*0.995:
+                          rebounded=True;first_high=h;max_high=h
+                          if running_peak>low:first_retr=(first_high-low)/(running_peak-low)*100
+                  else:
+                      max_high=max(max_high,h)
+                      if c<frozen:
+                          if running_peak>low:max_retr=(max_high-low)/(running_peak-low)*100
+                          break
+              if first_retr is None or max_retr is None: continue
+              reclaimed=max(x[2] for x in post)>prior_peak if post else False
+              out.append({
+                  "symbol":sym,"base_x":base,
+                  "first_retr":first_retr,"max_retr":max_retr,
+                  "reclaimed":reclaimed,
+                  "ret":float(rr["d7_net40_pct"]),"mae":float(rr["d7_mae_pct"])
+              })
+          def stat(xs):
+              if not xs:return {"n":0}
+              rets=[x["ret"] for x in xs];maes=[x["mae"] for x in xs]
+              return {"n":len(xs),
+                "reclaim_pct":round(100*sum(x["reclaimed"] for x in xs)/len(xs),1),
+                "mean_ret":round(sum(rets)/len(rets),2),
+                "win_pct":round(100*sum(x>0 for x in rets)/len(rets),1),
+                "mean_mae":round(sum(maes)/len(maes),2)}
+          for definition,key in [("FIRST","first_retr"),("MAX","max_retr")]:
+              print("DEFINITION",definition)
+              for b in BASES:
+                  bx=[x for x in out if x["base_x"]==b]
+                  for t in THRS:
+                      print(json.dumps({"definition":definition,"base_x":b,"threshold":t,
+                        "weak":stat([x for x in bx if x[key]<t]),
+                        "strong":stat([x for x in bx if x[key]>=t])},ensure_ascii=False))
+          print("DETAIL20")
+          for x in sorted([x for x in out if x["base_x"]==20.0],key=lambda z:z["symbol"]):
+              print(json.dumps({k:(round(v,2) if isinstance(v,float) else v) for k,v in x.items()},ensure_ascii=False))
+          PY
