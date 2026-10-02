@@ -1,0 +1,104 @@
+name: Compression Rejection V3 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/compression_first_expansion_rejection_v3_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile and chronology smoke
+        run: |
+          python -m py_compile scripts/compression_first_expansion_rejection_v3.py scripts/compression_first_expansion_rejection_v3_merge.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          import numpy as np
+          import scripts.compression_first_expansion_rejection_v3 as s
+          h=np.array([99.,100.1,99.8,99.7,99.6])
+          c=np.array([98.5,99.5,98.7,98.0,97.5])
+          l=np.array([98.,98.6,98.4,97.8,97.2])
+          rb=s.first_retest_bar(h,0,100.,5)
+          assert rb==1
+          assert s.first_confirm_bar(c,l,rb,98.8,"SIGNAL_CLOSE",2)==2
+          assert s.first_confirm_bar(c,l,rb,98.8,"RETEST_LOW",4)==3
+          assert len(s.CONFIGS)==96
+          assert s.RETRACE==(.25,.50,1.00)
+          assert s.RETEST_TTL==(4,8)
+          assert s.CONFIRM_TTL==(2,4)
+          print("COMPRESSION_REJECTION_V3_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay V3 TRAIN shard
+        run: |
+          python scripts/compression_first_expansion_rejection_v3.py \
+            --data data \
+            --shard \${{ matrix.shard }} \
+            --shards 12
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-rejection-v3-\${{ matrix.shard }}
+          path: |
+            compression_rejection_v3_\${{ matrix.shard }}.csv.gz
+            compression_rejection_v3_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: compression-rejection-v3-*
+          path: artifacts
+      - name: Verify all shards
+        run: |
+          test "$(find artifacts -name 'compression_rejection_v3_*.csv.gz' | wc -l)" -eq 12
+          test "$(find artifacts -name 'compression_rejection_v3_meta_*.json' | wc -l)" -eq 12
+      - name: Merge TRAIN only
+        run: |
+          python scripts/compression_first_expansion_rejection_v3_merge.py \
+            --input artifacts \
+            --out compression_rejection_v3_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compression-rejection-v3-train-final
+          path: compression_rejection_v3_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
