@@ -163,6 +163,13 @@ class GlobalArtifactContract(unittest.TestCase):
         with self.assertRaises(ValueError):b.reduce_maps(self.parts,self.root/'bad5','DEV',cp)
 
 class AuditArithmeticContract(unittest.TestCase):
+    def test_source_check_inside_scan_output_real_pipeline(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);s.smoke(root)
+            for i in range(8):
+                p=root/'scans'/str(i);m=json.loads((p/'scan_meta.json').read_text())
+                self.assertTrue(m['complete']);self.assertEqual(m['source_check_sha256'],b.digest(p/'source_check.json'))
+                self.assertEqual((root/f'check-{i}.json').read_bytes(),(p/'source_check.json').read_bytes())
     def test_independent_costs_and_R(self):
         entry=100.;ex=99.;fill=ex*.999;hold=16;duration=60;fee=.002*(1+fill/entry);fund=.0002*duration/1440
         net=fill/entry-1-fee-fund;reserve=1-99/100*.999+.002*(1+99/100*.999)+.0002*hold*15/1440

@@ -178,7 +178,8 @@ def scan(data,btc_path,out,cache,stage,source_check,selection_path=None,context_
     chronology.chronology.CACHE.clear();official.INPUTS.clear();minute_audit.MINUTE_INPUTS.clear();minute_audit.MINUTE_SLICES.clear()
     minute_audit.SLICE_DIR=out/'minute_evidence';minute_audit.MINUTE_RAW_DIR=out/'minute_original_archives'
     minute_audit.SLICE_DIR.mkdir(exist_ok=True);minute_audit.MINUTE_RAW_DIR.mkdir(exist_ok=True)
-    shutil.copyfile(source_check,out/'source_check.json');shutil.copyfile(context_path,out/'frozen_context.json')
+    if source_check.resolve()!=(out/'source_check.json').resolve():shutil.copyfile(source_check,out/'source_check.json')
+    if context_path.resolve()!=(out/'frozen_context.json').resolve():shutil.copyfile(context_path,out/'frozen_context.json')
     shutil.copyfile(breadth_dir/'breadth.csv.gz',out/'breadth.csv.gz');shutil.copyfile(breadth_dir/'breadth_manifest.json',out/'breadth_manifest.json')
     rows,counts,bad,coverage=[],Counter(),[],[]
     def checkpoint(complete):
@@ -313,7 +314,10 @@ def smoke(out):
         breadth.map_shard(out/'market'/str(i),bp,out/'maps'/str(i),'DEV',check,cp)
     global_frame,_=breadth.reduce_maps(out/'maps',out/'breadth','DEV',cp)
     assert (global_frame.n16>=30).any() and not global_frame.down16.any()
-    for i in range(8):scan(out/'market'/str(i),bp,out/'scans'/str(i),out/'minute-cache','DEV',out/f'check-{i}.json',context_path=cp,breadth_dir=out/'breadth')
+    for i in range(8):
+        target=out/'scans'/str(i);target.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(out/f'check-{i}.json',target/'source_check.json')
+        scan(out/'market'/str(i),bp,target,out/'minute-cache','DEV',target/'source_check.json',context_path=cp,breadth_dir=out/'breadth')
     select(out/'scans',out/'selected',cp)
     cells=pd.read_csv(out/'selected/development_policy_cells.csv');assert len(cells)==96 and cells.n.sum()==0
     report=dict(synthetic_only=True,source_files=32,global_map_shards=8,scans=8,all96_cells_preserved=True,market_profitability_claim=False)

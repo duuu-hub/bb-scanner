@@ -22,7 +22,7 @@ print('FROZEN_V14_INPUT_CONTRACT_PASS',256,856,flush=True)
 suite=unittest.TestSuite()
 for name in TEST_FILES[:1] if args.only_new else TEST_FILES:
     suite.addTests(unittest.defaultTestLoader.discover(str(ROOT/'tests'),pattern=name))
-assert suite.countTestCases()==(38 if args.only_new else 376)
+assert suite.countTestCases()==(39 if args.only_new else 377)
 print('V14_REGISTERED_SUITE_SIZE',suite.countTestCases(),flush=True)
 result=unittest.TextTestRunner(verbosity=2,stream=sys.__stderr__).run(suite)
 print('V14_TEST_RESULT',result.testsRun,len(result.failures),len(result.errors),result.wasSuccessful(),flush=True)
