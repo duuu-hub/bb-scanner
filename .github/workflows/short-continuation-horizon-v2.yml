@@ -1,0 +1,94 @@
+name: Short Continuation Horizon V2
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/short_continuation_horizon_v2_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Smoke
+        run: |
+          python -m py_compile scripts/short_continuation_horizon_v2.py scripts/short_continuation_horizon_v2_merge.py scripts/sweep_reclaim_research.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import numpy as np
+          import scripts.short_continuation_horizon_v2 as s
+          import scripts.sweep_reclaim_research as b
+          assert s.HORIZONS==(8,12,16,24,36,48)
+          assert s.SL_ATR==2.0 and s.TP_R==3.0
+          t=np.array([0,900000,1800000],dtype=np.int64)
+          o=np.array([100.,100.,100.]);h=np.array([101.,101.,101.]);l=np.array([99.,89.,99.]);c=np.array([100.,90.,100.])
+          z=b.trade("TEST",t,o,h,l,c,0,"short",110.,80.,1)
+          assert z is not None and abs(z["gross_return"]-.10)<1e-12
+          print("HORIZON_V2_SMOKE_PASS")
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Replay
+        run: python scripts/short_continuation_horizon_v2.py --data data --shard \${{ matrix.shard }} --shards 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-continuation-horizon-v2-\${{ matrix.shard }}
+          path: |
+            short_continuation_horizon_\${{ matrix.shard }}.csv.gz
+            short_continuation_horizon_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: short-continuation-horizon-v2-*
+          path: artifacts
+      - name: Merge
+        run: python scripts/short_continuation_horizon_v2_merge.py --input artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-continuation-horizon-v2-final
+          path: |
+            short_continuation_horizon_summary.csv
+            short_continuation_horizon_report.md
+            short_continuation_horizon_all.csv.gz
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
