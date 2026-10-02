@@ -7,22 +7,25 @@ as assets. Research only: never main/live/demo orders/watcher state changes.
 
 ## Current actual execution
 
-V11 actual run36980518301/code7f7c3b517978e3401e80d1d2f9fafea01cc048d1:
-validation/8DEV/selection/preserve SUCCESS;96 cells/37064 overlapping outcomes,
-ZERO candidates/accounts;gate/accounts skipped. All96 net40 price/R negative;
-all2022/2023 R and equal-active-date R negative. Best -28.0354bp/-0.18367R/PF.78213.
-Seven gross-positive cells became zero net-positive after45.3727-48.9334bp deductions.
-Original8 compressed ledgers byte/hash/arithmetic and all96 cells audit PASS.
-Full archive2611 files/1134733117 bytes atbf0127ad77d88862af9321a8642acac814d76cf0.
-751 raw official1m ZIPs vs752 checksum records:malformed BNX2022-06 raw bytes
-were not retained by old helper;52 outcomes/3 unique entry events excluded.
-Recovery of that exact-hash malformed ZIP is pending V12 validation,no market rerun.
+V12 actual run36989682215/code793820a5dee7577663e94f9e45157468e05850aa:
+actual307 tests23.130s, canonical chronology/invariants, synthetic8 shards PASS;
+all8DEV scans,selection,preserve SUCCESS.96 cells/654 overlapping outcomes,
+109 entry-key events/67 unique coin-entry events;ZERO selected/accounts.
+Every cell fails frequency;N0--52,24 empty,92 concentrated.51/72 nonempty
+net40-positive cells cannot establish alpha. Best mean1019.13bp is ONE trade.
+Largest-N52 long has net40 -28.945bp/R-.24796/PF.70546.
+Original8 compressed ledgers SHA256/Gitblob/arithmetic and all96 cells PASS.
+204 files/7707395bytes;complete evidence3d64282d571f32736ac8a9bf6ed3d7b42299b5af.
+V11 malformed BNX2022-06 ZIP/checksum exact bytes recovered and preserved in
+V12 validation;invalid parser exclusion/V11 outcomes unchanged,no market rerun.
 
-V12 taker absorption release distinct hypothesis preregistered BEFORE code at
-c8741743ecff8573c0994878557db38698e14267,branch research-taker-absorption-release-v12.
-Setup:one-sided high-volume executed flow with flat price, then opposite range
-release;16entries/96DEV cells fixed. Implementation/tests/actual launch pending.
-Lease through2026-10-02T11:56:00Z. Daily whole-account+0.7%-2% remains unmet.
+V13 breakout level retest preregistered BEFORE implementation at
+1859c6096948fc851bca09d267ce3642028da838,
+branch research-breakout-level-retest-v13.
+Fixed prior1d/3d channel breakout snapshot followed by closed retest/recovery,
+optional low pullback participation;16entries/96cells. Code/tests/launch pending.
+V12 failure audit is preserved on this preregistered research branch.
+Whole-account daily+0.7%-2% remains unmet.
 
 ## Completed failures and durable assets
 - V10 actual36966622286:16entries/96cells/340491outcomes,all96 global net40 price/R negative,zero selected/accounts. Best -9.5794bp/-0.04375R/PF.946/N1278;2022 and2023 all96 R negative,2023 all96 equal-dateR negative. DEV branch research-residual-reversion-v10-dev-36966622286 commit 8d0f1aa84b5aacf432ea688e3f26b165f11f4b87. Full evidence preservation still running; raw original ledger audit pending.
