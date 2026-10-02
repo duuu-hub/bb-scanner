@@ -55,6 +55,7 @@ jobs:
       max-parallel: 8
       matrix:
         shard: [0,1,2,3,4,5,6,7]
+        tp: [1.5,2.0,3.0]
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
@@ -79,7 +80,7 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay wide-SL shard with canonical 1m chronology
+      - name: Replay TP/SL grid shard with canonical 1m chronology
         run: |
           rm -rf shard_result
           python scripts/trend_continuation_first_touch.py \
@@ -87,10 +88,11 @@ jobs:
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
             --restrict-to-raw-symbols \
+            --tp-pct "${{ matrix.tp }}" \
             --out shard_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-wide-sl-shard-${{ matrix.shard }}
+          name: trend-continuation-tpsl-tp-${{ matrix.tp }}-shard-${{ matrix.shard }}
           path: |
             shard_result/cells.csv
             shard_result/summary.json
@@ -109,13 +111,13 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-wide-sl-shard-*
+          pattern: trend-continuation-tpsl-tp-*-shard-*
           path: shard_results
       - name: Merge exact aggregate metrics
         run: python scripts/trend_continuation_merge_shards.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-wide-sl-merged-${{ github.run_id }}
+          name: trend-continuation-tpsl-merged-${{ github.run_id }}
           path: |
             merged_cells.csv
             merged_summary.json
