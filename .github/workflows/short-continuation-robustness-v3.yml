@@ -1,0 +1,62 @@
+name: Short Continuation Robustness V3
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/short_continuation_robustness_v3_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Smoke chronology invariants
+        run: |
+          python -m py_compile scripts/short_continuation_robustness_v3.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,str(Path('.').resolve()))
+          import pandas as pd
+          import scripts.short_continuation_robustness_v3 as s
+          # Same-bar exit remains open for simultaneous new entries: cap must bind.
+          g=pd.DataFrame([
+            dict(entry_time=100,exit_time=100,symbol="A",impulse_atr=3.,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="B",impulse_atr=2.9,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="C",impulse_atr=2.8,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="D",impulse_atr=2.7,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="E",impulse_atr=2.6,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="F",impulse_atr=2.5,risk_pct=.02,gross_return=.03,reason="TP"),
+            dict(entry_time=100,exit_time=200,symbol="G",impulse_atr=2.4,risk_pct=.02,gross_return=.03,reason="TP"),
+          ])
+          x=s.select_exec(g)
+          assert len(x)==6, len(x)
+          m,r=s.account(x)
+          assert len(r)==6 and "A" in set(r.symbol)
+          print("ROBUSTNESS_V3_SMOKE_PASS")
+          PY
+      - name: Download frozen horizon V2 final artifact
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p source
+          gh run download 36963458040 -R \${{ github.repository }} -n short-continuation-horizon-v2-final -D source
+          test -f source/short_continuation_horizon_all.csv.gz
+      - name: Run robustness audit
+        run: |
+          python scripts/short_continuation_robustness_v3.py \
+            --input source/short_continuation_horizon_all.csv.gz \
+            --out robustness_v3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: short-continuation-robustness-v3-final
+          path: robustness_v3/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
