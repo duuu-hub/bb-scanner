@@ -17,21 +17,21 @@ def select_exec(g):
  if not len(g):return pd.DataFrame(),[],[]
  z=g.sort_values(["entry_time","expansion_strength","compression_strength","symbol"],
                  ascending=[True,False,False,True]).copy()
- acc=[];op=[];conc=[];expo=[]
- for et,grp in z.groupby("entry_time",sort=True):
-  et=int(et)
-  # A position exiting on this same bar is still occupying a slot at bar open.
-  op=[p for p in op if p["exit_time"]>=et]
-  for _,r in grp.sort_values(["expansion_strength","compression_strength","symbol"],
-                             ascending=[False,False,True]).iterrows():
-   if len(op)>=CAP:break
-   if any(p["symbol"]==r.symbol for p in op):continue
-   notional=RISK/float(r.risk_pct)
-   gross=sum(p["notional"] for p in op)
-   if gross+notional>MAX_GROSS+1e-12:continue
-   acc.append(r.to_dict())
-   op.append({"symbol":r.symbol,"exit_time":int(r.exit_time),"notional":notional})
-   conc.append(len(op));expo.append(gross+notional)
+ acc=[];op=[];conc=[];expo=[];last_et=None
+ for r in z.itertuples(index=False):
+  et=int(r.entry_time)
+  if last_et is None or et!=last_et:
+   # A position exiting on this same bar is still occupying a slot at bar open.
+   op=[p for p in op if p["exit_time"]>=et]
+   last_et=et
+  if len(op)>=CAP:continue
+  if any(p["symbol"]==r.symbol for p in op):continue
+  notional=RISK/float(r.risk_pct)
+  gross=sum(p["notional"] for p in op)
+  if gross+notional>MAX_GROSS+1e-12:continue
+  acc.append(r._asdict())
+  op.append({"symbol":r.symbol,"exit_time":int(r.exit_time),"notional":notional})
+  conc.append(len(op));expo.append(gross+notional)
  return pd.DataFrame(acc),conc,expo
 
 def account(sel,bp):
@@ -39,13 +39,11 @@ def account(sel,bp):
   return {"return_pct":0.,"mdd_pct":0.,"pf":np.nan,"max_ls":0,"win_pct":np.nan,
           "mean_net_r":np.nan,"median_net_r":np.nan}
  z=sel.sort_values(["entry_time","exit_time","symbol"]).reset_index(drop=True)
+ et=z["entry_time"].to_numpy(np.int64);xt=z["exit_time"].to_numpy(np.int64)
+ gr=z["gross_return"].to_numpy(float);rp=z["risk_pct"].to_numpy(float)
  ev=[]
- for i,r in z.iterrows():
-  et=int(r.entry_time);xt=int(r.exit_time)
-  ev.append((et,1,i))
-  # Old trades exiting at this timestamp realize before new entries.
-  # Same-trade entry/exit on one bar realizes only after its entry.
-  ev.append((xt,2 if xt==et else 0,i))
+ for i in range(len(z)):
+  a=int(et[i]);b=int(xt[i]);ev.append((a,1,i));ev.append((b,2 if b==a else 0,i))
  ev.sort(key=lambda x:(x[0],x[1],x[2]))
  eq=1.;peak=1.;mdd=0.;openrisk={};pnls=[];nrs=[]
  for ts,typ,i in ev:
@@ -53,8 +51,7 @@ def account(sel,bp):
    openrisk[i]=eq*RISK
   else:
    if i not in openrisk:continue
-   rc=openrisk.pop(i);r=z.iloc[i]
-   nr=(float(r.gross_return)-bp/10000.0)/float(r.risk_pct)
+   rc=openrisk.pop(i);nr=(gr[i]-bp/10000.0)/rp[i]
    pnl=rc*nr;eq+=pnl;pnls.append(pnl);nrs.append(nr)
    peak=max(peak,eq);mdd=max(mdd,(peak-eq)/peak if peak>0 else 0)
  cur=ls=0
