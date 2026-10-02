@@ -4,10 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - '.research/extreme_pump_cycle_stats_run'
-      - 'research/extreme_pump_cycles.py'
-      - 'scripts/trend_continuation_first_touch.py'
-      - 'scripts/trend_continuation_merge_shards.py'
+      - 'scripts/trend_continuation_cpr_pullback.py'
+      - 'scripts/trend_continuation_cpr_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -15,47 +13,12 @@ permissions:
   actions: read
 
 jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    timeout-minutes: 350
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Download frozen 5Y shards
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          mkdir -p pump_data
-          gh run download 36095439671 -D pump_data \
-            -n rank5-binance-um-15m-5y-data-shard-0 \
-            -n rank5-binance-um-15m-5y-data-shard-1 \
-            -n rank5-binance-um-15m-5y-data-shard-2 \
-            -n rank5-binance-um-15m-5y-data-shard-3 \
-            -n rank5-binance-um-15m-5y-data-shard-4 \
-            -n rank5-binance-um-15m-5y-data-shard-5 \
-            -n rank5-binance-um-15m-5y-data-shard-6 \
-            -n rank5-binance-um-15m-5y-data-shard-7
-      - name: Compute cycle statistics
-        run: |
-          rm -rf pump_cycle_result
-          python research/extreme_pump_cycles.py --data-root pump_data --out pump_cycle_result
-      - uses: actions/upload-artifact@v4
-        with:
-          name: extreme-pump-cycle-stats-${{ github.run_id }}
-          path: pump_cycle_result/
-          retention-days: 30
-          compression-level: 6
-
-  wide-sl-replay:
+  cpr-replay:
     strategy:
       fail-fast: false
       max-parallel: 8
       matrix:
         shard: [0,1,2,3,4,5,6,7]
-        tp: [2.5,4.0,5.0]
     runs-on: ubuntu-latest
     timeout-minutes: 340
     steps:
@@ -80,27 +43,24 @@ jobs:
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
             -D raw_data
-      - name: Replay TP/SL grid shard with canonical 1m chronology
+      - name: Replay CPR pullback/reclaim shard
         run: |
-          rm -rf shard_result
-          python scripts/trend_continuation_first_touch.py \
-            --parts unused \
+          rm -rf cpr_result
+          python scripts/trend_continuation_cpr_pullback.py \
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --restrict-to-raw-symbols \
-            --tp-pct "${{ matrix.tp }}" \
-            --out shard_result
+            --out cpr_result
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-tpsl-tp-${{ matrix.tp }}-shard-${{ matrix.shard }}
+          name: trend-continuation-cpr-shard-${{ matrix.shard }}
           path: |
-            shard_result/cells.csv
-            shard_result/summary.json
+            cpr_result/cells.csv
+            cpr_result/summary.json
           retention-days: 30
           compression-level: 6
 
-  wide-sl-merge:
-    needs: wide-sl-replay
+  cpr-merge:
+    needs: cpr-replay
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -111,13 +71,13 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: trend-continuation-tpsl-tp-*-shard-*
+          pattern: trend-continuation-cpr-shard-*
           path: shard_results
-      - name: Merge exact aggregate metrics
-        run: python scripts/trend_continuation_merge_shards.py
+      - name: Merge CPR metrics
+        run: python scripts/trend_continuation_cpr_merge.py
       - uses: actions/upload-artifact@v4
         with:
-          name: trend-continuation-tpsl-merged-${{ github.run_id }}
+          name: trend-continuation-cpr-merged-${{ github.run_id }}
           path: |
             merged_cells.csv
             merged_summary.json
