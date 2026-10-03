@@ -1,0 +1,110 @@
+{
+  "study": "V18_SESSION_OPENING_IMPULSE_ACCEPTANCE",
+  "status": "ECONOMIC_REJECTION_ZERO_OF_96",
+  "run": 37100246454,
+  "trigger_commit": "bc72e1d7d90ba3eff0e9b1efe4107750c8c61d2a",
+  "validation": {
+    "job": 111138197429,
+    "registered_tests": 483,
+    "passed": 483,
+    "failed": 0,
+    "errors": 0
+  },
+  "execution": {
+    "dev_breadth_maps_succeeded": 8,
+    "dev_breadth_reduce_succeeded": true,
+    "dev_scans_succeeded": 8,
+    "selection_job": 111140643746,
+    "cells_examined": 96,
+    "selected": 0,
+    "gate_and_accounts_skipped": true,
+    "source_symbols": 856,
+    "breadth_data_sha256": "1af3880fe0e6a5c739d384e004ab110422ba2904bb191671d9b58d413af31d41"
+  },
+  "ranges": {
+    "resolved_n": [
+      1220,
+      4063
+    ],
+    "symbols": [
+      187,
+      223
+    ],
+    "net40_mean_bp": [
+      -62.76137479192729,
+      -22.2427290475653
+    ],
+    "net40_R_mean": [
+      -0.35380808295729776,
+      -0.11791124793640569
+    ],
+    "net40_pf": [
+      0.2487062752704927,
+      0.7751951852637593
+    ]
+  },
+  "sign_counts": {
+    "positive_net40_mean_cells": 0,
+    "positive_net40_R_cells": 0,
+    "long_positive_mean": 0,
+    "long_positive_R": 0,
+    "short_positive_mean": 0,
+    "short_positive_R": 0
+  },
+  "best_cell": {
+    "policy": "OPEN_S-1_D15_B65_R382__H32__R15",
+    "side": "SHORT",
+    "n": 1221,
+    "symbols": 195,
+    "net40_mean_bp": -22.2427290475653,
+    "net40_R_mean": -0.11791124793640569,
+    "net40_pf": 0.7751951852637593,
+    "win_pct": 46.19164619164619,
+    "year_2021": {
+      "n": 191,
+      "days": 34,
+      "mean_bp": -59.173915912795955,
+      "R": -0.2555846858646924,
+      "day_R": -0.2710489114766789
+    },
+    "year_2022": {
+      "n": 566,
+      "days": 121,
+      "mean_bp": -11.190003582836924,
+      "R": -0.06138710984480919,
+      "day_R": -0.22854379919231252
+    },
+    "year_2023": {
+      "n": 464,
+      "days": 109,
+      "mean_bp": -20.522871120361007,
+      "R": -0.13018934171989893,
+      "day_R": -0.3213778588125068
+    }
+  },
+  "failure_decomposition": [
+    "All 96 cells lost after the frozen 40bp execution model in both price return and risk-normalized R.",
+    "No side, displacement, breadth, pullback, hold, or exit neighborhood contained a positive cell; this is a broad economic rejection, not an isolated parameter failure.",
+    "The least-bad cell was negative in mean bp, R, PF below 1, and every DEV year/day-R diagnostic.",
+    "The immediate session-opening breadth impulse plus VWAP-hold continuation premise is rejected under the frozen execution contract."
+  ],
+  "durable_development": {
+    "branch": "research-session-opening-impulse-v18-dev-37100246454",
+    "commit": "be55501",
+    "path": "research/session-opening-impulse-v18/run-37100246454/development"
+  },
+  "evidence": {
+    "preserve_job": 111140747171,
+    "initial_status": "TRANSIENT_PUSH_FAILURE_HTTP_500",
+    "recovery": "RERUN_SAME_PRESERVE_JOB_REQUESTED_NO_MARKET_RERUN"
+  },
+  "goal_assessment": {
+    "daily_net_account_target_pct": [
+      0.7,
+      2
+    ],
+    "account_replay_performed": false,
+    "target_supported": false
+  },
+  "note": "Overlapping parameterized outcomes are diagnostics, not executable account returns. Seen historical periods are not clean holdouts."
+}
