@@ -372,3 +372,13 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Failure JSON and exact log are preserved on `research-session-vwap-failed-auction-v17-evidence-37081846528`.
 - Hash-attestation-only repair: `c7a4ffc2b40a6d007bba43be7d8d5563e351e1f2`. Local repaired validator evidence: input contract passed and 15/15 new tests passed.
 - Exactly one retry was triggered at `a9c3fecb7b3c6170ffab543f30ca933f9f5593de`: [37082108726](https://github.com/duuu-hub/bb-scanner/actions/runs/37082108726). Do not duplicate it.
+
+
+## 2026-10-03 — V17 retry validation passed; DEV scans active
+
+- Existing retry run: [37082108726](https://github.com/duuu-hub/bb-scanner/actions/runs/37082108726), code/trigger `a9c3fecb7b3c6170ffab543f30ca933f9f5593de`.
+- Downloaded actual validation artifact `11258868229` (digest `sha256:aa972077...`) and read all three logs.
+- Actual validation job `111084675598`: 473/473 tests passed in 60.514 s, zero failures/errors.
+- Official conservative 1m chronology smoke and canonical invariants passed.
+- Eight-shard synthetic pipeline passed and preserved all 96 cells; it intentionally generated zero market outcomes.
+- All eight real DEV scan jobs are active. This is implementation validation only; no V17 profitability, account growth, survivor, or daily-goal claim exists yet.
