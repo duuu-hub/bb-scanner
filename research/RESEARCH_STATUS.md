@@ -382,3 +382,21 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Official conservative 1m chronology smoke and canonical invariants passed.
 - Eight-shard synthetic pipeline passed and preserved all 96 cells; it intentionally generated zero market outcomes.
 - All eight real DEV scan jobs are active. This is implementation validation only; no V17 profitability, account growth, survivor, or daily-goal claim exists yet.
+
+
+## 2026-10-03 — V17 actual DEV result and V18 preregistration
+
+V17 run [37090734742](https://github.com/duuu-hub/bb-scanner/actions/runs/37090734742) completed validation, all eight DEV scans and selection. Actual logs show 473/473 tests passed and the 96-cell selector returned zero survivors. The durable DEV branch is `research-session-vwap-failed-auction-v17-dev-37090734742` at commit `b00b135`.
+
+Numerical rejection:
+- resolved N range: 318–3,506; symbols: 135–215
+- net40 mean: -69.7103 to +53.0550 bp/trade
+- cost-adjusted R: -0.38547 to +0.10369; PF: 0.3930–1.6966
+- 24/96 cells had positive mean and R, all on the long side; short positive-R cells: 0/48
+- best cell `SVWAP_S+1_D30_V20_C10__H16__R15`: N 318, +53.0550 bp, R +0.10369, PF 1.6966
+- the best cell still had 2021 R -0.36323, only 25 trades across 14 dates in 2021, and negative equal-calendar/active-date diagnostic R in 2021, 2022 and 2023
+- therefore 2024 gate and account simulation were correctly skipped; there is no evidence for the +0.7%–2% daily account target
+
+The workflow's final status is failure only because the post-result preservation job attempted to copy an absent optional `PREEXECUTION_VALIDATION.json`. A targeted evidence-only recovery, run [37097336607](https://github.com/duuu-hub/bb-scanner/actions/runs/37097336607), is collecting the already-produced artifacts and actual logs without rerunning market research.
+
+V18 was preregistered before implementation on branch `research-session-opening-impulse-v18`, commit `be48e9335b2fd9564627022429b8cd8de7273bcc`. It tests fixed-session opening impulse continuation after cross-sectional breadth, session-VWAP acceptance, a distinct shallow pullback and later reacceleration. The grid is frozen at 16 entries × 2 holds × 3 exits = 96 policies.
