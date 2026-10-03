@@ -461,3 +461,13 @@ V18 evidence recovery [37103484177](https://github.com/duuu-hub/bb-scanner/actio
 - The opening-range continuation family is retired without local tuning.
 - V20 was preregistered before implementation/outcomes at `3e8da35699b8e987b31a39e7264c49cb0e7ec8e0` on `research-session-opening-range-sweep-v20`.
 - V20 is an opening-range liquidity-sweep reversal: after frozen two-sided range acceptance, it requires an outside wick with a decisive close back inside plus swept-direction taker aggression, then trades toward frozen accepted value. Grid remains 16 entries × 2 holds × 3 exits = 96 policies under unchanged hard gates.
+
+## 2026-10-03 — V20 implementation frozen and actual run launched
+
+- Frozen preregistration remains `3e8da35699b8e987b31a39e7264c49cb0e7ec8e0`; no V20 market outcome was observed before implementation.
+- Implemented the exact opening-range liquidity-sweep reversal: 4/8-bar two-sided acceptance, later outside wick plus decisive inside close, swept-direction taker aggression, next-open reversal, stop beyond actual sweep extreme and frozen midpoint/opposite-boundary/R exits.
+- Registered 16 entry configurations and 96 policy cells.
+- Local pre-execution evidence: 18/18 new causality tests, 501/501 full regression tests, bytecode compilation and the synthetic eight-scan/96-cell pipeline passed. This is implementation validation, not profitability evidence.
+- Implementation commit: `41b4f7dffea2f3bc8d7b8d37fca98bf71b32d551`. Trigger commit: `3d3f315a426f72fefd7933347f71061e725cdf54`.
+- Exactly one actual run is active: [37116650810](https://github.com/duuu-hub/bb-scanner/actions/runs/37116650810).
+- Do not duplicate the run or claim a survivor/daily target until actual logs and result tables are read.
