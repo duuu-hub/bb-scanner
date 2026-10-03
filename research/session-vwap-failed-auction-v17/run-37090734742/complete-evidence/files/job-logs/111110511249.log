@@ -1,0 +1,388 @@
+﻿2026-10-03T02:43:41.3184056Z Current runner version: '2.337.0'
+2026-10-03T02:43:41.3207742Z ##[group]Runner Image Provisioner
+2026-10-03T02:43:41.3208786Z Hosted Compute Agent
+2026-10-03T02:43:41.3209477Z Version: 20260901.588
+2026-10-03T02:43:41.3210172Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-03T02:43:41.3211017Z Build Date: 2026-09-01T19:56:44Z
+2026-10-03T02:43:41.3211793Z Worker ID: {bf6c481b-a2ee-4dd1-ae96-405568651f87}
+2026-10-03T02:43:41.3212631Z Azure Region: westus3
+2026-10-03T02:43:41.3213279Z ##[endgroup]
+2026-10-03T02:43:41.3214874Z ##[group]Operating System
+2026-10-03T02:43:41.3215616Z Ubuntu
+2026-10-03T02:43:41.3216148Z 24.04.5
+2026-10-03T02:43:41.3217200Z LTS
+2026-10-03T02:43:41.3217847Z ##[endgroup]
+2026-10-03T02:43:41.3218415Z ##[group]Runner Image
+2026-10-03T02:43:41.3219094Z Image: ubuntu-24.04
+2026-10-03T02:43:41.3219666Z Version: 20260927.320.1
+2026-10-03T02:43:41.3220930Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-03T02:43:41.3222497Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-03T02:43:41.3223541Z ##[endgroup]
+2026-10-03T02:43:41.3224745Z ##[group]GITHUB_TOKEN Permissions
+2026-10-03T02:43:41.3227266Z Actions: read
+2026-10-03T02:43:41.3227907Z Contents: read
+2026-10-03T02:43:41.3228454Z Metadata: read
+2026-10-03T02:43:41.3229119Z ##[endgroup]
+2026-10-03T02:43:41.3231198Z Secret source: Actions
+2026-10-03T02:43:41.3232247Z Cache mode: write
+2026-10-03T02:43:41.3232957Z Prepare workflow directory
+2026-10-03T02:43:41.3849281Z Prepare all required actions
+2026-10-03T02:43:41.3896105Z Getting action download info
+2026-10-03T02:43:41.6862056Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-03T02:43:41.7898842Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-03T02:43:41.8660221Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-03T02:43:41.9565443Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-03T02:43:42.1724791Z Complete job name: development (4)
+2026-10-03T02:43:42.2509889Z ##[group]Run actions/checkout@v4
+2026-10-03T02:43:42.2510832Z with:
+2026-10-03T02:43:42.2511333Z   repository: duuu-hub/bb-scanner
+2026-10-03T02:43:42.2515393Z   token: ***
+2026-10-03T02:43:42.2515875Z   ssh-strict: true
+2026-10-03T02:43:42.2516357Z   ssh-user: git
+2026-10-03T02:43:42.2517127Z   persist-credentials: true
+2026-10-03T02:43:42.2517659Z   clean: true
+2026-10-03T02:43:42.2518143Z   sparse-checkout-cone-mode: true
+2026-10-03T02:43:42.2518705Z   fetch-depth: 1
+2026-10-03T02:43:42.2519162Z   fetch-tags: false
+2026-10-03T02:43:42.2519636Z   show-progress: true
+2026-10-03T02:43:42.2520119Z   lfs: false
+2026-10-03T02:43:42.2520575Z   submodules: false
+2026-10-03T02:43:42.2521067Z   set-safe-directory: true
+2026-10-03T02:43:42.2521613Z   allow-unsafe-pr-checkout: false
+2026-10-03T02:43:42.2522827Z env:
+2026-10-03T02:43:42.2527048Z   GH_TOKEN: ***
+2026-10-03T02:43:42.2527543Z ##[endgroup]
+2026-10-03T02:43:42.3606085Z Syncing repository: duuu-hub/bb-scanner
+2026-10-03T02:43:42.3609155Z ##[group]Getting Git version info
+2026-10-03T02:43:42.3610633Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-03T02:43:42.3612500Z [command]/usr/bin/git version
+2026-10-03T02:43:42.3677755Z git version 2.55.0
+2026-10-03T02:43:42.3705202Z ##[endgroup]
+2026-10-03T02:43:42.3720030Z Temporarily overriding HOME='/home/runner/work/_temp/00cb2820-8f51-4876-b01b-8c3f86b2db0f' before making global git config changes
+2026-10-03T02:43:42.3723132Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T02:43:42.3726987Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T02:43:42.3789622Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-03T02:43:42.3795062Z ##[group]Initializing the repository
+2026-10-03T02:43:42.3799655Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T02:43:42.3912368Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-03T02:43:42.3914787Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-03T02:43:42.3918809Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-03T02:43:42.3920615Z hint: call:
+2026-10-03T02:43:42.3921665Z hint:
+2026-10-03T02:43:42.3923029Z hint: 	git config --global init.defaultBranch <name>
+2026-10-03T02:43:42.3924508Z hint:
+2026-10-03T02:43:42.3925854Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-03T02:43:42.3929433Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-03T02:43:42.3931146Z hint:
+2026-10-03T02:43:42.3932191Z hint: 	git branch -m <name>
+2026-10-03T02:43:42.3934600Z hint:
+2026-10-03T02:43:42.3936108Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-03T02:43:42.3938608Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-03T02:43:42.3942806Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-03T02:43:42.4005604Z ##[endgroup]
+2026-10-03T02:43:42.4008200Z ##[group]Disabling automatic garbage collection
+2026-10-03T02:43:42.4009482Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-03T02:43:42.4037415Z ##[endgroup]
+2026-10-03T02:43:42.4039623Z ##[group]Setting up auth
+2026-10-03T02:43:42.4045549Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T02:43:42.4103041Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-03T02:43:42.4473570Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T02:43:42.4513609Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-03T02:43:42.4742781Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T02:43:42.4778531Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-03T02:43:42.5004843Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-03T02:43:42.5045052Z ##[endgroup]
+2026-10-03T02:43:42.5046941Z ##[group]Fetching the repository
+2026-10-03T02:43:42.5057623Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +bc8af04530f986ce0dcc36981ae8a791a364651b:refs/remotes/origin/research-session-vwap-failed-auction-v17
+2026-10-03T02:43:44.1200389Z From https://github.com/duuu-hub/bb-scanner
+2026-10-03T02:43:44.1202324Z  * [new ref]         bc8af04530f986ce0dcc36981ae8a791a364651b -> origin/research-session-vwap-failed-auction-v17
+2026-10-03T02:43:44.1205029Z ##[endgroup]
+2026-10-03T02:43:44.1205790Z ##[group]Determining the checkout info
+2026-10-03T02:43:44.1208370Z ##[endgroup]
+2026-10-03T02:43:44.1213930Z [command]/usr/bin/git sparse-checkout disable
+2026-10-03T02:43:44.1268867Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-03T02:43:44.1302133Z ##[group]Checking out the ref
+2026-10-03T02:43:44.1307351Z [command]/usr/bin/git checkout --progress --force -B research-session-vwap-failed-auction-v17 refs/remotes/origin/research-session-vwap-failed-auction-v17
+2026-10-03T02:43:44.3674576Z Switched to a new branch 'research-session-vwap-failed-auction-v17'
+2026-10-03T02:43:44.3680596Z branch 'research-session-vwap-failed-auction-v17' set up to track 'origin/research-session-vwap-failed-auction-v17'.
+2026-10-03T02:43:44.3691220Z ##[endgroup]
+2026-10-03T02:43:44.3738447Z [command]/usr/bin/git log -1 --format=%H
+2026-10-03T02:43:44.3765927Z bc8af04530f986ce0dcc36981ae8a791a364651b
+2026-10-03T02:43:44.4034468Z ##[group]Run actions/setup-python@v5
+2026-10-03T02:43:44.4034858Z with:
+2026-10-03T02:43:44.4035129Z   python-version: 3.12
+2026-10-03T02:43:44.4035418Z   check-latest: false
+2026-10-03T02:43:44.4038460Z   token: ***
+2026-10-03T02:43:44.4038752Z   update-environment: true
+2026-10-03T02:43:44.4039066Z   allow-prereleases: false
+2026-10-03T02:43:44.4039357Z   freethreaded: false
+2026-10-03T02:43:44.4039619Z env:
+2026-10-03T02:43:44.4042307Z   GH_TOKEN: ***
+2026-10-03T02:43:44.4042570Z ##[endgroup]
+2026-10-03T02:43:44.5357017Z ##[group]Installed versions
+2026-10-03T02:43:44.5442389Z (node:2279) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:43:44.5443541Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:43:44.5444297Z Successfully set up CPython (3.12.14)
+2026-10-03T02:43:44.5444910Z ##[endgroup]
+2026-10-03T02:43:44.5595976Z ##[group]Run set -euo pipefail
+2026-10-03T02:43:44.5596399Z [36;1mset -euo pipefail[0m
+2026-10-03T02:43:44.5597140Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-03T02:43:44.5909816Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T02:43:44.5910263Z env:
+2026-10-03T02:43:44.5913145Z   GH_TOKEN: ***
+2026-10-03T02:43:44.5913499Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:44.5914000Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:43:44.5914484Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:44.5914919Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:44.5915350Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:44.5915790Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:43:44.5916186Z ##[endgroup]
+2026-10-03T02:43:45.5141427Z Collecting pandas==2.3.3
+2026-10-03T02:43:45.5822977Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-03T02:43:45.8167382Z Collecting numpy==2.3.3
+2026-10-03T02:43:45.8283404Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-03T02:43:45.8616149Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-03T02:43:45.8726844Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-03T02:43:45.9064089Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-03T02:43:45.9167910Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-03T02:43:45.9320584Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-03T02:43:45.9426497Z   Downloading tzdata-2026.4-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-03T02:43:45.9556711Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-03T02:43:45.9703854Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-03T02:43:45.9858047Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-03T02:43:46.4153635Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 30.4 MB/s  0:00:00
+2026-10-03T02:43:46.4291599Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-03T02:43:46.5974632Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 99.1 MB/s  0:00:00
+2026-10-03T02:43:46.6079355Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-03T02:43:46.6211739Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-03T02:43:46.6351651Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-03T02:43:46.6477146Z Downloading tzdata-2026.4-py2.py3-none-any.whl (347 kB)
+2026-10-03T02:43:46.8079874Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-03T02:43:53.5868119Z 
+2026-10-03T02:43:53.5881583Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.4
+2026-10-03T02:43:53.6463919Z ##[group]Run actions/cache@v4
+2026-10-03T02:43:53.6464199Z with:
+2026-10-03T02:43:53.6464393Z   path: data
+2026-10-03T02:43:53.6464615Z   key: frozen-source-36095439671-15m-shard-4
+2026-10-03T02:43:53.6464916Z   enableCrossOsArchive: false
+2026-10-03T02:43:53.6465166Z   fail-on-cache-miss: false
+2026-10-03T02:43:53.6465400Z   lookup-only: false
+2026-10-03T02:43:53.6465609Z   save-always: false
+2026-10-03T02:43:53.6465806Z env:
+2026-10-03T02:43:53.6468815Z   GH_TOKEN: ***
+2026-10-03T02:43:53.6469112Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.6469560Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:43:53.6469994Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.6470377Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.6470775Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.6471188Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:43:53.6471516Z ##[endgroup]
+2026-10-03T02:43:53.7492713Z (node:2317) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:43:53.7493449Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:43:53.9481357Z Cache not found for input keys: frozen-source-36095439671-15m-shard-4
+2026-10-03T02:43:53.9561755Z ##[group]Run set -euo pipefail
+2026-10-03T02:43:53.9562066Z [36;1mset -euo pipefail[0m
+2026-10-03T02:43:53.9562309Z [36;1mif [ '' != 'true' ]; then[0m
+2026-10-03T02:43:53.9562820Z [36;1m  gh run download 36095439671 -R duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-data-shard-4 -D data[0m
+2026-10-03T02:43:53.9563320Z [36;1mfi[0m
+2026-10-03T02:43:53.9563658Z [36;1mgh run download 36858492497 -R duuu-hub/bb-scanner -n day-edge-v2-btc -D btc[0m
+2026-10-03T02:43:53.9564366Z [36;1mgh run download 36095439671 -R duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-manifest-shard-4 -D source-manifest[0m
+2026-10-03T02:43:53.9565519Z [36;1mpython scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/session-vwap-failed-auction-v17/FROZEN_INPUT_HASHES.json --out source-check.json[0m
+2026-10-03T02:43:53.9632393Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T02:43:53.9632747Z env:
+2026-10-03T02:43:53.9635478Z   GH_TOKEN: ***
+2026-10-03T02:43:53.9635776Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.9636219Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:43:53.9636900Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.9637285Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.9637667Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:43:53.9638074Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:43:53.9638399Z ##[endgroup]
+2026-10-03T02:44:11.0870368Z FROZEN_SOURCE_VERIFIED 107 files 37 prior SHA256 matches
+2026-10-03T02:44:11.1320385Z ##[group]Run actions/cache@v4
+2026-10-03T02:44:11.1320654Z with:
+2026-10-03T02:44:11.1320853Z   path: cache/verified-1m
+2026-10-03T02:44:11.1321145Z   key: session-vwap-failed-auction-v17-dev-1m-shard-4
+2026-10-03T02:44:11.1322286Z   restore-keys: taker-absorption-release-v12-dev-1m-shard-4
+aggressive-flow-cascade-v11-dev-1m-shard-4
+residual-reversion-v10-dev-1m-shard-4
+cross-sectional-leader-v9-dev-1m-shard-4
+premium-absorption-v8-dev-1m-shard-4
+factor-lag-v6-dev-1m-shard-4
+2026-10-03T02:44:11.1323375Z   enableCrossOsArchive: false
+2026-10-03T02:44:11.1323630Z   fail-on-cache-miss: false
+2026-10-03T02:44:11.1323864Z   lookup-only: false
+2026-10-03T02:44:11.1324081Z   save-always: false
+2026-10-03T02:44:11.1324283Z env:
+2026-10-03T02:44:11.1327501Z   GH_TOKEN: ***
+2026-10-03T02:44:11.1327802Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.1328244Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:44:11.1328705Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.1329095Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.1329473Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.1329854Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:44:11.1330176Z ##[endgroup]
+2026-10-03T02:44:11.2381270Z (node:2360) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:44:11.2381994Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:44:11.4378818Z Cache not found for input keys: session-vwap-failed-auction-v17-dev-1m-shard-4, taker-absorption-release-v12-dev-1m-shard-4, aggressive-flow-cascade-v11-dev-1m-shard-4, residual-reversion-v10-dev-1m-shard-4, cross-sectional-leader-v9-dev-1m-shard-4, premium-absorption-v8-dev-1m-shard-4, factor-lag-v6-dev-1m-shard-4
+2026-10-03T02:44:11.4455749Z ##[group]Run set -euo pipefail
+2026-10-03T02:44:11.4456076Z [36;1mset -euo pipefail[0m
+2026-10-03T02:44:11.4457355Z [36;1mpython scripts/session_vwap_failed_auction_v17.py scan --stage DEV --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out dev-4 --minute-cache cache/verified-1m[0m
+2026-10-03T02:44:11.4520765Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T02:44:11.4521107Z env:
+2026-10-03T02:44:11.4523800Z   GH_TOKEN: ***
+2026-10-03T02:44:11.4524090Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.4524536Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:44:11.4524958Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.4525341Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.4525733Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:44:11.4526160Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:44:11.4526495Z ##[endgroup]
+2026-10-03T02:44:12.6379295Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:62: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:12.6380541Z   f['session_vwap'][k:z]=np.where(valid,numer/denom,np.nan)
+2026-10-03T02:44:12.6794241Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:12.6795743Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:13.1792692Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:13.1794154Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:15.5955848Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:15.5957339Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:20.6617620Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:20.6619238Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:21.6255298Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:21.6257288Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:24.0409100Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:24.0410814Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:26.5699425Z V17_VWAP_SCAN DEV 8 / 107 parameterized_outcomes 2424
+2026-10-03T02:44:26.9413483Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:26.9414728Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:29.0665063Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:29.0665864Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:31.4882471Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:31.4883681Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:35.8431444Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:35.8432654Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:38.0765672Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:38.0767551Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:40.2526790Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:40.2528206Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:41.1394460Z V17_VWAP_SCAN DEV 16 / 107 parameterized_outcomes 4794
+2026-10-03T02:44:41.5597551Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:41.5599192Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:46.0345764Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:46.0347730Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:49.0310568Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:49.0311492Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:51.9679883Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:51.9680631Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:53.0455342Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:53.0456424Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:44:58.4062298Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:44:58.4063066Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:03.6668927Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:03.6670226Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:04.1085329Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:04.1087918Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:04.9317510Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:04.9319752Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:09.8064986Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:09.8066904Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:18.6194312Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:18.6195088Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:26.9300181Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:26.9301562Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:27.4465884Z V17_VWAP_SCAN DEV 48 / 107 parameterized_outcomes 9498
+2026-10-03T02:45:28.2573582Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:28.2575424Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:34.7089146Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:34.7090323Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:38.1226576Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:38.1228175Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:42.8261594Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:42.8262977Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:43.4377769Z V17_VWAP_SCAN DEV 56 / 107 parameterized_outcomes 11592
+2026-10-03T02:45:48.0330428Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:48.0331827Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:48.6148653Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:48.6149819Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:51.1111207Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:51.1112814Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:45:58.9117715Z V17_VWAP_SCAN DEV 96 / 107 parameterized_outcomes 13368
+2026-10-03T02:45:59.9031365Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:45:59.9032796Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:46:04.4197287Z /home/runner/work/bb-scanner/bb-scanner/scripts/session_vwap_failed_auction_v17.py:80: RuntimeWarning: invalid value encountered in divide
+2026-10-03T02:46:04.4198258Z   &(f['volume_multiple']>=cfg['volume'])&(rng>0)&(wick/rng>=.5)&outer
+2026-10-03T02:46:08.1535422Z V17_VWAP_SCAN_DONE DEV 14202 chronology_exclusions 0
+2026-10-03T02:46:08.2168793Z ##[group]Run actions/upload-artifact@v4
+2026-10-03T02:46:08.2169105Z with:
+2026-10-03T02:46:08.2169348Z   name: session-vwap-failed-auction-v17-dev-4
+2026-10-03T02:46:08.2169655Z   path: dev-4/
+2026-10-03T02:46:08.2169863Z   retention-days: 30
+2026-10-03T02:46:08.2170081Z   compression-level: 0
+2026-10-03T02:46:08.2170302Z   if-no-files-found: warn
+2026-10-03T02:46:08.2170725Z   overwrite: false
+2026-10-03T02:46:08.2170940Z   include-hidden-files: false
+2026-10-03T02:46:08.2171168Z env:
+2026-10-03T02:46:08.2173855Z   GH_TOKEN: ***
+2026-10-03T02:46:08.2174141Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:46:08.2174575Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T02:46:08.2174995Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:46:08.2175373Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:46:08.2175747Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T02:46:08.2176156Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T02:46:08.2176484Z ##[endgroup]
+2026-10-03T02:46:08.3858992Z (node:2433) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:46:08.3859913Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:46:08.4167535Z With the provided path, there will be 132 files uploaded
+2026-10-03T02:46:08.4197401Z Artifact name is valid!
+2026-10-03T02:46:08.4227482Z Root directory input is valid!
+2026-10-03T02:46:08.7615132Z Beginning upload of artifact content to blob storage
+2026-10-03T02:46:08.8573776Z (node:2433) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-03T02:46:09.5912883Z Uploaded bytes 8388608
+2026-10-03T02:46:09.6443900Z Uploaded bytes 16777216
+2026-10-03T02:46:09.6909195Z Uploaded bytes 25165824
+2026-10-03T02:46:09.7765539Z Uploaded bytes 33554432
+2026-10-03T02:46:09.8683651Z Uploaded bytes 41943040
+2026-10-03T02:46:09.9260157Z Uploaded bytes 50331648
+2026-10-03T02:46:09.9585725Z Uploaded bytes 58720256
+2026-10-03T02:46:10.0802899Z Uploaded bytes 62547438
+2026-10-03T02:46:10.1379980Z Finished uploading artifact content to blob storage!
+2026-10-03T02:46:10.1380884Z SHA256 digest of uploaded artifact zip is 15588e276d90f0db61e132b97f5ea41b7e124f9185b64c08b0befcc8ff163de7
+2026-10-03T02:46:10.1382594Z Finalizing artifact upload
+2026-10-03T02:46:10.4256336Z Artifact session-vwap-failed-auction-v17-dev-4.zip successfully finalized. Artifact ID 11261784038
+2026-10-03T02:46:10.4258259Z Artifact session-vwap-failed-auction-v17-dev-4 has been successfully uploaded! Final size is 62547438 bytes. Artifact ID is 11261784038
+2026-10-03T02:46:10.4263981Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37090734742/artifacts/11261784038
+2026-10-03T02:46:10.4458617Z Post job cleanup.
+2026-10-03T02:46:10.5542078Z (node:2446) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:46:10.5542812Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:46:10.5747774Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/bb-scanner/bb-scanner --files-from manifest.txt --use-compress-program zstdmt
+2026-10-03T02:46:10.9573462Z (node:2446) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-03T02:46:11.9493919Z Sent 36634624 of 76427771 (47.9%), 34.9 MBs/sec
+2026-10-03T02:46:12.9500558Z Sent 76427771 of 76427771 (100.0%), 36.4 MBs/sec
+2026-10-03T02:46:13.1907628Z Cache saved with key: session-vwap-failed-auction-v17-dev-1m-shard-4
+2026-10-03T02:46:13.2074888Z Post job cleanup.
+2026-10-03T02:46:13.3128473Z (node:2467) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:46:13.3129326Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:46:13.3325908Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/bb-scanner/bb-scanner --files-from manifest.txt --use-compress-program zstdmt
+2026-10-03T02:46:13.8244874Z (node:2467) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-03T02:46:14.8103744Z Sent 0 of 240222679 (0.0%), 0.0 MBs/sec
+2026-10-03T02:46:15.7156164Z Sent 240222679 of 240222679 (100.0%), 120.1 MBs/sec
+2026-10-03T02:46:15.8432855Z Cache saved with key: frozen-source-36095439671-15m-shard-4
+2026-10-03T02:46:15.8550752Z Post job cleanup.
+2026-10-03T02:46:15.9741293Z (node:2487) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T02:46:15.9742058Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T02:46:15.9937456Z Post job cleanup.
+2026-10-03T02:46:16.0857429Z [command]/usr/bin/git version
+2026-10-03T02:46:16.0900826Z git version 2.55.0
+2026-10-03T02:46:16.0943133Z Temporarily overriding HOME='/home/runner/work/_temp/25bbe0f2-ba22-49ac-97b2-b4b25d2cedf5' before making global git config changes
+2026-10-03T02:46:16.0944521Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T02:46:16.0949497Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T02:46:16.0989361Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T02:46:16.1026130Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-03T02:46:16.1277078Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T02:46:16.1306475Z http.https://github.com/.extraheader
+2026-10-03T02:46:16.1319639Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-03T02:46:16.1359145Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-03T02:46:16.1614444Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T02:46:16.1652161Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-03T02:46:16.2037575Z Cleaning up orphan processes
+2026-10-03T02:46:16.2481220Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4, actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
