@@ -22,6 +22,7 @@ BAR,DAY=base.BAR,base.DAY
 HOLDS,EXITS=(16,32),('MID','OPP','R20')
 ROOT=Path(__file__).resolve().parents[1]
 CONTEXT=ROOT/'research/session-opening-range-sweep-v20/FROZEN_CONTEXT.json'
+LOG_PREFIX='V20_OPENING_RANGE_SWEEP'
 digest=source_helpers.digest
 COLUMNS=['symbol','key','signal_time','decision_time','entry_time','entry','sl','side',
     'risk_pct','score','atr_mult','prior_atr','buy_share','volume_multiple',
@@ -301,10 +302,10 @@ def scan(data,btc_path,out,cache,stage,source_check,selection_path=None,context_
                 unavailable_session_vwap_bars=int((eligible&~np.isfinite(f['session_vwap'])).sum()),market_sha256=sources[symbol]))
             chronology.chronology.CACHE.clear()
             if n%8==0 or n==len(paths):
-                checkpoint(False);print('V20_OPENING_RANGE_SWEEP_SCAN',stage,n,'/',len(paths),'parameterized_outcomes',len(rows),flush=True)
+                checkpoint(False);print(LOG_PREFIX+'_SCAN',stage,n,'/',len(paths),'parameterized_outcomes',len(rows),flush=True)
     except BaseException:
         checkpoint(False);raise
-    checkpoint(True);print('V20_OPENING_RANGE_SWEEP_SCAN_DONE',stage,len(rows),'chronology_exclusions',len(bad),flush=True)
+    checkpoint(True);print(LOG_PREFIX+'_SCAN_DONE',stage,len(rows),'chronology_exclusions',len(bad),flush=True)
 
 def select(parts,out,context_path=CONTEXT):
     out.mkdir(parents=True,exist_ok=True);paths=sorted(parts.rglob('independent_candidates.csv.gz'))
@@ -372,7 +373,7 @@ def select(parts,out,context_path=CONTEXT):
         (target/'scan_meta.json').write_text(json.dumps(dict(complete=True,stage='DEV',shard=m['shard'],counts=kept,
             selection_sha256=selection_hash,source_development_ledger_sha256=m['ledger_sha256'],source_context_sha256=source_context_sha,
             coverage=m['coverage']),indent=2))
-    print('V20_OPENING_RANGE_SWEEP_SELECT',json.dumps(decision),flush=True)
+    print(LOG_PREFIX+'_SELECT',json.dumps(decision),flush=True)
 
 def accounts(data,parts,out,selection_path):
     canonical.accounts(data,parts,out,selection_path,('DEV','GATE'),expected_shards=16,all_kst_days=True)
