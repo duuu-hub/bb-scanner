@@ -548,3 +548,6 @@ Actual logs and validation artifacts are preserved on `research-fragmented-chase
 Repair commit `01183f81aefa85fb513d564371804156e566a6db` snapshots and restores every shared engine global mutated by `bind_engine()` in a `try/finally`. A same-process local sequence of all 18 V22 tests followed by all 17 V20 tests passed 35/35. No strategy parameter, cost, chronology, risk rule, universe or frozen 96-policy grid changed.
 
 Exactly one repaired actual run is active: [37157873856](https://github.com/duuu-hub/bb-scanner/actions/runs/37157873856), trigger `0706d1447116b3ae3370ae73f99480d7b5eb9c9b`. Do not duplicate it. No profitability or daily-target claim exists.
+
+
+V22 run4 validation has now completed successfully. Actual job `111304974457` proves the frozen input contract (256 hashes / 856 source files), 536/536 registered tests with zero failures/errors in 61.228 s, synthetic rank/map-reduce smoke, and all chronology smoke checks. All eight real DEV shards are active and fetching immutable source data. This establishes execution readiness only; no market-return or account result exists yet.
