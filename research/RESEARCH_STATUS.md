@@ -1,5 +1,14 @@
 # Trading research continuation checkpoint
 
+
+## 2026-10-03 — V21 frozen implementation complete; actual run active
+
+- Frozen implementation commit: `9f83766ccca168002143ff4cd87129f95a7a0c62`; trigger commit: `fd46fa1fb6f6616e3d4b4b0dcc399ccf4d482b1d`.
+- Actual Actions run [37138299485](https://github.com/duuu-hub/bb-scanner/actions/runs/37138299485) is active. Do not create a duplicate run.
+- Pre-execution evidence: 18/18 new V21 tests and 519/519 registered research regression tests passed; Python compilation, YAML parsing, and the eight-shard synthetic pipeline passed. The synthetic pipeline preserved all 96 cells and exercised 100% mark alignment in each DEV year, but it is not market or profitability evidence.
+- The workflow installs pinned dependencies, probes official Binance mark-price archives with adjacent checksums, scans eight frozen DEV shards, applies the per-year 95% source-coverage gate, freezes DEV selection before any 2024 processing, and conditionally runs the shared strict account engine.
+- No V21 actual source-probe, DEV outcome, account growth, or daily-target result has yet been read. The +0.7% to +2% daily account target remains unmet and unclaimed.
+
 ## 2026-10-03 — V20 rejected; V21 preregistered
 
 - V20 actual run [37116650810](https://github.com/duuu-hub/bb-scanner/actions/runs/37116650810) completed successfully as computation: 501 tests passed, canonical chronology smoke passed, eight DEV shards and all 96 policies executed.
