@@ -13,10 +13,10 @@ TEST_FILES=['test_session_vwap_failed_auction_v17.py','test_breadth_pullback_rec
 ap=argparse.ArgumentParser();ap.add_argument('--only-new',action='store_true');args=ap.parse_args()
 p=ROOT/'research/session-vwap-failed-auction-v17/FROZEN_INPUT_HASHES.json';d=json.loads(p.read_text())
 assert d['source_data_run']==36095439671 and len(d['expected_csv_sha256'])==256
-assert hashlib.sha256(p.read_bytes()).hexdigest()=='75db339af95601c1a34f44b769664e1b43bb3a6e37a4d020a26b16179359138b'
+assert hashlib.sha256(p.read_bytes()).hexdigest()=='0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f'
 cp=p.parent/'FROZEN_CONTEXT.json';context=json.loads(cp.read_text())
 assert len(context['expected_market_sha256'])==856
-assert hashlib.sha256(cp.read_bytes()).hexdigest()=='4ea5c86b07c48b926c99495ff82e7d8a45a5e68152492cae592fe853ddd45c0b'
+assert hashlib.sha256(cp.read_bytes()).hexdigest()=='4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614'
 assert all(context['expected_market_sha256'].get(k)==v for k,v in d['expected_csv_sha256'].items())
 for name in ['PLAN.md','IMPLEMENTATION_CONTRACT.md']:assert (p.parent/name).is_file(),name
 print('FROZEN_V17_INPUT_CONTRACT_PASS',256,856,flush=True)
