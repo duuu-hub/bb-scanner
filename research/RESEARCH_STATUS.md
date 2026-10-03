@@ -1,3 +1,14 @@
+## 2026-10-04 — V21 actual rejection; V22 preregistration
+
+- Actual V21 run: [37138299485](https://github.com/duuu-hub/bb-scanner/actions/runs/37138299485), code `9f83766ccca168002143ff4cd87129f95a7a0c62`. The validation log proves 519/519 tests passed, the conservative chronology smoke passed, and the official BTCUSDT 2022-01 mark-source probe verified 2,976 bars plus checksum.
+- All eight DEV shards and selection completed. Across 856 source symbols, 96 policy cells and 472,436 parameterized resolved outcomes, zero cells survived. The 2024 gate and account simulation were correctly skipped.
+- Every cell had negative 40 bp stressed mean return and negative risk-normalized R. Ranges: N 267–21,932; net40 mean -129.857233 to -38.824744 bp/trade; net40 R -0.888165 to -0.288683; PF 0–0.579634. Positive-mean cells: 0/96; positive-R cells: 0/96.
+- Official mark coverage passed the frozen gate: 2021 100.0000%, 2022 99.7285%, 2023 99.6880%. The best mean cell still lost 38.824744 bp/trade after stressed costs; therefore this entire contract/mark dislocation family is rejected, with no account-growth or daily-target claim.
+- Durable DEV: `research-contract-mark-dislocation-v21-dev-37138299485`, path `research/contract-mark-dislocation-v21/run-37138299485/development`. Rejection audit: `research/contract-mark-dislocation-v21/V21_ACTUAL_REJECTION.json`, commit `a27ea247f5dbbd834f4d8c934c11d5460d969bc5`.
+- The original preservation job built 41,984 files / 5,969,311,394 bytes, then failed only at Git push with GitHub HTTP 500. Evidence-only recovery [37140997407](https://github.com/duuu-hub/bb-scanner/actions/runs/37140997407) is active; it does not rerun market research. Expected branch: `research-contract-mark-dislocation-v21-evidence-37138299485`.
+- V22 was preregistered before implementation/outcomes on `research-fragmented-chase-exhaustion-v22`, plan commit `72fe5ff070f763cb6438700a18574f2aaabcd7c9`; the V21 audit was copied at `4503bc87b3ec2de88c58746b8fc14a540478aa8b`.
+- V22 is economically distinct: after a large 15-minute shock it looks for fragmented crowd chasing (turnover high, trades high, quote value per trade collapsed, extreme taker direction), then requires a separate closed rejection and enters the following open against the chase. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies. Implementation and execution are pending; no profitability claim exists.
+
 # Trading research continuation checkpoint
 
 
