@@ -523,3 +523,10 @@ V18 evidence recovery [37103484177](https://github.com/duuu-hub/bb-scanner/actio
 - Implementation commit: `41b4f7dffea2f3bc8d7b8d37fca98bf71b32d551`. Trigger commit: `3d3f315a426f72fefd7933347f71061e725cdf54`.
 - Exactly one actual run is active: [37116650810](https://github.com/duuu-hub/bb-scanner/actions/runs/37116650810).
 - Do not duplicate the run or claim a survivor/daily target until actual logs and result tables are read.
+
+
+## 2026-10-03T19:21Z — V22 run1 audited; fixed retry active
+
+V22 run [37146393987](https://github.com/duuu-hub/bb-scanner/actions/runs/37146393987) passed the actual registered 535-test validation, canonical invariants, chronology smoke, and synthetic eight-shard/96-cell pipeline. All eight real DEV jobs then failed before scanning any market symbol: the shared scanner routed the frozen BTC context through V22's tradable-symbol positive-integer trade-count validator, and legitimate zero-count BTC context bars raised `bad positive integer trade count btc/BTCUSDT.csv.gz`. This is an execution-role routing failure, not a market or strategy result; economic outcomes were zero.
+
+The failure and exact logs are recorded at `research/fragmented-chase-exhaustion-v22/V22_RUN_37146393987_FAILURE.json`. Preserve job succeeded on evidence branch `research-fragmented-chase-exhaustion-v22-evidence-37146393987`, commit `eca2b7c4ee2105fdd3ebf1a059e5390da2ccf999`. Repair commit `b9c709f3764f59a10430422f09ffb33b09a8663f` separates the BTC context loader/feature builder from the strict market-symbol loader and adds a regression with zero-count BTC context; all economic parameters, 16x2x3=96 grid, costs, chronology, and risk rules remain frozen. Isolated local V22 tests 17/17, V20 regression 18/18, and synthetic eight-shard/96-cell pipeline passed. Exactly one retry, [37147529513](https://github.com/duuu-hub/bb-scanner/actions/runs/37147529513), is in progress. Do not duplicate it; no profit or daily-target claim exists.
