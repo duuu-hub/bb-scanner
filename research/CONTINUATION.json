@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T04:36:00Z",
+  "updated_at": "2026-10-03T04:43:00Z",
   "interactive_lease": null,
   "current_branch": "research-session-opening-impulse-v18",
   "current_run": null,
   "current_workflow": null,
   "current_plan": "research/session-opening-impulse-v18/PLAN.md",
-  "latest_research_checkpoint": "V17_REJECTED_ZERO_OF_96_V18_PREREGISTERED_V17_EVIDENCE_RECOVERY_RUNNING",
+  "latest_research_checkpoint": "V17_REJECTED_ZERO_OF_96_EVIDENCE_COMPLETE_V18_PREREGISTERED",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -173,7 +173,10 @@
     "v17_rejection_path": "research/session-vwap-failed-auction-v17/V17_ACTUAL_REJECTION.json",
     "v18_branch": "research-session-opening-impulse-v18",
     "v18_plan_commit": "be48e9335b2fd9564627022429b8cd8de7273bcc",
-    "v18_plan_path": "research/session-opening-impulse-v18/PLAN.md"
+    "v18_plan_path": "research/session-opening-impulse-v18/PLAN.md",
+    "v17_complete_evidence_branch": "research-session-vwap-failed-auction-v17-evidence-37090734742",
+    "v17_complete_evidence_commit": "d38be1a",
+    "v17_complete_evidence_path": "research/session-vwap-failed-auction-v17/run-37090734742/complete-evidence"
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -287,7 +290,7 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Complete V17 evidence recovery without rerunning market stages. Implement V18 exactly as preregistered, add causal and synthetic validation, then trigger one actual DEV run and audit logs/results.",
+  "next_action": "Implement V18 exactly as preregistered, add causal and eight-shard synthetic validation, then trigger one actual DEV run and audit logs/results.",
   "phase": "V17_DEV_SCANS_RUNNING",
   "last_failure": {
     "version": "V17",
@@ -296,7 +299,7 @@
     "primary_reason": "All 96 cells failed frozen DEV gates. Best cell had +53.055bp/trade, R +0.10369 and PF 1.697 but lost in 2021, had only 25 2021 trades across 14 dates, and had negative calendar/active-date diagnostic R in every DEV year. All 48 short cells had non-positive R.",
     "selected": 0,
     "account_scenarios": 0,
-    "technical_note": "Final preserve_cycle failed after selection because an optional PREEXECUTION_VALIDATION.json did not exist; targeted evidence recovery run 37097336607 is active and does not rerun market research."
+    "technical_note": "Final preserve_cycle referenced an absent optional file; targeted recovery run 37097336607 completed successfully and preserved 1,606 files on research-session-vwap-failed-auction-v17-evidence-37090734742 at d38be1a."
   },
   "previous_interactive_lease": {
     "owner": "v15-implementation-20261002T1415Z",
@@ -3614,11 +3617,5 @@
     "artifact_id": 11258868229,
     "artifact_digest": "sha256:aa9720771df73e9b90a4428806f61f30b563a28acee58fe780b089def60d35de",
     "source": "Downloaded actual Actions validation artifact and read logs; not market profitability."
-  },
-  "active_supporting_run": {
-    "purpose": "V17 complete evidence recovery only; no market rerun",
-    "run": 37097336607,
-    "workflow": ".github/workflows/session-vwap-failed-auction-v17-evidence-recovery.yml",
-    "source_run": 37090734742
   }
 }
