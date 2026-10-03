@@ -437,3 +437,15 @@ V17 evidence recovery completed successfully: 1,606 files were preserved on bran
 - Added a dedicated evidence-only recovery at workflow commit `fb89783979fc9de3b1e5ff6ecc0c9213fbf8096e`; trigger `cf67e91eadf5c437f7d78391d23785d412ffe12a`.
 - Recovery run [37103484177](https://github.com/duuu-hub/bb-scanner/actions/runs/37103484177) is active. It preserves all result tables, ledgers, exclusions, source checks, plans, rejection audit and actual job logs, plus a complete path/size/SHA256 manifest and GitHub artifact digests for every original file. Reproducible large official-minute binary/cache payloads are hash-only in Git to avoid a third 2.28GB pack failure.
 - This is recordkeeping recovery only. V19 remains preregistered at `0485ee848e8802b398b91b9d911d0b9804ee73d6`; implementation has not yet begun.
+
+
+V18 evidence recovery [37103484177](https://github.com/duuu-hub/bb-scanner/actions/runs/37103484177) completed successfully. The durable branch is `research-session-opening-impulse-v18-evidence-37100246454`, commit `698a6fb`. It retains 211 material result/log/audit files (7,689,281 bytes) and a complete exact path/size/SHA256 manifest for all 5,270 collected files; 5,059 reproducible minute/cache binaries (2,269,966,705 bytes) are represented hash-only together with original Actions artifact digests. This resolves the recordkeeping failure without rerunning market research.
+
+## 2026-10-03 — V19 implementation and actual launch
+
+- Frozen preregistration remains `0485ee848e8802b398b91b9d911d0b9804ee73d6`; no V19 market result was observed before implementation.
+- Implemented exact-session two-bar opening-range freeze, 4/8-bar two-sided causal-VWAP balance, later four-bar volume/taker-confirmed escape, next-open entry, structural stop and frozen measured-move/R exits.
+- Registered 16 entry configurations and 96 policy cells, with 15 new causal/grid tests and the inherited chronology/account regression suite.
+- Workflow commit: `282ea906d9521aed380fff5bcdd1eab01c366e6b`. Trigger/code commit: `a623fd81bd88383604ff6e68c1f8ab1a91823b9a`.
+- Exactly one actual run is active: [37103772006](https://github.com/duuu-hub/bb-scanner/actions/runs/37103772006), validation job `111148239722`.
+- No test pass, market outcome, survivor or daily-target claim exists until the actual log is read. Do not duplicate this run.
