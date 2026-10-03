@@ -400,3 +400,6 @@ Numerical rejection:
 The workflow's final status is failure only because the post-result preservation job attempted to copy an absent optional `PREEXECUTION_VALIDATION.json`. A targeted evidence-only recovery, run [37097336607](https://github.com/duuu-hub/bb-scanner/actions/runs/37097336607), is collecting the already-produced artifacts and actual logs without rerunning market research.
 
 V18 was preregistered before implementation on branch `research-session-opening-impulse-v18`, commit `be48e9335b2fd9564627022429b8cd8de7273bcc`. It tests fixed-session opening impulse continuation after cross-sectional breadth, session-VWAP acceptance, a distinct shallow pullback and later reacceleration. The grid is frozen at 16 entries × 2 holds × 3 exits = 96 policies.
+
+
+V17 evidence recovery completed successfully: 1,606 files were preserved on branch `research-session-vwap-failed-auction-v17-evidence-37090734742` at commit `d38be1a`. This closed only the recordkeeping failure; it did not rerun or alter market results.
