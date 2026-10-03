@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTEXT = ROOT / "research/fragmented-chase-exhaustion-v22/FROZEN_CONTEXT.json"
 digest = source_helpers.digest
 SOURCE_LOAD = engine.load
+SOURCE_FEATURES = engine.features
 COLUMNS = [
     "symbol","key","signal_time","decision_time","entry_time","entry","sl","side",
     "risk_pct","score","atr_mult","prior_atr","buy_share","volume_multiple",
@@ -218,6 +219,7 @@ def policy_rows(symbol, chosen, raw, f, btc, start, end):
 def bind_engine():
     engine.CONTEXT=CONTEXT;engine.COLUMNS=COLUMNS;engine.LOG_PREFIX='V22_FRAGMENTED_CHASE';engine.configurations=configurations
     engine.policies=policies;engine.load=load;engine.features=features;engine.intents=intents
+    engine.BTC_LOAD=SOURCE_LOAD;engine.BTC_FEATURES=SOURCE_FEATURES
     engine.policy_rows=policy_rows
 
 
@@ -245,11 +247,13 @@ def smoke(out):
     bind_engine();out.mkdir(parents=True,exist_ok=True);n=32*96
     t=base.START+np.arange(n,dtype=np.int64)*BAR;rng=np.random.default_rng(62202)
     x=np.cumsum(rng.normal(0,.001,n));btc=np.exp(10+x)
-    def write(path, close):
+    def write(path, close, trades=1000):
         pd.DataFrame(dict(open_time=t,open=close,high=close*1.001,low=close*.999,close=close,
-            quote_volume=np.full(n,1e6),trades=np.full(n,1000,dtype=int),
+            quote_volume=np.full(n,1e6),trades=np.full(n,trades,dtype=int),
             taker_buy_quote=np.full(n,6e5))).to_csv(path,index=False,compression="gzip")
-    bp=out/"BTCUSDT.csv.gz";write(bp,btc);hashes={}
+    # The frozen BTC context legitimately contains zero-count bars. It is loaded only
+    # for market context and must not pass through V22's tradable-symbol validator.
+    bp=out/"BTCUSDT.csv.gz";write(bp,btc,trades=0);hashes={}
     for i in range(8):
         d=out/"market"/str(i);d.mkdir(parents=True,exist_ok=True);p=d/f"X{i:02d}USDT.csv.gz"
         write(p,np.exp(1+1.2*x+rng.normal(0,.0001,n)));hashes[p.name[:-7]]=digest(p)
