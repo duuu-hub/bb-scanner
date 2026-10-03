@@ -1,0 +1,37 @@
+{
+  "study": "V20 session opening-range liquidity sweep reversal",
+  "preregistration_commit": "3e8da35699b8e987b31a39e7264c49cb0e7ec8e0",
+  "market_outcomes_observed_before_freeze": false,
+  "local_validation": {
+    "new_tests": {
+      "command": "python scripts/validate_session_opening_range_sweep_v20.py --only-new",
+      "tests_run": 18,
+      "failures": 0,
+      "errors": 0,
+      "successful": true
+    },
+    "registered_regression_suite": {
+      "command": "python scripts/validate_session_opening_range_sweep_v20.py",
+      "tests_run": 501,
+      "failures": 0,
+      "errors": 0,
+      "successful": true
+    },
+    "synthetic_pipeline": {
+      "command": "python scripts/session_opening_range_sweep_v20.py smoke --out <temporary-directory>",
+      "scans": 8,
+      "policy_cells": 96,
+      "successful": true,
+      "profitability_claim": false
+    },
+    "bytecode_compile": true
+  },
+  "frozen_source_contract": {
+    "source_data_run": 36095439671,
+    "baseline_symbols": 256,
+    "full_catalogue_symbols": 856,
+    "frozen_input_hashes_sha256": "0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f",
+    "frozen_context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614"
+  },
+  "note": "Local validation establishes implementation consistency only. It is not market, account-growth, survivor or daily-target evidence."
+}
