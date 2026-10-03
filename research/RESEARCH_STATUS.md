@@ -427,3 +427,13 @@ V17 evidence recovery completed successfully: 1,606 files were preserved on bran
 - The initial complete-evidence push failed only with transient GitHub HTTP 500 after archive creation. Same preserve job rerun `111146131308` is active; no market stage is rerun.
 - V19 was preregistered before implementation/outcomes at `0485ee848e8802b398b91b9d911d0b9804ee73d6` on `research-session-opening-range-breakout-v19`.
 - V19 is economically distinct: it rejects immediate opening-impulse chasing and instead requires a quiet frozen opening range, multi-bar two-sided VWAP balance, and a later volume/taker-confirmed range escape. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies.
+
+
+## 2026-10-03 — V18 oversized evidence recovery
+
+- V18 economic result remains unchanged: actual run [37100246454](https://github.com/duuu-hub/bb-scanner/actions/runs/37100246454), 483/483 validation tests, all eight breadth maps/scans, 96 cells, zero survivors.
+- The initial preserve job and its targeted rerun both built the same 5,268-file / 2,276,505,454-byte archive, then failed at the final monolithic Git push with HTTP 500. No market computation failed or reran.
+- The expected evidence branch did not exist after either failure.
+- Added a dedicated evidence-only recovery at workflow commit `fb89783979fc9de3b1e5ff6ecc0c9213fbf8096e`; trigger `cf67e91eadf5c437f7d78391d23785d412ffe12a`.
+- Recovery run [37103484177](https://github.com/duuu-hub/bb-scanner/actions/runs/37103484177) is active. It preserves all result tables, ledgers, exclusions, source checks, plans, rejection audit and actual job logs, plus a complete path/size/SHA256 manifest and GitHub artifact digests for every original file. Reproducible large official-minute binary/cache payloads are hash-only in Git to avoid a third 2.28GB pack failure.
+- This is recordkeeping recovery only. V19 remains preregistered at `0485ee848e8802b398b91b9d911d0b9804ee73d6`; implementation has not yet begun.
