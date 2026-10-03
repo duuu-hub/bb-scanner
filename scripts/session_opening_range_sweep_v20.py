@@ -23,6 +23,8 @@ HOLDS,EXITS=(16,32),('MID','OPP','R20')
 ROOT=Path(__file__).resolve().parents[1]
 CONTEXT=ROOT/'research/session-opening-range-sweep-v20/FROZEN_CONTEXT.json'
 LOG_PREFIX='V20_OPENING_RANGE_SWEEP'
+BTC_LOAD=None
+BTC_FEATURES=None
 digest=source_helpers.digest
 COLUMNS=['symbol','key','signal_time','decision_time','entry_time','entry','sl','side',
     'risk_pct','score','atr_mult','prior_atr','buy_share','volume_multiple',
@@ -265,9 +267,11 @@ def scan(data,btc_path,out,cache,stage,source_check,selection_path=None,context_
             raise ValueError('no consistent frozen selection')
         if any(p['policy'] not in info or any(p[k]!=v for k,v in info[p['policy']].items()) for p in chosen):
             raise ValueError('unregistered/altered selection')
-    br,bq,bb=load(btc_path,end)
+    btc_loader=BTC_LOAD or load
+    btc_feature_builder=BTC_FEATURES or features
+    br,bq,bb=btc_loader(btc_path,end)
     if not len(br[0]):raise ValueError('empty BTC source')
-    bf=features(br,bq,bb);out.mkdir(parents=True,exist_ok=True)
+    bf=btc_feature_builder(br,bq,bb);out.mkdir(parents=True,exist_ok=True)
     chronology.MINUTE_CACHE_DIR=cache;chronology.chronology.one_min=audited_minutes
     chronology.chronology.CACHE.clear();official.INPUTS.clear();minute_audit.MINUTE_INPUTS.clear();minute_audit.MINUTE_SLICES.clear()
     minute_audit.SLICE_DIR=out/'minute_evidence';minute_audit.MINUTE_RAW_DIR=out/'minute_original_archives'
