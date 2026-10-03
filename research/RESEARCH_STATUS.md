@@ -403,3 +403,14 @@ V18 was preregistered before implementation on branch `research-session-opening-
 
 
 V17 evidence recovery completed successfully: 1,606 files were preserved on branch `research-session-vwap-failed-auction-v17-evidence-37090734742` at commit `d38be1a`. This closed only the recordkeeping failure; it did not rerun or alter market results.
+
+
+## 2026-10-03 — V18 implementation validated; DEV breadth maps active
+
+- Frozen preregistration remains `be48e9335b2fd9564627022429b8cd8de7273bcc`; no V18 market outcome was observed before implementation.
+- Implemented the exact 16-entry / 96-policy session-opening impulse continuation, full-universe opening breadth, causal session VWAP, distinct shallow pullback and later reacceleration on `research-session-opening-impulse-v18`.
+- Corrected selection to the V18 plan's own gates (300 outcomes, 60 symbols, 30 observations and 20 active KST dates per DEV year) before execution; it does not inherit V9 sample gates.
+- Actual Actions run: [37100246454](https://github.com/duuu-hub/bb-scanner/actions/runs/37100246454), trigger/code `bc72e1d7d90ba3eff0e9b1efe4107750c8c61d2a`.
+- Actual validation job `111138197429` succeeded. Logs prove the frozen 256/856 source contract, 483/483 registered tests, conservative chronology smoke, and eight-map/eight-scan synthetic 96-cell pipeline passed.
+- All eight real DEV opening-breadth map jobs are active. This proves implementation consistency only; it is not profitability, account-growth, survivor, or daily-target evidence.
+- Continue this existing run through breadth reduction, eight canonical DEV scans, selection and durable evidence. Do not launch a duplicate.
