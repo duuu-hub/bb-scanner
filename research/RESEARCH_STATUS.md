@@ -551,3 +551,14 @@ Exactly one repaired actual run is active: [37157873856](https://github.com/duuu
 
 
 V22 run4 validation has now completed successfully. Actual job `111304974457` proves the frozen input contract (256 hashes / 856 source files), 536/536 registered tests with zero failures/errors in 61.228 s, synthetic rank/map-reduce smoke, and all chronology smoke checks. All eight real DEV shards are active and fetching immutable source data. This establishes execution readiness only; no market-return or account result exists yet.
+
+
+## 2026-10-03T22:57Z — V22 run4 zero-trade-bar failure audited; run5 active
+
+Run [37157873856](https://github.com/duuu-hub/bb-scanner/actions/runs/37157873856) passed 536/536 registered tests and chronology validation, but all eight DEV shards aborted on their first assigned source symbol containing a legitimate zero-trade 15-minute bar. Representative failures were 1INCHUSDT, ANKRUSDT, BCHUSDT, ALGOUSDT, 1000BTTCUSDT, API3USDT, 1000XECUSDT and AKROUSDT. The implementation applied the frozen plan's “reject zero trade counts” rule at whole-file scope rather than excluding the invalid bar. No shard completed a market symbol, so parameterized economic outcomes were zero; selection, gate and accounts were skipped.
+
+The exact evidence is preserved on `research-fragmented-chase-exhaustion-v22-evidence-37157873856`, commit `9e686b6` (176 files, 3,206,493 archived bytes). Structured failure audit: `research/fragmented-chase-exhaustion-v22/V22_RUN_37157873856_FAILURE.json`.
+
+Repair audit commit `c3cfc69f6d171f603a8d970fd7793e1f9aefdb63` keeps integer/nonnegative schema checks, excludes zero-count bars from signal and rolling calculations, and requires 96 subsequent valid bars before baselines recover. The 96-policy grid, costs, universe, chronology and account risk rules are unchanged. Local same-process V22+V20 regression passed 36/36; synthetic eight-shard/all-96-cell pipeline passed.
+
+Exactly one repaired run is active: [37160262235](https://github.com/duuu-hub/bb-scanner/actions/runs/37160262235), trigger `9ee40edddb61d072fa24f38b8ab11020970b649c`. This remains execution repair, not a new economic discovery or profitability claim.
