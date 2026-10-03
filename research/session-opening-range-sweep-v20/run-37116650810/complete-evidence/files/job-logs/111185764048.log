@@ -1,0 +1,399 @@
+﻿2026-10-03T10:37:59.3524236Z Current runner version: '2.337.0'
+2026-10-03T10:37:59.3545629Z ##[group]Runner Image Provisioner
+2026-10-03T10:37:59.3546326Z Hosted Compute Agent
+2026-10-03T10:37:59.3546807Z Version: 20260901.588
+2026-10-03T10:37:59.3547407Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-03T10:37:59.3548027Z Build Date: 2026-09-01T19:56:44Z
+2026-10-03T10:37:59.3548865Z Worker ID: {8475b806-85bb-4aec-a7ad-f214c4c6c2ac}
+2026-10-03T10:37:59.3549472Z Azure Region: eastus
+2026-10-03T10:37:59.3549977Z ##[endgroup]
+2026-10-03T10:37:59.3551173Z ##[group]Operating System
+2026-10-03T10:37:59.3551676Z Ubuntu
+2026-10-03T10:37:59.3552447Z 24.04.5
+2026-10-03T10:37:59.3552890Z LTS
+2026-10-03T10:37:59.3553344Z ##[endgroup]
+2026-10-03T10:37:59.3553836Z ##[group]Runner Image
+2026-10-03T10:37:59.3554354Z Image: ubuntu-24.04
+2026-10-03T10:37:59.3554839Z Version: 20260927.320.1
+2026-10-03T10:37:59.3555873Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-03T10:37:59.3557191Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-03T10:37:59.3557980Z ##[endgroup]
+2026-10-03T10:37:59.3559231Z ##[group]GITHUB_TOKEN Permissions
+2026-10-03T10:37:59.3561053Z Actions: read
+2026-10-03T10:37:59.3561599Z Contents: write
+2026-10-03T10:37:59.3562082Z Metadata: read
+2026-10-03T10:37:59.3562539Z ##[endgroup]
+2026-10-03T10:37:59.3564300Z Secret source: Actions
+2026-10-03T10:37:59.3565140Z Cache mode: write
+2026-10-03T10:37:59.3566353Z Prepare workflow directory
+2026-10-03T10:37:59.3955114Z Prepare all required actions
+2026-10-03T10:37:59.3994808Z Getting action download info
+2026-10-03T10:37:59.6459853Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-03T10:37:59.7449570Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-03T10:37:59.8424726Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-03T10:38:00.0558951Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-03T10:38:00.2680215Z Complete job name: selection
+2026-10-03T10:38:00.3288029Z ##[group]Run actions/checkout@v4
+2026-10-03T10:38:00.3289348Z with:
+2026-10-03T10:38:00.3289965Z   repository: duuu-hub/bb-scanner
+2026-10-03T10:38:00.3296820Z   token: ***
+2026-10-03T10:38:00.3297484Z   ssh-strict: true
+2026-10-03T10:38:00.3298119Z   ssh-user: git
+2026-10-03T10:38:00.3298995Z   persist-credentials: true
+2026-10-03T10:38:00.3299693Z   clean: true
+2026-10-03T10:38:00.3300307Z   sparse-checkout-cone-mode: true
+2026-10-03T10:38:00.3301062Z   fetch-depth: 1
+2026-10-03T10:38:00.3301666Z   fetch-tags: false
+2026-10-03T10:38:00.3302297Z   show-progress: true
+2026-10-03T10:38:00.3302951Z   lfs: false
+2026-10-03T10:38:00.3303542Z   submodules: false
+2026-10-03T10:38:00.3304187Z   set-safe-directory: true
+2026-10-03T10:38:00.3304898Z   allow-unsafe-pr-checkout: false
+2026-10-03T10:38:00.3305927Z env:
+2026-10-03T10:38:00.3313115Z   GH_TOKEN: ***
+2026-10-03T10:38:00.3313765Z ##[endgroup]
+2026-10-03T10:38:00.4154291Z Syncing repository: duuu-hub/bb-scanner
+2026-10-03T10:38:00.4156706Z ##[group]Getting Git version info
+2026-10-03T10:38:00.4157680Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-03T10:38:00.4159228Z [command]/usr/bin/git version
+2026-10-03T10:38:00.4236494Z git version 2.55.0
+2026-10-03T10:38:00.4251310Z ##[endgroup]
+2026-10-03T10:38:00.4265536Z Temporarily overriding HOME='/home/runner/work/_temp/6e514e75-44ed-441a-98b3-50c01b13b014' before making global git config changes
+2026-10-03T10:38:00.4267958Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T10:38:00.4271739Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T10:38:00.4318952Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-03T10:38:00.4322537Z ##[group]Initializing the repository
+2026-10-03T10:38:00.4326952Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T10:38:00.4409840Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-03T10:38:00.4439599Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-03T10:38:00.4440697Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-03T10:38:00.4441371Z hint: call:
+2026-10-03T10:38:00.4441721Z hint:
+2026-10-03T10:38:00.4442174Z hint: 	git config --global init.defaultBranch <name>
+2026-10-03T10:38:00.4442723Z hint:
+2026-10-03T10:38:00.4443226Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-03T10:38:00.4444053Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-03T10:38:00.4444699Z hint:
+2026-10-03T10:38:00.4445058Z hint: 	git branch -m <name>
+2026-10-03T10:38:00.4445463Z hint:
+2026-10-03T10:38:00.4446041Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-03T10:38:00.4446948Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-03T10:38:00.4448677Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-03T10:38:00.4459872Z ##[endgroup]
+2026-10-03T10:38:00.4461149Z ##[group]Disabling automatic garbage collection
+2026-10-03T10:38:00.4463206Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-03T10:38:00.4494982Z ##[endgroup]
+2026-10-03T10:38:00.4496168Z ##[group]Setting up auth
+2026-10-03T10:38:00.4501138Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T10:38:00.4534751Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-03T10:38:00.4820150Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T10:38:00.4854591Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-03T10:38:00.5063655Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T10:38:00.5094859Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-03T10:38:00.5285626Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-03T10:38:00.5321040Z ##[endgroup]
+2026-10-03T10:38:00.5322093Z ##[group]Fetching the repository
+2026-10-03T10:38:00.5328744Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3d3f315a426f72fefd7933347f71061e725cdf54:refs/remotes/origin/research-session-opening-range-sweep-v20
+2026-10-03T10:38:01.3153031Z From https://github.com/duuu-hub/bb-scanner
+2026-10-03T10:38:01.3155339Z  * [new ref]         3d3f315a426f72fefd7933347f71061e725cdf54 -> origin/research-session-opening-range-sweep-v20
+2026-10-03T10:38:01.3158827Z ##[endgroup]
+2026-10-03T10:38:01.3159797Z ##[group]Determining the checkout info
+2026-10-03T10:38:01.3160853Z ##[endgroup]
+2026-10-03T10:38:01.3162984Z [command]/usr/bin/git sparse-checkout disable
+2026-10-03T10:38:01.3209836Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-03T10:38:01.3236988Z ##[group]Checking out the ref
+2026-10-03T10:38:01.3241129Z [command]/usr/bin/git checkout --progress --force -B research-session-opening-range-sweep-v20 refs/remotes/origin/research-session-opening-range-sweep-v20
+2026-10-03T10:38:01.5279855Z Switched to a new branch 'research-session-opening-range-sweep-v20'
+2026-10-03T10:38:01.5282934Z branch 'research-session-opening-range-sweep-v20' set up to track 'origin/research-session-opening-range-sweep-v20'.
+2026-10-03T10:38:01.5293573Z ##[endgroup]
+2026-10-03T10:38:01.5332189Z [command]/usr/bin/git log -1 --format=%H
+2026-10-03T10:38:01.5354801Z 3d3f315a426f72fefd7933347f71061e725cdf54
+2026-10-03T10:38:01.5635892Z ##[group]Run actions/setup-python@v5
+2026-10-03T10:38:01.5636211Z with:
+2026-10-03T10:38:01.5636426Z   python-version: 3.12
+2026-10-03T10:38:01.5636651Z   check-latest: false
+2026-10-03T10:38:01.5639065Z   token: ***
+2026-10-03T10:38:01.5639301Z   update-environment: true
+2026-10-03T10:38:01.5639553Z   allow-prereleases: false
+2026-10-03T10:38:01.5639796Z   freethreaded: false
+2026-10-03T10:38:01.5640010Z env:
+2026-10-03T10:38:01.5642099Z   GH_TOKEN: ***
+2026-10-03T10:38:01.5642308Z ##[endgroup]
+2026-10-03T10:38:01.6676402Z ##[group]Installed versions
+2026-10-03T10:38:01.6748730Z (node:2141) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T10:38:01.6749777Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T10:38:01.6750436Z Successfully set up CPython (3.12.14)
+2026-10-03T10:38:01.6751104Z ##[endgroup]
+2026-10-03T10:38:01.6881734Z ##[group]Run set -euo pipefail
+2026-10-03T10:38:01.6882088Z [36;1mset -euo pipefail[0m
+2026-10-03T10:38:01.6882406Z [36;1mpip install pandas==2.3.3 numpy==2.3.3[0m
+2026-10-03T10:38:01.7112428Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T10:38:01.7112837Z env:
+2026-10-03T10:38:01.7115267Z   GH_TOKEN: ***
+2026-10-03T10:38:01.7115563Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:01.7115983Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:01.7116401Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:01.7116790Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:01.7117141Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:01.7117496Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:01.7117831Z ##[endgroup]
+2026-10-03T10:38:03.6333159Z Collecting pandas==2.3.3
+2026-10-03T10:38:03.6754795Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-03T10:38:03.8575524Z Collecting numpy==2.3.3
+2026-10-03T10:38:03.8629236Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-03T10:38:03.8865153Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-03T10:38:03.8895244Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-03T10:38:03.9147004Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-03T10:38:03.9176230Z   Downloading pytz-2026.4-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-03T10:38:03.9294085Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-03T10:38:03.9323989Z   Downloading tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-03T10:38:03.9436183Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-03T10:38:03.9467393Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-03T10:38:03.9559792Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-03T10:38:04.0494329Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 137.3 MB/s  0:00:00
+2026-10-03T10:38:04.0554004Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-03T10:38:04.2019740Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 113.4 MB/s  0:00:00
+2026-10-03T10:38:04.2051685Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-03T10:38:04.2170007Z Downloading pytz-2026.4-py2.py3-none-any.whl (506 kB)
+2026-10-03T10:38:04.2231290Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-03T10:38:04.2280764Z Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-03T10:38:04.4504465Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+2026-10-03T10:38:10.0584918Z 
+2026-10-03T10:38:10.0596448Z Successfully installed numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.4 six-1.17.0 tzdata-2026.5
+2026-10-03T10:38:10.1175793Z ##[group]Run actions/download-artifact@v4
+2026-10-03T10:38:10.1176033Z with:
+2026-10-03T10:38:10.1176242Z   pattern: session-opening-range-sweep-v20-dev-[0-7]
+2026-10-03T10:38:10.1176496Z   path: dev-parts
+2026-10-03T10:38:10.1176686Z   merge-multiple: false
+2026-10-03T10:38:10.1176879Z   repository: duuu-hub/bb-scanner
+2026-10-03T10:38:10.1177078Z   run-id: 37116650810
+2026-10-03T10:38:10.1177246Z env:
+2026-10-03T10:38:10.1179742Z   GH_TOKEN: ***
+2026-10-03T10:38:10.1179994Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:10.1180344Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:10.1180679Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:10.1180978Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:10.1181286Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:10.1181612Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:10.1181870Z ##[endgroup]
+2026-10-03T10:38:10.2452108Z (node:2176) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T10:38:10.2453283Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T10:38:10.3510995Z Found 9 artifact(s)
+2026-10-03T10:38:10.3512370Z Filtering artifacts by pattern 'session-opening-range-sweep-v20-dev-[0-7]'
+2026-10-03T10:38:10.3533219Z Preparing to download the following artifacts:
+2026-10-03T10:38:10.3534170Z - session-opening-range-sweep-v20-dev-6 (ID: 11272525177, Size: 81793094, Expected Digest: sha256:c2cf3b8383252cb3c6b5bbed0faf1f0c343cef40029a4a74b7bb66fae4a4113b)
+2026-10-03T10:38:10.3535580Z - session-opening-range-sweep-v20-dev-7 (ID: 11272390400, Size: 81579506, Expected Digest: sha256:bd5e5b5f03838e683bea2c151181f700d025ab03893b5834a3dd665e9502992a)
+2026-10-03T10:38:10.3537127Z - session-opening-range-sweep-v20-dev-4 (ID: 11272220706, Size: 73393654, Expected Digest: sha256:3a8603c857b0e9b16f71e44f3f294a6f0e44578221ae416024fca4fe9ff870a5)
+2026-10-03T10:38:10.3538743Z - session-opening-range-sweep-v20-dev-5 (ID: 11271812237, Size: 116640077, Expected Digest: sha256:f219ca5c9949eac00bcf433cb018c17517589472e01598e2d7143ef12b790dbf)
+2026-10-03T10:38:10.3540222Z - session-opening-range-sweep-v20-dev-2 (ID: 11271592446, Size: 87713584, Expected Digest: sha256:e868541712c22125ed34f30e7c79b4ab74932a9e4a2261504c0573fda4c39b68)
+2026-10-03T10:38:10.3541731Z - session-opening-range-sweep-v20-dev-0 (ID: 11271572355, Size: 91031203, Expected Digest: sha256:2a5262b9e2422f58bbd90d74909a9bfad3b11a013b769bac39e13b29263f242e)
+2026-10-03T10:38:10.3543273Z - session-opening-range-sweep-v20-dev-3 (ID: 11271437800, Size: 84793366, Expected Digest: sha256:ec0ff0dfc2f844d6af3e7c72ab0b86ae0b06c104e8202c2a6f9220a16b95bbca)
+2026-10-03T10:38:10.3544769Z - session-opening-range-sweep-v20-dev-1 (ID: 11271432793, Size: 92412465, Expected Digest: sha256:70918dca54cb0bca4244cc100cf4fda0d4bd69b6b48eff706f3c8abbd3d7583b)
+2026-10-03T10:38:10.4846814Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-e41d3249-6d2d-5e38-887f-519bd3fd627e/artifacts/761ff03287f9e90fbfd5ab6f89cd79b7d4865fc71f24565f72fa82fd6e30ae1e.zip
+2026-10-03T10:38:10.4848318Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-0
+2026-10-03T10:38:10.4866172Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-e4f8573b-ce2b-5682-ae63-4fa3ab5c13a6/artifacts/c099b2a845d468fa870252da98ba76e1eeeb1f9a2ed84e1086bc6f498140a85b.zip
+2026-10-03T10:38:10.4868046Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-6
+2026-10-03T10:38:10.4943394Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-077a4ae5-5232-5854-a776-f103a48851b4/artifacts/7a4eeec79f99353414d7a5ed8d8c1f03728c1fa277139920df21ddc4f944f463.zip
+2026-10-03T10:38:10.4944540Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-3
+2026-10-03T10:38:10.5010022Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-cd32821b-433c-5772-82df-a1b992f3f3d8/artifacts/c3ec9284c6b8d8104e805ebe007a439274ec20df660ba9107f48b8c10f0b1d5f.zip
+2026-10-03T10:38:10.5011910Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-7
+2026-10-03T10:38:10.5015179Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-8bd8e936-37a8-5bc1-b239-c8d506b9c2b8/artifacts/5bed7aa3e72c9b471cce9204e34d9442dcb8195ec1fa0698186f0ab9ff974b04.zip
+2026-10-03T10:38:10.5016373Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-1
+2026-10-03T10:38:10.5022686Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-1c2f3571-8e3c-5030-a3b3-42a0066c8032/artifacts/50f098cdb3358829b17111b243f4d27421b2c3bebb1b7fbd8869b702b56bd90c.zip
+2026-10-03T10:38:10.5024868Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-2
+2026-10-03T10:38:10.5092123Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-dd890697-81e2-503a-9cdb-4d6c46188e90/artifacts/fe5f5c0e4a5f0dbd833181733a7a7702e3f40e27ecef47f2647d2e3334955801.zip
+2026-10-03T10:38:10.5094124Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-5
+2026-10-03T10:38:10.5406046Z Redirecting to blob download url: https://productionresultssa9.blob.core.windows.net/actions-results/fe864105-cd09-890e-8c4f-0334f8d3f137/workflow-job-run-18f3aa16-843e-5318-83b8-fd1aff8e04ee/artifacts/324ed6bf73efdd62d8d40569bfec3e382369f895b9e98a2ed8747110d2830003.zip
+2026-10-03T10:38:10.5407218Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/dev-parts/session-opening-range-sweep-v20-dev-4
+2026-10-03T10:38:10.5952560Z (node:2176) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-03T10:38:12.7885216Z SHA256 digest of downloaded artifact is 3a8603c857b0e9b16f71e44f3f294a6f0e44578221ae416024fca4fe9ff870a5
+2026-10-03T10:38:12.7886032Z Artifact download completed successfully.
+2026-10-03T10:38:12.9963224Z SHA256 digest of downloaded artifact is bd5e5b5f03838e683bea2c151181f700d025ab03893b5834a3dd665e9502992a
+2026-10-03T10:38:12.9963999Z Artifact download completed successfully.
+2026-10-03T10:38:12.9993528Z SHA256 digest of downloaded artifact is c2cf3b8383252cb3c6b5bbed0faf1f0c343cef40029a4a74b7bb66fae4a4113b
+2026-10-03T10:38:12.9994314Z Artifact download completed successfully.
+2026-10-03T10:38:13.0756543Z SHA256 digest of downloaded artifact is ec0ff0dfc2f844d6af3e7c72ab0b86ae0b06c104e8202c2a6f9220a16b95bbca
+2026-10-03T10:38:13.0757085Z Artifact download completed successfully.
+2026-10-03T10:38:13.0991231Z SHA256 digest of downloaded artifact is e868541712c22125ed34f30e7c79b4ab74932a9e4a2261504c0573fda4c39b68
+2026-10-03T10:38:13.0991870Z Artifact download completed successfully.
+2026-10-03T10:38:13.1283133Z SHA256 digest of downloaded artifact is 2a5262b9e2422f58bbd90d74909a9bfad3b11a013b769bac39e13b29263f242e
+2026-10-03T10:38:13.1283917Z Artifact download completed successfully.
+2026-10-03T10:38:13.1541613Z SHA256 digest of downloaded artifact is 70918dca54cb0bca4244cc100cf4fda0d4bd69b6b48eff706f3c8abbd3d7583b
+2026-10-03T10:38:13.1542172Z Artifact download completed successfully.
+2026-10-03T10:38:13.3564947Z SHA256 digest of downloaded artifact is f219ca5c9949eac00bcf433cb018c17517589472e01598e2d7143ef12b790dbf
+2026-10-03T10:38:13.3565679Z Artifact download completed successfully.
+2026-10-03T10:38:13.3566251Z Total of 8 artifact(s) downloaded
+2026-10-03T10:38:13.3573101Z Download artifact has finished successfully
+2026-10-03T10:38:13.3741779Z ##[group]Run set -euo pipefail
+2026-10-03T10:38:13.3742100Z [36;1mset -euo pipefail[0m
+2026-10-03T10:38:13.3742535Z [36;1mpython scripts/session_opening_range_sweep_v20.py select --parts dev-parts --out selected-input[0m
+2026-10-03T10:38:13.3742979Z [36;1mpython - <<'SELECT'[0m
+2026-10-03T10:38:13.3743226Z [36;1mimport json,os[0m
+2026-10-03T10:38:13.3743569Z [36;1mn=len(json.load(open('selected-input/selection.json'))['policies'])[0m
+2026-10-03T10:38:13.3744050Z [36;1mwith open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')[0m
+2026-10-03T10:38:13.3744422Z [36;1mSELECT[0m
+2026-10-03T10:38:13.3802630Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T10:38:13.3802958Z env:
+2026-10-03T10:38:13.3805131Z   GH_TOKEN: ***
+2026-10-03T10:38:13.3805424Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:13.3805814Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:13.3806229Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:13.3806575Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:13.3806916Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:13.3807270Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:13.3807573Z ##[endgroup]
+2026-10-03T10:38:14.3157562Z V20_OPENING_RANGE_SWEEP_SELECT {"status": "NO_DEVELOPMENT_POLICY_SURVIVOR", "cells_examined": 96, "selected": [], "policies": [], "union_name": "SESSION_OPENING_RANGE_LIQUIDITY_SWEEP_UNION", "source_context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614", "source_symbols": 856, "economic_surviving_cells": 0, "rejection_counts": {"N_LT_300": 90, "NET40_MEAN_BP_NONPOSITIVE": 95, "NET40_R_MEAN_NONPOSITIVE": 96, "2021_N_LT_30": 90, "2021_DATES_LT_20": 84, "2022_net40_R_NONPOSITIVE": 96, "2022_net40_mean_bp_NONPOSITIVE": 96, "2022_day_R_NONPOSITIVE": 96, "2023_N_LT_30": 66, "2023_net40_R_NONPOSITIVE": 88, "2023_net40_mean_bp_NONPOSITIVE": 87, "2023_day_R_NONPOSITIVE": 88, "2021_net40_R_NONPOSITIVE": 82, "2021_net40_mean_bp_NONPOSITIVE": 81, "SYMBOLS_LT_60": 62, "TOP_SYMBOL_GT_30PCT": 50, "2021_day_R_NONPOSITIVE": 81, "2022_N_LT_30": 60, "2022_DATES_LT_20": 60, "2023_DATES_LT_20": 48}, "note": "Frozen session opening-range liquidity sweep reversal experiment. Overlapping diagnostics are not executable account growth."}
+2026-10-03T10:38:14.3835752Z ##[group]Run set -euo pipefail
+2026-10-03T10:38:14.3836046Z [36;1mset -euo pipefail[0m
+2026-10-03T10:38:14.3836281Z [36;1mpython - <<'SAVE'[0m
+2026-10-03T10:38:14.3836511Z [36;1mfrom pathlib import Path[0m
+2026-10-03T10:38:14.3836778Z [36;1mimport shutil,json,os,hashlib[0m
+2026-10-03T10:38:14.3837220Z [36;1mp=Path('research/session-opening-range-sweep-v20/run-'+os.environ['GITHUB_RUN_ID']+'/development')[0m
+2026-10-03T10:38:14.3837673Z [36;1mshutil.copytree('selected-input',p)[0m
+2026-10-03T10:38:14.3838079Z [36;1mfor name in ['scan_meta.json','exclusions.csv','frozen_context.json','source_check.json']:[0m
+2026-10-03T10:38:14.3838751Z [36;1m for i,f in enumerate(sorted(Path('dev-parts').rglob(name))):[0m
+2026-10-03T10:38:14.3839141Z [36;1m  shutil.copyfile(f,p/('full_dev_shard_'+str(i)+'_'+name))[0m
+2026-10-03T10:38:14.3839678Z [36;1m(p/'provenance.json').write_text(json.dumps(dict(run=int(os.environ['GITHUB_RUN_ID']),code_commit=os.environ['GITHUB_SHA'],[0m
+2026-10-03T10:38:14.3840622Z [36;1m source_data_run=36095439671,cells=96,sha256={str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file()}),indent=2))[0m
+2026-10-03T10:38:14.3841151Z [36;1mSAVE[0m
+2026-10-03T10:38:14.3897203Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T10:38:14.3897514Z env:
+2026-10-03T10:38:14.3899884Z   GH_TOKEN: ***
+2026-10-03T10:38:14.3900169Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.3900568Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:14.3900941Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.3901275Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.3901606Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.3901945Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:14.3902246Z ##[endgroup]
+2026-10-03T10:38:14.4464748Z ##[group]Run set -euo pipefail
+2026-10-03T10:38:14.4465073Z [36;1mset -euo pipefail[0m
+2026-10-03T10:38:14.4465347Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-03T10:38:14.4465754Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-03T10:38:14.4466256Z [36;1mgit checkout -b "research-session-opening-range-sweep-v20-dev-37116650810"[0m
+2026-10-03T10:38:14.4466775Z [36;1mgit add "research/session-opening-range-sweep-v20/run-37116650810/development"[0m
+2026-10-03T10:38:14.4467246Z [36;1mgit commit -m "Preserve V20 dev before subsequent research stages"[0m
+2026-10-03T10:38:14.4467599Z [36;1mgit push origin HEAD[0m
+2026-10-03T10:38:14.4520366Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-03T10:38:14.4520679Z env:
+2026-10-03T10:38:14.4522827Z   GH_TOKEN: ***
+2026-10-03T10:38:14.4523122Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.4523569Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:14.4523954Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.4524297Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.4524644Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:14.4525008Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:14.4525324Z ##[endgroup]
+2026-10-03T10:38:14.4641099Z Switched to a new branch 'research-session-opening-range-sweep-v20-dev-37116650810'
+2026-10-03T10:38:14.6274503Z [research-session-opening-range-sweep-v20-dev-37116650810 5724a11] Preserve V20 dev before subsequent research stages
+2026-10-03T10:38:14.6275380Z  51 files changed, 39103 insertions(+)
+2026-10-03T10:38:14.6276121Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-0/independent_candidates.csv.gz
+2026-10-03T10:38:14.6276851Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-0/scan_meta.json
+2026-10-03T10:38:14.6277517Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-1/independent_candidates.csv.gz
+2026-10-03T10:38:14.6278615Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-1/scan_meta.json
+2026-10-03T10:38:14.6279600Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-2/independent_candidates.csv.gz
+2026-10-03T10:38:14.6280712Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-2/scan_meta.json
+2026-10-03T10:38:14.6281835Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-3/independent_candidates.csv.gz
+2026-10-03T10:38:14.6283043Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-3/scan_meta.json
+2026-10-03T10:38:14.6284459Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-4/independent_candidates.csv.gz
+2026-10-03T10:38:14.6285567Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-4/scan_meta.json
+2026-10-03T10:38:14.6286632Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-5/independent_candidates.csv.gz
+2026-10-03T10:38:14.6287699Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-5/scan_meta.json
+2026-10-03T10:38:14.6288939Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-6/independent_candidates.csv.gz
+2026-10-03T10:38:14.6290037Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-6/scan_meta.json
+2026-10-03T10:38:14.6291131Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-7/independent_candidates.csv.gz
+2026-10-03T10:38:14.6292322Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/dev-7/scan_meta.json
+2026-10-03T10:38:14.6292997Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/development_policy_cells.csv
+2026-10-03T10:38:14.6293693Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_0_exclusions.csv
+2026-10-03T10:38:14.6294410Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_0_frozen_context.json
+2026-10-03T10:38:14.6295129Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_0_scan_meta.json
+2026-10-03T10:38:14.6295833Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_0_source_check.json
+2026-10-03T10:38:14.6296535Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_1_exclusions.csv
+2026-10-03T10:38:14.6297240Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_1_frozen_context.json
+2026-10-03T10:38:14.6297934Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_1_scan_meta.json
+2026-10-03T10:38:14.6299113Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_1_source_check.json
+2026-10-03T10:38:14.6300245Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_2_exclusions.csv
+2026-10-03T10:38:14.6301340Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_2_frozen_context.json
+2026-10-03T10:38:14.6302315Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_2_scan_meta.json
+2026-10-03T10:38:14.6302986Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_2_source_check.json
+2026-10-03T10:38:14.6303655Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_3_exclusions.csv
+2026-10-03T10:38:14.6304326Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_3_frozen_context.json
+2026-10-03T10:38:14.6304978Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_3_scan_meta.json
+2026-10-03T10:38:14.6305622Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_3_source_check.json
+2026-10-03T10:38:14.6306265Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_4_exclusions.csv
+2026-10-03T10:38:14.6306916Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_4_frozen_context.json
+2026-10-03T10:38:14.6307568Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_4_scan_meta.json
+2026-10-03T10:38:14.6308643Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_4_source_check.json
+2026-10-03T10:38:14.6309319Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_5_exclusions.csv
+2026-10-03T10:38:14.6309977Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_5_frozen_context.json
+2026-10-03T10:38:14.6310628Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_5_scan_meta.json
+2026-10-03T10:38:14.6311280Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_5_source_check.json
+2026-10-03T10:38:14.6311929Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_6_exclusions.csv
+2026-10-03T10:38:14.6312697Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_6_frozen_context.json
+2026-10-03T10:38:14.6313369Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_6_scan_meta.json
+2026-10-03T10:38:14.6314032Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_6_source_check.json
+2026-10-03T10:38:14.6314678Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_7_exclusions.csv
+2026-10-03T10:38:14.6315350Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_7_frozen_context.json
+2026-10-03T10:38:14.6315997Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_7_scan_meta.json
+2026-10-03T10:38:14.6316669Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/full_dev_shard_7_source_check.json
+2026-10-03T10:38:14.6317308Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/provenance.json
+2026-10-03T10:38:14.6317887Z  create mode 100644 research/session-opening-range-sweep-v20/run-37116650810/development/selection.json
+2026-10-03T10:38:17.4605273Z remote: 
+2026-10-03T10:38:17.4605848Z remote: Create a pull request for 'research-session-opening-range-sweep-v20-dev-37116650810' on GitHub by visiting:        
+2026-10-03T10:38:17.4606621Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-session-opening-range-sweep-v20-dev-37116650810        
+2026-10-03T10:38:17.4607104Z remote: 
+2026-10-03T10:38:17.4616000Z To https://github.com/duuu-hub/bb-scanner
+2026-10-03T10:38:17.4616535Z  * [new branch]      HEAD -> research-session-opening-range-sweep-v20-dev-37116650810
+2026-10-03T10:38:17.4700538Z ##[group]Run actions/upload-artifact@v4
+2026-10-03T10:38:17.4700823Z with:
+2026-10-03T10:38:17.4701065Z   name: session-opening-range-sweep-v20-selected
+2026-10-03T10:38:17.4701372Z   path: selected-input/
+2026-10-03T10:38:17.4701595Z   retention-days: 30
+2026-10-03T10:38:17.4701815Z   compression-level: 0
+2026-10-03T10:38:17.4702039Z   if-no-files-found: warn
+2026-10-03T10:38:17.4702261Z   overwrite: false
+2026-10-03T10:38:17.4702475Z   include-hidden-files: false
+2026-10-03T10:38:17.4702709Z env:
+2026-10-03T10:38:17.4705099Z   GH_TOKEN: ***
+2026-10-03T10:38:17.4705392Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:17.4705789Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-03T10:38:17.4706177Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:17.4706522Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:17.4706892Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-03T10:38:17.4707237Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-03T10:38:17.4707535Z ##[endgroup]
+2026-10-03T10:38:17.6040413Z (node:2221) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T10:38:17.6041393Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T10:38:17.6132050Z With the provided path, there will be 18 files uploaded
+2026-10-03T10:38:17.6136482Z Artifact name is valid!
+2026-10-03T10:38:17.6136994Z Root directory input is valid!
+2026-10-03T10:38:17.8013481Z Beginning upload of artifact content to blob storage
+2026-10-03T10:38:17.8304498Z (node:2221) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-03T10:38:17.8907736Z Uploaded bytes 222237
+2026-10-03T10:38:17.9073099Z Finished uploading artifact content to blob storage!
+2026-10-03T10:38:17.9074028Z SHA256 digest of uploaded artifact zip is bfe3f87e15bba216ce10df1817e4746f7319160e54c950588baf5a979f4c57dd
+2026-10-03T10:38:17.9075453Z Finalizing artifact upload
+2026-10-03T10:38:18.1331571Z Artifact session-opening-range-sweep-v20-selected.zip successfully finalized. Artifact ID 11272310824
+2026-10-03T10:38:18.1332788Z Artifact session-opening-range-sweep-v20-selected has been successfully uploaded! Final size is 222237 bytes. Artifact ID is 11272310824
+2026-10-03T10:38:18.1338884Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37116650810/artifacts/11272310824
+2026-10-03T10:38:18.1479227Z Post job cleanup.
+2026-10-03T10:38:18.2418838Z (node:2233) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-03T10:38:18.2419506Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-03T10:38:18.2601610Z Post job cleanup.
+2026-10-03T10:38:18.3302779Z [command]/usr/bin/git version
+2026-10-03T10:38:18.3336807Z git version 2.55.0
+2026-10-03T10:38:18.3364658Z Temporarily overriding HOME='/home/runner/work/_temp/a72bc84f-93fd-4448-a971-b9e149025141' before making global git config changes
+2026-10-03T10:38:18.3365742Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T10:38:18.3368682Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-03T10:38:18.3399707Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T10:38:18.3427061Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-03T10:38:18.3691085Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T10:38:18.3707043Z http.https://github.com/.extraheader
+2026-10-03T10:38:18.3722648Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-03T10:38:18.3757192Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-03T10:38:18.3997604Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T10:38:18.4028531Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-03T10:38:18.4361622Z Evaluate and set job outputs
+2026-10-03T10:38:18.4366191Z Set output 'selected_count'
+2026-10-03T10:38:18.4367692Z Cleaning up orphan processes
+2026-10-03T10:38:18.4603801Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
