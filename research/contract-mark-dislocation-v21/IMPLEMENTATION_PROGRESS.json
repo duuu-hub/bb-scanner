@@ -1,47 +1,34 @@
 {
   "schema_version": 1,
-  "stage": "SOURCE_LOADER_AND_SIGNAL_CORE_VALIDATED",
-  "recorded_at": "2026-10-03T12:48:27Z",
+  "stage": "FULL_PIPELINE_AND_ACTIONS_WORKFLOW_VALIDATED",
+  "recorded_at": "2026-10-03T16:46:33Z",
   "market_result": null,
   "profitability_claim": false,
   "implemented": [
     "official Binance USD-M monthly 15m mark-price loader with adjacent checksum verification",
-    "immutable ZIP, checksum, NPZ, and metadata cache validation",
+    "immutable ZIP, checksum, NPZ, metadata cache, corruption detection, and evidence copying",
     "exact-timestamp mark/contract alignment with no fill or nearest-time substitution",
     "preregistered 16-entry by 2-hold by 3-exit 96-policy signal geometry",
-    "next-contiguous-open entry, favorable-gap exclusion, structural stop floor/cap, and canonical resolver integration",
-    "95 percent per-year source-coverage gate and development selection gates"
+    "verified eight-shard scanner with explicit mark gaps and source-coverage accounting",
+    "DEV selector preserving all 96 cells and freezing survivors before GATE",
+    "canonical 1-minute chronology and strict account-engine integration",
+    "GitHub Actions validation, eight DEV shards, conditional GATE/accounts, and evidence preservation"
   ],
-  "new_tests": {
-    "command": "python -m unittest tests.test_mark_price_archive_v21 tests.test_contract_mark_dislocation_v21 -v",
-    "ran": 18,
-    "passed": 18,
-    "failed": 0
-  },
-  "repository_regression": {
-    "command": "python -m unittest discover -s tests -v",
-    "ran": 561,
-    "passed": 555,
-    "errors": 6,
-    "strategy_regressions_observed": 0,
-    "environment_errors": {
-      "dependency": "requests==2.32.5",
-      "declared_in": [
-        "requirements.txt",
-        "requirements-backtest.txt"
-      ],
-      "local_runtime_import_error_modules": [
-        "test_auto_trader_safety",
-        "test_contract_filters (2 tests)",
-        "test_long3_signal_adapter",
-        "test_runtime_plumbing",
-        "test_smc_forward"
-      ]
+  "validation": {
+    "new_tests": {"command": "python scripts/validate_contract_mark_dislocation_v21.py --only-new", "ran": 18, "passed": 18, "failed": 0},
+    "registered_research_regression": {"command": "python scripts/validate_contract_mark_dislocation_v21.py", "ran": 519, "passed": 519, "failed": 0, "errors": 0},
+    "synthetic_pipeline": {
+      "command": "python scripts/contract_mark_dislocation_v21.py smoke --out /tmp/v21-smoke-final",
+      "shards": 8,
+      "cells": 96,
+      "coverage_2021_2022_2023_pct": [100.0, 100.0, 100.0],
+      "status": "PASS_NO_SYNTHETIC_SURVIVOR",
+      "market_profitability_claim": false
     },
-    "note": "The six errors occurred before test execution because the transient local runtime lacked the repository-declared requests dependency. The pinned Actions validation must install requirements and obtain a clean full-suite result before an actual research run."
+    "workflow_yaml_parse": "PASS"
   },
   "actual_source_probe_completed": false,
   "actual_development_scan_completed": false,
   "actual_account_validation_completed": false,
-  "next_action": "Complete scanner, frozen source manifest, selector/account integration, synthetic eight-shard pipeline, and pinned GitHub Actions workflow; then validate official-source coverage and run the preregistered development experiment."
+  "next_action": "Commit the frozen implementation and trigger the pinned GitHub Actions workflow; inspect actual source-probe logs and every completed market artifact before making any result claim."
 }
