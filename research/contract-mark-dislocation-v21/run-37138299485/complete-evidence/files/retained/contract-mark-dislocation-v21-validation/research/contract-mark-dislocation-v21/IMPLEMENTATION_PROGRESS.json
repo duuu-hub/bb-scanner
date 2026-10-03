@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "stage": "FULL_PIPELINE_AND_ACTIONS_WORKFLOW_VALIDATED",
+  "recorded_at": "2026-10-03T16:46:33Z",
+  "market_result": null,
+  "profitability_claim": false,
+  "implemented": [
+    "official Binance USD-M monthly 15m mark-price loader with adjacent checksum verification",
+    "immutable ZIP, checksum, NPZ, metadata cache, corruption detection, and evidence copying",
+    "exact-timestamp mark/contract alignment with no fill or nearest-time substitution",
+    "preregistered 16-entry by 2-hold by 3-exit 96-policy signal geometry",
+    "verified eight-shard scanner with explicit mark gaps and source-coverage accounting",
+    "DEV selector preserving all 96 cells and freezing survivors before GATE",
+    "canonical 1-minute chronology and strict account-engine integration",
+    "GitHub Actions validation, eight DEV shards, conditional GATE/accounts, and evidence preservation"
+  ],
+  "validation": {
+    "new_tests": {"command": "python scripts/validate_contract_mark_dislocation_v21.py --only-new", "ran": 18, "passed": 18, "failed": 0},
+    "registered_research_regression": {"command": "python scripts/validate_contract_mark_dislocation_v21.py", "ran": 519, "passed": 519, "failed": 0, "errors": 0},
+    "synthetic_pipeline": {
+      "command": "python scripts/contract_mark_dislocation_v21.py smoke --out /tmp/v21-smoke-final",
+      "shards": 8,
+      "cells": 96,
+      "coverage_2021_2022_2023_pct": [100.0, 100.0, 100.0],
+      "status": "PASS_NO_SYNTHETIC_SURVIVOR",
+      "market_profitability_claim": false
+    },
+    "workflow_yaml_parse": "PASS"
+  },
+  "actual_source_probe_completed": false,
+  "actual_development_scan_completed": false,
+  "actual_account_validation_completed": false,
+  "next_action": "Commit the frozen implementation and trigger the pinned GitHub Actions workflow; inspect actual source-probe logs and every completed market artifact before making any result claim."
+}
