@@ -32,10 +32,17 @@ class TestFragmentedChaseExhaustionV22(unittest.TestCase):
         self.assertEqual(len(v22.configurations()),16);self.assertEqual(len(v22.policies()),96)
 
     def test_btc_context_uses_source_loader_not_trade_count_validator(self):
-        v22.bind_engine()
-        self.assertIs(v22.engine.BTC_LOAD,v22.SOURCE_LOAD)
-        self.assertIs(v22.engine.BTC_FEATURES,v22.SOURCE_FEATURES)
-        self.assertIs(v22.engine.load,v22.load)
+        names=('CONTEXT','COLUMNS','LOG_PREFIX','configurations','policies','load',
+            'features','intents','policy_rows','BTC_LOAD','BTC_FEATURES')
+        original={name:getattr(v22.engine,name) for name in names}
+        try:
+            v22.bind_engine()
+            self.assertIs(v22.engine.BTC_LOAD,v22.SOURCE_LOAD)
+            self.assertIs(v22.engine.BTC_FEATURES,v22.SOURCE_FEATURES)
+            self.assertIs(v22.engine.load,v22.load)
+        finally:
+            for name,value in original.items():
+                setattr(v22.engine,name,value)
 
     def test_long_after_down_chase(self):
         raw,f,btc,cfg,i=self.fixture(1);self.assertTrue(v22.event_mask(cfg,raw,f)[i])
