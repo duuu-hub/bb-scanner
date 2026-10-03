@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T00:28:00Z",
+  "updated_at": "2026-10-03T00:30:00Z",
   "interactive_lease": null,
   "current_branch": "research-session-vwap-failed-auction-v17",
   "current_run": 37082108726,
   "current_workflow": ".github/workflows/session-vwap-failed-auction-v17.yml",
   "current_plan": "research/session-vwap-failed-auction-v17/PLAN.md",
-  "latest_research_checkpoint": "V17_RUN1_HASH_ATTESTATION_FAILURE_PRESERVED_RETRY_QUEUED",
+  "latest_research_checkpoint": "V17_RETRY_VALIDATION_473_OF_473_PASS_EIGHT_DEV_SCANS_ACTIVE",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -276,8 +276,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Follow only existing V17 retry run 37082108726. First read actual validation log; if passed continue through eight DEV scans and selection. Do not launch another run.",
-  "phase": "V17_RETRY_VALIDATION_QUEUED",
+  "next_action": "Continue existing V17 run 37082108726 without duplication through all eight official DEV scans, selection, conditional gate/accounts, and preservation. Read saved outcomes directly before any economic claim.",
+  "phase": "V17_DEV_SCANS_RUNNING",
   "last_failure": {
     "version": "V17",
     "run": 37081846528,
@@ -3588,5 +3588,21 @@
     "saved_v13_audit": "PASS",
     "canonical_chronology_smoke": "PASS",
     "source": "Actual Actions job log read; validation is not market profit"
+  },
+  "completed_v17_validation": {
+    "run": 37082108726,
+    "job_id": 111084675598,
+    "status": "SUCCESS",
+    "tests": 473,
+    "failures": 0,
+    "errors": 0,
+    "duration_seconds": 60.514,
+    "canonical_chronology_smoke": "PASS",
+    "canonical_invariants": "PASS",
+    "synthetic_shards": 8,
+    "synthetic_cells": 96,
+    "artifact_id": 11258868229,
+    "artifact_digest": "sha256:aa9720771df73e9b90a4428806f61f30b563a28acee58fe780b089def60d35de",
+    "source": "Downloaded actual Actions validation artifact and read logs; not market profitability."
   }
 }
