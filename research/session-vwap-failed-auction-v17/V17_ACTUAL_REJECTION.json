@@ -1,0 +1,72 @@
+{
+  "version": "V17",
+  "hypothesis": "Session VWAP failed-auction reversal",
+  "run": 37090734742,
+  "code_commit": "bc8af04530f986ce0dcc36981ae8a791a364651b",
+  "validation": {
+    "tests_passed": 473,
+    "tests_failed": 0,
+    "chronology": "PASS",
+    "synthetic_cells": 96
+  },
+  "development": {
+    "shards_successful": 8,
+    "cells": 96,
+    "survivors": 0,
+    "n_range": [
+      318,
+      3506
+    ],
+    "symbols_range": [
+      135,
+      215
+    ],
+    "net40_mean_bp_range": [
+      -69.71033644746802,
+      53.05497747118851
+    ],
+    "net40_R_range": [
+      -0.3854652060189183,
+      0.10369303291235035
+    ],
+    "net40_pf_range": [
+      0.39295557813905463,
+      1.6965552922505063
+    ],
+    "positive_net40_mean_cells": 24,
+    "positive_net40_R_cells": 24,
+    "long_positive_R_cells": 24,
+    "short_positive_R_cells": 0
+  },
+  "best_cell": {
+    "policy": "SVWAP_S+1_D30_V20_C10__H16__R15",
+    "n": 318,
+    "symbols": 144,
+    "net40_mean_bp": 53.05497747118851,
+    "net40_R": 0.10369303291235035,
+    "pf": 1.6965552922505063,
+    "year_2021_R": -0.36322790875648275,
+    "year_2022_R": 0.10794341992661632,
+    "year_2023_R": 0.19412242940216087,
+    "year_2021_day_R": -0.35592097892606034,
+    "year_2022_day_R": -0.21444127008486188,
+    "year_2023_day_R": -0.17082437836030712
+  },
+  "rejection_reason": "No cell passed frozen DEV gates. The apparent long-side edge is sparse and regime-dependent: the best cell loses in 2021, has only 25 2021 trades across 14 dates, and its equal-calendar/active-date diagnostic is negative in every DEV year. All 48 short cells have non-positive cost-adjusted R. No gate or account simulation was authorized.",
+  "workflow_note": {
+    "run_conclusion": "failure",
+    "economic_stages": "validate/development/selection successful; gate/accounts skipped because selected_count=0",
+    "technical_failure": "preserve_cycle attempted to copy absent PREEXECUTION_VALIDATION.json after all economic results were already produced",
+    "recovery_workflow": ".github/workflows/session-vwap-failed-auction-v17-evidence-recovery.yml"
+  },
+  "data": {
+    "source_run": 36095439671,
+    "source_context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614",
+    "source_symbols": 856,
+    "development_branch": "research-session-vwap-failed-auction-v17-dev-37090734742",
+    "development_commit": "b00b135",
+    "result_path": "research/session-vwap-failed-auction-v17/run-37090734742/development"
+  },
+  "verdict": "REJECTED",
+  "target_gap": "No cost/risk validated account result; therefore no evidence of +0.7% to +2% per KST calendar day."
+}
