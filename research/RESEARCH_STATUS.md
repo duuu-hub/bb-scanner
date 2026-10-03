@@ -1,3 +1,12 @@
+## 2026-10-04 — V21 evidence recovered; V22 implemented and launched
+
+- V21 evidence-only recovery [37140997407](https://github.com/duuu-hub/bb-scanner/actions/runs/37140997407) completed successfully without rerunning market research.
+- Durable evidence branch: `research-contract-mark-dislocation-v21-evidence-37138299485`, commit `02648c205e88174b8a2b1979bf6542a089b95730`. The complete manifest covers 41,989 files; 174 material files / 26,777,461 bytes are retained verbatim and 41,815 reproducible large files / 5,951,553,789 bytes are hash-only.
+- Implemented V22's frozen fragmented-chase exhaustion reversal, positive-integer trade-count loader, shifted/gap-reset fragmentation baselines, distinct event/confirmation/next-open state, stop floor/cap, midpoint/1.5R/2.5R exits, 16-entry and 96-policy geometry.
+- Local evidence: 16/16 new tests passed; 34/34 V20+V22 relevant regression tests passed; synthetic source-to-eight-shard-to-96-cell pipeline passed. Full local discovery ran 577 tests with 571 passes and six existing import errors solely because local `requests` is absent. These are not claimed as Actions passes.
+- Frozen implementation/preexecution commit: `a28a25b7103a868cc36e0f0dd8f5fc1cc5c15d1b`. Exactly one trigger commit: `0e2923c8a2fcf22c2b958ea0394935aa960a07f6`.
+- Actual Actions run [37146393987](https://github.com/duuu-hub/bb-scanner/actions/runs/37146393987) is queued. It must prove the registered 535-test suite, chronology smoke, synthetic pipeline and real eight-shard DEV scan before any market-performance claim. Do not duplicate it.
+
 ## 2026-10-04 — V21 actual rejection; V22 preregistration
 
 - Actual V21 run: [37138299485](https://github.com/duuu-hub/bb-scanner/actions/runs/37138299485), code `9f83766ccca168002143ff4cd87129f95a7a0c62`. The validation log proves 519/519 tests passed, the conservative chronology smoke passed, and the official BTCUSDT 2022-01 mark-source probe verified 2,976 bars plus checksum.
