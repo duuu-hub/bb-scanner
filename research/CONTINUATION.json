@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T06:01:00Z",
+  "updated_at": "2026-10-03T06:34:00Z",
   "interactive_lease": null,
   "current_branch": "research-session-opening-range-breakout-v19",
   "current_run": null,
   "current_workflow": null,
   "current_plan": "research/session-opening-range-breakout-v19/PLAN.md",
-  "latest_research_checkpoint": "V18_REJECTED_ZERO_OF_96_EVIDENCE_RETRY_ACTIVE_V19_PREREGISTERED",
+  "latest_research_checkpoint": "V18_REJECTED_ZERO_OF_96_MANIFEST_COMPLETE_EVIDENCE_RECOVERY_ACTIVE_V19_PREREGISTERED",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -193,10 +193,15 @@
     "v18_preserve_initial_job": 111140747171,
     "v18_preserve_initial_failure": "TRANSIENT_GITHUB_PUSH_HTTP_500",
     "v18_preserve_retry_job": 111146131308,
-    "v18_preserve_retry_status": "IN_PROGRESS",
+    "v18_preserve_retry_status": "FAILED_GITHUB_PUSH_HTTP_500",
     "v19_branch": "research-session-opening-range-breakout-v19",
     "v19_plan_commit": "0485ee848e8802b398b91b9d911d0b9804ee73d6",
-    "v19_plan_path": "research/session-opening-range-breakout-v19/PLAN.md"
+    "v19_plan_path": "research/session-opening-range-breakout-v19/PLAN.md",
+    "v18_preserve_retry_failure": "SECOND_MONOLITHIC_2_276_505_454_BYTE_GIT_PUSH_HTTP_500",
+    "v18_evidence_recovery_workflow_commit": "fb89783979fc9de3b1e5ff6ecc0c9213fbf8096e",
+    "v18_evidence_recovery_trigger_commit": "cf67e91eadf5c437f7d78391d23785d412ffe12a",
+    "v18_evidence_recovery_run": 37103484177,
+    "v18_complete_evidence_expected_branch": "research-session-opening-impulse-v18-evidence-37100246454"
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -322,8 +327,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Finish auditing the existing V18 evidence-preservation retry without rerunning market research, then implement V19 exactly as preregistered with causal tests and one actual DEV execution.",
-  "phase": "V19_PREREGISTERED_IMPLEMENTATION_PENDING",
+  "next_action": "Audit V18 manifest-complete evidence recovery run 37103484177 without rerunning market research; then implement V19 exactly as preregistered with causal tests and one actual DEV execution.",
+  "phase": "V18_EVIDENCE_RECOVERY_ACTIVE_V19_IMPLEMENTATION_PENDING",
   "last_failure": {
     "version": "V18",
     "run": 37100246454,
@@ -331,7 +336,7 @@
     "primary_reason": "All 96 cells had negative frozen-cost mean return and negative risk-normalized R. Ranges: -62.7614 to -22.2427 bp/trade, R -0.35381 to -0.11791, PF 0.2487 to 0.7752. The least-bad cell was negative in every DEV year and equal-date diagnostic.",
     "selected": 0,
     "account_scenarios": 0,
-    "technical_note": "All eight maps, reduction and DEV scans succeeded. Initial complete-evidence push hit transient GitHub HTTP 500; same preserve job rerun 111146131308 is active and does not rerun market research."
+    "technical_note": "All economic stages completed. Two attempts to push the same 5,268-file / 2,276,505,454-byte monolithic evidence archive failed with GitHub HTTP 500. Recovery run 37103484177 retains all non-binary results/logs and a SHA256 manifest for every file plus Actions artifact digests, omitting only reproducible large official-minute binaries from Git payload; no market stage is rerun."
   },
   "previous_interactive_lease": {
     "owner": "v15-implementation-20261002T1415Z",
