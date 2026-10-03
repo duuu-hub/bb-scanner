@@ -562,3 +562,6 @@ The exact evidence is preserved on `research-fragmented-chase-exhaustion-v22-evi
 Repair audit commit `c3cfc69f6d171f603a8d970fd7793e1f9aefdb63` keeps integer/nonnegative schema checks, excludes zero-count bars from signal and rolling calculations, and requires 96 subsequent valid bars before baselines recover. The 96-policy grid, costs, universe, chronology and account risk rules are unchanged. Local same-process V22+V20 regression passed 36/36; synthetic eight-shard/all-96-cell pipeline passed.
 
 Exactly one repaired run is active: [37160262235](https://github.com/duuu-hub/bb-scanner/actions/runs/37160262235), trigger `9ee40edddb61d072fa24f38b8ab11020970b649c`. This remains execution repair, not a new economic discovery or profitability claim.
+
+
+V22 run5 validation job `111312084020` has now succeeded: frozen 256-hash/856-file input contract, 537/537 registered tests in 60.636 s, zero failures/errors, and all chronology smoke checks passed. All eight repaired DEV shards are active. This is validation evidence only; no market profitability or account-growth result exists yet.
