@@ -122,5 +122,15 @@ class TestFragmentedChaseExhaustionV22(unittest.TestCase):
         aux=np.column_stack((q*.5,np.full(n,1000.)));aux[3,1]=1000.5
         with self.assertRaises(ValueError):v22.features(raw,q,aux)
 
+    def test_zero_trade_bar_is_excluded_and_resets_rolling_baselines(self):
+        n=205;t=base.START+np.arange(n,dtype=np.int64)*base.BAR;c=np.full(n,100.)
+        raw=(t,c.copy(),c*1.001,c*.999,c.copy());q=np.full(n,1e6)
+        aux=np.column_stack((q*.5,np.full(n,1000.)));aux[100,1]=0
+        f=v22.features(raw,q,aux)
+        self.assertTrue(np.isnan(f['average_trade_value'][100]))
+        self.assertFalse(f['eligible'][100])
+        self.assertTrue(np.isnan(f['prior_average_trade_value'][196]))
+        self.assertTrue(np.isfinite(f['prior_average_trade_value'][197]))
+
 
 if __name__=='__main__':unittest.main()
