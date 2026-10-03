@@ -31,6 +31,12 @@ class TestFragmentedChaseExhaustionV22(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(len(v22.configurations()),16);self.assertEqual(len(v22.policies()),96)
 
+    def test_btc_context_uses_source_loader_not_trade_count_validator(self):
+        v22.bind_engine()
+        self.assertIs(v22.engine.BTC_LOAD,v22.SOURCE_LOAD)
+        self.assertIs(v22.engine.BTC_FEATURES,v22.SOURCE_FEATURES)
+        self.assertIs(v22.engine.load,v22.load)
+
     def test_long_after_down_chase(self):
         raw,f,btc,cfg,i=self.fixture(1);self.assertTrue(v22.event_mask(cfg,raw,f)[i])
         rows,_=v22.intents('X',cfg,raw,f,btc,raw[0][0],raw[0][-1]+base.BAR)
