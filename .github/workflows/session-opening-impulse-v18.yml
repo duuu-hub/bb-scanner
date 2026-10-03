@@ -1,0 +1,368 @@
+name: Session Opening Impulse V18 Research Cycle
+'on':
+  push:
+    branches: [research-session-opening-impulse-v18]
+    paths: [.research/session-opening-impulse-v18-run]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: session-opening-impulse-v18-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1
+      - name: Frozen causality, chronology, account and synthetic-pipeline validation
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/session_opening_breadth_v18.py scripts/session_opening_impulse_v18.py scripts/validate_session_opening_impulse_v18.py
+          python scripts/validate_session_opening_impulse_v18.py 2>&1 | tee v18-tests.log
+          python scripts/psar_chronology_smoke.py 2>&1 | tee chronology-smoke.log
+          python scripts/session_opening_impulse_v18.py smoke --out synthetic-v18 2>&1 | tee v18-pipeline-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-validation
+          path: |
+            v18-tests.log
+            chronology-smoke.log
+            v18-pipeline-smoke.log
+            synthetic-v18/
+            research/session-opening-impulse-v18/
+          retention-days: 30
+          compression-level: 0
+
+  dev_breadth_map:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        id: source-cache
+        with:
+          path: data
+          key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+      - name: Fetch and verify immutable source
+        run: |
+          set -euo pipefail
+          if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
+            gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+          fi
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/session-opening-impulse-v18/FROZEN_INPUT_HASHES.json --out source-check.json
+          python scripts/session_opening_breadth_v18.py map --stage DEV --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out breadth-map-${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-dev-breadth-map-${{ matrix.shard }}
+          path: breadth-map-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  dev_breadth_reduce:
+    needs: dev_breadth_map
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: session-opening-impulse-v18-dev-breadth-map-[0-7]
+          path: breadth-maps
+      - run: python scripts/session_opening_breadth_v18.py reduce --stage DEV --parts breadth-maps --out dev-breadth
+      - uses: actions/upload-artifact@v4
+        with:
+          name: session-opening-impulse-v18-dev-breadth
+          path: dev-breadth/
+          retention-days: 30
+          compression-level: 0
+
+  development:
+    needs: dev_breadth_reduce
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        id: source-cache
+        with:
+          path: data
+          key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+      - name: Fetch and verify immutable source
+        run: |
+          set -euo pipefail
+          if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
+            gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+          fi
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/session-opening-impulse-v18/FROZEN_INPUT_HASHES.json --out source-check.json
+      - uses: actions/download-artifact@v4
+        with: {name: session-opening-impulse-v18-dev-breadth, path: dev-breadth}
+      - uses: actions/cache@v4
+        with:
+          path: cache/verified-1m
+          key: session-opening-impulse-v18-dev-1m-shard-${{ matrix.shard }}
+          restore-keys: |
+            session-vwap-failed-auction-v17-dev-1m-shard-${{ matrix.shard }}
+            breadth-pullback-reclaim-v16-dev-1m-shard-${{ matrix.shard }}
+      - name: Canonical DEV scan
+        run: python scripts/session_opening_impulse_v18.py scan --stage DEV --data data --btc btc/BTCUSDT.csv.gz --breadth dev-breadth --source-check source-check.json --out dev-${{ matrix.shard }} --minute-cache cache/verified-1m
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-dev-${{ matrix.shard }}
+          path: dev-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  selection:
+    needs: development
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions: {contents: write, actions: read}
+    outputs: {selected_count: '${{ steps.pick.outputs.selected_count }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: session-opening-impulse-v18-dev-[0-7]
+          path: dev-parts
+      - id: pick
+        name: Freeze DEV selection before any 2024 processing
+        run: |
+          set -euo pipefail
+          python scripts/session_opening_impulse_v18.py select --parts dev-parts --out selected-input
+          python - <<'PY'
+          import json,os
+          n=len(json.load(open('selected-input/selection.json'))['policies'])
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('selected_count='+str(n)+'\n')
+          PY
+      - name: Preserve full DEV result on a separate research branch
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          set -euo pipefail
+          target=research/session-opening-impulse-v18/run-${GITHUB_RUN_ID}/development
+          mkdir -p "$target"
+          cp -r selected-input/. "$target/"
+          for name in scan_meta.json exclusions.csv frozen_context.json source_check.json breadth_manifest.json; do
+            i=0
+            while IFS= read -r f; do cp "$f" "$target/full_dev_shard_${i}_${name}"; i=$((i+1)); done < <(find dev-parts -name "$name" | sort)
+          done
+          python - <<'PY'
+          from pathlib import Path
+          import json,os,hashlib
+          p=Path('research/session-opening-impulse-v18/run-'+os.environ['GITHUB_RUN_ID']+'/development')
+          (p/'provenance.json').write_text(json.dumps({'run':int(os.environ['GITHUB_RUN_ID']),'code_commit':os.environ['GITHUB_SHA'],'source_data_run':36095439671,'cells':96,'sha256':{str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file()}},indent=2))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b research-session-opening-impulse-v18-dev-${GITHUB_RUN_ID}
+          git add "$target"
+          git commit -m 'Preserve V18 DEV result before subsequent stages'
+          git push origin HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-selected
+          path: selected-input/
+          retention-days: 30
+          compression-level: 0
+
+  gate_breadth_map:
+    needs: selection
+    if: needs.selection.outputs.selected_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        id: source-cache
+        with: {path: data, key: 'frozen-source-36095439671-15m-shard-${{ matrix.shard }}'}
+      - run: |
+          set -euo pipefail
+          if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data; fi
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/session-opening-impulse-v18/FROZEN_INPUT_HASHES.json --out source-check.json
+          python scripts/session_opening_breadth_v18.py map --stage GATE --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out breadth-map-${{ matrix.shard }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-gate-breadth-map-${{ matrix.shard }}
+          path: breadth-map-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  gate_breadth_reduce:
+    needs: [selection, gate_breadth_map]
+    if: needs.selection.outputs.selected_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'session-opening-impulse-v18-gate-breadth-map-[0-7]', path: breadth-maps}
+      - run: python scripts/session_opening_breadth_v18.py reduce --stage GATE --parts breadth-maps --out gate-breadth
+      - uses: actions/upload-artifact@v4
+        with:
+          name: session-opening-impulse-v18-gate-breadth
+          path: gate-breadth/
+          retention-days: 30
+          compression-level: 0
+
+  gate:
+    needs: [selection, gate_breadth_reduce]
+    if: needs.selection.outputs.selected_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: {shard: [0,1,2,3,4,5,6,7]}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/cache@v4
+        id: source-cache
+        with: {path: data, key: 'frozen-source-36095439671-15m-shard-${{ matrix.shard }}'}
+      - run: |
+          set -euo pipefail
+          if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data; fi
+          gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+          python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/session-opening-impulse-v18/FROZEN_INPUT_HASHES.json --out source-check.json
+      - uses: actions/download-artifact@v4
+        with: {name: session-opening-impulse-v18-gate-breadth, path: gate-breadth}
+      - uses: actions/download-artifact@v4
+        with: {name: session-opening-impulse-v18-selected, path: selected-input}
+      - uses: actions/cache@v4
+        with:
+          path: cache/verified-1m
+          key: session-opening-impulse-v18-gate-1m-shard-${{ matrix.shard }}
+      - run: python scripts/session_opening_impulse_v18.py scan --stage GATE --data data --btc btc/BTCUSDT.csv.gz --breadth gate-breadth --source-check source-check.json --out gate-${{ matrix.shard }} --minute-cache cache/verified-1m --selection selected-input/selection.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-gate-${{ matrix.shard }}
+          path: gate-${{ matrix.shard }}/
+          retention-days: 30
+          compression-level: 0
+
+  accounts:
+    needs: [selection, gate]
+    if: needs.selection.outputs.selected_count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions: {contents: write, actions: read}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with: {name: session-opening-impulse-v18-selected, path: combined-parts}
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'session-opening-impulse-v18-gate-[0-7]', path: combined-parts/gate}
+      - name: Shared account replay and preservation
+        run: |
+          set -euo pipefail
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D market
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-manifest-shard-*' -D source-manifests
+          python scripts/research_evidence_archive.py verify-source --data market --manifests source-manifests --expected-shards 8 --baseline research/session-opening-impulse-v18/FROZEN_INPUT_HASHES.json --out account/source_check.json
+          python scripts/session_opening_impulse_v18.py accounts --data market --parts combined-parts --out account --selection combined-parts/selection.json
+          target=research/session-opening-impulse-v18/run-${GITHUB_RUN_ID}/accounts
+          mkdir -p "$target"; cp -r account/. "$target/"; cp combined-parts/selection.json combined-parts/development_policy_cells.csv "$target/"
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b research-session-opening-impulse-v18-results-${GITHUB_RUN_ID}
+          git add "$target"; git commit -m 'Preserve V18 canonical account result'; git push origin HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: session-opening-impulse-v18-account-details
+          path: account/
+          retention-days: 30
+          compression-level: 0
+
+  preserve_cycle:
+    needs: [validate, dev_breadth_map, dev_breadth_reduce, development, selection, gate_breadth_map, gate_breadth_reduce, gate, accounts]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions: {contents: write, actions: read}
+    env: {GH_TOKEN: '${{ github.token }}'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Collect actual completed-job logs and all available artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p cycle-evidence/job-logs
+          gh run download ${{ github.run_id }} -R ${{ github.repository }} -p 'session-opening-impulse-v18-*' -D cycle-evidence || echo artifact_download_incomplete > cycle-evidence/artifact-download-incomplete.txt
+          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100 > cycle-evidence/actions-jobs.json
+          python - <<'PY' > completed-jobs.txt
+          import json
+          for j in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+              if j['status']=='completed' and j['conclusion']!='skipped': print(j['id'])
+          PY
+          while read -r job_id; do gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log; done < completed-jobs.txt
+          for f in PLAN.md IMPLEMENTATION_CONTRACT.md FROZEN_INPUT_HASHES.json FROZEN_CONTEXT.json PREEXECUTION_VALIDATION.json; do
+            src=research/session-opening-impulse-v18/$f; [ ! -f "$src" ] || cp "$src" cycle-evidence/$f
+          done
+      - run: python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V18-complete-or-partial --out research/session-opening-impulse-v18/run-${{ github.run_id }}/complete-evidence
+      - name: Preserve complete or partial evidence on a separate research branch
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -b research-session-opening-impulse-v18-evidence-${GITHUB_RUN_ID}
+          git add research/session-opening-impulse-v18/run-${GITHUB_RUN_ID}/complete-evidence
+          git commit -m 'Preserve V18 evidence before subsequent research stages'
+          git push origin HEAD
