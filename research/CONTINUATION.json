@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T19:02:08.121Z",
+  "updated_at": "2026-10-03T19:21:30Z",
   "interactive_lease": null,
   "current_branch": "research-fragmented-chase-exhaustion-v22",
-  "current_run": 37146393987,
+  "current_run": 37147529513,
   "current_workflow": ".github/workflows/fragmented-chase-exhaustion-v22.yml",
   "current_plan": "research/fragmented-chase-exhaustion-v22/PLAN.md",
-  "latest_research_checkpoint": "V21_EVIDENCE_RECOVERY_SUCCESS_V22_IMPLEMENTED_LOCAL_VALIDATION_PASS_ACTUAL_RUN_QUEUED",
+  "latest_research_checkpoint": "V22_RUN1_ROLE_ROUTING_FAILURE_AUDITED_REPAIRED_RETRY_IN_PROGRESS",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -308,7 +308,20 @@
     "v22_preexecution_validation_path": "research/fragmented-chase-exhaustion-v22/PREEXECUTION_VALIDATION.json",
     "v22_local_new_tests_passed": 16,
     "v22_local_relevant_regression_passed": 34,
-    "v22_local_synthetic_pipeline": "EIGHT_SHARDS_ALL_96_CELLS_PASS"
+    "v22_local_synthetic_pipeline": "EIGHT_SHARDS_ALL_96_CELLS_PASS",
+    "v22_run1": 37146393987,
+    "v22_run1_status": "FAILED_BEFORE_MARKET_SCAN",
+    "v22_run1_validation_job": 111271117744,
+    "v22_run1_registered_tests_passed": 535,
+    "v22_run1_dev_jobs_failed": 8,
+    "v22_run1_market_symbols_scanned": 0,
+    "v22_run1_failure": "BTC_CONTEXT_SENT_TO_TRADABLE_SYMBOL_POSITIVE_TRADE_COUNT_VALIDATOR",
+    "v22_run1_failure_audit_path": "research/fragmented-chase-exhaustion-v22/V22_RUN_37146393987_FAILURE.json",
+    "v22_run1_evidence_branch": "research-fragmented-chase-exhaustion-v22-evidence-37146393987",
+    "v22_run1_evidence_commit": "eca2b7c4ee2105fdd3ebf1a059e5390da2ccf999",
+    "v22_role_routing_repair_commit": "b9c709f3764f59a10430422f09ffb33b09a8663f",
+    "v22_retry_trigger_commit": "996d0dd6886d541c2950cbe039e182ebf24a092a",
+    "v22_retry_run": 37147529513
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -450,7 +463,7 @@
     "v21_account_scenarios": 0,
     "v22_entry_settings_planned": 16,
     "v22_dev_policy_cells_planned": 96,
-    "v22_execution_attempts": 1
+    "v22_execution_attempts": 2
   },
   "goal": {
     "max_hold_days": 7,
@@ -460,16 +473,17 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Monitor the eight active V21 DEV shards in run 37138299485 without duplication. When complete, read every scan_meta/exclusion/mark-source artifact and the frozen 96-cell selection; process 2024 GATE/accounts only if a DEV policy survives.",
-  "phase": "V22_ACTUAL_RUN_QUEUED",
+  "next_action": "Monitor V22 retry run 37147529513 without duplication. Read validation and every DEV shard log/artifact. Only interpret the frozen 96-cell market results after all eight scans complete; proceed to 2024/account replay only if a DEV policy survives.",
+  "phase": "V22_ACTUAL_RETRY_IN_PROGRESS",
   "last_failure": {
-    "version": "V18",
-    "run": 37100246454,
-    "status": "ECONOMIC_REJECTION_ZERO_OF_96",
-    "primary_reason": "All 96 cells had negative frozen-cost mean return and negative risk-normalized R. Ranges: -62.7614 to -22.2427 bp/trade, R -0.35381 to -0.11791, PF 0.2487 to 0.7752. The least-bad cell was negative in every DEV year and equal-date diagnostic.",
-    "selected": 0,
+    "version": "V22",
+    "run": 37146393987,
+    "status": "EXECUTION_ROLE_ROUTING_FAILURE_BEFORE_MARKET_SCAN",
+    "primary_reason": "All 8 DEV jobs passed source verification then stopped before scanning because the frozen BTC context was incorrectly sent through V22's tradable-symbol positive-integer trade-count validator.",
+    "economic_outcomes": 0,
+    "selected": null,
     "account_scenarios": 0,
-    "technical_note": "V18 recordkeeping is now closed by evidence-only recovery run 37103484177. Branch research-session-opening-impulse-v18-evidence-37100246454 commit 698a6fb retains 211 files/7,689,281 bytes and exact path/size/SHA256 for all 5,270 files, including 5,059 reproducible binaries/2,269,966,705 bytes as hash-only entries."
+    "audit_path": "research/fragmented-chase-exhaustion-v22/V22_RUN_37146393987_FAILURE.json"
   },
   "previous_interactive_lease": {
     "owner": "v15-implementation-20261002T1415Z",
@@ -478,7 +492,7 @@
     "scope": "research-breadth-expansion-continuation-v15 implementation, tests, and one actual run"
   },
   "plan_commit": "0485ee848e8802b398b91b9d911d0b9804ee73d6",
-  "code_commit": "9f83766ccca168002143ff4cd87129f95a7a0c62",
+  "code_commit": "b9c709f3764f59a10430422f09ffb33b09a8663f",
   "current_result_locations": {
     "v15_development": "research-breadth-expansion-continuation-v15-dev-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/development",
     "v15_evidence": "research-breadth-expansion-continuation-v15-evidence-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/complete-evidence",
@@ -607,10 +621,19 @@
     }
   },
   "current_execution": {
-    "version": "V17",
-    "run_id": null,
-    "state": "PREREGISTERED_IMPLEMENTATION_PENDING",
-    "prereg_commit": "34f8a1dea44b09ce3720e6bed676ef4d7d1d33bb"
+    "version": "V22",
+    "run_id": 37147529513,
+    "state": "ACTUAL_RETRY_IN_PROGRESS",
+    "prereg_commit": "72fe5ff070f763cb6438700a18574f2aaabcd7c9",
+    "repair_commit": "b9c709f3764f59a10430422f09ffb33b09a8663f",
+    "trigger_commit": "996d0dd6886d541c2950cbe039e182ebf24a092a",
+    "run1": {
+      "run_id": 37146393987,
+      "state": "FAILED_BEFORE_MARKET_SCAN",
+      "validation_tests": 535,
+      "market_symbols_scanned": 0,
+      "evidence_commit": "eca2b7c4ee2105fdd3ebf1a059e5390da2ccf999"
+    }
   },
   "v8_attempt_failures": [
     {
@@ -1785,7 +1808,7 @@
       "No V12 market rerun, account growth claim or daily target claim."
     ]
   },
-  "current_run_url": null,
+  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37147529513",
   "completed_v13_validation": {
     "observed_at": "2026-10-02T10:03:30Z",
     "run": 36992677948,
@@ -3659,7 +3682,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V17_PREREGISTERED_IMPLEMENTATION_PENDING",
+    "phase": "V22_ACTUAL_RETRY_IN_PROGRESS",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -3765,6 +3788,26 @@
       "execution_attempts": 0,
       "market_outcomes": 0,
       "state": "PREREGISTERED_IMPLEMENTATION_PENDING"
+    },
+    "v22": {
+      "branch": "research-fragmented-chase-exhaustion-v22",
+      "plan": "research/fragmented-chase-exhaustion-v22/PLAN.md",
+      "prereg_commit": "72fe5ff070f763cb6438700a18574f2aaabcd7c9",
+      "hypothesis": "fragmented small-ticket chase exhaustion reversal after separate confirmation",
+      "entry_configurations": 16,
+      "policies": 96,
+      "execution_attempts": 2,
+      "run1": {
+        "run": 37146393987,
+        "state": "FAILED_BEFORE_MARKET_SCAN",
+        "validation_tests": 535,
+        "market_symbols_scanned": 0,
+        "evidence_branch": "research-fragmented-chase-exhaustion-v22-evidence-37146393987",
+        "evidence_commit": "eca2b7c4ee2105fdd3ebf1a059e5390da2ccf999"
+      },
+      "repair_commit": "b9c709f3764f59a10430422f09ffb33b09a8663f",
+      "retry_run": 37147529513,
+      "state": "ACTUAL_RETRY_IN_PROGRESS"
     }
   },
   "completed_v16_validation": {
