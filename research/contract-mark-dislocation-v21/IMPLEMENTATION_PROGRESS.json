@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "stage": "SOURCE_LOADER_AND_SIGNAL_CORE_VALIDATED",
+  "recorded_at": "2026-10-03T12:55:00Z",
+  "market_result": null,
+  "profitability_claim": false,
+  "implemented": [
+    "official Binance USD-M monthly 15m mark-price loader with adjacent checksum verification",
+    "immutable ZIP, checksum, NPZ, and metadata cache validation",
+    "exact-timestamp mark/contract alignment with no fill or nearest-time substitution",
+    "preregistered 16-entry by 2-hold by 3-exit 96-policy signal geometry",
+    "next-contiguous-open entry, favorable-gap exclusion, structural stop floor/cap, and canonical resolver integration",
+    "95 percent per-year source-coverage gate and development selection gates"
+  ],
+  "new_tests": {
+    "command": "python -m unittest tests.test_mark_price_archive_v21 tests.test_contract_mark_dislocation_v21 -v",
+    "ran": 18,
+    "passed": 18,
+    "failed": 0
+  },
+  "repository_regression": {
+    "command": "python -m unittest discover -s tests -v",
+    "ran": 561,
+    "passed": 555,
+    "errors": 6,
+    "strategy_regressions_observed": 0,
+    "environment_errors": {
+      "dependency": "requests==2.32.5",
+      "declared_in": [
+        "requirements.txt",
+        "requirements-backtest.txt"
+      ],
+      "local_runtime_import_error_modules": [
+        "test_auto_trader_safety",
+        "test_contract_filters (2 tests)",
+        "test_long3_signal_adapter",
+        "test_runtime_plumbing",
+        "test_smc_forward"
+      ]
+    },
+    "note": "The six errors occurred before test execution because the transient local runtime lacked the repository-declared requests dependency. The pinned Actions validation must install requirements and obtain a clean full-suite result before an actual research run."
+  },
+  "actual_source_probe_completed": false,
+  "actual_development_scan_completed": false,
+  "actual_account_validation_completed": false,
+  "next_action": "Complete scanner, frozen source manifest, selector/account integration, synthetic eight-shard pipeline, and pinned GitHub Actions workflow; then validate official-source coverage and run the preregistered development experiment."
+}
