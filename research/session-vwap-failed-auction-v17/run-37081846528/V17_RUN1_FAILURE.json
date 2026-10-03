@@ -1,0 +1,31 @@
+{
+  "version": "V17",
+  "run": 37081846528,
+  "trigger_commit": "9c9da99e9cb57041190ae3841cfd561bc0cb309d",
+  "validation_job": 111083860167,
+  "status": "VALIDATION_FAILED_BEFORE_MARKET",
+  "observed_log": "Traceback in validate_session_vwap_failed_auction_v17.py line 16: frozen input text SHA assertion mismatch",
+  "tests_started": 0,
+  "market_jobs_started": 0,
+  "market_outcomes": 0,
+  "artifact": {
+    "id": 11258862620,
+    "name": "session-vwap-failed-auction-v17-validation",
+    "digest": "sha256:613d91de378655968d31e81eba422da651f605541df9d19c419580e90da4aea8",
+    "files": [
+      "v17-tests.log",
+      "FROZEN_CONTEXT.json",
+      "FROZEN_INPUT_HASHES.json",
+      "IMPLEMENTATION_CONTRACT.md",
+      "PLAN.md"
+    ]
+  },
+  "cause": "Connector-preserved UTF-8 files have deterministic bytes but copied V13 validator expected the V13 byte hashes. V17 files are semantically identical and were preserved with different trailing-newline bytes.",
+  "actual_sha256": {
+    "FROZEN_INPUT_HASHES": "75db339af95601c1a34f44b769664e1b43bb3a6e37a4d020a26b16179359138b",
+    "FROZEN_CONTEXT": "4ea5c86b07c48b926c99495ff82e7d8a45a5e68152492cae592fe853ddd45c0b"
+  },
+  "repair_commit": "c7a4ffc2b40a6d007bba43be7d8d5563e351e1f2",
+  "economics_changed": false,
+  "new_discovery": false
+}
