@@ -361,3 +361,14 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Frozen trigger commit: `9c9da99e9cb57041190ae3841cfd561bc0cb309d`.
 - Exactly one actual Actions run was launched: [37081846528](https://github.com/duuu-hub/bb-scanner/actions/runs/37081846528), validation job `111083860167`.
 - Current observed state: dependency installation/validation active. No Actions test result and no market outcome may be claimed until logs are read. Do not launch a duplicate.
+
+
+## 2026-10-03 — V17 run 1 validation failure and hash-only retry
+
+- Run [37081846528](https://github.com/duuu-hub/bb-scanner/actions/runs/37081846528), validation job `111083860167`, failed before any test or market stage.
+- The downloaded validation artifact `11258862620` contained the actual `v17-tests.log`. It proves an assertion at validator line 16: the V17 frozen input file had deterministic V17 bytes while the copied validator still expected V13's byte hash.
+- Actual V17 hashes: inputs `75db339a...`, context `4ea5c86b...`. Source semantics remained 256 frozen hashes / 856 market files; no economic parameter changed.
+- Tests started: 0. Market outcomes: 0. DEV/gate/accounts were skipped.
+- Failure JSON and exact log are preserved on `research-session-vwap-failed-auction-v17-evidence-37081846528`.
+- Hash-attestation-only repair: `c7a4ffc2b40a6d007bba43be7d8d5563e351e1f2`. Local repaired validator evidence: input contract passed and 15/15 new tests passed.
+- Exactly one retry was triggered at `a9c3fecb7b3c6170ffab543f30ca933f9f5593de`: [37082108726](https://github.com/duuu-hub/bb-scanner/actions/runs/37082108726). Do not duplicate it.
