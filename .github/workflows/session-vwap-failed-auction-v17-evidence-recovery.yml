@@ -1,0 +1,68 @@
+name: Recover V17 Complete Evidence
+'on':
+  push:
+    branches:
+      - research-session-vwap-failed-auction-v17
+    paths:
+      - .research/session-vwap-failed-auction-v17-evidence-recovery
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: session-vwap-failed-auction-v17-evidence-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: '37090734742'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned archive dependencies
+        run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Collect original artifacts and actual logs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cycle-evidence/job-logs
+          gh run download "$SOURCE_RUN" -R "${{ github.repository }}" -p 'session-vwap-failed-auction-v17-*' -D cycle-evidence
+          gh api "repos/${{ github.repository }}/actions/runs/$SOURCE_RUN/jobs?per_page=100" > cycle-evidence/actions-jobs.json
+          python - <<'JOBS' > completed-jobs.txt
+          import json
+          for job in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+              if job['status'] == 'completed' and job['conclusion'] != 'skipped':
+                  print(job['id'])
+          JOBS
+          while read -r job_id; do
+            gh api --allow-escape-sequences "repos/${{ github.repository }}/actions/jobs/$job_id/logs" > "cycle-evidence/job-logs/$job_id.log"
+          done < completed-jobs.txt
+          cp research/session-vwap-failed-auction-v17/PLAN.md cycle-evidence/FROZEN_PLAN.md
+          cp research/session-vwap-failed-auction-v17/IMPLEMENTATION_CONTRACT.md cycle-evidence/
+          cp research/session-vwap-failed-auction-v17/FROZEN_INPUT_HASHES.json cycle-evidence/
+          cp research/session-vwap-failed-auction-v17/FROZEN_CONTEXT.json cycle-evidence/
+          if [ -f research/session-vwap-failed-auction-v17/PREEXECUTION_VALIDATION.json ]; then
+            cp research/session-vwap-failed-auction-v17/PREEXECUTION_VALIDATION.json cycle-evidence/
+          else
+            printf '%s\n' 'PREEXECUTION_VALIDATION.json was never created; validation evidence is in job log 111110335940 and the validation artifact.' > cycle-evidence/PREEXECUTION_VALIDATION_NOT_PRESENT.txt
+          fi
+          cp research/session-vwap-failed-auction-v17/V17_ACTUAL_REJECTION.json cycle-evidence/
+      - name: Archive evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V17-complete --out "research/session-vwap-failed-auction-v17/run-$SOURCE_RUN/complete-evidence"
+      - name: Preserve on immutable research branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "research-session-vwap-failed-auction-v17-evidence-$SOURCE_RUN"
+          git add "research/session-vwap-failed-auction-v17/run-$SOURCE_RUN/complete-evidence"
+          git commit -m "Preserve recovered V17 complete evidence"
+          git push origin HEAD
