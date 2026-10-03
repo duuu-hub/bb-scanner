@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "study": "V19 session-opening range breakout",
+  "disposition": "REJECTED_AT_DEVELOPMENT",
+  "run_id": 37103772006,
+  "code_commit": "a623fd81bd88383604ff6e68c1f8ab1a91823b9a",
+  "validation_job": 111148239722,
+  "selection_job": 111149625620,
+  "preserve_job": 111149712360,
+  "actual_log_evidence": {
+    "validation": "498/498 registered tests passed; official chronology smoke and synthetic 8-scan/96-cell pipeline succeeded",
+    "execution": "8/8 development shards and selection succeeded",
+    "selection": "96 cells examined; zero economic survivors; 2024 gate and account jobs skipped",
+    "durable_development": {
+      "branch": "research-session-opening-range-breakout-v19-dev-37103772006",
+      "commit": "388ae60",
+      "path": "research/session-opening-range-breakout-v19/run-37103772006/development"
+    },
+    "durable_evidence": {
+      "branch": "research-session-opening-range-breakout-v19-evidence-37103772006",
+      "commit": "6410bc1",
+      "files": 3393
+    }
+  },
+  "development_audit": {
+    "policy_cells": 96,
+    "entry_settings": 16,
+    "selected_policies": 0,
+    "ranges": {
+      "n": [
+        12,
+        1065
+      ],
+      "symbols": [
+        12,
+        194
+      ],
+      "net40_mean_bp": [
+        -138.24289639032108,
+        10.398591762420065
+      ],
+      "net40_R_mean": [
+        -0.7569693093514449,
+        -0.031515257118415886
+      ],
+      "net40_pf": [
+        0.05218284337641018,
+        1.1257345859729673
+      ],
+      "top_symbol_share_pct": [
+        6.888524101595059,
+        81.38870374511727
+      ]
+    },
+    "positive_counts": {
+      "net40_mean_bp": 1,
+      "net40_R_mean": 0,
+      "net40_pf_gt_1": 1
+    },
+    "by_side": {
+      "short": {
+        "cells": 48,
+        "positive_mean_bp": 1,
+        "positive_R": 0
+      },
+      "long": {
+        "cells": 48,
+        "positive_mean_bp": 0,
+        "positive_R": 0
+      }
+    },
+    "least_bad_policy": {
+      "policy": "ORBREAK_S-1_W10_B04_V175__H32__R25",
+      "n": 47,
+      "symbols": 39,
+      "net40_mean_bp": 10.398591762420065,
+      "net40_R_mean": -0.031515257118415886,
+      "net40_pf": 1.1257345859729673,
+      "top_symbol_share_pct": 14.309540543351911,
+      "year_2021": {
+        "R": -0.12948210814701644,
+        "mean_bp": -6.9443055111928755
+      },
+      "year_2022": {
+        "R": 0.3127582731243705,
+        "mean_bp": 86.8764934985297
+      },
+      "year_2023": {
+        "R": -0.3896268863889554,
+        "mean_bp": -71.11767258587989
+      },
+      "rejection_reasons": [
+        "N_LT_300",
+        "SYMBOLS_LT_60",
+        "NET40_R_MEAN_NONPOSITIVE",
+        "2021_N_LT_30",
+        "2021_DATES_LT_20",
+        "2021_R_NONPOSITIVE",
+        "2021_MEAN_BP_NONPOSITIVE",
+        "2022_N_LT_30",
+        "2022_DATES_LT_20",
+        "2023_N_LT_30",
+        "2023_DATES_LT_20",
+        "2023_R_NONPOSITIVE",
+        "2023_MEAN_BP_NONPOSITIVE"
+      ]
+    },
+    "rejection_count_from_actual_selection_log": {
+      "N_LT_300": 66,
+      "SYMBOLS_LT_60": 36,
+      "TOP_SYMBOL_GT_30PCT": 31,
+      "NET40_MEAN_BP_NONPOSITIVE": 95,
+      "NET40_R_MEAN_NONPOSITIVE": 96,
+      "2021_N_LT_30": 72,
+      "2021_DATES_LT_20": 66,
+      "2021_R_NONPOSITIVE": 94,
+      "2021_MEAN_BP_NONPOSITIVE": 91,
+      "2021_DAY_R_NONPOSITIVE": 94,
+      "2022_N_LT_30": 36,
+      "2022_DATES_LT_20": 36,
+      "2022_R_NONPOSITIVE": 87,
+      "2022_MEAN_BP_NONPOSITIVE": 84,
+      "2022_DAY_R_NONPOSITIVE": 88,
+      "2023_N_LT_30": 36,
+      "2023_DATES_LT_20": 36,
+      "2023_R_NONPOSITIVE": 96,
+      "2023_MEAN_BP_NONPOSITIVE": 96,
+      "2023_DAY_R_NONPOSITIVE": 96
+    }
+  },
+  "interpretation": [
+    "Later volume/taker-confirmed continuation beyond a quiet frozen session opening range did not produce positive risk-normalized expectancy in any of the 96 policies.",
+    "The only positive mean/PF cell had only 47 outcomes across 39 symbols and was negative in 2021 and 2023; it is a sparse, regime-specific artifact, not a candidate.",
+    "Long continuation was uniformly negative even before sample gates. The opening-range continuation family is retired rather than locally tuned."
+  ],
+  "account_stage": {
+    "executed": false,
+    "reason": "No policy passed frozen development gates"
+  },
+  "daily_target_claim": false,
+  "source_table": {
+    "branch": "research-session-opening-range-breakout-v19-dev-37103772006",
+    "path": "research/session-opening-range-breakout-v19/run-37103772006/development/development_policy_cells.csv",
+    "blob_sha": "42061a7df457ae6e75c524c46e7eaa7d438cb527"
+  }
+}
