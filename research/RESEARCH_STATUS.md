@@ -1,5 +1,14 @@
 # Trading research continuation checkpoint
 
+## 2026-10-03 — V20 rejected; V21 preregistered
+
+- V20 actual run [37116650810](https://github.com/duuu-hub/bb-scanner/actions/runs/37116650810) completed successfully as computation: 501 tests passed, canonical chronology smoke passed, eight DEV shards and all 96 policies executed.
+- Economic result: zero DEV survivors. All 96 cells had negative net40 risk-normalized R; 95/96 had non-positive net40 mean bp. The sole positive-price cell had only 2 outcomes/2 symbols, 100% positive-contribution concentration and negative R. Gate/account jobs correctly skipped, so V20 has no account-growth or daily-target result.
+- Durable evidence: dev branch `research-session-opening-range-sweep-v20-dev-37116650810` at `5724a112df2ae2e2b3a038c50c7433d2a4ac1d7d`; evidence branch `research-session-opening-range-sweep-v20-evidence-37116650810` at `e032c87955ecd2a3894c8b7d0bff96dc0c71c185`; fixed audit at `research/session-opening-range-sweep-v20/V20_ACTUAL_REJECTION.json`.
+- The opening-range family is retired according to its preregistration. V21 was preregistered before implementation/outcomes on `research-contract-mark-dislocation-v21` at `cf5b8a5732be5ab993fb78b95dc42350845fe888`.
+- V21 tests a distinct contract-price versus official Binance mark-price dislocation reversal mechanism: 16 entries × 2 holds × 3 exits = 96 frozen DEV policies. Implementation and source verification are pending; no V21 market run or profitability claim exists.
+
+
 Objective: mainly intraday, maximum seven-day hold; whole-account NET daily
 +0.7% to +2%, additional upside allowed. Small positive CAGR/scout EV does not
 meet this goal. User authorized sustained research and asks to preserve failures
