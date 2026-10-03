@@ -31,7 +31,7 @@ print('FROZEN_V22_INPUT_CONTRACT_PASS',256,856,hashlib.sha256(cp.read_bytes()).h
 suite=unittest.TestSuite()
 for name in NEW_TEST_FILES if args.only_new else TEST_FILES:
     suite.addTests(unittest.defaultTestLoader.discover(str(ROOT/'tests'),pattern=name))
-expected=17 if args.only_new else 536
+expected=18 if args.only_new else 537
 assert suite.countTestCases()==expected,(suite.countTestCases(),expected)
 print('V22_REGISTERED_SUITE_SIZE',suite.countTestCases(),flush=True)
 result=unittest.TextTestRunner(verbosity=2,stream=sys.__stderr__).run(suite)
