@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T00:30:00Z",
+  "updated_at": "2026-10-03T04:36:00Z",
   "interactive_lease": null,
-  "current_branch": "research-session-vwap-failed-auction-v17",
-  "current_run": 37082108726,
-  "current_workflow": ".github/workflows/session-vwap-failed-auction-v17.yml",
-  "current_plan": "research/session-vwap-failed-auction-v17/PLAN.md",
-  "latest_research_checkpoint": "V17_RETRY_VALIDATION_473_OF_473_PASS_EIGHT_DEV_SCANS_ACTIVE",
+  "current_branch": "research-session-opening-impulse-v18",
+  "current_run": null,
+  "current_workflow": null,
+  "current_plan": "research/session-opening-impulse-v18/PLAN.md",
+  "latest_research_checkpoint": "V17_REJECTED_ZERO_OF_96_V18_PREREGISTERED_V17_EVIDENCE_RECOVERY_RUNNING",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -156,13 +156,24 @@
     "v16_failure_audit_path": "research/breadth-pullback-reclaim-v16/V16_ACTUAL_REJECTION.json",
     "v17_branch": "research-session-vwap-failed-auction-v17",
     "v17_prereg_commit": "34f8a1dea44b09ce3720e6bed676ef4d7d1d33bb",
-    "v17_run": 37081846528,
+    "v17_run": 37090734742,
     "v17_trigger_commit": "9c9da99e9cb57041190ae3841cfd561bc0cb309d",
     "v17_run1": 37081846528,
     "v17_run1_validation_job": 111083860167,
     "v17_run1_evidence_branch": "research-session-vwap-failed-auction-v17-evidence-37081846528",
     "v17_retry_run": 37082108726,
-    "v17_retry_commit": "a9c3fecb7b3c6170ffab543f30ca933f9f5593de"
+    "v17_retry_commit": "a9c3fecb7b3c6170ffab543f30ca933f9f5593de",
+    "v17_code_commit": "bc8af04530f986ce0dcc36981ae8a791a364651b",
+    "v17_survivors": 0,
+    "v17_development_branch": "research-session-vwap-failed-auction-v17-dev-37090734742",
+    "v17_development_commit": "b00b135",
+    "v17_development_path": "research/session-vwap-failed-auction-v17/run-37090734742/development",
+    "v17_complete_evidence_expected_branch": "research-session-vwap-failed-auction-v17-evidence-37090734742",
+    "v17_evidence_recovery_run": 37097336607,
+    "v17_rejection_path": "research/session-vwap-failed-auction-v17/V17_ACTUAL_REJECTION.json",
+    "v18_branch": "research-session-opening-impulse-v18",
+    "v18_plan_commit": "be48e9335b2fd9564627022429b8cd8de7273bcc",
+    "v18_plan_path": "research/session-opening-impulse-v18/PLAN.md"
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -276,17 +287,16 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Continue existing V17 run 37082108726 without duplication through all eight official DEV scans, selection, conditional gate/accounts, and preservation. Read saved outcomes directly before any economic claim.",
+  "next_action": "Complete V17 evidence recovery without rerunning market stages. Implement V18 exactly as preregistered, add causal and synthetic validation, then trigger one actual DEV run and audit logs/results.",
   "phase": "V17_DEV_SCANS_RUNNING",
   "last_failure": {
     "version": "V17",
-    "run": 37081846528,
-    "status": "VALIDATION_FAILED_BEFORE_MARKET",
-    "primary_reason": "Frozen copied text files had V17 byte hashes but validator retained V13 expected byte hashes; no tests or market stages ran.",
+    "run": 37090734742,
+    "status": "ECONOMIC_REJECTION_ZERO_OF_96",
+    "primary_reason": "All 96 cells failed frozen DEV gates. Best cell had +53.055bp/trade, R +0.10369 and PF 1.697 but lost in 2021, had only 25 2021 trades across 14 dates, and had negative calendar/active-date diagnostic R in every DEV year. All 48 short cells had non-positive R.",
     "selected": 0,
     "account_scenarios": 0,
-    "audit_branch": "research-session-vwap-failed-auction-v17-evidence-37081846528",
-    "repair_commit": "c7a4ffc2b40a6d007bba43be7d8d5563e351e1f2"
+    "technical_note": "Final preserve_cycle failed after selection because an optional PREEXECUTION_VALIDATION.json did not exist; targeted evidence recovery run 37097336607 is active and does not rerun market research."
   },
   "previous_interactive_lease": {
     "owner": "v15-implementation-20261002T1415Z",
@@ -3604,5 +3614,11 @@
     "artifact_id": 11258868229,
     "artifact_digest": "sha256:aa9720771df73e9b90a4428806f61f30b563a28acee58fe780b089def60d35de",
     "source": "Downloaded actual Actions validation artifact and read logs; not market profitability."
+  },
+  "active_supporting_run": {
+    "purpose": "V17 complete evidence recovery only; no market rerun",
+    "run": 37097336607,
+    "workflow": ".github/workflows/session-vwap-failed-auction-v17-evidence-recovery.yml",
+    "source_run": 37090734742
   }
 }
