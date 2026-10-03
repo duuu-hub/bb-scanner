@@ -1,0 +1,124 @@
+name: Recover V21 Evidence With Content Manifests
+'on':
+  push:
+    branches:
+      - research-contract-mark-dislocation-v21
+    paths:
+      - .research/contract-mark-dislocation-v21-evidence-recovery
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: contract-mark-dislocation-v21-evidence-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: '37138299485'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned archive dependencies
+        run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Collect original artifacts and actual logs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cycle-evidence/job-logs
+          gh run download "$SOURCE_RUN" -R "${{ github.repository }}" -p 'contract-mark-dislocation-v21-*' -D cycle-evidence
+          gh api "repos/${{ github.repository }}/actions/runs/$SOURCE_RUN" > cycle-evidence/actions-run.json
+          gh api "repos/${{ github.repository }}/actions/runs/$SOURCE_RUN/artifacts?per_page=100" > cycle-evidence/actions-artifacts.json
+          gh api "repos/${{ github.repository }}/actions/runs/$SOURCE_RUN/jobs?per_page=100" > cycle-evidence/actions-jobs.json
+          python - <<'JOBS' > completed-jobs.txt
+          import json
+          for job in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+              if job['status'] == 'completed' and job['conclusion'] != 'skipped':
+                  print(job['id'])
+          JOBS
+          while read -r job_id; do
+            gh api --allow-escape-sequences "repos/${{ github.repository }}/actions/jobs/$job_id/logs" > "cycle-evidence/job-logs/$job_id.log"
+          done < completed-jobs.txt
+          cp research/contract-mark-dislocation-v21/PLAN.md cycle-evidence/FROZEN_PLAN.md
+          cp research/contract-mark-dislocation-v21/IMPLEMENTATION_CONTRACT.md cycle-evidence/
+          cp research/contract-mark-dislocation-v21/FROZEN_INPUT_HASHES.json cycle-evidence/
+          cp research/contract-mark-dislocation-v21/FROZEN_CONTEXT.json cycle-evidence/
+          cp research/contract-mark-dislocation-v21/PREEXECUTION_VALIDATION.json cycle-evidence/
+          cp research/contract-mark-dislocation-v21/IMPLEMENTATION_PROGRESS.json cycle-evidence/
+          cp research/contract-mark-dislocation-v21/V21_ACTUAL_REJECTION.json cycle-evidence/
+      - name: Build complete hashes and compact durable evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'CURATE'
+          from pathlib import Path
+          import hashlib, json, shutil
+
+          src = Path('cycle-evidence')
+          dst = Path('curated-evidence')
+          dst.mkdir()
+          manifest = []
+          copied_bytes = omitted_bytes = copied_files = omitted_files = 0
+          binary_suffixes = {'.npz', '.npy', '.zip', '.gz', '.parquet', '.feather'}
+          binary_parts = {'minute_evidence', 'minute_original_archives', 'mark_evidence', 'verified-1m', 'verified-mark'}
+          for f in sorted(p for p in src.rglob('*') if p.is_file()):
+              rel = f.relative_to(src)
+              size = f.stat().st_size
+              sha = hashlib.sha256()
+              with f.open('rb') as stream:
+                  for block in iter(lambda: stream.read(1024 * 1024), b''):
+                      sha.update(block)
+              is_repro_binary = f.suffix.lower() in binary_suffixes or any(part in binary_parts for part in rel.parts)
+              keep = not is_repro_binary and size <= 50 * 1024 * 1024
+              reason = None if keep else ('reproducible_official_binary' if is_repro_binary else 'oversize_over_50MiB')
+              manifest.append({'path': rel.as_posix(), 'bytes': size, 'sha256': sha.hexdigest(),
+                               'retained': keep, 'omission_reason': reason})
+              if keep:
+                  target = dst / 'retained' / rel
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(f, target)
+                  copied_bytes += size
+                  copied_files += 1
+              else:
+                  omitted_bytes += size
+                  omitted_files += 1
+          artifact_json = json.loads((src / 'actions-artifacts.json').read_text())
+          inventory = [{'id': a['id'], 'name': a['name'], 'size_in_bytes': a['size_in_bytes'],
+                        'digest': a.get('digest'), 'expired': a.get('expired'),
+                        'created_at': a.get('created_at'), 'expires_at': a.get('expires_at'),
+                        'source_run': int(a['workflow_run']['id']), 'head_sha': a['workflow_run']['head_sha']}
+                       for a in artifact_json.get('artifacts', [])]
+          (dst / 'COMPLETE_FILE_SHA256_MANIFEST.json').write_text(json.dumps({
+              'source_run': 37138299485,
+              'source_commit': 'fd46fa1fb6f6616e3d4b4b0dcc399ccf4d482b1d',
+              'file_count': len(manifest), 'files': manifest}, indent=2) + '\n')
+          (dst / 'ACTIONS_ARTIFACT_INVENTORY.json').write_text(json.dumps({
+              'source_run': 37138299485, 'artifacts': inventory}, indent=2) + '\n')
+          (dst / 'CURATION_POLICY.json').write_text(json.dumps({
+              'purpose': 'Replace the failed 5.97GB monolithic Git push while retaining every path, size and SHA256.',
+              'retained': 'All non-binary results, exclusions, manifests, plans, audits and actual logs up to 50 MiB each.',
+              'hash_only': 'Reproducible official Binance archives/caches, compressed ledgers already preserved on the DEV branch, and files over 50 MiB.',
+              'reconstruction': 'Re-download source-run artifacts or official archives under frozen rules, then verify SHA256.',
+              'retained_files': copied_files, 'retained_bytes': copied_bytes,
+              'hash_only_files': omitted_files, 'hash_only_bytes': omitted_bytes}, indent=2) + '\n')
+          print(f'CURATED_EVIDENCE retained={copied_files}/{len(manifest)} bytes={copied_bytes} hash_only={omitted_files} bytes={omitted_bytes}')
+          CURATE
+      - name: Archive curated evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/research_evidence_archive.py archive --source curated-evidence --kind V21-manifest-complete-deduplicated --out "research/contract-mark-dislocation-v21/run-$SOURCE_RUN/complete-evidence"
+      - name: Preserve on immutable research branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "research-contract-mark-dislocation-v21-evidence-$SOURCE_RUN"
+          git add "research/contract-mark-dislocation-v21/run-$SOURCE_RUN/complete-evidence"
+          git commit -m "Preserve compact hash-complete V21 evidence"
+          git push origin HEAD
