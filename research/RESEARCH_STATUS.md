@@ -414,3 +414,16 @@ V17 evidence recovery completed successfully: 1,606 files were preserved on bran
 - Actual validation job `111138197429` succeeded. Logs prove the frozen 256/856 source contract, 483/483 registered tests, conservative chronology smoke, and eight-map/eight-scan synthetic 96-cell pipeline passed.
 - All eight real DEV opening-breadth map jobs are active. This proves implementation consistency only; it is not profitability, account-growth, survivor, or daily-target evidence.
 - Continue this existing run through breadth reduction, eight canonical DEV scans, selection and durable evidence. Do not launch a duplicate.
+
+
+## 2026-10-03 — V18 actual rejection; V19 preregistration
+
+- Actual V18 run: [37100246454](https://github.com/duuu-hub/bb-scanner/actions/runs/37100246454), code/trigger `bc72e1d7d90ba3eff0e9b1efe4107750c8c61d2a`.
+- Log-backed execution: 483/483 validation tests passed; all eight opening-breadth maps, full-856 reduction, all eight canonical DEV scans and selection succeeded.
+- Result: 96 cells examined, zero survivors. The 2024 gate and account jobs were correctly skipped.
+- Every cell had negative cost-stressed mean return and negative risk-normalized R. Ranges: N 1,220–4,063; symbols 187–223; net40 mean -62.7614 to -22.2427 bp; R -0.35381 to -0.11791; PF 0.2487–0.7752.
+- Least-bad cell `OPEN_S-1_D15_B65_R382__H32__R15`: N 1,221, 195 symbols, -22.2427 bp/trade, R -0.11791, PF 0.7752. Its annual R was -0.25558 / -0.06139 / -0.13019 and equal-date R was negative in all DEV years.
+- Durable DEV output: `research-session-opening-impulse-v18-dev-37100246454`, commit `be55501`. Rejection audit: `research/session-opening-impulse-v18/V18_ACTUAL_REJECTION.json`, commit `e70023c1b4e420e64998c602435047981230d7fd`.
+- The initial complete-evidence push failed only with transient GitHub HTTP 500 after archive creation. Same preserve job rerun `111146131308` is active; no market stage is rerun.
+- V19 was preregistered before implementation/outcomes at `0485ee848e8802b398b91b9d911d0b9804ee73d6` on `research-session-opening-range-breakout-v19`.
+- V19 is economically distinct: it rejects immediate opening-impulse chasing and instead requires a quiet frozen opening range, multi-bar two-sided VWAP balance, and a later volume/taker-confirmed range escape. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies.
