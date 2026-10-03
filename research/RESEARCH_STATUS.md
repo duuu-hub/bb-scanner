@@ -14,6 +14,20 @@ Objective: mainly intraday, maximum seven-day hold; whole-account NET daily
 meet this goal. User authorized sustained research and asks to preserve failures
 as assets. Research only: never main/live/demo orders/watcher state changes.
 
+## V21 implementation checkpoint — 2026-10-03
+
+Contract-mark dislocation remains preregistered and has no market or profitability
+result yet. Commit a57141d3770043e9e83a5e1c12925cf1612508cc adds the verified official
+Binance USD-M monthly 15m mark-price loader, adjacent-checksum/immutable-cache
+validation, exact no-fill timestamp alignment, and the frozen 16-entry × 2-hold ×
+3-exit (96-policy) signal core. New V21 tests: 18/18 pass. A local repository
+regression executed 561 tests: 555 passed and six import-stage errors all traced
+to the transient runtime missing repository-declared requests==2.32.5; no V21
+strategy regression was observed. Pinned Actions must install requirements and
+produce a clean full-suite result before any actual DEV launch. Scanner,
+source-manifest freeze, selection/account integration, synthetic eight-shard
+pipeline, and workflow remain pending. Daily target is not met or claimed.
+
 ## Current actual execution
 
 V12 actual run36989682215/code793820a5dee7577663e94f9e45157468e05850aa:
