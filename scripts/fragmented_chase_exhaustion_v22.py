@@ -66,8 +66,8 @@ def load(path, end=None):
     trades = d.trades.to_numpy(float)
     if end is not None:
         trades = trades[d.open_time.to_numpy(np.int64) < end]
-    if len(trades) != len(q) or np.any(~np.isfinite(trades)) or np.any(trades <= 0) or np.any(trades != np.floor(trades)):
-        raise ValueError(f"bad positive integer trade count {path}")
+    if len(trades) != len(q) or np.any(~np.isfinite(trades)) or np.any(trades < 0) or np.any(trades != np.floor(trades)):
+        raise ValueError(f"bad nonnegative integer trade count {path}")
     return raw, q, np.column_stack((buy, trades))
 
 
@@ -76,30 +76,35 @@ def features(raw, q, aux):
     if aux.ndim != 2 or aux.shape != (len(q), 2):
         raise ValueError("expected taker-buy and trade-count columns")
     buy, trades = aux[:, 0], aux[:, 1]
-    if np.any(~np.isfinite(trades)) or np.any(trades <= 0) or np.any(trades != np.floor(trades)):
-        raise ValueError("bad positive integer trade count")
+    if np.any(~np.isfinite(trades)) or np.any(trades < 0) or np.any(trades != np.floor(trades)):
+        raise ValueError("bad nonnegative integer trade count")
     f = history.features(raw, q, buy)
     t, n = raw[0], len(q)
+    valid_trade_bar = trades > 0
     for key in ("trade_count", "average_trade_value", "prior_average_trade_value",
                 "prior_trade_count_median", "prior_quote_mean", "closed_quote_24h",
                 "fragmentation_ratio", "trade_count_multiple"):
         f[key] = np.full(n, np.nan)
-    f["trade_count"] = trades.copy()
-    f["average_trade_value"] = q / trades
+    f["trade_count"] = np.where(valid_trade_bar, trades, np.nan)
+    f["average_trade_value"] = np.divide(q, trades, out=np.full(n, np.nan),
+        where=valid_trade_bar)
     for a, b in base.segments(t):
         av = pd.Series(f["average_trade_value"][a:b])
-        tc, qq = pd.Series(trades[a:b]), pd.Series(q[a:b])
+        local_valid = valid_trade_bar[a:b]
+        tc = pd.Series(np.where(local_valid, trades[a:b], np.nan))
+        qq = pd.Series(np.where(local_valid, q[a:b], np.nan))
         f["prior_average_trade_value"][a:b] = av.rolling(96, min_periods=96).median().shift(1).to_numpy()
         f["prior_trade_count_median"][a:b] = tc.rolling(96, min_periods=96).median().shift(1).to_numpy()
         f["prior_quote_mean"][a:b] = qq.rolling(96, min_periods=96).mean().shift(1).to_numpy()
         f["closed_quote_24h"][a:b] = qq.rolling(96, min_periods=96).sum().shift(1).to_numpy()
     f["fragmentation_ratio"] = np.divide(f["average_trade_value"], f["prior_average_trade_value"],
         out=np.full(n, np.nan), where=f["prior_average_trade_value"] > 0)
-    f["trade_count_multiple"] = np.divide(trades, f["prior_trade_count_median"],
+    f["trade_count_multiple"] = np.divide(f["trade_count"], f["prior_trade_count_median"],
         out=np.full(n, np.nan), where=f["prior_trade_count_median"] > 0)
     f["volume_multiple"] = np.divide(q, f["prior_quote_mean"], out=np.full(n, np.nan),
         where=f["prior_quote_mean"] > 0)
     f["session_vwap"] = f["prior_average_trade_value"]  # diagnostics-only compatibility field
+    f["eligible"] &= valid_trade_bar
     f["eligible"] &= source_helpers.observed_days(t) >= 30
     f["eligible"] &= f["closed_quote_24h"] >= 20_000_000
     return f
