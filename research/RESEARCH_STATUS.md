@@ -349,3 +349,15 @@ Distinct V15 breadth-expansion continuation preregistered before code/outcomes a
 - Full evidence: 963 files / 342,209,447 bytes, branch `research-breadth-pullback-reclaim-v16-evidence-37074366568`, commit `62efcc275b981621c7655a85c6cb4db714ef6685`. Failure audit is preserved on the V17 branch.
 - V17 was preregistered before code/outcomes at `34f8a1dea44b09ce3720e6bed676ef4d7d1d33bb` on `research-session-vwap-failed-auction-v17`.
 - V17 is economically distinct: fixed 00:00/08:00/16:00 UTC session-VWAP failed-auction reversal after ATR displacement, volume climax, and a separate closed confirmation. It uses no breadth, premium, taker-flow, or cross-sectional residual trigger. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies. Implementation and execution are pending.
+
+
+## 2026-10-03 — V17 implementation and actual launch
+
+- Frozen preregistration remains `34f8a1dea44b09ce3720e6bed676ef4d7d1d33bb`; no V17 market outcome was observed before implementation.
+- Implemented the exact 16-entry / 96-policy fixed-session VWAP failed-auction reversal on `research-session-vwap-failed-auction-v17`.
+- Session VWAP is cumulative quote volume divided by a causal base-volume proxy from exact 00:00/08:00/16:00 UTC anchors. Gaps invalidate the segment; prior 96-bar median volume and prior ATR are shifted/frozen.
+- Same-bar exhaustion/confirmation is impossible. Confirmation is a separate closed bar within four bars, entry is the next contiguous open, event-time VWAP is frozen, and stop floor/cap plus favorable-gap exclusion are explicit.
+- Added 15 V17-specific causal/grid/target tests. Local evidence: 15/15 passed; the local eight-shard synthetic pipeline preserved all 96 zero-outcome cells. This is implementation evidence only, not profitability.
+- Frozen trigger commit: `9c9da99e9cb57041190ae3841cfd561bc0cb309d`.
+- Exactly one actual Actions run was launched: [37081846528](https://github.com/duuu-hub/bb-scanner/actions/runs/37081846528), validation job `111083860167`.
+- Current observed state: dependency installation/validation active. No Actions test result and no market outcome may be claimed until logs are read. Do not launch a duplicate.
