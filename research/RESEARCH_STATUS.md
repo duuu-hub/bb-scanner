@@ -7,7 +7,7 @@
 - Actual Actions run [37138299485](https://github.com/duuu-hub/bb-scanner/actions/runs/37138299485) is active. Do not create a duplicate run.
 - Pre-execution evidence: 18/18 new V21 tests and 519/519 registered research regression tests passed; Python compilation, YAML parsing, and the eight-shard synthetic pipeline passed. The synthetic pipeline preserved all 96 cells and exercised 100% mark alignment in each DEV year, but it is not market or profitability evidence.
 - The workflow installs pinned dependencies, probes official Binance mark-price archives with adjacent checksums, scans eight frozen DEV shards, applies the per-year 95% source-coverage gate, freezes DEV selection before any 2024 processing, and conditionally runs the shared strict account engine.
-- No V21 actual source-probe, DEV outcome, account growth, or daily-target result has yet been read. The +0.7% to +2% daily account target remains unmet and unclaimed.
+- Actual validation job `111247261611` succeeded: 519/519 registered tests passed, canonical chronology and the eight-shard synthetic pipeline passed, and the checksum-verified official Binance BTCUSDT 2022-01 mark archive contained 2,976 bars. All eight actual DEV scans are active. No DEV outcome, account growth, or daily-target result has yet been read; the +0.7% to +2% target remains unmet and unclaimed.
 
 ## 2026-10-03 — V20 rejected; V21 preregistered
 
