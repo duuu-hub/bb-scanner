@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "hypothesis_id": "V22",
+  "run_id": 37157873856,
+  "workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37157873856",
+  "source_commit": "0706d1447116b3ae3370ae73f99480d7b5eb9c9b",
+  "conclusion": "failure_before_any_completed_market_symbol",
+  "validation": {
+    "job": 111304974457,
+    "registered_tests": 536,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 61.228
+  },
+  "development": {
+    "jobs": 8,
+    "completed_successfully": 0,
+    "completed_failed": 8,
+    "failed_job_ids": [
+      111305224324,
+      111305224595,
+      111305224314,
+      111305224364,
+      111305224287,
+      111305224328,
+      111305224337,
+      111305224370
+    ],
+    "first_symbol_failures": [
+      "1INCHUSDT",
+      "ANKRUSDT",
+      "BCHUSDT",
+      "ALGOUSDT",
+      "1000BTTCUSDT",
+      "API3USDT",
+      "1000XECUSDT",
+      "AKROUSDT"
+    ],
+    "completed_market_symbols": 0,
+    "parameterized_outcomes": 0,
+    "root_cause": "The frozen source contains legitimate zero-trade 15-minute bars. The implementation interpreted the plan's zero-count rejection at whole-file scope, aborting each shard on its first such symbol instead of excluding the invalid bar from signals and rolling baselines."
+  },
+  "downstream": {
+    "selection": "skipped",
+    "gate_2024": "skipped",
+    "accounts": "skipped"
+  },
+  "evidence": {
+    "branch": "research-fragmented-chase-exhaustion-v22-evidence-37157873856",
+    "commit": "9e686b6",
+    "files": 176,
+    "archive_bytes": 3206493
+  },
+  "repair": {
+    "commits": [
+      "40ae678fe9a02aae517aefd8aa089d30f79d60f5",
+      "c53879cd8200186246d2ef64fedd5a3af141cb72",
+      "11085ae9d8ed56b14e4ad3cc200e76aa2ac026a9"
+    ],
+    "semantics": "Keep nonnegative integer schema validation, exclude zero-count bars, set their trade-derived fields to NaN, and require 96 subsequent valid bars before rolling baselines recover.",
+    "unchanged": [
+      "16x2x3=96 policy grid",
+      "entry and exit rules",
+      "costs",
+      "risk rules",
+      "universe",
+      "chronology"
+    ],
+    "local_tests": "36/36 V22+V20 same-process tests passed",
+    "synthetic_pipeline": "8 shards and all 96 cells passed; synthetic-only, zero market profitability claim"
+  },
+  "interpretation": "Execution/data-validity handling failure only. It is not an economic trial and provides no evidence for or against V22."
+}
