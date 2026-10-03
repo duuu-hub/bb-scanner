@@ -537,3 +537,14 @@ The failure and exact logs are recorded at `research/fragmented-chase-exhaustion
 V22 retry [37147529513](https://github.com/duuu-hub/bb-scanner/actions/runs/37147529513) stopped before executing tests or market scans because the newly added BTC role-routing regression raised discovered tests from 535 to 536 while the validator still required exactly 535. Economic outcomes and scanned market symbols were both zero. The failure is preserved at `research/fragmented-chase-exhaustion-v22/V22_RUN_37147529513_FAILURE.json` and evidence branch `research-fragmented-chase-exhaustion-v22-evidence-37147529513` commit `4b9710c1ad6ab1b41de28d5a9746e077df055918`.
 
 The validator-only repair changes exact counts from 16/535 to 17/536 at commit `5629b5e9274ef02bbaf699f0b4cb6af06f050450`; no runtime or economic rule changed. Local V22 tests are 17/17. Exactly one new run, [37156055399](https://github.com/duuu-hub/bb-scanner/actions/runs/37156055399), is queued. Do not duplicate it. No market result, profitability, or daily-target claim exists yet.
+
+
+## 2026-10-03T22:18Z — V22 run3 test-isolation failure audited; run4 active
+
+V22 run [37156055399](https://github.com/duuu-hub/bb-scanner/actions/runs/37156055399) discovered and executed the expected 536-test suite. The new BTC role-routing regression passed, but it left V22 functions bound into the shared V20 engine module. All 17 subsequently ordered V20 tests therefore read V22 configurations and raised `KeyError: width_cap`. The suite ended with 536 run, 0 assertion failures, 17 errors. DEV, selection, gate and accounts were skipped; zero market symbols and zero economic outcomes were evaluated.
+
+Actual logs and validation artifacts are preserved on `research-fragmented-chase-exhaustion-v22-evidence-37156055399`, commit `a8a92bf`. The structured failure audit is `research/fragmented-chase-exhaustion-v22/V22_RUN_37156055399_FAILURE.json`.
+
+Repair commit `01183f81aefa85fb513d564371804156e566a6db` snapshots and restores every shared engine global mutated by `bind_engine()` in a `try/finally`. A same-process local sequence of all 18 V22 tests followed by all 17 V20 tests passed 35/35. No strategy parameter, cost, chronology, risk rule, universe or frozen 96-policy grid changed.
+
+Exactly one repaired actual run is active: [37157873856](https://github.com/duuu-hub/bb-scanner/actions/runs/37157873856), trigger `0706d1447116b3ae3370ae73f99480d7b5eb9c9b`. Do not duplicate it. No profitability or daily-target claim exists.
