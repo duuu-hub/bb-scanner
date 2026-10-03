@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-03T05:38:00Z",
+  "updated_at": "2026-10-03T06:01:00Z",
   "interactive_lease": null,
-  "current_branch": "research-session-opening-impulse-v18",
-  "current_run": 37100246454,
-  "current_workflow": ".github/workflows/session-opening-impulse-v18.yml",
-  "current_plan": "research/session-opening-impulse-v18/PLAN.md",
-  "latest_research_checkpoint": "V18_VALIDATION_483_PASS_ALL8_BREADTH_MAPS_AND_REDUCTION_PASS_DEV_SCANS_ACTIVE",
+  "current_branch": "research-session-opening-range-breakout-v19",
+  "current_run": null,
+  "current_workflow": null,
+  "current_plan": "research/session-opening-range-breakout-v19/PLAN.md",
+  "latest_research_checkpoint": "V18_REJECTED_ZERO_OF_96_EVIDENCE_RETRY_ACTIVE_V19_PREREGISTERED",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -183,7 +183,20 @@
     "v18_code_commit": "bc72e1d7d90ba3eff0e9b1efe4107750c8c61d2a",
     "v18_dev_breadth_maps_completed": 8,
     "v18_dev_breadth_reduce_status": "SUCCESS",
-    "v18_dev_breadth_data_sha256": "1af3880fe0e6a5c739d384e004ab110422ba2904bb191671d9b58d413af31d41"
+    "v18_dev_breadth_data_sha256": "1af3880fe0e6a5c739d384e004ab110422ba2904bb191671d9b58d413af31d41",
+    "v18_survivors": 0,
+    "v18_development_branch": "research-session-opening-impulse-v18-dev-37100246454",
+    "v18_development_commit": "be55501",
+    "v18_development_path": "research/session-opening-impulse-v18/run-37100246454/development",
+    "v18_rejection_path": "research/session-opening-impulse-v18/V18_ACTUAL_REJECTION.json",
+    "v18_rejection_commit": "e70023c1b4e420e64998c602435047981230d7fd",
+    "v18_preserve_initial_job": 111140747171,
+    "v18_preserve_initial_failure": "TRANSIENT_GITHUB_PUSH_HTTP_500",
+    "v18_preserve_retry_job": 111146131308,
+    "v18_preserve_retry_status": "IN_PROGRESS",
+    "v19_branch": "research-session-opening-range-breakout-v19",
+    "v19_plan_commit": "0485ee848e8802b398b91b9d911d0b9804ee73d6",
+    "v19_plan_path": "research/session-opening-range-breakout-v19/PLAN.md"
   },
   "trial_counts": {
     "v1_entry_hypotheses": 1,
@@ -291,8 +304,15 @@
     "v18_entry_settings_planned": 16,
     "v18_dev_policy_cells_planned": 96,
     "v18_execution_attempts": 1,
-    "v18_entry_settings_executed": 0,
-    "v18_dev_policy_cells_executed": 0
+    "v18_entry_settings_executed": 16,
+    "v18_dev_policy_cells_executed": 96,
+    "v18_resolved_parameterized_outcomes": null,
+    "v18_selected_policies": 0,
+    "v18_account_scenarios": 0,
+    "v18_strict_account_survivors": 0,
+    "v19_entry_settings_planned": 16,
+    "v19_dev_policy_cells_planned": 96,
+    "v19_execution_attempts": 0
   },
   "goal": {
     "max_hold_days": 7,
@@ -302,16 +322,16 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Continue existing V18 run 37100246454 without duplication; audit all eight active canonical DEV scans, 96-cell selection, and durable evidence.",
-  "phase": "V18_DEV_SCANS_RUNNING",
+  "next_action": "Finish auditing the existing V18 evidence-preservation retry without rerunning market research, then implement V19 exactly as preregistered with causal tests and one actual DEV execution.",
+  "phase": "V19_PREREGISTERED_IMPLEMENTATION_PENDING",
   "last_failure": {
-    "version": "V17",
-    "run": 37090734742,
+    "version": "V18",
+    "run": 37100246454,
     "status": "ECONOMIC_REJECTION_ZERO_OF_96",
-    "primary_reason": "All 96 cells failed frozen DEV gates. Best cell had +53.055bp/trade, R +0.10369 and PF 1.697 but lost in 2021, had only 25 2021 trades across 14 dates, and had negative calendar/active-date diagnostic R in every DEV year. All 48 short cells had non-positive R.",
+    "primary_reason": "All 96 cells had negative frozen-cost mean return and negative risk-normalized R. Ranges: -62.7614 to -22.2427 bp/trade, R -0.35381 to -0.11791, PF 0.2487 to 0.7752. The least-bad cell was negative in every DEV year and equal-date diagnostic.",
     "selected": 0,
     "account_scenarios": 0,
-    "technical_note": "Final preserve_cycle referenced an absent optional file; targeted recovery run 37097336607 completed successfully and preserved 1,606 files on research-session-vwap-failed-auction-v17-evidence-37090734742 at d38be1a."
+    "technical_note": "All eight maps, reduction and DEV scans succeeded. Initial complete-evidence push hit transient GitHub HTTP 500; same preserve job rerun 111146131308 is active and does not rerun market research."
   },
   "previous_interactive_lease": {
     "owner": "v15-implementation-20261002T1415Z",
@@ -319,8 +339,8 @@
     "expires_at": "2026-10-02T16:15:21Z",
     "scope": "research-breadth-expansion-continuation-v15 implementation, tests, and one actual run"
   },
-  "plan_commit": "be48e9335b2fd9564627022429b8cd8de7273bcc",
-  "code_commit": "bc72e1d7d90ba3eff0e9b1efe4107750c8c61d2a",
+  "plan_commit": "0485ee848e8802b398b91b9d911d0b9804ee73d6",
+  "code_commit": null,
   "current_result_locations": {
     "v15_development": "research-breadth-expansion-continuation-v15-dev-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/development",
     "v15_evidence": "research-breadth-expansion-continuation-v15-evidence-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/complete-evidence",
@@ -335,7 +355,9 @@
     "v17_run1_evidence": "research-session-vwap-failed-auction-v17-evidence-37081846528:research/session-vwap-failed-auction-v17/run-37081846528",
     "v18_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37100246454",
     "v18_expected_development": "research-session-opening-impulse-v18-dev-37100246454:research/session-opening-impulse-v18/run-37100246454/development",
-    "v18_expected_evidence": "research-session-opening-impulse-v18-evidence-37100246454:research/session-opening-impulse-v18/run-37100246454/complete-evidence"
+    "v18_expected_evidence": "research-session-opening-impulse-v18-evidence-37100246454:research/session-opening-impulse-v18/run-37100246454/complete-evidence",
+    "v18_development": "research-session-opening-impulse-v18-dev-37100246454:research/session-opening-impulse-v18/run-37100246454/development",
+    "v19_plan": "research-session-opening-range-breakout-v19:research/session-opening-range-breakout-v19/PLAN.md"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
