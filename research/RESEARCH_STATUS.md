@@ -449,3 +449,15 @@ V18 evidence recovery [37103484177](https://github.com/duuu-hub/bb-scanner/actio
 - Workflow commit: `282ea906d9521aed380fff5bcdd1eab01c366e6b`. Trigger/code commit: `a623fd81bd88383604ff6e68c1f8ab1a91823b9a`.
 - Exactly one actual run is active: [37103772006](https://github.com/duuu-hub/bb-scanner/actions/runs/37103772006), validation job `111148239722`.
 - No test pass, market outcome, survivor or daily-target claim exists until the actual log is read. Do not duplicate this run.
+
+## 2026-10-03 — V19 actual rejection; V20 preregistration
+
+- Actual V19 run: [37103772006](https://github.com/duuu-hub/bb-scanner/actions/runs/37103772006), code/trigger `a623fd81bd88383604ff6e68c1f8ab1a91823b9a`.
+- Log-backed execution: 498/498 registered tests passed; official 1-minute chronology smoke, synthetic eight-scan/96-cell pipeline, all eight real DEV shards, selection and preservation succeeded.
+- Result: 96 cells examined, zero survivors. The 2024 gate and account jobs were correctly skipped.
+- Original policy-table ranges: N 12–1,065; symbols 12–194; net40 mean -138.2429 to +10.3986 bp; R -0.75697 to -0.03152; PF 0.0522–1.1257. Exactly one cell had positive mean/PF; no cell had positive R.
+- Least-bad cell `ORBREAK_S-1_W10_B04_V175__H32__R25`: N 47, 39 symbols, +10.3986 bp, R -0.03152, PF 1.1257. Annual R was -0.12948 / +0.31276 / -0.38963 for 2021/2022/2023, so it is sparse and regime-specific, not a candidate.
+- Durable DEV: `research-session-opening-range-breakout-v19-dev-37103772006`, commit `388ae60`. Durable complete evidence: `research-session-opening-range-breakout-v19-evidence-37103772006`, commit `6410bc1`. Rejection audit: `research/session-opening-range-breakout-v19/V19_ACTUAL_REJECTION.json`, commit `06b013365a9966cfb11359d425eb341ca453095c`.
+- The opening-range continuation family is retired without local tuning.
+- V20 was preregistered before implementation/outcomes at `3e8da35699b8e987b31a39e7264c49cb0e7ec8e0` on `research-session-opening-range-sweep-v20`.
+- V20 is an opening-range liquidity-sweep reversal: after frozen two-sided range acceptance, it requires an outside wick with a decisive close back inside plus swept-direction taker aggression, then trades toward frozen accepted value. Grid remains 16 entries × 2 holds × 3 exits = 96 policies under unchanged hard gates.
