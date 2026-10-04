@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "study": "V23_PATH_EFFICIENCY_RESUMPTION",
+  "run_id": 37181004354,
+  "disposition": "REJECTED_NO_DEVELOPMENT_POLICY_SURVIVOR",
+  "accepted_for_account_gate": false,
+  "workflow_head_sha": "588f7c00531231b0be9fdab6de8bc8c043479c9a",
+  "validation": {
+    "job_id": 111373406555,
+    "registered_tests": 546,
+    "failures": 0,
+    "errors": 0,
+    "input_hashes": 256,
+    "source_files": 856,
+    "context_sha256": "23cf6114f0bfb32f98ed3ea4bde89fac3068ab5052ddcf3f0026cae3b2deea87"
+  },
+  "execution": {
+    "development_jobs": [
+      111373596017,
+      111373596012,
+      111373596033,
+      111373596016,
+      111373596029,
+      111373596011,
+      111373596010,
+      111373596015
+    ],
+    "selection_job": 111376668406,
+    "development_branch": "research-path-efficiency-resumption-v23-dev-37181004354",
+    "development_commit": "3cc77f9",
+    "development_path": "research/path-efficiency-resumption-v23/run-37181004354/development",
+    "source_data_run": 36095439671,
+    "policy_cells": 96,
+    "unique_entry_events": 22284
+  },
+  "result": {
+    "survivors": 0,
+    "positive_cost_adjusted_mean_cells": 0,
+    "positive_R_cells": 0,
+    "pf_above_1_cells": 0,
+    "n_range": [
+      88,
+      4489
+    ],
+    "symbols_range": [
+      64,
+      222
+    ],
+    "net40_mean_bp_range": [
+      -71.13765706643807,
+      -24.86320262862772
+    ],
+    "net40_R_range": [
+      -0.4030262086110588,
+      -0.1519027515885313
+    ],
+    "pf_range": [
+      0.2874800730866136,
+      0.7645879381999067
+    ]
+  },
+  "least_bad": {
+    "policy": "PATH_S-1_W16_E70_FLOW55__H32__R25",
+    "n": 97,
+    "symbols": 74,
+    "net40_mean_bp": -24.86320262862772,
+    "net40_R_mean": -0.1519027515885313,
+    "pf": 0.7645879381999067,
+    "year_R": {
+      "2021": 0.18607036783814568,
+      "2022": -0.27993185327938475,
+      "2023": -0.11618763749140262
+    }
+  },
+  "failure_decomposition": {
+    "side": {
+      "long": {
+        "best_bp": -39.33145092569742,
+        "avg_bp": -54.317435298356315,
+        "best_R": -0.22888652277920807
+      },
+      "short": {
+        "best_bp": -24.86320262862772,
+        "avg_bp": -53.58573455860765,
+        "best_R": -0.1519027515885313
+      }
+    },
+    "window": {
+      "w8": {
+        "best_bp": -48.334239489762986,
+        "avg_bp": -57.91047022812061
+      },
+      "w16": {
+        "best_bp": -24.86320262862772,
+        "avg_bp": -49.99269962884333
+      }
+    },
+    "efficiency": {
+      "e55": {
+        "best_bp": -49.696896536061566,
+        "avg_bp": -57.14575335762089
+      },
+      "e70": {
+        "best_bp": -24.86320262862772,
+        "avg_bp": -50.757416499343066
+      }
+    },
+    "confirmation": {
+      "price_only": {
+        "best_bp": -29.214136400217008,
+        "avg_bp": -53.17851233843857
+      },
+      "flow55": {
+        "best_bp": -24.86320262862772,
+        "avg_bp": -54.72465751852538
+      }
+    },
+    "exit": {
+      "r15": {
+        "best_bp": -27.85466599668644,
+        "avg_bp": -49.573774115550364
+      },
+      "r25": {
+        "best_bp": -24.86320262862772,
+        "avg_bp": -53.04258784073144
+      },
+      "trail2atr": {
+        "best_bp": -41.59799215040672,
+        "avg_bp": -59.23839282916414
+      }
+    }
+  },
+  "interpretation": [
+    "The hypothesized continuation edge is negative after 40 bp round-trip stress across every cell, not merely capacity-limited.",
+    "Greater selectivity (16 bars, 0.70 efficiency) reduces losses but does not produce positive expectancy and is sparse/regime-fragile.",
+    "FLOW55 does not repair the family; all confirmation and exit families remain negative.",
+    "The least-bad cell is positive only in 2021 and negative in both 2022 and 2023, so it is not a reusable candidate."
+  ],
+  "target_gap": "No account simulation was permitted; therefore the whole-account calendar-day +0.7% to +2% objective remains wholly unmet.",
+  "next_research_constraint": "Do not locally tune V23. Preregister an economically distinct hypothesis before implementation."
+}
