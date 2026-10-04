@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 import numpy as np
 
 from scripts import day_edge_lab as base
@@ -43,6 +44,11 @@ class TestFragmentedChaseExhaustionV22(unittest.TestCase):
         finally:
             for name,value in original.items():
                 setattr(v22.engine,name,value)
+
+    def test_scan_forwards_v22_frozen_context_by_default(self):
+        with mock.patch.object(v22.engine, "scan") as scan:
+            v22.scan("data", "btc", "out", "cache", "DEV", "source-check")
+        self.assertEqual(scan.call_args.kwargs["context_path"], v22.CONTEXT)
 
     def test_long_after_down_chase(self):
         raw,f,btc,cfg,i=self.fixture(1);self.assertTrue(v22.event_mask(cfg,raw,f)[i])
