@@ -574,3 +574,13 @@ Run [37160262235](https://github.com/duuu-hub/bb-scanner/actions/runs/3716026223
 Audit identified a Python default-argument binding error: the V22 wrapper rebound the shared engine's `CONTEXT` global but did not explicitly pass `context_path`, so DEV metadata recorded the V20 context hash `4cbf469c...` instead of V22's frozen context hash `204fc2c3...`. Baseline, BTC, all 856 market hashes, source run, policies, and candidate-ledger byte hashes were unchanged, but the mismatch correctly failed the integrity gate. Evidence is retained on `research-fragmented-chase-exhaustion-v22-evidence-37160262235` at `fab5d51` (291 files, 60,367,034 bytes); failure record is `research/fragmented-chase-exhaustion-v22/V22_RUN_37160262235_FAILURE.json` at `39a0d8d5...`.
 
 The wrapper now explicitly forwards V22's frozen context; a state-isolated regression was added. Local registered suite: 538 tests, zero failures/errors in 65.873s. Clean run [37166361208](https://github.com/duuu-hub/bb-scanner/actions/runs/37166361208) is active at trigger commit `ee0313d7cc71c898f862a5493792eda8565e49e4`. No run-5 outcomes were used for tuning or promotion; whole-account daily target remains unmet.
+
+
+## 2026-10-04 — V22 actual rejection; V23 implemented before execution
+
+- V22 run [37166361208](https://github.com/duuu-hub/bb-scanner/actions/runs/37166361208) completed 538/538 registered tests, all eight DEV shards, selection and evidence preservation.
+- Frozen 96 cells produced 934 parameterized outcomes and zero survivors. Only six cells had positive cost-adjusted mean/R; every one was exactly one trade in one symbol, all in 2023, so none is evidence of a reusable edge. The most frequent cell had N=80 across 56 symbols and lost 53.4653 bp/trade and 0.17763R with PF 0.5811.
+- Durable rejection audit: research/fragmented-chase-exhaustion-v22/V22_ACTUAL_REJECTION.json at bed86f323386576f326e8a25a207644f13d33c6a. Complete evidence branch: research-fragmented-chase-exhaustion-v22-evidence-37166361208 at cf74a18.
+- V23 was preregistered before implementation at 1375d151a7226aba0a99eaa07d70ed232218e693. It tests smooth directional path efficiency followed by a low-volume 5–35% pause and high-volume resumption, distinct from shock chasing and fragmentation reversal.
+- Implemented 16 entry configurations × 2 holds × 3 exits = 96 policies, causal next-open entry, structural stop, explicit V23 context forwarding, eight causal unit tests and an eight-shard/96-cell synthetic pipeline. Local new tests passed 8/8; synthetic pipeline preserved 96/96 cells. These are implementation checks only, not profitability evidence.
+- Workflow is frozen at .github/workflows/path-efficiency-resumption-v23.yml. Actual DEV has not yet been launched at this checkpoint.
