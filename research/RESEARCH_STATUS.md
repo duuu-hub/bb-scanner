@@ -597,3 +597,6 @@ V23 pre-outcome implementation audit found that the shared canonical TRAIL resol
 - Structured record: `research/path-efficiency-resumption-v23/V23_RUN_37175047449_FAILURE.json`, commit `bb0db32d02138d33676fcf0c6205b71074193e0a`. Raw DEV remains on `research-path-efficiency-resumption-v23-dev-37175047449`.
 - Corrected code `d2ae8ef96b522407b1f9baf597a82c0d21993adb` and regression `90a0eec368ebec9ed9154c96ff3fdf4b8ecef179` lock TRAIL at 2.0 ATR without changing the preregistered grid.
 - Exactly one corrected run is active: [37181004354](https://github.com/duuu-hub/bb-scanner/actions/runs/37181004354), trigger `588f7c00531231b0be9fdab6de8bc8c043479c9a`. Do not duplicate it or infer profitability until its actual logs and result tables are audited.
+
+
+Corrected V23 validation job `111373406555` has now succeeded on the corrected trigger commit: frozen 256-hash / 856-source-file contract, 546/546 registered tests in 47.384 seconds with zero failures/errors, all chronology smoke checks, and the synthetic eight-shard/96-cell pipeline passed. All eight real DEV shards are active. This is execution validation only; no market-return, survivor, account-growth, or daily-target conclusion exists yet.
