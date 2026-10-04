@@ -174,7 +174,8 @@ def intents(symbol, cfg, raw, f, btc, start, end):
         score = setup["formation_efficiency"] * setup["formation_move"] * setup["confirmation_volume_multiple"]
         rows.append(dict(symbol=symbol,key=cfg["key"],signal_time=int(t[i]),decision_time=int(t[i]+BAR),
             entry_time=int(t[j]),entry_index=int(j),entry=entry,sl=float(sl),side=int(side),
-            risk_pct=float(distance/entry),score=float(score),atr_mult=1.5,prior_atr=atr,
+            # Canonical TRAIL consumes atr_mult; the frozen contract is 2 ATR.
+            risk_pct=float(distance/entry),score=float(score),atr_mult=2.0,prior_atr=atr,
             buy_share=float(f["buy_share"][i]),volume_multiple=float(f["volume_multiple"][i]),
             formation_bars=cfg["window"],efficiency_threshold=cfg["efficiency"],
             confirmation_time=int(t[i]),flow_confirmation=cfg["confirmation"],known_entry_gap=float(gap),
