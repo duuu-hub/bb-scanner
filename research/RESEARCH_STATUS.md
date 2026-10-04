@@ -565,3 +565,12 @@ Exactly one repaired run is active: [37160262235](https://github.com/duuu-hub/bb
 
 
 V22 run5 validation job `111312084020` has now succeeded: frozen 256-hash/856-file input contract, 537/537 registered tests in 60.636 s, zero failures/errors, and all chronology smoke checks passed. All eight repaired DEV shards are active. This is validation evidence only; no market profitability or account-growth result exists yet.
+
+
+## V22 run 5 integrity failure and clean retry
+
+Run [37160262235](https://github.com/duuu-hub/bb-scanner/actions/runs/37160262235) passed its registered 537-test validation and all eight DEV shards completed, producing 934 parameterized outcomes across the frozen 96 policies. Selection then failed closed with `incomplete/altered development scan`; 2024 gate and account stages were skipped, so this is not an economic rejection or success.
+
+Audit identified a Python default-argument binding error: the V22 wrapper rebound the shared engine's `CONTEXT` global but did not explicitly pass `context_path`, so DEV metadata recorded the V20 context hash `4cbf469c...` instead of V22's frozen context hash `204fc2c3...`. Baseline, BTC, all 856 market hashes, source run, policies, and candidate-ledger byte hashes were unchanged, but the mismatch correctly failed the integrity gate. Evidence is retained on `research-fragmented-chase-exhaustion-v22-evidence-37160262235` at `fab5d51` (291 files, 60,367,034 bytes); failure record is `research/fragmented-chase-exhaustion-v22/V22_RUN_37160262235_FAILURE.json` at `39a0d8d5...`.
+
+The wrapper now explicitly forwards V22's frozen context; a state-isolated regression was added. Local registered suite: 538 tests, zero failures/errors in 65.873s. Clean run [37166361208](https://github.com/duuu-hub/bb-scanner/actions/runs/37166361208) is active at trigger commit `ee0313d7cc71c898f862a5493792eda8565e49e4`. No run-5 outcomes were used for tuning or promotion; whole-account daily target remains unmet.
