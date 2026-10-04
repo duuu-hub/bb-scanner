@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "study": "V23_PATH_EFFICIENCY_RESUMPTION",
+  "run_id": 37175047449,
+  "disposition": "INVALID_IMPLEMENTATION_RUN",
+  "accepted_for_economic_inference": false,
+  "observed_at_utc": "2026-10-04T04:18:01Z",
+  "workflow_head_sha": "33ec3c9a11ca49ef9db9653737604acfa40d7078",
+  "frozen_plan_sha": "1375d151a7226aba0a99eaa07d70ed232218e693",
+  "frozen_context_sha": "df8441043f5df735f72328b5db44e9e63a7d369b",
+  "defect": {
+    "field": "TRAIL exit ATR multiplier",
+    "frozen_plan_value": 2,
+    "executed_value": 1.5,
+    "affected_policy_cells": 32,
+    "total_policy_cells": 96,
+    "detection_timing": "Detected after trigger but before any market outcome was read.",
+    "correction_commit": "d2ae8ef96b522407b1f9baf597a82c0d21993adb",
+    "regression_test_commit": "90a0eec368ebec9ed9154c96ff3fdf4b8ecef179"
+  },
+  "execution_evidence": {
+    "validation_job_id": 111355820838,
+    "validation_result": "success",
+    "registered_suite_size": 546,
+    "development_job_ids": [
+      111356058694,
+      111356058679,
+      111356058707,
+      111356058779,
+      111356058678,
+      111356058706,
+      111356058785,
+      111356058697
+    ],
+    "selection_job_id": 111360316241,
+    "selection_result": "success",
+    "preservation_job_id": 111360395792,
+    "preserved_development_branch": "research-path-efficiency-resumption-v23-dev-37175047449",
+    "preserved_development_commit": "e6ebe85",
+    "gate_result": "skipped",
+    "accounts_result": "skipped",
+    "selected_artifact_id": 11293951426,
+    "selected_artifact_sha256": "aa1293597db05a758d4519f4d4da617f09a6a800c3968611c4852f642010041b"
+  },
+  "observed_but_rejected_diagnostic": {
+    "cells_examined": 96,
+    "selected_count": 0,
+    "status": "NO_DEVELOPMENT_POLICY_SURVIVOR",
+    "economic_surviving_cells": 0,
+    "rejection_counts": {
+      "N_LT_300": 24,
+      "NET40_MEAN_BP_NONPOSITIVE": 96,
+      "NET40_R_MEAN_NONPOSITIVE": 96,
+      "2021_N_LT_30": 18,
+      "2021_DATES_LT_20": 24,
+      "2021_day_R_NONPOSITIVE": 94,
+      "2022_net40_R_NONPOSITIVE": 96,
+      "2022_net40_mean_bp_NONPOSITIVE": 96,
+      "2022_day_R_NONPOSITIVE": 96,
+      "2023_net40_R_NONPOSITIVE": 96,
+      "2023_net40_mean_bp_NONPOSITIVE": 96,
+      "2023_day_R_NONPOSITIVE": 96,
+      "2021_net40_R_NONPOSITIVE": 85,
+      "2021_net40_mean_bp_NONPOSITIVE": 85
+    },
+    "use_restriction": "Do not count as success, failure, hypothesis iteration, tuning evidence, or economic discovery. Rerun the identical preregistered grid with corrected code."
+  },
+  "rerun_rule": "Exactly one corrected rerun from the same frozen plan/context and unchanged grid; do not tune from this run."
+}
