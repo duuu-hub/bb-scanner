@@ -620,3 +620,5 @@ Corrected V23 validation job `111373406555` has now succeeded on the corrected t
 - Implementation/validation commit: `f71f32bcadb60ae776d2cccb7a11fb15d23e1a3d`; trigger commit `9fbad10acf78367a664bd9eee4992577b66e390b`.
 - Actual Actions run `37244305969` is in progress under `.github/workflows/failed-resumption-reversal-v24.yml`.
 - Local preflight: 7 focused tests pass; 8-shard synthetic pipeline preserves all 96 cells. This is validation only, not profitability evidence.
+
+Validation job `111559028652` completed successfully: 553/553 tests, canonical chronology smoke, and the synthetic 8-shard/96-cell pipeline all passed. Eight actual DEV shard jobs then started; no profitability conclusion exists yet.
