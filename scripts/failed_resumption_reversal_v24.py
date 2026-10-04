@@ -8,6 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -111,10 +112,17 @@ def intents(symbol, cfg, raw, f, btc, start, end):
         structural = (max(h[i-1], h[i]) + .10*atr if formation_side == 1
                       else min(l[i-1], l[i]) - .10*atr)
         raw_distance = abs(entry - structural)
-        distance = max(raw_distance, .60*atr)
+        breached = (side == 1 and entry <= structural) or (side == -1 and entry >= structural)
+        # Preserve a next-open gap through the structural stop.  Moving the stop
+        # beyond the entry would erase precisely the adverse fill that the frozen
+        # plan requires us to retain.  The canonical resolver will stop it on the
+        # entry minute under the repository's conservative ordering rule.
+        distance = raw_distance if breached else max(raw_distance, .60*atr)
+        if distance <= 0:
+            excluded["ZERO_STOP_DISTANCE"] += 1; continue
         if distance > 2.50*atr:
             excluded["STOP_ABOVE_2P5_ATR"] += 1; continue
-        sl = entry - side*distance
+        sl = structural if breached else entry - side*distance
         if sl <= 0:
             excluded["NONPOSITIVE_LEVEL"] += 1; continue
         score = setup["formation_efficiency"]*setup["formation_move"]*setup["confirmation_volume_multiple"]
@@ -169,10 +177,42 @@ def select(parts,out,context_path=CONTEXT):
     decision["union_name"]="FAILED_RESUMPTION_REVERSAL_UNION"
     decision["note"]="Frozen V24 failed-resumption reversal. Diagnostics are not executable account growth."
     path.write_text(json.dumps(decision,indent=2,allow_nan=False))
+    selection_hash=v23.digest(path)
+    for meta in out.glob("dev-*/scan_meta.json"):
+        m=json.loads(meta.read_text());m["selection_sha256"]=selection_hash
+        meta.write_text(json.dumps(m,indent=2))
 
 
 def accounts(*args,**kwargs):
     bind_engine();return v23.engine.accounts(*args,**kwargs)
+
+
+def smoke(out):
+    """Exercise the complete 8-shard/96-cell pipeline on synthetic data only."""
+    bind_engine();out.mkdir(parents=True,exist_ok=True);n=32*96
+    t=v23.base.START+np.arange(n,dtype=np.int64)*BAR;rng=np.random.default_rng(62402)
+    x=np.cumsum(rng.normal(0,.001,n));btc=np.exp(10+x)
+    def write(path,close,trades=1000):
+        pd.DataFrame(dict(open_time=t,open=close,high=close*1.001,low=close*.999,close=close,
+            quote_volume=np.full(n,1e6),trades=np.full(n,trades,dtype=int),
+            taker_buy_quote=np.full(n,6e5))).to_csv(path,index=False,compression="gzip")
+    bp=out/"BTCUSDT.csv.gz";write(bp,btc,trades=0);hashes={}
+    for i in range(8):
+        d=out/"market"/str(i);d.mkdir(parents=True,exist_ok=True);p=d/f"X{i:02d}USDT.csv.gz"
+        write(p,np.exp(1+1.2*x+rng.normal(0,.0001,n)));hashes[p.name[:-7]]=v23.digest(p)
+    cp=out/"synthetic-context.json"
+    cp.write_text(json.dumps(dict(baseline_sha256="a"*64,btc_sha256=v23.digest(bp),expected_market_sha256=hashes)))
+    for i in range(8):
+        symbol=f"X{i:02d}USDT";check=out/f"check-{i}.json"
+        check.write_text(json.dumps(dict(status="VERIFIED",shards=[i],baseline_sha256="a"*64,
+            files=[dict(symbol=symbol,sha256=hashes[symbol])])))
+        scan(out/"market"/str(i),bp,out/"parts"/str(i),out/"minute-cache","DEV",check,context_path=cp)
+    select(out/"parts",out/"selected",cp)
+    cells=pd.read_csv(out/"selected/development_policy_cells.csv")
+    assert len(cells)==96 and cells.n.sum()==0
+    report=dict(synthetic_only=True,scans=8,all96_cells_preserved=True,market_profitability_claim=False)
+    (out/"smoke.json").write_text(json.dumps(report,indent=2))
+    print("V24_SYNTHETIC_PIPELINE_PASS",json.dumps(report),flush=True)
 
 
 def main():
@@ -183,10 +223,12 @@ def main():
     p=sub.add_parser("select");p.add_argument("--parts",type=Path,required=True);p.add_argument("--out",type=Path,required=True)
     p=sub.add_parser("accounts")
     for name in ("data","parts","out","selection"):p.add_argument("--"+name,type=Path,required=True)
+    p=sub.add_parser("smoke");p.add_argument("--out",type=Path,required=True)
     a=parser.parse_args()
     if a.command=="scan":scan(a.data,a.btc,a.out,a.minute_cache,a.stage,a.source_check,a.selection)
     elif a.command=="select":select(a.parts,a.out)
-    else:accounts(a.data,a.parts,a.out,a.selection)
+    elif a.command=="accounts":accounts(a.data,a.parts,a.out,a.selection)
+    else:smoke(a.out)
 
 
 if __name__=="__main__":

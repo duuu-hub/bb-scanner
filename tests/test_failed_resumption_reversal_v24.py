@@ -49,6 +49,17 @@ class FailedResumptionReversalV24Tests(unittest.TestCase):
         for k in range(1,5):changed[k][i+2:]*=3
         after,_=v24.intents("X",c,changed,f,btc,base.START,end)
         self.assertEqual(before,after);self.assertEqual(len(before),1)
+    def test_gap_through_structural_stop_is_not_moved_past_entry(self):
+        i,c,r,f=fixture();t,o,h,l,close=(x.copy() for x in r)
+        # Reversal is short.  Gap the next open above its structural stop; the
+        # seed must retain that already-breached level instead of inventing a
+        # new stop above the adverse entry.
+        structural=max(h[i-1],h[i])+.10*f["prior_atr"][i-2]
+        o[i+1]=structural+.10
+        seeds,_=v24.intents("X",c,(t,o,h,l,close),f,{"r1":np.zeros(len(t))},base.START,int(t[-1]+base.BAR))
+        self.assertEqual(len(seeds),1)
+        self.assertLess(seeds[0]["sl"],seeds[0]["entry"])
+        self.assertAlmostEqual(seeds[0]["sl"],structural)
 
 
 if __name__=="__main__":unittest.main()
