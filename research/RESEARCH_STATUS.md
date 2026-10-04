@@ -587,3 +587,13 @@ The wrapper now explicitly forwards V22's frozen context; a state-isolated regre
 
 
 V23 pre-outcome implementation audit found that the shared canonical TRAIL resolver consumes the seed's atr_mult. The first trigger commit supplied 1.5 although the frozen plan requires 2.0 ATR after four closed bars. Before reading any market output, code commit d2ae8ef96b522407b1f9baf597a82c0d21993adb and regression commit 90a0eec368ebec9ed9154c96ff3fdf4b8ecef179 fixed and locked the value at 2.0; 8/8 focused tests still pass. The initial trigger 33ec3c9a11ca49ef9db9653737604acfa40d7078 is not acceptable economic evidence. Do not launch a duplicate while its workflow may still be active; wait for terminal state, preserve the failure, then trigger exactly one corrected cycle.
+
+
+## 2026-10-04 — V23 invalid first cycle preserved; corrected cycle active
+
+- Initial run [37175047449](https://github.com/duuu-hub/bb-scanner/actions/runs/37175047449) executed commit `33ec3c9a11ca49ef9db9653737604acfa40d7078`, passed the actual 546-test validation, all eight DEV shards and selection, but is excluded from every economic conclusion.
+- Reason: 32 of 96 TRAIL cells used 1.5 ATR through the shared canonical resolver instead of the frozen plan's 2.0 ATR. The discrepancy was detected after trigger and before any market outcome was read; no parameter was tuned from the run.
+- The observed zero-selection output is retained only as a rejected diagnostic. It is not counted as a strategy failure, success, discovery, or iteration.
+- Structured record: `research/path-efficiency-resumption-v23/V23_RUN_37175047449_FAILURE.json`, commit `bb0db32d02138d33676fcf0c6205b71074193e0a`. Raw DEV remains on `research-path-efficiency-resumption-v23-dev-37175047449`.
+- Corrected code `d2ae8ef96b522407b1f9baf597a82c0d21993adb` and regression `90a0eec368ebec9ed9154c96ff3fdf4b8ecef179` lock TRAIL at 2.0 ATR without changing the preregistered grid.
+- Exactly one corrected run is active: [37181004354](https://github.com/duuu-hub/bb-scanner/actions/runs/37181004354), trigger `588f7c00531231b0be9fdab6de8bc8c043479c9a`. Do not duplicate it or infer profitability until its actual logs and result tables are audited.
