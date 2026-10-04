@@ -1,0 +1,71 @@
+{
+  "study": "V22_FRAGMENTED_CHASE_EXHAUSTION",
+  "run_id": 37160262235,
+  "run_head_sha": "9ee40edddb61d072fa24f38b8ab11020970b649c",
+  "classification": "EXECUTION_INTEGRITY_FAILURE_NOT_ECONOMIC_TRIAL",
+  "validation": {
+    "status": "success",
+    "registered_tests": 537,
+    "failures": 0,
+    "errors": 0
+  },
+  "development": {
+    "shards_completed": 8,
+    "shards_expected": 8,
+    "parameterized_outcomes_by_shard": [
+      130,
+      74,
+      50,
+      114,
+      106,
+      194,
+      112,
+      154
+    ],
+    "parameterized_outcomes_total": 934,
+    "policies": 96,
+    "source_symbols": 856,
+    "selection_status": "failed",
+    "selection_error": "ValueError: incomplete/altered development scan",
+    "gate_status": "skipped",
+    "account_status": "skipped"
+  },
+  "root_cause": {
+    "type": "PYTHON_DEFAULT_ARGUMENT_CONTEXT_BINDING",
+    "detail": "The V22 wrapper rebound engine.CONTEXT but called engine.scan without context_path. The shared function's default had already captured the V20 FROZEN_CONTEXT path at definition time.",
+    "recorded_scan_context_sha256": "4cbf469c0c0d4efa9c63d19c9650bbaf1e8ded8f38bc4195ec2d702d2eea9614",
+    "required_v22_context_sha256": "204fc2c366dcca2dfadaa46ffdb318fe8530cedd66ff14f8c008a039523ea0ee",
+    "semantic_context_difference": [
+      "plan_commit",
+      "source_note",
+      "study"
+    ],
+    "unchanged_contract_fields": [
+      "baseline_sha256",
+      "btc_sha256",
+      "expected_market_sha256",
+      "source_data_run"
+    ],
+    "ledger_byte_hashes_verified_against_scan_meta": true
+  },
+  "evidence": {
+    "branch": "research-fragmented-chase-exhaustion-v22-evidence-37160262235",
+    "commit": "fab5d51",
+    "archived_files": 291,
+    "archived_bytes": 60367034
+  },
+  "remediation": {
+    "code_commit": "d0fee118867f5e89f0fbec02878aa0983c6726d7",
+    "regression_commit": "6f777a10f5e738a1a635b441e1428852ddd08f1e",
+    "validator_commit": "655af04af179d04f49a2c634e1154896e488e17e",
+    "isolation_fix_commit": "9284fc845759aa3d1c0c0c62856872914839b3bf",
+    "fix": "V22 scan wrapper now explicitly forwards its own frozen context; a regression asserts the forwarded path and restores shared engine globals.",
+    "local_validation": {
+      "registered_tests": 538,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_seconds": 65.873
+    }
+  },
+  "conclusion": "Run 37160262235 cannot select or reject a policy. Its economic outputs were not used for tuning or promotion. A clean run is required."
+}

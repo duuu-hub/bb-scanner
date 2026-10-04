@@ -1,0 +1,39 @@
+{
+  "study": "fragmented-chase-exhaustion-v22",
+  "run_id": 37146393987,
+  "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37146393987",
+  "source_commit": "0e2923c8a2fcf22c2b958ea0394935aa960a07f6",
+  "conclusion": "failure_before_market_scan",
+  "validation": {
+    "job_id": 111271117744,
+    "tests_run": 535,
+    "failures": 0,
+    "errors": 0,
+    "chronology_smoke": "PASS",
+    "canonical_invariants": "PASS"
+  },
+  "development_jobs": {
+    "attempted": 8,
+    "failed": 8,
+    "market_symbols_scanned": 0,
+    "economic_outcomes_produced": 0
+  },
+  "failure": {
+    "exception": "ValueError",
+    "message": "bad positive integer trade count btc/BTCUSDT.csv.gz",
+    "location": "scripts/fragmented_chase_exhaustion_v22.py:load",
+    "root_cause": "The generic V20 scan delegated the frozen BTC context to the V22 tradable-symbol loader. The BTC context includes legitimate zero trade-count bars and is not an instrument evaluated by the fragmented-chase trade-count hypothesis.",
+    "classification": "execution_role_routing_bug_not_strategy_result"
+  },
+  "repair_scope": {
+    "economic_hypothesis_changed": false,
+    "grid_changed": false,
+    "costs_or_risk_changed": false,
+    "change": "Use the inherited source loader and feature builder for BTC context only; retain the strict V22 trade-count validator for every market symbol.",
+    "regression": "Synthetic BTC context now contains zero trade-count bars while all tradable symbols retain positive integer counts. The eight-shard/96-cell smoke pipeline must pass."
+  },
+  "evidence": {
+    "branch": "research-fragmented-chase-exhaustion-v22-evidence-37146393987",
+    "commit": "eca2b7c4ee2105fdd3ebf1a059e5390da2ccf999"
+  }
+}

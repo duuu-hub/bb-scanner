@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "hypothesis_id": "V22",
+  "run_id": 37156055399,
+  "workflow_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37156055399",
+  "source_commit": "c221300d65d9d10d44b4896dfbc2061a5d262219",
+  "conclusion": "failure_before_market_scan",
+  "validation": {
+    "registered_tests": 536,
+    "failures": 0,
+    "errors": 17,
+    "elapsed_seconds": 60.62,
+    "root_cause": "test_btc_context_uses_source_loader_not_trade_count_validator called bind_engine() without restoring the shared V20 engine module; all 17 later V20 tests read V22 configurations and raised KeyError: width_cap"
+  },
+  "market_execution": {
+    "started": false,
+    "development_jobs_run": 0,
+    "policies_evaluated": 0,
+    "outcomes": 0
+  },
+  "evidence": {
+    "branch": "research-fragmented-chase-exhaustion-v22-evidence-37156055399",
+    "commit": "a8a92bf",
+    "validation_artifact_id": 11285862227,
+    "validation_artifact_sha256": "53cbf18e6c7601e22904ac91d76d4b68ee16aba63a951dfa8205cffb6401b365"
+  },
+  "repair": {
+    "commit": "01183f81aefa85fb513d564371804156e566a6db",
+    "change": "snapshot and restore every engine global mutated by bind_engine() in try/finally",
+    "local_regression": "python -m unittest tests.test_fragmented_chase_exhaustion_v22 tests.test_session_opening_range_sweep_v20",
+    "local_result": "35 tests passed"
+  },
+  "interpretation": "Infrastructure/test-isolation failure only. It is not an economic trial and provides no evidence for or against the frozen V22 hypothesis."
+}
