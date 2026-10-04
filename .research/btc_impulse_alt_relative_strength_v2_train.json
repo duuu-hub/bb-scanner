@@ -1,0 +1,86 @@
+{
+  "experiment_id": "btc_impulse_alt_relative_strength_v2_train",
+  "classification": "EXPLORATORY",
+  "generation_reason": "V1 lag catch-up traded laggards in BTC direction and failed across all 4 TRAIN years. V2 tests the opposite causal interpretation: lag after a BTC impulse represents persistent relative weakness/strength rather than delayed catch-up.",
+  "parent_experiment": "btc_impulse_alt_lag_catchup_v1_train",
+  "parent_run": 37078429326,
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "registration_base_head": "506dda75d4152c0fe590da64c5ee540aa31e741b",
+  "data": {
+    "feature_source_run": 37078429326,
+    "raw_source_run": 36095439671,
+    "market": "Binance USD-M USDT perpetual",
+    "train": "2021-01-01 through 2024-12-31 UTC",
+    "validation": "2025-2026 SEEN validation; not read",
+    "universe": "same non-BTC frozen universe/features as V1",
+    "point_in_time_universe_status": "unknown / survivorship-biased until audited",
+    "liquidity_filter": "unavailable/unknown"
+  },
+  "signal": {
+    "leader": "same completed BTC 1h impulse and lag ranking frozen in V1 feature artifacts",
+    "ranking": "same lag_gap descending, Top3/Top6 per BTC event",
+    "trade_direction": "OPPOSITE BTC direction: BTC up + lagging alt => SHORT; BTC down + resilient/lagging alt => LONG",
+    "rationale": "relative weakness/strength continuation",
+    "lag_fraction_max_grid": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "entry": "same next 15m OPEN after completed BTC event"
+  },
+  "exits": {
+    "stop_atr1h_grid": [
+      1,
+      1.5
+    ],
+    "target_r_grid": [
+      1.5,
+      2.5
+    ],
+    "max_hold_hours_grid": [
+      4,
+      8
+    ],
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "portfolio": {
+    "top_k_per_event_grid": [
+      3,
+      6
+    ],
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false
+  },
+  "execution": {
+    "canonical_chronology": "AGENTS.md section 11; official Binance 1m for ambiguous parent-bar exits",
+    "costs_round_trip_all_in_bp": [
+      20,
+      40
+    ],
+    "funding": "excluded"
+  },
+  "selection": {
+    "scope": "BOTH leader directions combined; side-specific rows diagnostics only",
+    "min_executable_trades": 500,
+    "min_exec_per_day": 0.34,
+    "gates": [
+      "ret20 > 0",
+      "ret40 > 0",
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD20 <= 35%",
+      "at least 3/4 calendar years positive at 20bp",
+      "worst calendar-year PF20 >= 0.85",
+      "at least one adjacent grid config PF20 > 1.03 and ret20 > 0"
+    ],
+    "ranking": "ret20 desc, MDD20 asc, PF40 desc, executable N desc",
+    "if_pass": "freeze stable TRAIN region before revealing 2025-2026 validation",
+    "if_fail": "preserve failure; do not mine validation"
+  }
+}
