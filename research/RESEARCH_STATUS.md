@@ -600,3 +600,16 @@ V23 pre-outcome implementation audit found that the shared canonical TRAIL resol
 
 
 Corrected V23 validation job `111373406555` has now succeeded on the corrected trigger commit: frozen 256-hash / 856-source-file contract, 546/546 registered tests in 47.384 seconds with zero failures/errors, all chronology smoke checks, and the synthetic eight-shard/96-cell pipeline passed. All eight real DEV shards are active. This is execution validation only; no market-return, survivor, account-growth, or daily-target conclusion exists yet.
+
+
+## 2026-10-04 — Corrected V23 actual rejection; V24 preregistered
+
+- Corrected V23 run [37181004354](https://github.com/duuu-hub/bb-scanner/actions/runs/37181004354) completed successfully at code/trigger `588f7c00531231b0be9fdab6de8bc8c043479c9a`.
+- Actual evidence: 546/546 registered tests, all chronology checks, all eight real DEV shards, deterministic selection, DEV preservation and complete-evidence preservation succeeded.
+- Frozen 96 policy cells covered 16 entry definitions and 22,284 unique entry events. Survivors: 0. The 2024 gate and account jobs were correctly skipped.
+- Every cell was negative after the canonical 40 bp stress: mean return −71.1377 to −24.8632 bp/trade, mean R −0.40303 to −0.15190, PF 0.2875 to 0.7646. Positive mean cells: 0; positive R cells: 0; PF>1 cells: 0.
+- Least-bad policy `PATH_S-1_W16_E70_FLOW55__H32__R25`: N=97, 74 symbols, −24.8632 bp/trade, −0.15190R, PF 0.7646. Annual R was +0.18607 / −0.27993 / −0.11619 for 2021/2022/2023, so it is neither robust nor promotable.
+- Durable DEV: `research-path-efficiency-resumption-v23-dev-37181004354` at `3cc77f9`. Complete evidence: `research-path-efficiency-resumption-v23-evidence-37181004354` at `36f2d3cde3911946d40b422a360ea02ca527a850`. Rejection audit: `research/path-efficiency-resumption-v23/V23_ACTUAL_REJECTION.json` at `aa05e0c0012c8439355eb19fb2ea933bbc3bffae`.
+- V23 is retired without local parameter tuning. No account return or calendar-day +0.7% to +2% target evidence exists.
+- V24 was preregistered before implementation on `research-failed-resumption-reversal-v24`, plan commit `39852879b3722a46a37f0874264727c80f38b01d`.
+- V24 is economically distinct from V23 continuation: it requires a smooth path, shallow pause, high-volume resumption attempt, then a separate failed-resumption bar closing back through the pause anchor; it trades opposite the trapped attempt on the following open. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies. The reused periods remain observed research data, not clean holdouts.
