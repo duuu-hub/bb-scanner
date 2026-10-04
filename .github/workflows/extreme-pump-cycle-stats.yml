@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_body70_regime_partial.py'
-      - 'scripts/trend_continuation_body70_regime_merge.py'
+      - 'scripts/trend_continuation_body70_path_partial.py'
+      - 'scripts/trend_continuation_body70_path_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  regime-partial:
+  path-partial:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -27,40 +27,37 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pandas==2.3.3 numpy==2.3.3
-      - name: Download frozen BODY70 merged trades
+      - name: Download frozen global events
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p body70
-          gh run download 37078195174 -R ${{ github.repository }} \
-            -n body70-validation-merged-37078195174 -D body70
-          ls -lh body70/merged_trades.csv.gz
-      - name: Download raw source shard ${{ matrix.shard }}
+          mkdir -p events
+          gh run download 36934882492 -R ${{ github.repository }} \
+            -n trend-continuation-global-events -D events
+      - name: Download raw shard ${{ matrix.shard }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p raw_data
           gh run download 36095439671 -R ${{ github.repository }} \
-            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" \
-            -D raw_data
-      - name: Build shard market breadth
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw_data
+      - name: Build path diagnostics
         run: |
-          rm -rf regime_partial
-          python scripts/trend_continuation_body70_regime_partial.py \
-            --trades body70/merged_trades.csv.gz \
+          rm -rf path_result
+          python scripts/trend_continuation_body70_path_partial.py \
+            --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --out regime_partial
+            --out path_result
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-regime-partial-${{ matrix.shard }}
-          path: regime_partial/breadth_partial.csv.gz
+          name: body70-path-partial-${{ matrix.shard }}
+          path: path_result/path_diag.csv.gz
           retention-days: 30
-          compression-level: 6
 
-  regime-merge:
-    needs: regime-partial
+  path-merge:
+    needs: path-partial
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -69,30 +66,20 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: body70-regime-partial-*
-          path: regime_partials
-      - name: Download frozen BODY70 merged trades
-        env:
-          GH_TOKEN: ${{ github.token }}
+          pattern: body70-path-partial-*
+          path: path_partials
+      - name: Merge path diagnostics
         run: |
-          mkdir -p body70
-          gh run download 37078195174 -R ${{ github.repository }} \
-            -n body70-validation-merged-37078195174 -D body70
-      - name: Merge and diagnose regime decay
-        run: |
-          rm -rf regime_result
-          python scripts/trend_continuation_body70_regime_merge.py \
-            --partials regime_partials \
-            --trades body70/merged_trades.csv.gz \
-            --out regime_result
+          rm -rf path_merged
+          python scripts/trend_continuation_body70_path_merge.py \
+            --partials path_partials \
+            --out path_merged
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-regime-merged-${{ github.run_id }}
+          name: body70-path-merged-${{ github.run_id }}
           path: |
-            regime_result/breadth_merged.csv.gz
-            regime_result/body70_trades_with_regime.csv.gz
-            regime_result/year_regime.csv
-            regime_result/monthly.csv
-            regime_result/summary.json
+            path_merged/body70_path_all.csv.gz
+            path_merged/monthly_path.csv
+            path_merged/yearly_path.csv
+            path_merged/summary.json
           retention-days: 30
-          compression-level: 6
