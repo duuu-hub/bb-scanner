@@ -1,6 +1,6 @@
 {
   "closed_trades": [],
-  "last_run_ms": 1791123358454,
+  "last_run_ms": 1791124259313,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -240,7 +240,8 @@
     "LONG3:L2:BEAMUSDT:1791104400000",
     "SHORT3:S3:BEAMUSDT:1791104400000",
     "LONG3:L1:TOWNSUSDT:1791107100000",
-    "SHORT3:S2:MAGICUSDT:1791122400000"
+    "SHORT3:S2:MAGICUSDT:1791122400000",
+    "LONG3:L1:HAEDALUSDT:1791124200000"
   ],
   "signal_shadow_closed": [
     {
@@ -9929,11 +9930,10 @@
       "strategy": "S2",
       "symbol": "ATHUSDT",
       "tp": 0.007371
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791124257637,
       "deadline_ms": 1791124200000,
       "detected_price": 0.114406,
       "last_checked_ms": 1791123300000,
@@ -9961,7 +9961,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.114406,
+      "shadow_exit_price": 0.10786,
+      "shadow_return_pct": 6.0689783052104485,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:ESPUSDT:1791081000000",
       "signal_time_ms": 1791081000000,
@@ -9969,12 +9972,14 @@
       "strategy": "S1",
       "symbol": "ESPUSDT",
       "tp": 0.1029654
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791136800000,
       "detected_price": 0.06325,
-      "last_checked_ms": 1791123300000,
+      "last_checked_ms": 1791124200000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.7106198183971735,
         "alt_positive_4h_pct": 79.04967602591793,
@@ -10006,6 +10011,43 @@
       "strategy": "S2",
       "symbol": "MAGICUSDT",
       "tp": 0.056925
+    },
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1791167400000,
+      "detected_price": 0.02275,
+      "last_checked_ms": 1791124200000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.7106198183971735,
+        "alt_positive_4h_pct": 79.04967602591793,
+        "btc_1h_pct": -0.055174486378362086,
+        "btc_24h_pct": 0.41700000000000004,
+        "btc_4h_pct": -0.23038909507240302,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.11231290449326137,
+        "eth_24h_pct": 0.511,
+        "eth_4h_pct": -0.3229123513049714,
+        "eth_btc_relative_strength_24h_pct": 0.09399999999999997,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-04T05:36:17.000986+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.02275,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:HAEDALUSDT:1791124200000",
+      "signal_time_ms": 1791124200000,
+      "sl": 0.0216125,
+      "strategy": "L1",
+      "symbol": "HAEDALUSDT",
+      "tp": 0.025025000000000002
     }
   ],
   "spread_shadow_closed": [],
