@@ -46,6 +46,7 @@ class PathEfficiencyResumptionV23Tests(unittest.TestCase):
         before,_=v23.intents("X",c,r,f,btc,base.START,end);changed=tuple(x.copy() for x in r)
         changed[1][i+2:]*=4;changed[2][i+2:]*=4;changed[3][i+2:]*=.25;changed[4][i+2:]*=2
         after,_=v23.intents("X",c,changed,f,btc,base.START,end);self.assertEqual(before,after);self.assertEqual(len(before),1)
+        self.assertEqual(before[0]["atr_mult"],2.0)
     def test_scan_forwards_context_and_restores_engine(self):
         names=('CONTEXT','COLUMNS','LOG_PREFIX','configurations','policies','load','features','intents','policy_rows','BTC_LOAD','BTC_FEATURES')
         original={n:getattr(v23.engine,n) for n in names}
