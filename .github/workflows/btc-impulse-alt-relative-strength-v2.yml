@@ -1,0 +1,70 @@
+name: BTC Impulse Alt Relative-Strength V2 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/btc_impulse_alt_relative_strength_v2_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile and smoke
+        run: |
+          python -m py_compile scripts/btc_impulse_alt_relative_strength_v2.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          import scripts.btc_impulse_alt_relative_strength_v2 as v2
+          import scripts.btc_impulse_alt_lag_catchup_v1_merge as v1
+          assert v2.opposite("long")=="short"
+          assert v2.opposite("short")=="long"
+          assert len(v1.PORT_CONFIGS)==48
+          assert v1.LAG_MAX==(.25,.50,.75)
+          assert v1.TOPK==(3,6)
+          assert v1.HOLD_BARS==(16,32)
+          print("BTC_RELATIVE_STRENGTH_V2_SMOKE_PASS")
+          PY
+
+  evaluate:
+    needs: audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Download frozen V1 lag features
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p feature_artifacts
+          gh run download 37078429326 -R \${{ github.repository }} -p 'btc-lag-features-v1-*' -D feature_artifacts
+          test "$(find feature_artifacts -name 'btc_lag_features_*.csv.gz' | wc -l)" -eq 12
+          test "$(find feature_artifacts -name 'btc_lag_features_meta_*.json' | wc -l)" -eq 12
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Evaluate opposite-direction relative strength TRAIN
+        run: |
+          python scripts/btc_impulse_alt_relative_strength_v2.py \
+            --features feature_artifacts \
+            --data data \
+            --out btc_lag_relative_strength_v2_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: btc-impulse-alt-relative-strength-v2-train-final
+          path: btc_lag_relative_strength_v2_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
