@@ -613,3 +613,10 @@ Corrected V23 validation job `111373406555` has now succeeded on the corrected t
 - V23 is retired without local parameter tuning. No account return or calendar-day +0.7% to +2% target evidence exists.
 - V24 was preregistered before implementation on `research-failed-resumption-reversal-v24`, plan commit `39852879b3722a46a37f0874264727c80f38b01d`.
 - V24 is economically distinct from V23 continuation: it requires a smooth path, shallow pause, high-volume resumption attempt, then a separate failed-resumption bar closing back through the pause anchor; it trades opposite the trapped attempt on the following open. Frozen grid: 16 entries × 2 holds × 3 exits = 96 policies. The reused periods remain observed research data, not clean holdouts.
+
+## V24 actual run started (2026-10-04 UTC)
+
+- Preregistered branch: `research-failed-resumption-reversal-v24`; plan commit `39852879b3722a46a37f0874264727c80f38b01d`.
+- Implementation/validation commit: `f71f32bcadb60ae776d2cccb7a11fb15d23e1a3d`; trigger commit `9fbad10acf78367a664bd9eee4992577b66e390b`.
+- Actual Actions run `37244305969` is in progress under `.github/workflows/failed-resumption-reversal-v24.yml`.
+- Local preflight: 7 focused tests pass; 8-shard synthetic pipeline preserves all 96 cells. This is validation only, not profitability evidence.
