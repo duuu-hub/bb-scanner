@@ -43,18 +43,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
       - name: Download frozen V1 lag features
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p feature_artifacts
-          gh run download 37078429326 -R \${{ github.repository }} -p 'btc-lag-features-v1-*' -D feature_artifacts
+          gh run download 37078429326 -R ${{ github.repository }} -p 'btc-lag-features-v1-*' -D feature_artifacts
           test "$(find feature_artifacts -name 'btc_lag_features_*.csv.gz' | wc -l)" -eq 12
           test "$(find feature_artifacts -name 'btc_lag_features_meta_*.json' | wc -l)" -eq 12
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Evaluate opposite-direction relative strength TRAIN
         run: |
           python scripts/btc_impulse_alt_relative_strength_v2.py \
