@@ -229,7 +229,12 @@ def bind_engine():
 
 
 def scan(*args, **kwargs):
-    bind_engine(); return engine.scan(*args, **kwargs)
+    bind_engine()
+    # engine.scan's default was bound to V20's context when that module was
+    # defined.  Rebinding engine.CONTEXT cannot change a Python default
+    # argument, so every wrapper must forward its own frozen context.
+    kwargs.setdefault("context_path", CONTEXT)
+    return engine.scan(*args, **kwargs)
 
 
 def select(parts, out, context_path=CONTEXT):
