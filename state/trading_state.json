@@ -1,6 +1,6 @@
 {
   "closed_trades": [],
-  "last_run_ms": 1791199857451,
+  "last_run_ms": 1791200759348,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -255,7 +255,9 @@
     "SHORT3:S1:CARVUSDT:1791159300000",
     "SHORT3:S2:CARVUSDT:1791161100000",
     "SHORT3:S2:GRIFFAINUSDT:1791186300000",
-    "SHORT3:S3:FLUIDUSDT:1791198000000"
+    "SHORT3:S3:FLUIDUSDT:1791198000000",
+    "LONG3:L1:FLUIDUSDT:1791200700000",
+    "SHORT3:S1:FLUIDUSDT:1791200700000"
   ],
   "signal_shadow_closed": [
     {
@@ -10567,11 +10569,10 @@
       "strategy": "L3",
       "symbol": "FLUIDUSDT",
       "tp": 1.9635
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791200757164,
       "deadline_ms": 1791200700000,
       "detected_price": 0.01894,
       "last_checked_ms": 1791199800000,
@@ -10598,7 +10599,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.01894,
+      "shadow_exit_price": 0.01885,
+      "shadow_return_pct": 0.4774535809018543,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:GRIFFAINUSDT:1791186300000",
       "signal_time_ms": 1791186300000,
@@ -10609,6 +10613,7 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791200757164,
       "deadline_ms": 1791201600000,
       "detected_price": 1.876,
       "last_checked_ms": 1791199800000,
@@ -10635,7 +10640,10 @@
       ],
       "max_hold_minutes": 60,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 1.876,
+      "shadow_exit_price": 1.9698,
+      "shadow_return_pct": -4.761904761904767,
       "side": "SHORT",
       "signal_id": "SHORT3:S3:FLUIDUSDT:1791198000000",
       "signal_time_ms": 1791198000000,
@@ -10643,6 +10651,84 @@
       "strategy": "S3",
       "symbol": "FLUIDUSDT",
       "tp": 1.6884
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1791243900000,
+      "detected_price": 2.218,
+      "last_checked_ms": 1791200700000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.6676485027000467,
+        "alt_positive_4h_pct": 76.45788336933046,
+        "btc_1h_pct": 0.05139941297682693,
+        "btc_24h_pct": 0.947,
+        "btc_4h_pct": -0.3537063889519576,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.1072633111557586,
+        "eth_24h_pct": 0.61,
+        "eth_4h_pct": -0.3854942652684601,
+        "eth_btc_relative_strength_24h_pct": -0.33699999999999997,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-05T09:37:53.619263+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 2.218,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:FLUIDUSDT:1791200700000",
+      "signal_time_ms": 1791200700000,
+      "sl": 2.1071,
+      "strategy": "L1",
+      "symbol": "FLUIDUSDT",
+      "tp": 2.4398
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791243900000,
+      "detected_price": 2.218,
+      "last_checked_ms": 1791200700000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.6676485027000467,
+        "alt_positive_4h_pct": 76.45788336933046,
+        "btc_1h_pct": 0.05139941297682693,
+        "btc_24h_pct": 0.947,
+        "btc_4h_pct": -0.3537063889519576,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.1072633111557586,
+        "eth_24h_pct": 0.61,
+        "eth_4h_pct": -0.3854942652684601,
+        "eth_btc_relative_strength_24h_pct": -0.33699999999999997,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-05T09:37:53.619263+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 2.218,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S1:FLUIDUSDT:1791200700000",
+      "signal_time_ms": 1791200700000,
+      "sl": 2.30672,
+      "strategy": "S1",
+      "symbol": "FLUIDUSDT",
+      "tp": 1.9962
     }
   ],
   "spread_shadow_closed": [],
