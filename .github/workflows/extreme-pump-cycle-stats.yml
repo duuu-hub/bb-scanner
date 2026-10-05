@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_body70_subgroup_exact.py'
-      - 'scripts/trend_continuation_body70_subgroup_exact_merge.py'
+      - 'scripts/trend_continuation_body70_promising_robust.py'
+      - 'scripts/trend_continuation_body70_promising_robust_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  subgroup-partial:
+  robust-partial:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -41,21 +41,21 @@ jobs:
           mkdir -p raw_data
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw_data
-      - name: Exact subgroup replay
+      - name: Run execution robustness
         run: |
-          rm -rf subgroup_result
-          python scripts/trend_continuation_body70_subgroup_exact.py \
+          rm -rf robust_result
+          python scripts/trend_continuation_body70_promising_robust.py \
             --events-in events/continuation_events.csv.gz \
             --raw raw_data \
-            --out subgroup_result
+            --out robust_result
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-subgroup-partial-${{ matrix.shard }}
-          path: subgroup_result/trades.csv.gz
+          name: body70-promising-robust-partial-${{ matrix.shard }}
+          path: robust_result/trades.csv.gz
           retention-days: 30
 
-  subgroup-merge:
-    needs: subgroup-partial
+  robust-merge:
+    needs: robust-partial
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -66,19 +66,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: body70-subgroup-partial-*
-          path: subgroup_partials
-      - name: Merge exact subgroup replay
+          pattern: body70-promising-robust-partial-*
+          path: robust_partials
+      - name: Merge robustness
         run: |
-          rm -rf subgroup_merged
-          python scripts/trend_continuation_body70_subgroup_exact_merge.py \
-            --partials subgroup_partials \
-            --out subgroup_merged
+          rm -rf robust_merged
+          python scripts/trend_continuation_body70_promising_robust_merge.py \
+            --partials robust_partials \
+            --out robust_merged
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-subgroup-exact-merged-${{ github.run_id }}
+          name: body70-promising-robust-merged-${{ github.run_id }}
           path: |
-            subgroup_merged/trades_all.csv.gz
-            subgroup_merged/yearly.csv
-            subgroup_merged/summary.json
+            robust_merged/trades_all.csv.gz
+            robust_merged/summary.json
           retention-days: 30
