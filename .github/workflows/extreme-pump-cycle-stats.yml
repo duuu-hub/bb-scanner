@@ -4,8 +4,8 @@ on:
   push:
     branches: [research-rank5-binance-15m-5y]
     paths:
-      - 'scripts/trend_continuation_body70_stop_path_partial.py'
-      - 'scripts/trend_continuation_body70_stop_path_merge.py'
+      - 'scripts/trend_continuation_body70_context_partial.py'
+      - 'scripts/trend_continuation_body70_context_merge.py'
       - '.github/workflows/extreme-pump-cycle-stats.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  stop-path-partial:
+  context-partial:
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -34,6 +34,13 @@ jobs:
           mkdir -p body70
           gh run download 37078195174 -R ${{ github.repository }} \
             -n body70-validation-merged-37078195174 -D body70
+      - name: Download frozen global events
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p events
+          gh run download 36934882492 -R ${{ github.repository }} \
+            -n trend-continuation-global-events -D events
       - name: Download raw shard ${{ matrix.shard }}
         env:
           GH_TOKEN: ${{ github.token }}
@@ -41,21 +48,22 @@ jobs:
           mkdir -p raw_data
           gh run download 36095439671 -R ${{ github.repository }} \
             -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw_data
-      - name: Deep stop-path diagnostics
+      - name: Build signal-context diagnostics
         run: |
-          rm -rf stop_path_result
-          python scripts/trend_continuation_body70_stop_path_partial.py \
+          rm -rf context_result
+          python scripts/trend_continuation_body70_context_partial.py \
             --trades body70/merged_trades.csv.gz \
+            --events events/continuation_events.csv.gz \
             --raw raw_data \
-            --out stop_path_result
+            --out context_result
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-stop-path-partial-${{ matrix.shard }}
-          path: stop_path_result/stop_path.csv.gz
+          name: body70-context-partial-${{ matrix.shard }}
+          path: context_result/context_partial.csv.gz
           retention-days: 30
 
-  stop-path-merge:
-    needs: stop-path-partial
+  context-merge:
+    needs: context-partial
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -66,19 +74,18 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
-          pattern: body70-stop-path-partial-*
-          path: stop_path_partials
-      - name: Merge deep stop-path diagnostics
+          pattern: body70-context-partial-*
+          path: context_partials
+      - name: Merge signal-context diagnostics
         run: |
-          rm -rf stop_path_merged
-          python scripts/trend_continuation_body70_stop_path_merge.py \
-            --partials stop_path_partials \
-            --out stop_path_merged
+          rm -rf context_merged
+          python scripts/trend_continuation_body70_context_merge.py \
+            --partials context_partials \
+            --out context_merged
       - uses: actions/upload-artifact@v4
         with:
-          name: body70-stop-path-merged-${{ github.run_id }}
+          name: body70-context-merged-${{ github.run_id }}
           path: |
-            stop_path_merged/stop_path_all.csv.gz
-            stop_path_merged/monthly_stop_path.csv
-            stop_path_merged/summary.json
+            context_merged/context_all.csv.gz
+            context_merged/summary.json
           retention-days: 30
