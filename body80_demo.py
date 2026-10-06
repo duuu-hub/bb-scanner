@@ -359,6 +359,58 @@ def matching_position(positions: list[dict], symbol: str) -> dict | None:
     return None
 
 
+def resolve_exchange_close(client: BitgetDemoClassic, trade: dict, ts_ms: int) -> dict:
+    opened = int(trade.get("fill_ms") or trade.get("entry_boundary_ms") or 0)
+    try:
+        data = client.private_get(
+            "/api/v2/mix/order/orders-history",
+            {
+                "productType": PRODUCT_TYPE,
+                "symbol": trade["symbol"],
+                "startTime": str(max(0, opened - 5_000)),
+                "endTime": str(ts_ms),
+                "limit": "100",
+            },
+        ) or {}
+        rows = data.get("entrustedList", []) if isinstance(data, dict) else []
+        closes = []
+        for row in rows:
+            try:
+                evt = int(row.get("uTime") or row.get("cTime") or 0)
+            except Exception:
+                evt = 0
+            if evt < opened:
+                continue
+            if str(row.get("tradeSide") or "").lower() != "close":
+                continue
+            if str(row.get("status") or "").lower() not in {"filled", "full-fill", "full_fill"}:
+                continue
+            closes.append((evt, row))
+        if not closes:
+            return {"reason": "EXCHANGE_POSITION_GONE", "return_pct": None, "avg_price": None}
+        evt, row = min(closes, key=lambda x: x[0])
+        source = str(row.get("orderSource") or "").lower()
+        if source in {"profit_market", "profit_limit", "pos_profit_market", "pos_profit_limit"}:
+            reason = "TAKE_PROFIT"
+        elif source in {"loss_market", "loss_limit", "pos_loss_market", "pos_loss_limit"}:
+            reason = "STOP_LOSS"
+        else:
+            reason = "EXCHANGE_CLOSE"
+        entry = decimal_or_zero(trade.get("entry_avg_price"))
+        exit_px = decimal_or_zero(row.get("priceAvg") or row.get("price"))
+        ret = float((exit_px / entry - Decimal("1")) * Decimal("100")) if entry > 0 and exit_px > 0 else None
+        return {
+            "reason": reason,
+            "return_pct": ret,
+            "avg_price": str(exit_px) if exit_px > 0 else None,
+            "closed_at_ms": evt or ts_ms,
+            "order_id": row.get("orderId"),
+            "order_source": source or None,
+        }
+    except Exception as exc:
+        return {"reason": "EXCHANGE_POSITION_GONE", "return_pct": None, "avg_price": None, "error": str(exc)}
+
+
 def close_trade(client: BitgetDemoClassic, cfg: dict, state: dict, trade: dict, reason: str, ts_ms: int) -> None:
     positions = active_positions(client)
     pos = matching_position(positions, trade["symbol"])
@@ -404,10 +456,31 @@ def manage_trades(client: BitgetDemoClassic, cfg: dict, state: dict, ts_ms: int)
     for trade in state.get("open_trades", []):
         pos = matching_position(positions, trade["symbol"])
         if not pos:
-            trade["closed_at_ms"] = ts_ms
-            trade["close_reason"] = "EXCHANGE_POSITION_GONE"
+            info = resolve_exchange_close(client, trade, ts_ms)
+            trade.update({
+                "closed_at_ms": int(info.get("closed_at_ms") or ts_ms),
+                "close_reason": info.get("reason") or "EXCHANGE_POSITION_GONE",
+                "exit_avg_price": info.get("avg_price"),
+                "return_pct": info.get("return_pct"),
+                "exit_order_id": info.get("order_id"),
+                "exit_order_source": info.get("order_source"),
+            })
             state["closed_trades"].append(trade)
-            log_event(cfg, {"event": "EXCHANGE_POSITION_GONE", "signal_id": trade["signal_id"], "symbol": trade["symbol"]})
+            log_event(cfg, {
+                "event": "EXCHANGE_POSITION_CLOSED",
+                "signal_id": trade["signal_id"],
+                "symbol": trade["symbol"],
+                "reason": trade["close_reason"],
+                "return_pct": trade.get("return_pct"),
+                "avg_price": trade.get("exit_avg_price"),
+            })
+            try:
+                telegram(
+                    f"✅ BODY80 Demo 종료\\n{trade['symbol']}\\n"
+                    f"reason={trade['close_reason']} return={trade.get('return_pct')}"
+                )
+            except Exception as exc:
+                print(f"[BODY80][WARN] telegram observed close: {exc}", flush=True)
             continue
         if ts_ms >= int(trade["deadline_ms"]):
             close_trade(client, cfg, state, trade, "MAX_HOLD_6H", ts_ms)
