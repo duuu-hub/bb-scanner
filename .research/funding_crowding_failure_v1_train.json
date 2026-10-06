@@ -1,0 +1,91 @@
+{
+  "experiment_id": "funding_crowding_failure_v1_train",
+  "classification": "EXPLORATORY",
+  "hypothesis": "Extreme realized funding that is not confirmed by immediately preceding price action identifies crowded positioning vulnerable to short-horizon reversal.",
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "registration_base_head": "06be59a2362add84a2764784bdaca6522c821afc",
+  "data": {
+    "price_source_run": 36095439671,
+    "price_market": "Binance USD-M USDT perpetual 15m OHLC",
+    "funding_source": "Binance USD-M public GET /fapi/v1/fundingRate, snapshotted by shard artifacts",
+    "funding_fetch_start": "2020-10-01T00:00:00Z",
+    "train": "2021-01-01 through 2024-12-31 UTC",
+    "validation": "2025-2026 SEEN validation; not read in this TRAIN run",
+    "universe": "all symbols present in frozen price artifacts with non-empty funding history",
+    "point_in_time_universe_status": "unknown / survivorship-biased until audited"
+  },
+  "signal": {
+    "decision_time": "funding settlement timestamp after the realized funding rate is known",
+    "entry": "first 15m OPEN strictly after funding timestamp (+15m for on-grid settlements)",
+    "funding_history": "prior 90 calendar days only; current event excluded from trailing quantile",
+    "min_prior_funding_observations": 60,
+    "tail_quantile_grid": [
+      0.975,
+      0.99
+    ],
+    "absolute_funding_floor_grid": [
+      0.0002,
+      0.0005
+    ],
+    "side": "opposite funding sign: positive funding => SHORT; negative funding => LONG",
+    "price_failure_modes": {
+      "H1_REVERSAL": "funding_sign * prior completed 1h body <= 0",
+      "H4_STALL": "funding_sign * prior 4h close-to-close move / prior ATR14_1h <= 0.5"
+    },
+    "requirement": "funding extreme AND selected price-failure mode"
+  },
+  "exits": {
+    "stop_atr1h_grid": [
+      1,
+      1.5
+    ],
+    "target_r_grid": [
+      1.5,
+      2.5
+    ],
+    "max_hold_hours_grid": [
+      8,
+      16
+    ],
+    "risk_pct_bounds": [
+      0.004,
+      0.05
+    ]
+  },
+  "execution": {
+    "canonical_engine": "scripts/sweep_reclaim_research.py::trade",
+    "canonical_chronology": "AGENTS.md section 11; official Binance 1m for same-parent-bar ambiguity",
+    "costs_round_trip_all_in_bp": [
+      20,
+      40
+    ],
+    "funding_pnl": "excluded in V1 on purpose; funding is signal only. If signal edge survives, actual funding cashflows will be modeled in a new frozen generation."
+  },
+  "portfolio": {
+    "risk_per_trade_pct": 0.5,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_overlap": false,
+    "priority": "entry_time asc, abs(funding_rate) desc, funding_tail_strength desc, symbol asc"
+  },
+  "grid_count": 64,
+  "selection": {
+    "dataset": "TRAIN only",
+    "minimum_executable_trades": 300,
+    "minimum_exec_per_day": 0.2,
+    "gates": [
+      "ret20 > 0",
+      "ret40 > 0",
+      "PF20 >= 1.08",
+      "PF40 >= 1.00",
+      "MDD20 <= 35%",
+      "at least 3/4 calendar years positive at 20bp",
+      "worst calendar-year PF20 >= 0.85",
+      "at least one adjacent grid configuration PF20 > 1.03 and ret20 > 0"
+    ],
+    "ranking": "ret20 desc, MDD20 asc, PF40 desc, executable N desc",
+    "next_if_pass": "freeze stable TRAIN region, then add realized funding PnL in a new generation before opening validation",
+    "next_if_fail": "preserve failure; do not mine 2025-2026"
+  }
+}
