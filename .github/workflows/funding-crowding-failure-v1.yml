@@ -48,23 +48,23 @@ jobs:
       - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
       - name: Download frozen Binance 15m 5Y data
         env:
-          GH_TOKEN: '\${{ github.token }}'
+          GH_TOKEN: '${{ github.token }}'
         run: |
           mkdir -p data
-          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+          gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
       - name: Fetch funding snapshots and replay TRAIN shard
         run: |
           python scripts/funding_crowding_failure_v1.py \
             --data data \
-            --shard \${{ matrix.shard }} \
+            --shard ${{ matrix.shard }} \
             --shards 12
       - uses: actions/upload-artifact@v4
         with:
-          name: funding-crowding-v1-\${{ matrix.shard }}
+          name: funding-crowding-v1-${{ matrix.shard }}
           path: |
-            funding_crowding_failure_v1_\${{ matrix.shard }}.csv.gz
-            funding_snapshot_v1_\${{ matrix.shard }}.csv.gz
-            funding_crowding_failure_v1_meta_\${{ matrix.shard }}.json
+            funding_crowding_failure_v1_${{ matrix.shard }}.csv.gz
+            funding_snapshot_v1_${{ matrix.shard }}.csv.gz
+            funding_crowding_failure_v1_meta_${{ matrix.shard }}.json
           if-no-files-found: error
           retention-days: 30
           compression-level: 0
