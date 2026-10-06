@@ -19,7 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import body80_demo
 import trend_continuation_first_touch as base
 
-EXACT_CANDIDATE = "BODY80_90_H12_17"\nROBUST_CANDIDATE = "B80_90_H12_17"
+EXACT_CANDIDATE = "BODY80_90_H12_17"
+ROBUST_CANDIDATE = "B80_90_H12_17"
 EXACT_RUN = 37381087242
 ROBUST_RUN = 37381429984
 DATA_RUN = 36095439671
