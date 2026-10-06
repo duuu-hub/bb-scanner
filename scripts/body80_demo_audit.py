@@ -138,10 +138,15 @@ def chronology_smokes(audit: Audit):
         rr = base.event_outcomes("XUSDT", raw, bar + 1, 100.0, 5.0)["1h"]
         audit.check("event_outcomes_entry_timestamp_mismatch", rr["status"] == "ENTRY_MISMATCH", rr)
 
-        raw_gap = {k: v.copy() for k, v in raw.items()}
-        raw_gap["ts"][2] += base.BAR_MS
+        raw_gap = {
+            "ts": np.array([bar, bar + base.BAR_MS, bar + 3 * base.BAR_MS, bar + 4 * base.BAR_MS], dtype=np.int64),
+            "open": np.array([100.0, 100.0, 100.0, 100.0]),
+            "high": np.array([101.0, 101.0, 101.0, 101.0]),
+            "low": np.array([99.0, 99.0, 99.0, 99.0]),
+            "close": np.array([100.0, 100.0, 100.0, 100.0]),
+        }
         rr = base.event_outcomes("XUSDT", raw_gap, bar, 100.0, 5.0)["1h"]
-        audit.check("event_outcomes_gap_excluded", rr["status"] in {"DATA_GAP", "TP"}, rr)
+        audit.check("event_outcomes_gap_excluded", rr["status"] == "DATA_GAP", rr)
     finally:
         base.load_1m_day = old_loader
         base.resolve_collision_1m = old_resolver
