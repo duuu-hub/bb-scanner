@@ -59,7 +59,7 @@ def fetch_funding(symbol,start_ms=FETCH_START,end_ms=FETCH_END):
   if nxt<=cursor:break
   cursor=nxt
   if len(data)<1000:break
-  time.sleep(.65)
+  time.sleep(1.0)
  if not rows:return pd.DataFrame(columns=["symbol","fundingTime","fundingRate","markPrice"])
  d=pd.DataFrame(rows,columns=["symbol","fundingTime","fundingRate","markPrice"])
  d=d.drop_duplicates(["fundingTime"]).sort_values("fundingTime").reset_index(drop=True)
