@@ -1,0 +1,101 @@
+name: Funding Crowding Failure V1 TRAIN
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/funding_crowding_failure_v1_run']
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Compile, chronology, and funding API smoke
+        run: |
+          python -m py_compile scripts/funding_crowding_failure_v1.py scripts/funding_crowding_failure_v1_merge.py
+          python scripts/psar_chronology_smoke.py
+          python - <<'PY'
+          import pandas as pd
+          import scripts.funding_crowding_failure_v1 as s
+          assert len(s.CONFIGS)==64
+          a=pd.Timestamp("2024-01-01T00:00:00Z").value//10**6
+          b=pd.Timestamp("2024-01-03T23:59:59Z").value//10**6
+          d=s.fetch_funding("BTCUSDT",a,b)
+          assert len(d)>0 and d.fundingTime.is_monotonic_increasing
+          assert d.fundingTime.duplicated().sum()==0
+          print("FUNDING_CROWDING_V1_SMOKE_PASS",len(d))
+          PY
+
+  replay:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - name: Download frozen Binance 15m 5Y data
+        env:
+          GH_TOKEN: '\${{ github.token }}'
+        run: |
+          mkdir -p data
+          gh run download 36095439671 -R \${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - name: Fetch funding snapshots and replay TRAIN shard
+        run: |
+          python scripts/funding_crowding_failure_v1.py \
+            --data data \
+            --shard \${{ matrix.shard }} \
+            --shards 12
+      - uses: actions/upload-artifact@v4
+        with:
+          name: funding-crowding-v1-\${{ matrix.shard }}
+          path: |
+            funding_crowding_failure_v1_\${{ matrix.shard }}.csv.gz
+            funding_snapshot_v1_\${{ matrix.shard }}.csv.gz
+            funding_crowding_failure_v1_meta_\${{ matrix.shard }}.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  merge:
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3 requests numba
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: funding-crowding-v1-*
+          path: artifacts
+      - name: Verify all shards
+        run: |
+          test "$(find artifacts -name 'funding_crowding_failure_v1_*.csv.gz' | wc -l)" -eq 12
+          test "$(find artifacts -name 'funding_snapshot_v1_*.csv.gz' | wc -l)" -eq 12
+          test "$(find artifacts -name 'funding_crowding_failure_v1_meta_*.json' | wc -l)" -eq 12
+      - name: Merge TRAIN only
+        run: |
+          python scripts/funding_crowding_failure_v1_merge.py \
+            --input artifacts \
+            --out funding_crowding_failure_v1_train
+      - uses: actions/upload-artifact@v4
+        with:
+          name: funding-crowding-failure-v1-train-final
+          path: funding_crowding_failure_v1_train/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
