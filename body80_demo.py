@@ -607,6 +607,9 @@ def place_candidate(
     }
     state["open_trades"].append(trade)
     state["processed_signal_ids"].append(signal_id)
+    # Persist immediately after a fill so a later candidate/API failure cannot
+    # leave a Demo position untracked inside this workflow.
+    save_state(cfg, state)
     log_event(cfg, {"event": "DEMO_MARKET_FILL", **trade})
     try:
         telegram(
