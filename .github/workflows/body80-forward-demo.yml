@@ -1,0 +1,153 @@
+name: BODY80 Forward Demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - '.github/workflows/body80-forward-demo.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: body80-forward-demo-research
+  cancel-in-progress: false
+
+jobs:
+  admission-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Download frozen historical artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p audit_inputs/exact audit_inputs/robust audit_inputs/partial0 audit_inputs/raw0 audit_inputs/events
+          gh run download 37381087242 -R ${{ github.repository }} -n body70-subgroup-exact-merged-37381087242 -D audit_inputs/exact
+          gh run download 37381429984 -R ${{ github.repository }} -n body70-promising-robust-merged-37381429984 -D audit_inputs/robust
+          gh run download 37381087242 -R ${{ github.repository }} -n body70-subgroup-partial-0 -D audit_inputs/partial0
+          gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-0 -D audit_inputs/raw0
+          gh run download 36934882492 -R ${{ github.repository }} -n trend-continuation-global-events -D audit_inputs/events
+      - name: Run 30+ checks and 10 clean reconstruction rounds
+        run: |
+          rm -rf audit_out
+          python scripts/body80_demo_audit.py             --config config/body80_demo_config.json             --source body80_demo.py             --exact audit_inputs/exact             --robust audit_inputs/robust             --partial0 audit_inputs/partial0             --raw0 audit_inputs/raw0             --events audit_inputs/events             --out audit_out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: body80-demo-admission-audit-${{ github.run_id }}
+          path: audit_out/body80_demo_audit.json
+          retention-days: 30
+
+  wait-window:
+    needs: admission-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    outputs:
+      first_boundary: ${{ steps.calc.outputs.first_boundary }}
+    steps:
+      - id: calc
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import time
+          from datetime import datetime, timezone
+          BAR=900
+          now=time.time()
+          t=(int(now//BAR)+1)*BAR
+          for _ in range(96):
+              h=datetime.fromtimestamp(t-BAR,tz=timezone.utc).hour
+              if 12 <= h <= 17:
+                  delta=t-now
+                  if delta > 5.4*3600:
+                      raise SystemExit(f"next eligible BODY80 window is too far for one hosted wait job: {delta/3600:.2f}h")
+                  print(f"first_boundary={t}")
+                  print(f"target_iso={datetime.fromtimestamp(t,tz=timezone.utc).isoformat()}")
+                  break
+              t += BAR
+          else:
+              raise SystemExit("no eligible boundary found")
+          PY
+      - name: Wait until three minutes before entry window
+        env:
+          FIRST: ${{ steps.calc.outputs.first_boundary }}
+        run: |
+          python - <<'PY'
+          import os,time
+          target=int(os.environ["FIRST"])-180
+          while True:
+              rem=target-time.time()
+              if rem <= 0: break
+              time.sleep(min(rem,30))
+          PY
+
+  entry-window:
+    needs: [admission-audit, wait-window]
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Run BODY80 exact-boundary Demo entry window
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python body80_demo_watcher.py             --mode entry-window             --first-boundary-epoch "${{ needs.wait-window.outputs.first_boundary }}"             --cycles 24
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: body80-demo-entry-state-${{ github.run_id }}
+          path: |
+            state/body80_demo_state.json
+            logs/body80_demo_executions.jsonl
+          if-no-files-found: warn
+          retention-days: 30
+
+  manage-tail:
+    needs: entry-window
+    if: ${{ always() && needs.entry-window.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: body80-demo-entry-state-${{ github.run_id }}
+          path: .
+      - name: Manage exchange exits and 6h time limits
+        env:
+          BITGET_DEMO_API_KEY: ${{ secrets.BITGET_DEMO_API_KEY }}
+          BITGET_DEMO_SECRET_KEY: ${{ secrets.BITGET_DEMO_SECRET_KEY }}
+          BITGET_DEMO_PASSPHRASE: ${{ secrets.BITGET_DEMO_PASSPHRASE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python body80_demo_watcher.py --mode manage-tail --cycles 24
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: body80-demo-final-${{ github.run_id }}
+          path: |
+            state/body80_demo_state.json
+            logs/body80_demo_executions.jsonl
+          if-no-files-found: warn
+          retention-days: 30
