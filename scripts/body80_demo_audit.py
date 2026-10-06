@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import body80_demo
 import trend_continuation_first_touch as base
 
-CANDIDATE = "B80_90_H12_17"
+EXACT_CANDIDATE = "BODY80_90_H12_17"\nROBUST_CANDIDATE = "B80_90_H12_17"
 EXACT_RUN = 37381087242
 ROBUST_RUN = 37381429984
 DATA_RUN = 36095439671
@@ -305,7 +305,7 @@ def main() -> int:
     es = json.loads(exact_summary_path.read_text(encoding="utf-8"))
     rs = json.loads(robust_summary_path.read_text(encoding="utf-8"))
 
-    c = exact[exact["variant"].eq(CANDIDATE)].copy()
+    c = exact[exact["variant"].eq(EXACT_CANDIDATE)].copy()
     train = c[(c.signal_ts < CUT) & (c.exit_ts < CUT)]
     hold = c[c.signal_ts >= CUT]
     audit.check("artifact_exact_candidate_n_807", len(c) == 807, len(c))
@@ -315,7 +315,7 @@ def main() -> int:
 
     p20t, p20h = perf(train, .20), perf(hold, .20)
     p40t, p40h = perf(train, .40), perf(hold, .40)
-    esv = es["variants"][CANDIDATE]
+    esv = es["variants"][EXACT_CANDIDATE]
     audit.check("recompute_train_pf20", close(p20t["pf"], esv["train"]["20bp"]["pf"], 1e-10), [p20t, esv["train"]["20bp"]])
     audit.check("recompute_holdout_pf20", close(p20h["pf"], esv["holdout"]["20bp"]["pf"], 1e-10), [p20h, esv["holdout"]["20bp"]])
     audit.check("recompute_train_pf40", close(p40t["pf"], esv["train"]["40bp"]["pf"], 1e-10), [p40t, esv["train"]["40bp"]])
@@ -323,10 +323,10 @@ def main() -> int:
     audit.check("historical_train_positive_40bp", p40t["pf"] > 1 and p40t["ev_pct"] > 0, p40t)
     audit.check("historical_validation_positive_40bp_seen", p40h["pf"] > 1 and p40h["ev_pct"] > 0, p40h)
 
-    rr = rs["variants"][CANDIDATE]["delay0"]
+    rr = rs["variants"][ROBUST_CANDIDATE]["delay0"]
     audit.check("robust_delay0_n_matches_exact", rr["all"]["20bp"]["n"] == len(c))
     audit.check("robust_delay0_pf_matches_exact", close(rr["all"]["20bp"]["pf"], esv["all"]["20bp"]["pf"], 1e-10))
-    audit.check("latency_plus1m_degrades_holdout", rs["variants"][CANDIDATE]["delay1"]["holdout"]["20bp"]["pf"] < 1.0)
+    audit.check("latency_plus1m_degrades_holdout", rs["variants"][ROBUST_CANDIDATE]["delay1"]["holdout"]["20bp"]["pf"] < 1.0)
     audit.check("forward_market_entry_matches_latency_risk", cfg.get("entry_order_type") == "MARKET" and int(cfg["signal_ttl_seconds"]) < 60)
     audit.check("historical_max_concurrent_exceeds_current_cap_disclosed", int(rr["max_concurrent"]) == 8 and int(cfg["max_open_positions"]) == 6)
 
@@ -335,7 +335,7 @@ def main() -> int:
 
     # Representative reconstruction: ten distinct frozen candidate trades from raw shard 0.
     partial = pd.read_csv(partial_path, compression="gzip")
-    samples = partial[partial["variant"].eq(CANDIDATE)].sort_values(["signal_ts", "symbol"]).head(10).copy()
+    samples = partial[partial["variant"].eq(EXACT_CANDIDATE)].sort_values(["signal_ts", "symbol"]).head(10).copy()
     audit.check("representative_samples_at_least_10", len(samples) == 10, len(samples))
     keys = {(str(r.symbol), int(r.signal_ts)) for r in samples.itertuples(index=False)}
     event_rows = load_event_rows(events_path, keys)
