@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T07:46:06.412039+00:00",
+  "updated_at": "2026-10-07T07:55:46Z",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-account-v26",
-  "current_run": 37588740960,
+  "current_run": 37590305587,
   "current_workflow": ".github/workflows/daily-breakdown-account-v26.yml",
   "current_plan": "research/daily-breakdown-account-v26/PLAN.md",
-  "latest_research_checkpoint": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
+  "latest_research_checkpoint": "V26_ADAPTER_FIXED_593_PASS_ACTUAL_RETRY_REGISTERED",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -803,6 +803,18 @@
       "account_replay": "SKIPPED by V25 preregistration because DEV selected no policy",
       "daily_target_evidence": "NONE",
       "followup": "Preregister a separate V26 account/cross-date diagnostic across all eight same-hold same-target short entry keys, retain V25 rejection and all original gates. No threshold rescue or promotion."
+    },
+    "v26_attempt1": {
+      "run_id": 37588740960,
+      "status": "FAILED_IMPLEMENTATION_ADAPTER",
+      "error": "prepare_market incorrectly used single-shard source validator for eight-shard global source",
+      "actual_successful_validation_tests": 589,
+      "actual_original_dev_rows_verified": 327848,
+      "actual_gate_rows": 10310,
+      "gate_exclusions": 4,
+      "account_scenarios": 0,
+      "evidence_branch": "research-daily-breakdown-account-v26-evidence-37588740960",
+      "failure_preserved": "research/daily-breakdown-account-v26/failures/run-37588740960/FAILURE_AUDIT.json"
     }
   },
   "trial_counts": {
@@ -965,11 +977,14 @@
     "v25_account_scenarios": 0,
     "v26_probes_planned": 8,
     "v26_account_scenarios_planned": 64,
-    "v26_actual_market_runs": 1,
-    "v26_execution_attempts": 1,
-    "v26_local_tests_passed": 589,
+    "v26_actual_market_runs": 2,
+    "v26_execution_attempts": 2,
+    "v26_local_tests_passed": 593,
     "v26_server_tests_passed": 589,
-    "v26_original_dev_rows_verified": 327848
+    "v26_original_dev_rows_verified": 327848,
+    "v26_signal_gate_calculations": 1,
+    "v26_gate_outcomes_preserved": 10310,
+    "v26_account_scenarios_executed": 0
   },
   "goal": {
     "max_hold_days": 7,
@@ -979,8 +994,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Fetch actual terminal status and all 64 scenario/cluster/arithmetic outputs of 37588740960. V25 rejection remains; V26 is exploratory only.",
-  "phase": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
+  "next_action": "Observe corrected run 37590305587. Verify byte reuse of all eight completed GATE outputs (10310 outcomes), full eight-shard market source, then audit all 64 account scenarios. Frozen policies/cost/risk rules unchanged; V25 rejection retained.",
+  "phase": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -998,7 +1013,7 @@
     "scope": "research-breadth-expansion-continuation-v15 implementation, tests, and one actual run"
   },
   "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
-  "code_commit": "64cef63f752b894b49703e622c3bcbe57c177dbb",
+  "code_commit": "37db45d0e056e59225287c3cc79e339de5ce6f22",
   "current_result_locations": {
     "v15_development": "research-breadth-expansion-continuation-v15-dev-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/development",
     "v15_evidence": "research-breadth-expansion-continuation-v15-evidence-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/complete-evidence",
@@ -1027,9 +1042,9 @@
     "v25_expected_development": "research-daily-channel-breakout-v25-dev-37559595896:research/daily-channel-breakout-v25/run-37559595896/development",
     "v25_expected_evidence": "research-daily-channel-breakout-v25-evidence-37559595896:research/daily-channel-breakout-v25/run-37559595896/complete-evidence",
     "v26_plan": "research-daily-breakdown-account-v26:research/daily-breakdown-account-v26/PLAN.md",
-    "v26_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
-    "v26_expected_accounts": "research-daily-breakdown-account-v26-results-37588740960:research/daily-breakdown-account-v26/run-37588740960/accounts",
-    "v26_expected_evidence": "research-daily-breakdown-account-v26-evidence-37588740960:research/daily-breakdown-account-v26/run-37588740960/complete-evidence"
+    "v26_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37590305587",
+    "v26_expected_accounts": "research-daily-breakdown-account-v26-results-37590305587:research/daily-breakdown-account-v26/run-37590305587/accounts",
+    "v26_expected_evidence": "research-daily-breakdown-account-v26-evidence-37590305587:research/daily-breakdown-account-v26/run-37590305587/complete-evidence"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -1139,98 +1154,25 @@
   },
   "current_execution": {
     "version": "V26",
-    "run_id": 37588740960,
+    "run_id": 37590305587,
     "branch": "research-daily-breakdown-account-v26",
-    "code_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
-    "state": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
-    "workflow_status": "FINAL_CHECKPOINT_JOB_IN_PROGRESS",
-    "observed_at": "2026-10-07T07:46:06.412039+00:00",
-    "stage_jobs": [
-      {
-        "id": 112684890106,
-        "name": "validate",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685395291,
-        "name": "prepare_dev",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534917,
-        "name": "gate_scan (4)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534926,
-        "name": "gate_scan (5)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534939,
-        "name": "gate_scan (3)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534952,
-        "name": "gate_scan (1)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534967,
-        "name": "gate_scan (7)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534978,
-        "name": "gate_scan (2)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685534979,
-        "name": "gate_scan (0)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112685535033,
-        "name": "gate_scan (6)",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112686072173,
-        "name": "prepare_market",
-        "status": "completed",
-        "conclusion": "failure"
-      },
-      {
-        "id": 112686691672,
-        "name": "preserve_cycle",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 112686691938,
-        "name": "accounts",
-        "status": "completed",
-        "conclusion": "skipped"
-      },
-      {
-        "id": 112686692918,
-        "name": "collect",
-        "status": "completed",
-        "conclusion": "skipped"
-      }
-    ],
+    "state": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
+    "workflow_status": "in_progress",
+    "run_head_commit": "6ca61ce31e15ffebf6b08e4ae786210d2d2f77ca",
+    "implementation_commit": "37db45d0e056e59225287c3cc79e339de5ce6f22",
+    "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
+    "observed_at": "2026-10-07T07:55:46Z",
+    "attempt": 2,
+    "failed_original_run": 37588740960,
+    "gate_reuse_run": 37588740960,
+    "gate_reuse_frozen_input_sha256": "09ec31ebe7cf5a59f8b3e663185692ed1e65d36289640bcb12923e9b25513a82",
+    "local_validation": {
+      "tests": 593,
+      "failures": 0,
+      "errors": 0,
+      "synthetic_full_market_to_64": "PASS"
+    },
+    "settings_changed": false,
     "diagnostic_only": true,
     "v25_rejection_retained": true,
     "profitability_audited": false,
@@ -2409,7 +2351,7 @@
       "No V12 market rerun, account growth claim or daily target claim."
     ]
   },
-  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
+  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37590305587",
   "completed_v13_validation": {
     "observed_at": "2026-10-02T10:03:30Z",
     "run": 36992677948,
@@ -4283,7 +4225,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
+    "phase": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -4443,14 +4385,15 @@
       "audit_commit": "94f45e5779a66f5b6e200df63235fb4cb83000ca"
     },
     "v26": {
-      "status": "V26_RUNNING_HISTORICAL_GATE_SCANS",
+      "status": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
       "policies": 8,
       "planned_account_scenarios": 64,
       "diagnostic_only": true,
       "qualified_candidates": 0,
-      "run_id": 37588740960,
-      "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
-      "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371"
+      "run_id": 37590305587,
+      "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37590305587",
+      "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
+      "attempt": 2
     }
   },
   "completed_v16_validation": {
