@@ -1,0 +1,307 @@
+{
+  "study": "V25_DAILY_CHANNEL_BREAKOUT",
+  "status": "REJECTED_AT_FROZEN_DEV_GATES_WITH_SHORT_FAMILY_DIAGNOSTIC_FOLLOWUP",
+  "audited_at": "2026-10-07T07:16:46Z",
+  "run_id": 37559595896,
+  "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
+  "run_status": "completed",
+  "run_conclusion": "success",
+  "run_updated_at": "2026-10-07T02:01:31Z",
+  "branch": "research-daily-channel-breakout-v25",
+  "code_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
+  "implementation_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
+  "plan_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5",
+  "context_sha256": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+  "validation": {
+    "server_tests": 573,
+    "failed_tests": 0,
+    "canonical_chronology": "PASS",
+    "synthetic8_shards_96_cells": "PASS"
+  },
+  "source_data_run": 36095439671,
+  "source_market": "Binance USD-M USDT perpetual 15m",
+  "inventory": 856,
+  "dev_symbols_with_history": 256,
+  "split": "DEV 2021-09 through 2023; historically observed, not pristine holdout",
+  "costs": {
+    "roundtrip_notional_bp": 40,
+    "stop_forced_slip_bp": 10,
+    "funding_stress_bp_per_day": 2
+  },
+  "cells": 96,
+  "parameterized_outcomes": 327848,
+  "survivors": 0,
+  "positive_mean_cells": 48,
+  "positive_R_cells": 50,
+  "policy_n_range": [
+    1344,
+    6532
+  ],
+  "best_mean_R_cell": {
+    "key": "DAILY_S-1_D20_ALIGN20_A25",
+    "side": -1,
+    "channel_days": 20,
+    "btc_regime": "ALIGN20",
+    "stop_atr": 2.5,
+    "hold": 672,
+    "exit_type": "R20",
+    "policy": "DAILY_S-1_D20_ALIGN20_A25__H672__R20",
+    "n": 1344,
+    "symbols": 175,
+    "net40_mean_bp": 229.5031227102084,
+    "net40_R_mean": 0.154640334147943,
+    "net40_pf": 1.7254545913297574,
+    "win_pct": 51.11607142857143,
+    "top_symbol_share_pct": 3.4244699107949303,
+    "year_2021_net40_R": 0.0097719230717495,
+    "year_2021_net40_mean_bp": 35.28840625595539,
+    "year_2021_day_R": 0.2028473709495855,
+    "year_2021_days": 6,
+    "year_2021_n": 52,
+    "year_2022_net40_R": 0.1442697568248963,
+    "year_2022_net40_mean_bp": 308.666814886864,
+    "year_2022_day_R": 0.287957912928578,
+    "year_2022_days": 71,
+    "year_2022_n": 652,
+    "year_2023_net40_R": 0.1769759181957376,
+    "year_2023_net40_mean_bp": 164.63505701714848,
+    "year_2023_day_R": -0.0666568383766611,
+    "year_2023_days": 55,
+    "year_2023_n": 640,
+    "rejections": "2021_DATES_LT_20|2023_day_R_NONPOSITIVE"
+  },
+  "rejection_counts": {
+    "2021_DATES_LT_20": 36,
+    "2021_net40_R_NONPOSITIVE": 92,
+    "2021_net40_mean_bp_NONPOSITIVE": 91,
+    "2023_net40_mean_bp_NONPOSITIVE": 56,
+    "2021_day_R_NONPOSITIVE": 82,
+    "2023_net40_R_NONPOSITIVE": 31,
+    "2023_day_R_NONPOSITIVE": 82,
+    "NET40_MEAN_BP_NONPOSITIVE": 48,
+    "NET40_R_MEAN_NONPOSITIVE": 46,
+    "2022_net40_R_NONPOSITIVE": 48,
+    "2022_net40_mean_bp_NONPOSITIVE": 48,
+    "2022_day_R_NONPOSITIVE": 48
+  },
+  "diagnostic_family_summary": {
+    "net40_mean_bp": {
+      "1": -76.84520277944277,
+      "-1": 107.62948350270017
+    },
+    "net40_R_mean": {
+      "1": -0.0508730606698739,
+      "-1": 0.07904414398199976
+    },
+    "net40_pf": {
+      "1": 0.8321811125322293,
+      "-1": 1.3407978697566199
+    }
+  },
+  "failure_reason": "No cell passes all frozen DEV gates. Best short policy has positive trade-weighted mean R in each year but 2021 has too few active dates and 2023 equal-entry-date mean R is negative. Raw trades overlap; PF/EV is not account profit.",
+  "chronology_exclusions": 1504,
+  "data_gap_exclusions": 1504,
+  "entry_mismatch_exclusions": 0,
+  "exit_mismatch_exclusions": 0,
+  "shard_provenance": [
+    {
+      "shard": 0,
+      "complete": true,
+      "ledger_rows": 49098,
+      "exclusions": 210,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "NO_DEVELOPMENT_HISTORY": 79,
+        "SCANNED": 28
+      },
+      "minute_months": 3,
+      "minute_checksum_verified": 3,
+      "ledger_sha256": "ed1ba792a1b4b5fc834b8d98b216ad2a4fef776dacb76a3819afad091016d743",
+      "counts": {
+        "DATA_GAP": 210,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 20,
+        "STOP_ABOVE_25PCT": 1426,
+        "BTC_REGIME_OPPOSED": 1388,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 1,
+      "complete": true,
+      "ledger_rows": 47710,
+      "exclusions": 128,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "NO_DEVELOPMENT_HISTORY": 72,
+        "SCANNED": 36
+      },
+      "minute_months": 5,
+      "minute_checksum_verified": 5,
+      "ledger_sha256": "0520a3e2e1a4531d7de106ffd3a95c28e3fa97e3bc0452b1e991464ca831a123",
+      "counts": {
+        "DATA_GAP": 128,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 12,
+        "STOP_ABOVE_25PCT": 1273,
+        "BTC_REGIME_OPPOSED": 1258,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 2,
+      "complete": true,
+      "ledger_rows": 40760,
+      "exclusions": 334,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "NO_DEVELOPMENT_HISTORY": 76,
+        "SCANNED": 31
+      },
+      "minute_months": 3,
+      "minute_checksum_verified": 3,
+      "ledger_sha256": "1b0d2e7d3cbd2a24c15b2ec7ef623d82c6dea4c5b553796400400ee27e36627f",
+      "counts": {
+        "DATA_GAP": 334,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 12,
+        "STOP_ABOVE_25PCT": 1227,
+        "BTC_REGIME_OPPOSED": 1184,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 3,
+      "complete": true,
+      "ledger_rows": 33912,
+      "exclusions": 24,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "SCANNED": 31,
+        "NO_DEVELOPMENT_HISTORY": 75
+      },
+      "minute_months": 4,
+      "minute_checksum_verified": 4,
+      "ledger_sha256": "ddbe602af7a743869f7719e64da8a416f13d67127f79093e9fc1bdb9e5d310ad",
+      "counts": {
+        "DATA_GAP": 24,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 0,
+        "STOP_ABOVE_25PCT": 752,
+        "BTC_REGIME_OPPOSED": 864,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 4,
+      "complete": true,
+      "ledger_rows": 30714,
+      "exclusions": 126,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "SCANNED": 37,
+        "NO_DEVELOPMENT_HISTORY": 70
+      },
+      "minute_months": 4,
+      "minute_checksum_verified": 4,
+      "ledger_sha256": "3634ace92a9163055006770166a93540427da93151317128e5b84fec424b2378",
+      "counts": {
+        "DATA_GAP": 126,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 0,
+        "STOP_ABOVE_25PCT": 1006,
+        "BTC_REGIME_OPPOSED": 894,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 5,
+      "complete": true,
+      "ledger_rows": 54472,
+      "exclusions": 446,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "NO_DEVELOPMENT_HISTORY": 70,
+        "SCANNED": 37
+      },
+      "minute_months": 5,
+      "minute_checksum_verified": 5,
+      "ledger_sha256": "74a6cd9c6781574e251f36bb47fc53405d5c1bd56a14dcf93a0ac7aff1e138d4",
+      "counts": {
+        "DATA_GAP": 446,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 4,
+        "STOP_ABOVE_25PCT": 1651,
+        "BTC_REGIME_OPPOSED": 1612,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 6,
+      "complete": true,
+      "ledger_rows": 37466,
+      "exclusions": 112,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "NO_DEVELOPMENT_HISTORY": 79,
+        "SCANNED": 28
+      },
+      "minute_months": 5,
+      "minute_checksum_verified": 5,
+      "ledger_sha256": "83c129d39578364001129ed9db5032404919ad07cd9088cecc0764e1f3874bbc",
+      "counts": {
+        "DATA_GAP": 112,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 4,
+        "STOP_ABOVE_25PCT": 1361,
+        "BTC_REGIME_OPPOSED": 1156,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    },
+    {
+      "shard": 7,
+      "complete": true,
+      "ledger_rows": 33716,
+      "exclusions": 124,
+      "context_sha": "dab527bef32197364070e1d1cd17b5f9260cbf17f099e9698070ce5843c87faa",
+      "coverage": {
+        "SCANNED": 28,
+        "NO_DEVELOPMENT_HISTORY": 79
+      },
+      "minute_months": 3,
+      "minute_checksum_verified": 3,
+      "ledger_sha256": "f0ccca25f835a5b43082a0677990fa62b8578d1e983e59580635eebceedebed0",
+      "counts": {
+        "DATA_GAP": 124,
+        "ENTRY_MISMATCH": 0,
+        "EXIT_MISMATCH": 0,
+        "ENTRY_PATH_GAP": 0,
+        "STOP_ABOVE_25PCT": 1006,
+        "BTC_REGIME_OPPOSED": 1034,
+        "BTC_DAILY_HISTORY_GAP": 0
+      }
+    }
+  ],
+  "cells_sha256": "147c702f9abc3bbf0af234d37c888e388709bb85b124cb5348bf46daba04cce3",
+  "development": {
+    "branch": "research-daily-channel-breakout-v25-dev-37559595896",
+    "commit": "1b352cbd062fdddcc3d43e009bfab0f80e914c6d",
+    "path": "research/daily-channel-breakout-v25/run-37559595896/development"
+  },
+  "evidence": {
+    "branch": "research-daily-channel-breakout-v25-evidence-37559595896",
+    "tree_sha": "af95705045b5b12c2b1cacdac0ad4b4d8bac0405",
+    "files": 291,
+    "bytes": 67441413
+  },
+  "account_replay": "SKIPPED by V25 preregistration because DEV selected no policy",
+  "daily_target_evidence": "NONE",
+  "followup": "Preregister a separate V26 account/cross-date diagnostic across all eight same-hold same-target short entry keys, retain V25 rejection and all original gates. No threshold rescue or promotion."
+}
