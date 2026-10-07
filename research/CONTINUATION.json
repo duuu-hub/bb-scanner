@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T01:57:24Z",
+  "updated_at": "2026-10-07T01:58:42Z",
   "interactive_lease": null,
   "current_branch": "research-daily-channel-breakout-v25",
   "current_run": 37559595896,
   "current_workflow": ".github/workflows/daily-channel-breakout-v25.yml",
   "current_plan": "research/daily-channel-breakout-v25/PLAN.md",
-  "latest_research_checkpoint": "V25_QUEUED_VALIDATION",
+  "latest_research_checkpoint": "V25_ACTUAL_573_TESTS_PASS_EIGHT_DEV_SHARDS_RUNNING",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -646,7 +646,11 @@
     "v24_account_scenarios": 0,
     "v25_entry_settings_planned": 16,
     "v25_policy_cells_planned": 96,
-    "v25_actual_market_runs": 0
+    "v25_actual_market_runs": 1,
+    "v25_execution_attempts": 1,
+    "v25_server_tests_executed": 573,
+    "v25_server_tests_passed": 573,
+    "v25_development_shards_started": 8
   },
   "goal": {
     "max_hold_days": 7,
@@ -656,8 +660,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Observe actual Actions validation and eight DEV shards for run 37559595896; do not duplicate. Audit original 96-cell ledgers after stages finish. Final checkpoint records RESULT_READY_FOR_AUDIT or failure.",
-  "phase": "V25_QUEUED_VALIDATION",
+  "next_action": "After actual run 37559595896 finishes, fetch original eight DEV ledgers, all 96 cells, selection and evidence manifest. Preserve real failure or selection and proceed under the frozen plan; do not claim profitability or duplicate the run.",
+  "phase": "V25_RUNNING_DEVELOPMENT",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -695,7 +699,14 @@
     "v19_plan": "research-session-opening-range-breakout-v19:research/session-opening-range-breakout-v19/PLAN.md",
     "v21_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37138299485",
     "v21_expected_development": "research-contract-mark-dislocation-v21-dev-37138299485:research/contract-mark-dislocation-v21/run-37138299485/development",
-    "v21_expected_evidence": "research-contract-mark-dislocation-v21-evidence-37138299485:research/contract-mark-dislocation-v21/run-37138299485/complete-evidence"
+    "v21_expected_evidence": "research-contract-mark-dislocation-v21-evidence-37138299485:research/contract-mark-dislocation-v21/run-37138299485/complete-evidence",
+    "v24_actual_audit": "research-failed-resumption-reversal-v24:research/failed-resumption-reversal-v24/V24_ACTUAL_REJECTION.json",
+    "v24_development": "research-failed-resumption-reversal-v24-dev-37244305969:research/failed-resumption-reversal-v24/run-37244305969/development",
+    "v24_evidence": "research-failed-resumption-reversal-v24-evidence-37244305969:research/failed-resumption-reversal-v24/run-37244305969/complete-evidence",
+    "v25_plan": "research-daily-channel-breakout-v25:research/daily-channel-breakout-v25/PLAN.md",
+    "v25_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
+    "v25_expected_development": "research-daily-channel-breakout-v25-dev-37559595896:research/daily-channel-breakout-v25/run-37559595896/development",
+    "v25_expected_evidence": "research-daily-channel-breakout-v25-evidence-37559595896:research/daily-channel-breakout-v25/run-37559595896/complete-evidence"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -810,17 +821,82 @@
     "code_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
     "run_head_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
     "plan_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5",
-    "state": "ACTUAL_RUN_QUEUED",
-    "workflow_status": "queued",
+    "state": "RUNNING_DEVELOPMENT",
+    "workflow_status": "in_progress",
     "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
-    "observed_at": "2026-10-07T01:57:24Z",
+    "observed_at": "2026-10-07T01:58:42Z",
     "local_regression": {
       "tests": 573,
       "failures": 0,
       "errors": 0
     },
     "profitability_audited": false,
-    "account_daily_target_claim": false
+    "account_daily_target_claim": false,
+    "validation_job": 112593637542,
+    "server_validation": {
+      "tests": 573,
+      "failures": 0,
+      "errors": 0,
+      "canonical_chronology": "PASS",
+      "synthetic_eight_shards_96_cells": "PASS",
+      "checkpoint_selftest": "PASS"
+    },
+    "stage_jobs": [
+      {
+        "id": 112593637542,
+        "name": "validate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112593887558,
+        "name": "development (0)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887564,
+        "name": "development (7)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887585,
+        "name": "development (6)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887590,
+        "name": "development (1)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887598,
+        "name": "development (5)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887633,
+        "name": "development (4)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887640,
+        "name": "development (3)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 112593887691,
+        "name": "development (2)",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
   },
   "v8_attempt_failures": [
     {
@@ -3869,7 +3945,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V25_QUEUED_VALIDATION",
+    "phase": "V25_RUNNING_DEVELOPMENT",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -4021,7 +4097,7 @@
     },
     "v25": {
       "branch": "research-daily-channel-breakout-v25",
-      "status": "ACTUAL_RUN_QUEUED",
+      "status": "RUNNING_DEVELOPMENT",
       "cells": 96,
       "market_outcomes": 0,
       "daily_target_claim": false,
@@ -4033,7 +4109,10 @@
       "local_test_failures": 0,
       "local_test_errors": 0,
       "economic_result_available": false,
-      "completion_checkpoint": "scripts/research_run_checkpoint.py guards current branch/run identity and writes audit pending from actual stage statuses"
+      "completion_checkpoint": "scripts/research_run_checkpoint.py guards current branch/run identity and writes audit pending from actual stage statuses",
+      "server_tests": 573,
+      "development_jobs_started": 8,
+      "observed_at": "2026-10-07T01:58:42Z"
     }
   },
   "completed_v16_validation": {
