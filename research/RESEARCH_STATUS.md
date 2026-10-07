@@ -632,3 +632,9 @@ Validation job `111559028652` completed successfully: 553/553 tests, canonical c
 - Rejection audit commit 57e0efc468d323b6832ffdf10b88b701ef32a1b2. DEV branch research-failed-resumption-reversal-v24-dev-37244305969; evidence branch research-failed-resumption-reversal-v24-evidence-37244305969.
 - V25 preregistered before implementation: research-daily-channel-breakout-v25, plan commit 40361cafa861a86e7b0e2be9b47df362e1b842b5. Complete UTC daily 5/20-day channel breakouts, daily ATR20 stops, optional aligned BTC20 regime, 48h/168h holds and fixed 1R/2R/4R TP; 16 entry/risk settings × 6 exits = 96 policies.
 - All past historical periods remain observed research data. V25 is implementing and NOT_DISPATCHED, with no actual run ID or profitability claim.
+
+## V25 actual dispatch — 2026-10-07T01:57:24Z
+
+Preregistered daily-channel breakout V25 is actually **queued**: [run 37559595896](https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896). Implementation commit `68712bb25d53eee08ac802984d4f544d5a11dc95`; run head `4869af65facf606a8cb17979c0966c729e8cbfd9`; plan commit `40361cafa861a86e7b0e2be9b47df362e1b842b5`. Local regression: 573/573 pass, canonical chronology smoke pass, synthetic eight-shard 96-cell preservation pass (synthetic output is not market evidence). No completed market result or profitability claim yet.
+
+Frozen matrix: direction ±1 × prior daily channel 5/20 × BTC ANY/ALIGN20 × daily ATR stops 1.5/2.5, then 48h/168h holds and 1/2/4R targets, exactly 96 cells. Canonical input chronology, execution costs, DEV robustness gates and conditional account simulation remain frozen. Automatic final checkpoint records observed stage success/failure and audit pending only for this registered run; it cannot silently replace a newer branch/run.
