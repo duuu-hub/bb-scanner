@@ -15,10 +15,11 @@ assert (v.STUDY/'PLAN.md').is_file() and (v.STUDY/'PREMARKET_EXECUTION_ADDENDUM.
 baseline=ROOT/'research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json'
 assert v.digest(baseline)=='0c3f09f41127e29cbf7130891e9f2c1389c99798d43e470825c973acbcd5121f'
 assert len(json.loads(v.v25.CONTEXT.read_text())['expected_market_sha256'])==856
+assert v.digest(v.STUDY/'REUSE_GATE_INPUTS.json')=='09ec31ebe7cf5a59f8b3e663185692ed1e65d36289640bcb12923e9b25513a82'
 print('V26_FROZEN_COHORT_AND_ORIGINAL_LEDGER_CONTRACT_PASS',flush=True)
 suite=unittest.TestSuite()
 for name in NEW if a.only_new else NEW+OLD:suite.addTests(unittest.defaultTestLoader.discover(str(ROOT/'tests'),pattern=name))
-expected=16 if a.only_new else 589
+expected=20 if a.only_new else 593
 assert suite.countTestCases()==expected,(suite.countTestCases(),expected)
 print('V26_REGISTERED_SUITE_SIZE',suite.countTestCases(),flush=True)
 r=unittest.TextTestRunner(verbosity=2,stream=sys.__stderr__).run(suite)

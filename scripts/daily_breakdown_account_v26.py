@@ -157,9 +157,45 @@ def read_parts(parts,contract=REGISTRY):
     if f.duplicated(["symbol","variant","entry_time","split"]).any():raise ValueError("duplicate cross-shard rows")
     return f,counts
 
+def verify_full_market(source_check,paths,btc,context_path=v25.CONTEXT):
+    """Account marks need all eight source shards, unlike the single-shard scanner."""
+    source=json.loads(source_check.read_text());context=json.loads(context_path.read_text())
+    if source["status"]!="VERIFIED" or sorted(source["shards"])!=list(range(8)):
+        raise ValueError("eight verified original source shards required")
+    if source["baseline_sha256"]!=context["baseline_sha256"] or digest(btc)!=context["btc_sha256"]:
+        raise ValueError("global baseline/BTC mismatch")
+    verified={x["symbol"]:x["sha256"] for x in source["files"]}
+    if not paths or len(verified)!=len(source["files"]) or len(paths)!=len(verified):
+        raise ValueError("missing/duplicate global source file")
+    actual={}
+    for path in paths:
+        s=path.name[:-7];sha=digest(path)
+        if s in actual or verified.get(s)!=sha or context["expected_market_sha256"].get(s)!=sha:
+            raise ValueError("global source byte/catalogue mismatch "+s)
+        actual[s]=sha
+    if actual!=verified or actual!=context["expected_market_sha256"]:
+        raise ValueError("incomplete frozen global universe")
+    return actual
+
+def verify_reused_gate(parts,reuse_path=STUDY/"REUSE_GATE_INPUTS.json",contract=REGISTRY):
+    reg=registry(contract);reuse=json.loads(reuse_path.read_text())
+    if reuse["contract_sha256"]!=digest(contract) or reuse["source_run_id"]!=37588740960:
+        raise ValueError("unregistered GATE reuse")
+    paths=list(parts.rglob("independent_candidates.csv.gz"))
+    if len(paths)!=1:raise ValueError("one unchanged reused GATE shard required")
+    p=paths[0];mp=p.parent/"scan_meta.json";m=json.loads(mp.read_text())
+    expected={x["shard"]:x for x in reuse["expected_shards"]};e=expected.get(m["shard"])
+    if not e or (not m["complete"] or m["stage"]!="GATE" or m["policies"]!=reg["policies"]
+        or digest(p)!=e["ledger_sha256"] or git_blob_sha(mp)!=e["scan_meta_git_blob_sha"]
+        or m["ledger_rows"]!=e["ledger_rows"] or m["contract_sha256"]!=digest(contract)
+        or m["source_context_sha256"]!=CONTEXT_SHA):raise ValueError("altered reused GATE evidence")
+    f=pd.read_csv(p);validate_frame(f,"GATE",reg["policies"])
+    if len(f)!=e["ledger_rows"]:raise ValueError("reused GATE count mismatch")
+    print("V26_ORIGINAL_GATE_SHARD_REUSE_HASH_PASS",m["shard"],len(f),flush=True)
+
 def prepare_market(data,btc,source_check,parts,out,contract=REGISTRY):
     f,_=read_parts(parts,contract);paths=sorted(data.rglob("*.csv.gz"))
-    _,_,hashes=engine.verify_source(source_check,paths,btc,v25.CONTEXT)
+    hashes=verify_full_market(source_check,paths,btc,v25.CONTEXT)
     used=set(f.symbol)
     if not used.issubset(hashes):raise ValueError("missing account source")
     out.mkdir(parents=True,exist_ok=True)
@@ -285,7 +321,8 @@ def collect(parts,out,contract=REGISTRY):
 def main():
     ap=argparse.ArgumentParser();sub=ap.add_subparsers(dest="command",required=True)
     for command,names in [("prepare-dev",("parts","out")),("scan-gate",("data","btc","source-check","out","minute-cache")),
-                          ("prepare-market",("data","btc","source-check","out")),("accounts",("data","out")),("collect",("parts","out"))]:
+                          ("prepare-market",("data","btc","source-check","out")),("accounts",("data","out")),
+                          ("verify-reuse",("parts",)),("collect",("parts","out"))]:
         p=sub.add_parser(command)
         for name in names:p.add_argument("--"+name,type=Path,required=True)
         if command in {"prepare-market","accounts"}:p.add_argument("--parts",type=Path,nargs="+",required=True)
@@ -295,6 +332,7 @@ def main():
     elif a.command=="scan-gate":scan_gate(a.data,a.btc,a.out,a.minute_cache,a.source_check)
     elif a.command=="prepare-market":prepare_market(a.data,a.btc,a.source_check,a.parts,a.out)
     elif a.command=="accounts":replay_probe(a.data,a.parts,a.out,a.probe_index)
+    elif a.command=="verify-reuse":verify_reused_gate(a.parts)
     else:collect(a.parts,a.out)
 
 if __name__=="__main__":main()

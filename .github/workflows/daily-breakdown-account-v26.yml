@@ -92,30 +92,12 @@ jobs:
       run: |-
         set -euo pipefail
         pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
-    - uses: actions/cache@v4
-      id: source-cache
-      with:
-        path: data
-        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
-    - name: Verify frozen source and BTC
+    - name: Reuse exact completed canonical GATE output with frozen byte hashes
       shell: bash
       run: |
         set -euo pipefail
-        if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
-         gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
-        fi
-        gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
-        gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
-        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json
-    - uses: actions/cache@v4
-      with:
-        path: cache/verified-1m
-        key: daily-breakdown-account-v26-gate-1m-${{ matrix.shard }}
-    - name: Scan 2024 historical diagnostic including new decision-time listings
-      shell: bash
-      run: |
-        set -euo pipefail
-        python scripts/daily_breakdown_account_v26.py scan-gate --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out gate-${{ matrix.shard }} --minute-cache cache/verified-1m
+        gh run download 37588740960 -R ${{ github.repository }} -n daily-breakdown-account-v26-gate-${{ matrix.shard }} -D gate-${{ matrix.shard }}
+        python scripts/daily_breakdown_account_v26.py verify-reuse --parts gate-${{ matrix.shard }}
     - uses: actions/upload-artifact@v4
       if: always()
       with:

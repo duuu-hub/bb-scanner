@@ -170,4 +170,59 @@ class V26Tests(unittest.TestCase):
             p=Path(temp)
             with self.assertRaises(ValueError):v.collect(p,p/"out")
 
+    def global_fixture(self,temp):
+        root=Path(temp);paths=[];hashes={}
+        for i in range(8):
+            p=root/f"X{i}USDT.csv.gz";p.write_bytes(b"known input"+bytes([i]));paths.append(p);hashes[f"X{i}USDT"]=v.digest(p)
+        btc=root/"btc.bin";btc.write_bytes(b"BTC")
+        ctx=root/"context.json";v.write_json(ctx,dict(expected_market_sha256=hashes,btc_sha256=v.digest(btc),baseline_sha256="a"*64))
+        source=root/"source.json";v.write_json(source,dict(status="VERIFIED",shards=list(range(8)),
+            baseline_sha256="a"*64,files=[dict(symbol=s,sha256=h) for s,h in hashes.items()]))
+        return source,paths,btc,ctx,hashes
+
+    def test_actual_eight_shard_market_adapter_accepts_complete_catalogue(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source,paths,btc,ctx,hashes=self.global_fixture(temp)
+            self.assertEqual(v.verify_full_market(source,paths,btc,ctx),hashes)
+            with self.assertRaises(ValueError):v.engine.verify_source(source,paths,btc,ctx)
+
+    def test_global_catalogue_detects_shard_omission_bytes_duplicate_and_btc(self):
+        for problem in ("shards","duplicate","missing","data_bytes","btc","baseline"):
+            with self.subTest(problem=problem),tempfile.TemporaryDirectory() as temp:
+                source,paths,btc,ctx,_=self.global_fixture(temp);s=json.loads(source.read_text())
+                if problem=="shards":s["shards"]=list(range(7))
+                if problem=="duplicate":s["files"].append(s["files"][0])
+                if problem=="missing":paths=paths[:-1]
+                if problem=="data_bytes":paths[0].write_bytes(b"changed")
+                if problem=="btc":btc.write_bytes(b"changed")
+                if problem=="baseline":s["baseline_sha256"]="b"*64
+                v.write_json(source,s)
+                with self.assertRaises(ValueError):v.verify_full_market(source,paths,btc,ctx)
+
+    def reused_fixture(self,temp):
+        root=Path(temp);parts=root/"parts";parts.mkdir()
+        f=pd.DataFrame([intent(stage="GATE")]);lp=parts/"independent_candidates.csv.gz"
+        f.to_csv(lp,index=False,compression=dict(method="gzip",mtime=0))
+        m=dict(complete=True,stage="GATE",shard=0,policies=v.probes(),ledger_rows=1,
+            contract_sha256=v.digest(v.REGISTRY),source_context_sha256=v.CONTEXT_SHA)
+        mp=parts/"scan_meta.json";v.write_json(mp,m)
+        reuse=root/"reuse.json";v.write_json(reuse,dict(source_run_id=37588740960,contract_sha256=v.digest(v.REGISTRY),
+            expected_shards=[dict(shard=0,ledger_sha256=v.digest(lp),ledger_rows=1,scan_meta_git_blob_sha=v.git_blob_sha(mp))]))
+        return parts,reuse,lp,mp
+
+    def test_reused_original_gate_has_exact_byte_identity(self):
+        with tempfile.TemporaryDirectory() as temp:
+            parts,reuse,_,_=self.reused_fixture(temp);v.verify_reused_gate(parts,reuse)
+
+    def test_reused_original_gate_rejects_changed_ledger_meta_and_run(self):
+        for problem in ("ledger","meta","run"):
+            with self.subTest(problem=problem),tempfile.TemporaryDirectory() as temp:
+                parts,reuse,lp,mp=self.reused_fixture(temp)
+                if problem=="ledger":lp.write_bytes(lp.read_bytes()+b"changed")
+                if problem=="meta":
+                    m=json.loads(mp.read_text());m["complete"]=False;v.write_json(mp,m)
+                if problem=="run":
+                    m=json.loads(reuse.read_text());m["source_run_id"]=2;v.write_json(reuse,m)
+                with self.assertRaises(ValueError):v.verify_reused_gate(parts,reuse)
+
 if __name__=="__main__":unittest.main()

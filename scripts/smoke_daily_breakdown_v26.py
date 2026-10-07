@@ -20,7 +20,10 @@ def run(out):
         pd.DataFrame(dict(open_time=t,open=price,high=price+.01,low=price-.01,close=price,
             quote_volume=np.full(len(t),1e6),taker_buy_quote=np.full(len(t),5e5))).to_csv(p,index=False,compression="gzip")
         hashes[s]=v.digest(p)
-    context=out/"context.json";v.write_json(context,dict(expected_market_sha256=hashes,btc_sha256="a"*64))
+    btc=out/"BTC.csv.gz";btc.write_bytes((market/"X0USDT.csv.gz").read_bytes());btc_sha=v.digest(btc)
+    context=out/"context.json";v.write_json(context,dict(expected_market_sha256=hashes,btc_sha256=btc_sha,baseline_sha256="b"*64))
+    source=out/"source-check.json";v.write_json(source,dict(status="VERIFIED",shards=list(range(8)),
+        baseline_sha256="b"*64,files=[dict(symbol=s,sha256=h) for s,h in hashes.items()]))
     sha=v.digest(context);reg=json.loads(v.REGISTRY.read_text());reg["source_context_sha256"]=sha
     contract=out/"registry.json";v.write_json(contract,reg)
     originals=out/"original";gate=out/"gate";expected=[]
@@ -43,7 +46,7 @@ def run(out):
             lp=folder/"independent_candidates.csv.gz";pd.DataFrame(rows).to_csv(lp,index=False,compression=dict(method="gzip",mtime=0))
             pd.DataFrame(columns=["symbol","policy","entry_time","status"]).to_csv(folder/"exclusions.csv",index=False)
             m=dict(complete=True,stage=stage,shard=i,policies=v.v25.policies() if stage=="DEV" else v.probes(),
-                ledger_sha256=v.digest(lp),ledger_rows=len(rows),source_context_sha256=sha,btc_sha256="a"*64,
+                ledger_sha256=v.digest(lp),ledger_rows=len(rows),source_context_sha256=sha,btc_sha256=btc_sha,
                 market_hashes={s:hashes[s]},counts={},contract_sha256=v.digest(contract),status=v.DIAGNOSTIC,exclusions=0)
             v.write_json(folder/"scan_meta.json",m)
             if stage=="DEV":expected.append(dict(shard=i,ledger_sha256=v.digest(lp),ledger_rows=len(rows),
@@ -53,8 +56,7 @@ def run(out):
          patch.object(v.engine.source_helpers,"interval",side_effect=lambda stage:intervals[stage]),\
          patch.object(v.engine.base,"GATE_END",end):
         dev=out/"dev";v.prepare_dev(originals,dev,contract,frozen)
-        with patch.object(v.engine,"verify_source",return_value=({}, {}, hashes)):
-            v.prepare_market(market,out/"unused-btc",out/"unused-source",[dev,gate],out/"account-market",contract)
+        v.prepare_market(market,btc,source,[dev,gate],out/"account-market",contract)
         for i in range(8):v.replay_probe(out/"account-market",[dev,gate],out/"results"/str(i),i,contract)
         v.collect(out/"results",out/"collected",contract)
     result=json.loads((out/"collected/decision.json").read_text())
