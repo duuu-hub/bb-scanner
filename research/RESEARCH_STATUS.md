@@ -622,3 +622,13 @@ Corrected V23 validation job `111373406555` has now succeeded on the corrected t
 - Local preflight: 7 focused tests pass; 8-shard synthetic pipeline preserves all 96 cells. This is validation only, not profitability evidence.
 
 Validation job `111559028652` completed successfully: 553/553 tests, canonical chronology smoke, and the synthetic 8-shard/96-cell pipeline all passed. Eight actual DEV shard jobs then started; no profitability conclusion exists yet.
+
+## 2026-10-07 — V24 actual rejection audited; stale progress corrected
+
+- V24 run [37244305969](https://github.com/duuu-hub/bb-scanner/actions/runs/37244305969) completed at 2026-10-04 23:56:02 UTC (2026-10-05 08:56:02 KST), with 553/553 tests, all eight DEV shards, selection and evidence preservation successful.
+- The central RUNNING checkpoint and an older V22 next_action/phase/current_execution were stale. No research run was active at audit time; continuous work must not be claimed from those old records.
+- Actual V24: 96 cells, 5,544 parameterized outcomes; survivors 0. Only 7 positive mean and 10 positive R cells; every cell has N<300 (range 3–195). Best mean PF4.0305 / +96.8149bp is only N=5, five symbols, with losing 2021. The largest sample N=195 loses in all three years.
+- Gate/account jobs correctly skipped. No account-profit or daily-target evidence. Chronology exclusions 0, 856 input files reconciled (256 DEV histories); 310 original evidence files / 65,608,122 bytes preserved.
+- Rejection audit commit 57e0efc468d323b6832ffdf10b88b701ef32a1b2. DEV branch research-failed-resumption-reversal-v24-dev-37244305969; evidence branch research-failed-resumption-reversal-v24-evidence-37244305969.
+- V25 preregistered before implementation: research-daily-channel-breakout-v25, plan commit 40361cafa861a86e7b0e2be9b47df362e1b842b5. Complete UTC daily 5/20-day channel breakouts, daily ATR20 stops, optional aligned BTC20 regime, 48h/168h holds and fixed 1R/2R/4R TP; 16 entry/risk settings × 6 exits = 96 policies.
+- All past historical periods remain observed research data. V25 is implementing and NOT_DISPATCHED, with no actual run ID or profitability claim.
