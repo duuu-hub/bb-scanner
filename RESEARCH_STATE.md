@@ -29,3 +29,11 @@ Mutable handoff for active research. This file is not an audit result and must n
 - Archive workflow branch: `infra/binance-5y-release-archive`.
 - Last known archive run: `36123487610`; completion/assets must be verified before declaring the Release canonical.
 - Next step: verify run conclusion, Release existence, expected dataset/manifests, and SHA256SUMS before updating AGENTS.md wording from conditional to confirmed canonical storage.
+
+## Fix in progress: SHORT linear-return accounting
+
+- Branch: `fix-short-linear-return-20261007`.
+- Defect: SHORT returns in forward/shadow and SMC code used inverse-style `entry / exit - 1` math despite USDT-margined linear contracts.
+- Status: pre-fix SHORT3/SMC percentage-return aggregates are QUARANTINED. Win/loss direction is unaffected, but return magnitude, PF, and compounded return are contaminated.
+- Repair: shared `linear_return_pct` helper; runtime close paths use linear math; shadow/report statistics recompute legacy rows from stored entry/exit prices instead of trusting contaminated stored percentages.
+- Verification required before merge: focused unit/safety tests plus LONG3 safety workflow/equivalent checks.
