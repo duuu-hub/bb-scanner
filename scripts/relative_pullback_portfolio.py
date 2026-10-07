@@ -62,7 +62,7 @@ class Market:
 
 def liquidation_result(position, price, ts, fee, forced=False):
     tr = position["trade"]
-    slip = STOP_SLIP if forced or tr["reason"] == "SL" else 0.0
+    slip = STOP_SLIP if forced or tr["reason"] in {"SL", "SPLIT_END"} else 0.0
     fill = float(price) * (1 - tr["side"] * slip)
     gross = tr["side"] * position["qty"] * (fill - tr["entry"])
     exit_fee = position["qty"] * fill * fee

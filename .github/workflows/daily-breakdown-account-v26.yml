@@ -1,0 +1,376 @@
+name: Daily Breakdown V26 Account Diagnostic
+'on':
+  push:
+    branches:
+    - research-daily-breakdown-account-v26
+    paths:
+    - .research/daily-breakdown-account-v26-run
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: daily-breakdown-account-v26-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Frozen cohort and account chronology validation
+      shell: bash
+      run: |
+        set -euo pipefail
+        python -m py_compile scripts/daily_breakdown_account_v26.py scripts/validate_daily_breakdown_account_v26.py scripts/research_account_checkpoint_v26.py
+        python scripts/validate_daily_breakdown_account_v26.py 2>&1 | tee v26-tests.log
+        python scripts/psar_chronology_smoke.py 2>&1 | tee chronology-smoke.log
+        python scripts/research_account_checkpoint_v26.py --self-test 2>&1 | tee checkpoint-selftest.log
+        python scripts/smoke_daily_breakdown_v26.py synthetic-v26 2>&1 | tee account-pipeline-smoke.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-validation
+        path: |-
+          v26-tests.log
+          chronology-smoke.log
+          checkpoint-selftest.log
+          research/daily-breakdown-account-v26/
+          account-pipeline-smoke.log
+          synthetic-v26/smoke.json
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+  prepare_dev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Reuse byte-verified original V25 DEV, retain original rejection
+      shell: bash
+      run: |
+        set -euo pipefail
+        gh run download 37559595896 -R ${{ github.repository }} -p 'daily-channel-breakout-v25-dev-*' -D original-dev
+        python scripts/daily_breakdown_account_v26.py prepare-dev --parts original-dev --out diagnostic-dev
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-dev
+        path: diagnostic-dev/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: validate
+  gate_scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Verify frozen source and BTC
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
+         gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+        fi
+        gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+        gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json
+    - uses: actions/cache@v4
+      with:
+        path: cache/verified-1m
+        key: daily-breakdown-account-v26-gate-1m-${{ matrix.shard }}
+    - name: Scan 2024 historical diagnostic including new decision-time listings
+      shell: bash
+      run: |
+        set -euo pipefail
+        python scripts/daily_breakdown_account_v26.py scan-gate --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out gate-${{ matrix.shard }} --minute-cache cache/verified-1m
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-gate-${{ matrix.shard }}
+        path: gate-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs:
+    - validate
+    - prepare_dev
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  prepare_market:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        name: daily-breakdown-account-v26-dev
+        path: parts/dev
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-account-v26-gate-*
+        path: parts/gate
+    - name: Verify full frozen market and preserve required marking universe
+      shell: bash
+      run: |
+        set -euo pipefail
+        gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D market
+        gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-manifest-shard-*' -D manifests
+        gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+        python scripts/research_evidence_archive.py verify-source --data market --manifests manifests --expected-shards 8 --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json
+        python scripts/daily_breakdown_account_v26.py prepare-market --data market --btc btc/BTCUSDT.csv.gz --source-check source-check.json --parts parts/dev parts/gate --out account-market
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-market
+        path: account-market/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-market-manifest
+        path: |-
+          account-market/market_manifest.json
+          source-check.json
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs:
+    - prepare_dev
+    - gate_scan
+  accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        name: daily-breakdown-account-v26-dev
+        path: parts/dev
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-account-v26-gate-*
+        path: parts/gate
+    - uses: actions/download-artifact@v4
+      with:
+        name: daily-breakdown-account-v26-market
+        path: account-market
+    - name: Actual frozen-capital account scenarios and entry-date diagnostics
+      shell: bash
+      run: |
+        set -euo pipefail
+        python scripts/daily_breakdown_account_v26.py accounts --data account-market --parts parts/dev parts/gate --probe-index ${{ matrix.probe }} --out result-${{ matrix.probe }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-results-${{ matrix.probe }}
+        path: result-${{ matrix.probe }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: prepare_market
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        probe:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-account-v26-results-*
+        path: results
+    - name: Verify all 64 original scenarios and collect diagnostic summaries
+      shell: bash
+      run: |
+        set -euo pipefail
+        python scripts/daily_breakdown_account_v26.py collect --parts results --out research/daily-breakdown-account-v26/run-${{ github.run_id }}/accounts
+    - name: Preserve actual account summaries on an isolated research branch
+      shell: bash
+      run: |
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-account-v26-results-${{ github.run_id }}"
+        git add "research/daily-breakdown-account-v26/run-${{ github.run_id }}/accounts"
+        git commit -m "Preserve V26 actual 64 account diagnostics; V25 rejection retained"
+        git push origin HEAD
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-account-v26-collected
+        path: research/daily-breakdown-account-v26/run-${{ github.run_id }}/accounts/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: accounts
+    permissions:
+      contents: write
+      actions: read
+  preserve_cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install frozen research dependencies
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Preserve complete or partial originals, official minute evidence and Actions logs
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p cycle-evidence/job-logs
+        gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts?per_page=100 > cycle-evidence/artifacts.json
+        python - <<'ARTIFACTS' > artifact-names.txt
+        import json
+        for item in json.load(open('cycle-evidence/artifacts.json'))['artifacts']:
+         if item['name'].startswith('daily-breakdown-account-v26-') and item['name']!='daily-breakdown-account-v26-market':print(item['name'])
+        ARTIFACTS
+        while read artifact_name; do
+         if ! gh run download ${{ github.run_id }} -R ${{ github.repository }} -n "$artifact_name" -D "cycle-evidence/$artifact_name"; then
+          echo "$artifact_name" >> cycle-evidence/artifact-download-failures.txt
+         fi
+        done < artifact-names.txt
+        gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100 > cycle-evidence/actions-jobs.json
+        python - <<'JOBS' > completed-jobs.txt
+        import json
+        for item in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+         if item['status']=='completed' and item['conclusion']!='skipped':print(item['id'])
+        JOBS
+        while read job_id; do
+         gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
+        done < completed-jobs.txt
+        cp research/daily-breakdown-account-v26/PLAN.md cycle-evidence/FROZEN_PLAN.md
+        cp research/daily-breakdown-account-v26/PREMARKET_EXECUTION_ADDENDUM.md cycle-evidence/
+        cp research/daily-breakdown-account-v26/PROBES.json cycle-evidence/
+        cp research/daily-breakdown-account-v26/FROZEN_V25_INPUTS.json cycle-evidence/
+        cp research/daily-channel-breakout-v25/FROZEN_CONTEXT.json cycle-evidence/
+        cp research/daily-channel-breakout-v25/V25_ACTUAL_REJECTION.json cycle-evidence/
+        python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V26-account-complete-or-partial --out research/daily-breakdown-account-v26/run-${{ github.run_id }}/complete-evidence
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-account-v26-evidence-${{ github.run_id }}"
+        git add "research/daily-breakdown-account-v26/run-${{ github.run_id }}/complete-evidence"
+        git commit -m "Preserve original V26 account, chronology and failure evidence"
+        git push origin HEAD
+    needs:
+    - validate
+    - prepare_dev
+    - gate_scan
+    - prepare_market
+    - accounts
+    - collect
+    permissions:
+      contents: write
+      actions: read
+    if: always()
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+    - validate
+    - prepare_dev
+    - gate_scan
+    - prepare_market
+    - accounts
+    - collect
+    - preserve_cycle
+    if: always()
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Record actual stage status with branch/run identity guard
+      run: python scripts/research_account_checkpoint_v26.py
