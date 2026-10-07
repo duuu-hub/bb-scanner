@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T07:19:36Z",
+  "updated_at": "2026-10-07T07:40:34Z",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-account-v26",
-  "current_run": null,
+  "current_run": 37588740960,
   "current_workflow": ".github/workflows/daily-breakdown-account-v26.yml",
   "current_plan": "research/daily-breakdown-account-v26/PLAN.md",
-  "latest_research_checkpoint": "V25_ACTUAL_REJECTED_V26_ACCOUNT_DIAGNOSTIC_PREREGISTERED",
+  "latest_research_checkpoint": "V26_ACTUAL_RUN_REGISTERED_AFTER_589_PASS",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -965,7 +965,9 @@
     "v25_account_scenarios": 0,
     "v26_probes_planned": 8,
     "v26_account_scenarios_planned": 64,
-    "v26_actual_market_runs": 0
+    "v26_actual_market_runs": 1,
+    "v26_execution_attempts": 1,
+    "v26_local_tests_passed": 589
   },
   "goal": {
     "max_hold_days": 7,
@@ -975,8 +977,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Implement and validate eight preregistered V25 short-family account diagnostic probes (64 scenarios), then launch once and audit actual money/correlation. V25 remains rejected; no threshold rescue or daily-target claim.",
-  "phase": "V26_PREREGISTERED_ACCOUNT_DIAGNOSTIC_IMPLEMENTING",
+  "next_action": "Observe actual run 37588740960 validation, original DEV integrity, eight GATE scans, market hash validation, eight account probes and all 64 scenario audits. V25 rejection retained; final checkpoint records audit pending.",
+  "phase": "V26_QUEUED_VALIDATION",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -994,7 +996,7 @@
     "scope": "research-breadth-expansion-continuation-v15 implementation, tests, and one actual run"
   },
   "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
-  "code_commit": null,
+  "code_commit": "64cef63f752b894b49703e622c3bcbe57c177dbb",
   "current_result_locations": {
     "v15_development": "research-breadth-expansion-continuation-v15-dev-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/development",
     "v15_evidence": "research-breadth-expansion-continuation-v15-evidence-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/complete-evidence",
@@ -1021,7 +1023,11 @@
     "v25_plan": "research-daily-channel-breakout-v25:research/daily-channel-breakout-v25/PLAN.md",
     "v25_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
     "v25_expected_development": "research-daily-channel-breakout-v25-dev-37559595896:research/daily-channel-breakout-v25/run-37559595896/development",
-    "v25_expected_evidence": "research-daily-channel-breakout-v25-evidence-37559595896:research/daily-channel-breakout-v25/run-37559595896/complete-evidence"
+    "v25_expected_evidence": "research-daily-channel-breakout-v25-evidence-37559595896:research/daily-channel-breakout-v25/run-37559595896/complete-evidence",
+    "v26_plan": "research-daily-breakdown-account-v26:research/daily-breakdown-account-v26/PLAN.md",
+    "v26_run": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
+    "v26_expected_accounts": "research-daily-breakdown-account-v26-results-37588740960:research/daily-breakdown-account-v26/run-37588740960/accounts",
+    "v26_expected_evidence": "research-daily-breakdown-account-v26-evidence-37588740960:research/daily-breakdown-account-v26/run-37588740960/complete-evidence"
   },
   "auxiliary_execution": {
     "kind": "V4_EVIDENCE_RECOVERY_ONLY",
@@ -1132,10 +1138,25 @@
   "current_execution": {
     "version": "V26",
     "branch": "research-daily-breakdown-account-v26",
-    "state": "NOT_DISPATCHED",
-    "run_id": null,
+    "run_id": 37588740960,
+    "state": "ACTUAL_RUN_REGISTERED",
+    "workflow_status": "in_progress",
+    "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
+    "implementation_commit": "64cef63f752b894b49703e622c3bcbe57c177dbb",
     "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
-    "diagnostic_only": true
+    "execution_addendum_commit": "1633581b4f68f3367e18c2623b152582e5b9a9b8",
+    "observed_at": "2026-10-07T07:40:34Z",
+    "local_validation": {
+      "tests": 589,
+      "failures": 0,
+      "errors": 0,
+      "canonical_chronology": "PASS",
+      "synthetic64account_scenarios": "PASS"
+    },
+    "diagnostic_only": true,
+    "v25_rejection_retained": true,
+    "profitability_audited": false,
+    "account_daily_target_claim": false
   },
   "v8_attempt_failures": [
     {
@@ -2310,7 +2331,7 @@
       "No V12 market rerun, account growth claim or daily target claim."
     ]
   },
-  "current_run_url": null,
+  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
   "completed_v13_validation": {
     "observed_at": "2026-10-02T10:03:30Z",
     "run": 36992677948,
@@ -4184,7 +4205,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V26_PREREGISTERED_ACCOUNT_DIAGNOSTIC_IMPLEMENTING",
+    "phase": "V26_QUEUED_VALIDATION",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -4344,11 +4365,14 @@
       "audit_commit": "94f45e5779a66f5b6e200df63235fb4cb83000ca"
     },
     "v26": {
-      "status": "PREREGISTERED_IMPLEMENTING",
+      "status": "ACTUAL_RUN_REGISTERED",
       "policies": 8,
       "planned_account_scenarios": 64,
       "diagnostic_only": true,
-      "qualified_candidates": 0
+      "qualified_candidates": 0,
+      "run_id": 37588740960,
+      "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960",
+      "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371"
     }
   },
   "completed_v16_validation": {
