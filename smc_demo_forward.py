@@ -22,6 +22,7 @@ from bitget_demo_lifecycle_test import (
     q_up,
     wait_for_fill,
 )
+from pnl_math import linear_return_pct
 from smc_forward_engine import SMCConfig, replay_active_setups, setup_dict
 
 CONFIG_PATH = Path("config/smc_demo_config.json")
@@ -495,13 +496,7 @@ def resolve_exchange_close(client: BitgetDemoClassic, trade: dict, ts_ms: int) -
         entry = decimal_or_zero(trade.get("entry_avg_price"))
         exit_price = decimal_or_zero(row.get("priceAvg") or row.get("price"))
         side = str(trade.get("side") or "").lower()
-        ret = None
-        if entry > 0 and exit_price > 0:
-            ret = (
-                float((exit_price / entry - Decimal("1")) * Decimal("100"))
-                if side == "long"
-                else float((entry / exit_price - Decimal("1")) * Decimal("100"))
-            )
+        ret = linear_return_pct(entry, exit_price, side)
         return {
             "reason": reason,
             "return_pct": ret,
