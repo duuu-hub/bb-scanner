@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791396055180,
+  "last_run_ms": 1791396955556,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -349,7 +349,9 @@
     "LONG3:L1:SANDUSDT:1791389700000",
     "LONG3:L1:METUSDT:1791390600000",
     "LONG3:L1:METUSDT:1791393300000",
-    "SHORT3:S2:METUSDT:1791396000000"
+    "SHORT3:S2:METUSDT:1791396000000",
+    "LONG3:L1:METUSDT:1791396900000",
+    "SHORT3:S1:METUSDT:1791396900000"
   ],
   "signal_shadow_closed": [
     {
@@ -12813,11 +12815,10 @@
       "strategy": "L1",
       "symbol": "METUSDT",
       "tp": 0.39380000000000004
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1791396953432,
       "deadline_ms": 1791436500000,
       "detected_price": 0.3697,
       "last_checked_ms": 1791396000000,
@@ -12844,7 +12845,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "TAKE_PROFIT",
       "shadow_entry_price": 0.3697,
+      "shadow_exit_price": 0.40667,
+      "shadow_return_pct": 10.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:METUSDT:1791393300000",
       "signal_time_ms": 1791393300000,
@@ -12855,6 +12859,7 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791396953432,
       "deadline_ms": 1791410400000,
       "detected_price": 0.3969,
       "last_checked_ms": 1791396000000,
@@ -12881,7 +12886,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.3969,
+      "shadow_exit_price": 0.412776,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:METUSDT:1791396000000",
       "signal_time_ms": 1791396000000,
@@ -12889,6 +12897,88 @@
       "strategy": "S2",
       "symbol": "METUSDT",
       "tp": 0.35720999999999997
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1791440100000,
+      "detected_price": 0.4297,
+      "last_checked_ms": 1791396900000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -1.7473118279569877,
+        "alt_positive_4h_pct": 6.047516198704104,
+        "btc_1h_pct": -0.17614952232465342,
+        "btc_24h_pct": -2.783,
+        "btc_4h_pct": 0.2464025705716688,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4153589471350694,
+        "eth_24h_pct": -5.154,
+        "eth_4h_pct": -0.09442023246105657,
+        "eth_btc_relative_strength_24h_pct": -2.371,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-10-07T14:32:36.589961+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S1",
+        "S3"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.4297,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:METUSDT:1791396900000",
+      "signal_time_ms": 1791396900000,
+      "sl": 0.408215,
+      "strategy": "L1",
+      "symbol": "METUSDT",
+      "tp": 0.4726700000000001
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791440100000,
+      "detected_price": 0.4297,
+      "last_checked_ms": 1791396900000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -1.7473118279569877,
+        "alt_positive_4h_pct": 6.047516198704104,
+        "btc_1h_pct": -0.17614952232465342,
+        "btc_24h_pct": -2.783,
+        "btc_4h_pct": 0.2464025705716688,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4153589471350694,
+        "eth_24h_pct": -5.154,
+        "eth_4h_pct": -0.09442023246105657,
+        "eth_btc_relative_strength_24h_pct": -2.371,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-10-07T14:32:36.589961+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S1",
+        "S3"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.4297,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S1:METUSDT:1791396900000",
+      "signal_time_ms": 1791396900000,
+      "sl": 0.44688800000000006,
+      "strategy": "S1",
+      "symbol": "METUSDT",
+      "tp": 0.38673
     }
   ],
   "spread_shadow_closed": [],
