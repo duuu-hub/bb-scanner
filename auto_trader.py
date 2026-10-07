@@ -12,6 +12,7 @@ from pathlib import Path
 import requests
 
 from bitget_demo_lifecycle_test import BitgetDemoClassic, MARGIN_COIN, PRODUCT_TYPE, q_down, q_nearest, q_up, wait_for_fill
+from pnl_math import linear_return_pct
 from signal_io import load_signal_jsonl
 from trade_guard import Candle, GuardConfig, Signal, validate_signal
 from trade_state import load_trading_state, save_trading_state
@@ -363,13 +364,7 @@ def close_tracked_trade(client: BitgetDemoClassic, trade: dict, reason: str) -> 
     detail = wait_for_fill(client, trade["symbol"], order_id)
     entry = decimal_or_zero(trade.get("entry_avg_price"))
     exit_price = decimal_or_zero(detail.get("priceAvg"))
-    ret = None
-    if entry > 0 and exit_price > 0:
-        ret = (
-            float((exit_price / entry - Decimal("1")) * Decimal("100"))
-            if side == "LONG"
-            else float((entry / exit_price - Decimal("1")) * Decimal("100"))
-        )
+    ret = linear_return_pct(entry, exit_price, side)
     log_event(
         {
             "event": "CLOSE",
@@ -430,13 +425,7 @@ def resolve_exchange_close(client: BitgetDemoClassic, trade: dict, ts_ms: int) -
         entry = decimal_or_zero(trade.get("entry_avg_price"))
         exit_price = decimal_or_zero(row.get("priceAvg") or row.get("price"))
         side = str(trade.get("side") or "").upper()
-        ret = None
-        if entry > 0 and exit_price > 0:
-            ret = (
-                float((exit_price / entry - Decimal("1")) * Decimal("100"))
-                if side == "LONG"
-                else float((entry / exit_price - Decimal("1")) * Decimal("100"))
-            )
+        ret = linear_return_pct(entry, exit_price, side)
         return {
             "reason": reason,
             "return_pct": ret,
@@ -935,7 +924,15 @@ def signal_shadow_stats(state: dict, cfg: dict, side: str | None = None) -> dict
         rows = [r for r in rows if str(r.get("side") or "LONG").upper() == side.upper()]
     valid = []
     for row in rows:
-        value = row.get("shadow_return_pct")
+        # Recompute from immutable entry/exit prices so pre-fix SHORT records
+        # do not contaminate cumulative stats with the old inverse-style formula.
+        value = linear_return_pct(
+            row.get("shadow_entry_price"),
+            row.get("shadow_exit_price"),
+            row.get("side") or "LONG",
+        )
+        if value is None:
+            value = row.get("shadow_return_pct")
         if value is None:
             continue
         try:
@@ -1037,12 +1034,11 @@ def manage_signal_shadows(
             continue
 
         entry = float(shadow.get("shadow_entry_price") or 0.0)
-        ret = None
-        if entry > 0 and exit_price is not None:
-            if str(shadow.get("side") or "LONG").upper() == "SHORT":
-                ret = (entry / float(exit_price) - 1.0) * 100.0
-            else:
-                ret = (float(exit_price) / entry - 1.0) * 100.0
+        ret = linear_return_pct(
+            entry,
+            exit_price,
+            shadow.get("side") or "LONG",
+        )
 
         closed = {
             **shadow,
