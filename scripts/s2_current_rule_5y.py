@@ -364,15 +364,70 @@ def run_symbol(symbol, path):
     return rows,meta
 
 def self_test():
-    # Deterministic chronology helper checks.
-    # We test formula/sign semantics here; full archive reconstruction is audited from produced trades.
     assert abs(((100-90)/100*100)-10.0) < 1e-12
     assert abs(((100-104)/100*100)+4.0) < 1e-12
-    # Fresh-transition truth table.
     c=np.array([False,True,True,False,True])
     prev=np.roll(c,1); prev[0]=False
     assert np.where(c & ~prev)[0].tolist()==[1,4]
-    print("S2_SELF_TEST_PASS")
+
+    parent=1_800_000_000_000
+    tp=90.0; sl=104.0
+    original=globals()["day_rows"]
+
+    def make_rows(mods=None, count=15):
+        mods=mods or {}
+        rows=[]
+        for i in range(count):
+            o,h,l,cl=100.0,101.0,99.0,100.0
+            if i in mods:
+                h,l=mods[i]
+            rows.append((parent+i*MIN,o,h,l,cl))
+        return rows
+
+    try:
+        # 1 pre-entry TP ignored.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({0:(101.0,89.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="NONE", r
+
+        # 2 entry-minute TP-only => conservative LOSS.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({2:(101.0,89.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="SL" and r["via"]=="entry_minute_conservative_loss", r
+
+        # 3 entry-minute SL-only => LOSS.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({2:(105.0,99.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="SL", r
+
+        # 4 entry-minute both => LOSS.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({2:(105.0,89.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="SL", r
+
+        # 5 established-position same-minute both => LOSS.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({0:(105.0,89.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,None)
+        assert r["status"]=="SL" and r["via"]=="same_1m_both_loss", r
+
+        # 6 entry then later TP => WIN.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({3:(101.0,89.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="TP", r
+
+        # 7 entry then later SL => LOSS.
+        globals()["day_rows"]=lambda symbol,ts: make_rows({3:(105.0,99.0)})
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="SL", r
+
+        # 8 incomplete minute archive => DATA_GAP.
+        globals()["day_rows"]=lambda symbol,ts: make_rows(count=14)
+        r=inspect_parent_1m("XUSDT",parent,tp,sl,parent+2*MIN)
+        assert r["status"]=="DATA_GAP", r
+    finally:
+        globals()["day_rows"]=original
+
+    print("S2_SELF_TEST_PASS chronology=8/8")
 
 def main():
     ap=argparse.ArgumentParser()
