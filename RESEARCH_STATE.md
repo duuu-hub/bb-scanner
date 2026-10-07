@@ -30,10 +30,11 @@ Mutable handoff for active research. This file is not an audit result and must n
 - Last known archive run: `36123487610`; completion/assets must be verified before declaring the Release canonical.
 - Next step: verify run conclusion, Release existence, expected dataset/manifests, and SHA256SUMS before updating AGENTS.md wording from conditional to confirmed canonical storage.
 
-## Fix in progress: SHORT linear-return accounting
+## Verified fix: SHORT linear-return accounting
 
-- Branch: `fix-short-linear-return-20261007`.
+- Repair branch: `fix-short-linear-return-20261007`; PR #18; merged main commit `1db5b11d4240b7aa09e60023ae50e5c739a94da1`.
 - Defect: SHORT returns in forward/shadow and SMC code used inverse-style `entry / exit - 1` math despite USDT-margined linear contracts.
-- Status: pre-fix SHORT3/SMC percentage-return aggregates are QUARANTINED. Win/loss direction is unaffected, but return magnitude, PF, and compounded return are contaminated.
+- Status: pre-fix SHORT3/SMC percentage-return aggregates remain QUARANTINED. Win/loss direction is unaffected, but pre-fix return magnitude, PF, and compounded return are contaminated.
 - Repair: shared `linear_return_pct` helper; runtime close paths use linear math; shadow/report statistics recompute legacy rows from stored entry/exit prices instead of trusting contaminated stored percentages.
-- Verification required before merge: focused unit/safety tests plus LONG3 safety workflow/equivalent checks.
+- Verification: PR LONG3 Demo Unit Tests run `37551933238` passed; PR SMC Demo Tests run `37551933184` passed; post-merge main LONG3 run `37552047725` passed; post-merge main SMC run `37552047686` passed including 9 unit tests and public-data scan-only.
+- Audit state: accounting fix REGRESSION-TESTED. Any strategy-performance conclusion still requires the normal research audit/portfolio chronology/cost checks.
