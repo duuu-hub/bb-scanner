@@ -642,3 +642,7 @@ Frozen matrix: direction ±1 × prior daily channel 5/20 × BTC ANY/ALIGN20 × d
 ## V25 actual server validation and DEV handoff — 2026-10-07T01:58:42Z
 
 [Run 37559595896](https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896) is actually **in progress**. Actual validation job 112593637542 completed successfully; its original log includes `V25_TEST_RESULT 573 0 0 True`, `ALL_CANONICAL_INVARIANTS_PASS`, `V25_SYNTHETIC_PIPELINE_PASS` and `RESEARCH_CHECKPOINT_CONCURRENCY_AND_STATUS_SELFTEST_PASS`. All eight development jobs are in progress: development (0)=112593887558, development (7)=112593887564, development (6)=112593887585, development (1)=112593887590, development (5)=112593887598, development (4)=112593887633, development (3)=112593887640, development (2)=112593887691. These are observed job states, not completed economic evidence. V24 remains rejected at 0/96 survivors; V25 economic result is pending.
+
+## V25 Actions stage checkpoint — 2026-10-07T02:01:24.640665+00:00
+
+Run [37559595896](https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896) on `research-daily-channel-breakout-v25` / `4869af65facf606a8cb17979c0966c729e8cbfd9`: V25_RESULT_READY_FOR_AUDIT. All listed stage states are from actual Actions jobs. The final checkpoint job is still completing; audit the final run status and original 96-cell outputs before economic conclusions. No profitability or daily-target claim.
