@@ -646,3 +646,9 @@ Frozen matrix: direction ±1 × prior daily channel 5/20 × BTC ANY/ALIGN20 × d
 ## V25 Actions stage checkpoint — 2026-10-07T02:01:24.640665+00:00
 
 Run [37559595896](https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896) on `research-daily-channel-breakout-v25` / `4869af65facf606a8cb17979c0966c729e8cbfd9`: V25_RESULT_READY_FOR_AUDIT. All listed stage states are from actual Actions jobs. The final checkpoint job is still completing; audit the final run status and original 96-cell outputs before economic conclusions. No profitability or daily-target claim.
+
+## V25 actual economic audit → V26 account diagnostic — 2026-10-07T07:19:36Z
+
+V25 actual run 37559595896 completed SUCCESS at 2026-10-07T02:01:31Z; validate and eight DEV shards, selection, evidence and checkpoint all succeeded; gate/accounts skipped because 0/96 survives. Audit commit 94f45e5779a66f5b6e200df63235fb4cb83000ca: 327,848 parameterized outcomes, 48/96 positive mean bp and 50/96 positive mean R; canonical DATA_GAP exclusions 1,504, entry/exit mismatches 0. Source hashes and ledger-row totals reconcile. Best rejected short cell DAILY_S-1_D20_ALIGN20_A25__H672__R20: N1,344, 175 symbols, PF1.72545, net40 mean bp229.503, mean R0.15464, win51.116%; 2021 only six entry dates and 2023 equal-date R -0.066657. Raw outcomes are overlapping, not account profit.
+
+V25 rejection remains frozen. V26 plan fe223bc5fe375097cb342c6d85cd6b42222d15d5 preregisters all eight short entry keys with same 168h/2R policy, DEV reuse plus 2024 historical GATE scan, 64 identical-capital account scenarios and date-clustering diagnostics. This is exploratory and selected after V25; no pristine OOS, promotion, daily-target evidence, live/main change or guarantee. Actual V26 run not dispatched yet.
