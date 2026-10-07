@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T07:55:46Z",
+  "updated_at": "2026-10-07T08:03:34.197477+00:00",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-account-v26",
   "current_run": 37590305587,
   "current_workflow": ".github/workflows/daily-breakdown-account-v26.yml",
   "current_plan": "research/daily-breakdown-account-v26/PLAN.md",
-  "latest_research_checkpoint": "V26_ADAPTER_FIXED_593_PASS_ACTUAL_RETRY_REGISTERED",
+  "latest_research_checkpoint": "V26_ACCOUNT_DIAGNOSTIC_READY_FOR_AUDIT",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -994,8 +994,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Observe corrected run 37590305587. Verify byte reuse of all eight completed GATE outputs (10310 outcomes), full eight-shard market source, then audit all 64 account scenarios. Frozen policies/cost/risk rules unchanged; V25 rejection retained.",
-  "phase": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
+  "next_action": "Fetch actual terminal status and all 64 scenario/cluster/arithmetic outputs of 37590305587. V25 rejection remains; V26 is exploratory only.",
+  "phase": "V26_ACCOUNT_DIAGNOSTIC_READY_FOR_AUDIT",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -1156,23 +1156,138 @@
     "version": "V26",
     "run_id": 37590305587,
     "branch": "research-daily-breakdown-account-v26",
-    "state": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
-    "workflow_status": "in_progress",
-    "run_head_commit": "6ca61ce31e15ffebf6b08e4ae786210d2d2f77ca",
-    "implementation_commit": "37db45d0e056e59225287c3cc79e339de5ce6f22",
-    "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
-    "observed_at": "2026-10-07T07:55:46Z",
-    "attempt": 2,
-    "failed_original_run": 37588740960,
-    "gate_reuse_run": 37588740960,
-    "gate_reuse_frozen_input_sha256": "09ec31ebe7cf5a59f8b3e663185692ed1e65d36289640bcb12923e9b25513a82",
-    "local_validation": {
-      "tests": 593,
-      "failures": 0,
-      "errors": 0,
-      "synthetic_full_market_to_64": "PASS"
-    },
-    "settings_changed": false,
+    "code_commit": "6ca61ce31e15ffebf6b08e4ae786210d2d2f77ca",
+    "state": "V26_ACCOUNT_DIAGNOSTIC_READY_FOR_AUDIT",
+    "workflow_status": "FINAL_CHECKPOINT_JOB_IN_PROGRESS",
+    "observed_at": "2026-10-07T08:03:34.197477+00:00",
+    "stage_jobs": [
+      {
+        "id": 112689929141,
+        "name": "validate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690472343,
+        "name": "prepare_dev",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677297,
+        "name": "gate_scan (4)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677305,
+        "name": "gate_scan (0)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677311,
+        "name": "gate_scan (1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677312,
+        "name": "gate_scan (2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677319,
+        "name": "gate_scan (5)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677362,
+        "name": "gate_scan (7)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677365,
+        "name": "gate_scan (3)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690677417,
+        "name": "gate_scan (6)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112690851963,
+        "name": "prepare_market",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448324,
+        "name": "accounts (0)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448361,
+        "name": "accounts (4)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448363,
+        "name": "accounts (3)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448371,
+        "name": "accounts (6)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448415,
+        "name": "accounts (1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448440,
+        "name": "accounts (2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448448,
+        "name": "accounts (7)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112691448458,
+        "name": "accounts (5)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112692310138,
+        "name": "collect",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112692500828,
+        "name": "preserve_cycle",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
     "diagnostic_only": true,
     "v25_rejection_retained": true,
     "profitability_audited": false,
@@ -4225,7 +4340,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V26_RETRY_RUNNING_ACCOUNT_DIAGNOSTIC",
+    "phase": "V26_ACCOUNT_DIAGNOSTIC_READY_FOR_AUDIT",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
