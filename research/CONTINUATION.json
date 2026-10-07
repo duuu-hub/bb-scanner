@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T01:58:42Z",
+  "updated_at": "2026-10-07T02:01:24.640665+00:00",
   "interactive_lease": null,
   "current_branch": "research-daily-channel-breakout-v25",
   "current_run": 37559595896,
   "current_workflow": ".github/workflows/daily-channel-breakout-v25.yml",
   "current_plan": "research/daily-channel-breakout-v25/PLAN.md",
-  "latest_research_checkpoint": "V25_ACTUAL_573_TESTS_PASS_EIGHT_DEV_SHARDS_RUNNING",
+  "latest_research_checkpoint": "V25_RESULT_READY_FOR_AUDIT",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -660,8 +660,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "After actual run 37559595896 finishes, fetch original eight DEV ledgers, all 96 cells, selection and evidence manifest. Preserve real failure or selection and proceed under the frozen plan; do not claim profitability or duplicate the run.",
-  "phase": "V25_RUNNING_DEVELOPMENT",
+  "next_action": "Fetch actual terminal status of run 37559595896, audit original eight shard ledgers and all 96 cells; preserve rejection or freeze candidates. Do not duplicate or claim profitability from job success.",
+  "phase": "V25_RESULT_READY_FOR_AUDIT",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -818,29 +818,10 @@
     "version": "V25",
     "run_id": 37559595896,
     "branch": "research-daily-channel-breakout-v25",
-    "code_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
-    "run_head_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
-    "plan_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5",
-    "state": "RUNNING_DEVELOPMENT",
-    "workflow_status": "in_progress",
-    "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
-    "observed_at": "2026-10-07T01:58:42Z",
-    "local_regression": {
-      "tests": 573,
-      "failures": 0,
-      "errors": 0
-    },
-    "profitability_audited": false,
-    "account_daily_target_claim": false,
-    "validation_job": 112593637542,
-    "server_validation": {
-      "tests": 573,
-      "failures": 0,
-      "errors": 0,
-      "canonical_chronology": "PASS",
-      "synthetic_eight_shards_96_cells": "PASS",
-      "checkpoint_selftest": "PASS"
-    },
+    "code_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
+    "state": "RESULT_READY_FOR_AUDIT",
+    "workflow_status": "FINAL_CHECKPOINT_JOB_IN_PROGRESS",
+    "stages_observed_at": "2026-10-07T02:01:24.640665+00:00",
     "stage_jobs": [
       {
         "id": 112593637542,
@@ -851,52 +832,78 @@
       {
         "id": 112593887558,
         "name": "development (0)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887564,
         "name": "development (7)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887585,
         "name": "development (6)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887590,
         "name": "development (1)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887598,
         "name": "development (5)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887633,
         "name": "development (4)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887640,
         "name": "development (3)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
       },
       {
         "id": 112593887691,
         "name": "development (2)",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112594397826,
+        "name": "selection",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112594545002,
+        "name": "preserve_cycle",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112594545115,
+        "name": "gate",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 112594545871,
+        "name": "accounts",
+        "status": "completed",
+        "conclusion": "skipped"
       }
-    ]
+    ],
+    "profitability_audited": false,
+    "account_daily_target_claim": false
   },
   "v8_attempt_failures": [
     {
@@ -3945,7 +3952,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V25_RUNNING_DEVELOPMENT",
+    "phase": "V25_RESULT_READY_FOR_AUDIT",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
