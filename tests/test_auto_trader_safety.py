@@ -73,6 +73,36 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertAlmostEqual(stats["avg_return_pct"], 2.5)
         self.assertAlmostEqual(stats["weighted_compounded_pct"], 1.455, places=6)
 
+    def test_signal_shadow_stats_recomputes_legacy_short_return(self):
+        state = {
+            "signal_shadow_closed": [
+                {
+                    "closed_at_ms": 1,
+                    "signal_id": "short_tp",
+                    "side": "SHORT",
+                    "shadow_entry_price": 100.0,
+                    "shadow_exit_price": 90.0,
+                    # Historical buggy inverse-style value. Stats must ignore it.
+                    "shadow_return_pct": 11.11111111111111,
+                },
+                {
+                    "closed_at_ms": 2,
+                    "signal_id": "short_sl",
+                    "side": "SHORT",
+                    "shadow_entry_price": 100.0,
+                    "shadow_exit_price": 104.0,
+                    "shadow_return_pct": -3.8461538461538436,
+                },
+            ]
+        }
+        stats = signal_shadow_stats(state, {"position_size_pct": 30.0}, side="SHORT")
+        self.assertEqual(stats["valid"], 2)
+        self.assertEqual(stats["wins"], 1)
+        self.assertEqual(stats["losses"], 1)
+        self.assertAlmostEqual(stats["avg_return_pct"], 3.0)
+        self.assertAlmostEqual(stats["pf"], 2.5)
+        self.assertAlmostEqual(stats["weighted_compounded_pct"], 1.764, places=6)
+
     def test_repository_is_demo_and_live_disabled(self):
         cfg = load_config()
         self.assertEqual(cfg["trading_mode"], "DEMO")

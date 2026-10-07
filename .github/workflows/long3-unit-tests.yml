@@ -7,6 +7,7 @@ on:
       - demo-long3-integration
     paths:
       - 'auto_trader.py'
+      - 'pnl_math.py'
       - 'scanner.py'
       - 'long3_watcher.py'
       - 'long3_signal_adapter.py'
@@ -24,6 +25,7 @@ on:
       - main
     paths:
       - 'auto_trader.py'
+      - 'pnl_math.py'
       - 'scanner.py'
       - 'long3_watcher.py'
       - 'long3_signal_adapter.py'
@@ -51,7 +53,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: Compile scanner, watcher and trader
-        run: python -m py_compile scanner.py long3_watcher.py auto_trader.py
+        run: python -m py_compile scanner.py long3_watcher.py auto_trader.py pnl_math.py
       - name: Run LONG3 safety and plumbing tests
         run: |
           python -m unittest -v \
@@ -59,6 +61,7 @@ jobs:
             tests/test_runtime_plumbing.py \
             tests/test_long3_signal_adapter.py \
             tests/test_auto_trader_safety.py \
+            tests/test_pnl_math.py \
             tests/test_long3_watcher.py
       - name: Smoke-test weekly forward report
         run: python weekly_report.py

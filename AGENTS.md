@@ -193,6 +193,7 @@ Before every substantial research run, explicitly check the failure classes that
 - look-ahead/future-confirmation leakage and signal/entry timestamp mistakes;
 - omitted entry bar, TP/SL same-bar ambiguity, and incorrect holding-horizon units;
 - accidental reuse of pre-fix/QUARANTINED metrics;
+- direction-specific PnL formulas that do not match the instrument type (for USDT-margined linear futures, short return is `(entry - exit) / entry`, not an inverse-contract ratio);
 - timeout risk from unnecessarily monolithic jobs; shard/chunk large work when appropriate;
 - research workflows accidentally sharing live watcher concurrency/state or modifying protected forward-state files.
 

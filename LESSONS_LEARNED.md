@@ -30,6 +30,7 @@ Read it with AGENTS.md and RESEARCH_RULES.md before extending prior work.
 | LL-008 | Workflow success can hide wrong/empty outputs | inspect output contents, nonzero universe/rows and artifacts | final verification job produces VERIFIED artifact only after all checks | GUARDED |
 | LL-009 | Same failed repair can be repeated without new information | compare failure signature and attempted diff/evidence | require new evidence for each retry; bounded transient retries | DOCUMENTED |
 | LL-010 | Temporary Actions artifacts can expire and silently remove canonical research data | inspect expiry and canonical asset inventory/checksums | preserve reusable datasets in versioned long-lived storage with SHA256 | DOCUMENTED |
+| LL-011 | Short PnL can be overstated when inverse-style return math is used on USDT-margined linear futures | compare known symmetric long/short price moves and recompute stored entry/exit pairs | use one tested linear-return helper for live, shadow, SMC, and reports; recompute legacy stats from prices | REGRESSION-TESTED |
 
 ## Promotion rule
 

@@ -12,6 +12,8 @@ from pathlib import Path
 
 import requests
 
+from pnl_math import linear_return_pct
+
 SIGNALS = Path("signals/pending.jsonl")
 STATE = Path("state/trading_state.json")
 LOG = Path("logs/executions.jsonl")
@@ -179,13 +181,19 @@ def main() -> int:
     signal_shadow_by_strategy = defaultdict(list)
     for item in signal_shadow_closed:
         signal_shadow_exit_counts[str(item.get("shadow_close_reason") or "UNKNOWN")] += 1
-        if item.get("shadow_return_pct") is not None:
+        value = linear_return_pct(
+            item.get("shadow_entry_price"),
+            item.get("shadow_exit_price"),
+            item.get("side") or "LONG",
+        )
+        if value is None and item.get("shadow_return_pct") is not None:
             try:
                 value = float(item["shadow_return_pct"])
-                signal_shadow_returns.append(value)
-                signal_shadow_by_strategy[str(item.get("strategy"))].append(value)
             except Exception:
-                pass
+                value = None
+        if value is not None:
+            signal_shadow_returns.append(value)
+            signal_shadow_by_strategy[str(item.get("strategy"))].append(value)
 
     spread_shadow_returns = []
     spread_shadow_exit_counts = Counter()
