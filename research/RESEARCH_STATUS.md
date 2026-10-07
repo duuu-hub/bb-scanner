@@ -1,3 +1,17 @@
+# Latest verified state — 2026-10-07T08:12:14.978Z
+
+V26 [actual run 37590305587](https://github.com/duuu-hub/bb-scanner/actions/runs/37590305587) is **COMPLETED / SUCCESS**, including all 22 jobs and the final checkpoint. No later workflow has been launched. Registered tests: **593 passed**. All **64 real historical account scenarios** and their cash/calendar/source/hash audits passed. This is diagnostic completion, **not strategy qualification**; zero qualified candidates and the original V25 strict rejection remain.
+
+The first execution's market adapter error, original 10,310 GATE outcomes and failure logs are retained. The retry reused those exact signal outputs and changed neither signal thresholds nor financial risk assumptions. Full 856-file market checks and 336-symbol marking data passed.
+
+At 40bp cost with the fixed guarded account, the largest 2024 GATE return is +8.5544%, MDD 6.2088%, daily mean +0.02357%. Calendar target attainment: +0.7% on 24/367 dates (6.5395%), +1% on 13 dates, +2% on 3 dates. GATE reporting includes its partial 2025-01-01 KST boundary; pure KST 2024 return is +8.2713%. That policy lost -10.6706% in KST 2023. **All eight GATE policies have negative remaining P&L after arithmetic deletion of their best five positive entry dates.** This is a concentration diagnosis, not a new optimized backtest. The original V25 best raw-statistic policy lost -0.5769% in the GATE account.
+
+Audit/report commit: `51560210b26816428983578fc2bf3803fbe05ef7` on `research-daily-breakdown-account-v26`. [Readable actual account report](https://github.com/duuu-hub/bb-scanner/blob/research-daily-breakdown-account-v26/research/daily-breakdown-account-v26/ACTUAL_ACCOUNT_RESULTS.md). Durable original evidence: `research-daily-breakdown-account-v26-evidence-37590305587`, tree `a3314cd2009f4d2d15cce14aced810f3b5395c89`, 383 payload files / 69,980,678 bytes plus manifest. All payload presence/sizes and all 192 trade/daily/curve hashes reconcile.
+
+Next research must preregister <=24h holdings and 1/2 KST-day entries, then fixed cost/delay stress, event concentration and per-year calendar account gates. Verify whether a new history window was previously observed before calling it an independent holdout. This next implementation is **pending**, not running. Do not repeat V26, relax V25 gates, increase risk to reach the target, modify main/live, or claim guaranteed daily account gains.
+
+Earlier entries below are historical observations and are superseded by this verified state for the current run.
+
 ## 2026-10-04 — V21 evidence recovered; V22 implemented and launched
 
 - V21 evidence-only recovery [37140997407](https://github.com/duuu-hub/bb-scanner/actions/runs/37140997407) completed successfully without rerunning market research.
