@@ -1,0 +1,56 @@
+{
+  "experiment_id": "S2_CURRENT_RULE_5Y_V1",
+  "classification": "EXPLORATORY_PROVISIONAL_CROSS_EXCHANGE",
+  "hypothesis": "Current SHORT3 S2 (15M lag near upper BB) has a persistent historical short edge beyond the recent forward-shadow regime.",
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "source_strategy": {
+    "reference": "main/scanner.py S2_15M_LAG_NEAR1 semantics",
+    "direction": "SHORT",
+    "decision_grid": "exact 15m UTC boundaries",
+    "signal": "exactly 6/7 current multi-timeframe BB(20,2) upper-band breaks; 15M is the only missing timeframe; 15M distance to upper BB >= -1%; fresh false->true transition only",
+    "timeframes": ["1W","1D","12H","4H","1H","30M","15M"],
+    "bb": {"period":20,"std":2.0,"state":"previous 19 completed TF closes + current 15m-boundary price"},
+    "tp_pct": 10.0,
+    "sl_pct": 4.0,
+    "max_hold_minutes": 240
+  },
+  "historical_data": {
+    "exchange": "Binance",
+    "market": "USD-M USDT perpetual",
+    "timeframe": "15m",
+    "raw_source_run": 36095439671,
+    "raw_shards": 8,
+    "note": "Current forward scanner is Bitget; historical 5y evidence is cross-exchange and must not be called clean confirmation."
+  },
+  "execution": {
+    "entry_delays_min": [0,1,2],
+    "delay0": "exact 15m boundary open",
+    "delay1_2": "official Binance 1m open at boundary + delay",
+    "same_symbol_overlap": "blocked until prior trade exit",
+    "intrabar": "official Binance 1m for entry-parent touches and all ambiguous parent-bar TP/SL collisions; same 1m ambiguity => SL/loss",
+    "time_exit": "first executable price at declared deadline",
+    "cost_roundtrip_bp": [20,40],
+    "funding": "excluded"
+  },
+  "split": {
+    "TRAIN": "signal >=2021-01-01 and exit <2025-01-01 UTC",
+    "VALIDATION_SEEN": "signal >=2025-01-01 UTC",
+    "note": "2025-2026 has already been inspected elsewhere and is not pristine OOS."
+  },
+  "portfolio_report": {
+    "position_size_pct_equity": 30,
+    "max_open_positions": 6,
+    "max_gross_exposure_pct": 200,
+    "same_symbol_additional_entry": false
+  },
+  "selection": "None. Fixed current S2 only; no parameter search.",
+  "required_outputs": [
+    "raw signal N, resolved trade N, exclusions",
+    "0/+1/+2m by TRAIN/VALIDATION_SEEN at 20/40bp",
+    "yearly stability",
+    "symbol concentration",
+    "30%-position cap6 exposure200 portfolio return/MDD",
+    "recent historical windows where available"
+  ]
+}
