@@ -656,3 +656,7 @@ V25 rejection remains frozen. V26 plan fe223bc5fe375097cb342c6d85cd6b42222d15d5 
 ## V26 actual dispatch — 2026-10-07T07:40:34Z
 
 [Run 37588740960](https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960) observed in_progress; implementation `64cef63f752b894b49703e622c3bcbe57c177dbb`, actual run head `2c8146a81ef89b2ca02dc6813e17258fa5ded371`, preregistration `fe223bc5fe375097cb342c6d85cd6b42222d15d5`, execution addendum `1633581b4f68f3367e18c2623b152582e5b9a9b8`. Local 589/589 tests pass, canonical chronology pass, complete synthetic 8→16→64 account pipeline and checkpoint identity guards pass. A documented shared-account cost bug now applies the original 10bp slip to SPLIT_END as required; no V26 outcome selected or read before that addendum. V25 remains rejected. No completed real V26 account result, independent holdout claim or profitability/daily-target promise.
+
+## V26 actual stage checkpoint — 2026-10-07T07:46:06.412039+00:00
+
+Run [37588740960](https://github.com/duuu-hub/bb-scanner/actions/runs/37588740960): V26_FAILED_OR_PARTIAL_AUDIT_PENDING. Final checkpoint still completing; inspect final status and original account/cluster outputs. V25 remains rejected, V26 diagnostic only; no daily-target claim.
