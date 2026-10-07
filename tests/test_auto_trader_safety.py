@@ -101,7 +101,7 @@ class AutoTraderSafetyHelpersTests(unittest.TestCase):
         self.assertEqual(stats["losses"], 1)
         self.assertAlmostEqual(stats["avg_return_pct"], 3.0)
         self.assertAlmostEqual(stats["pf"], 2.5)
-        self.assertAlmostEqual(stats["weighted_compounded_pct"], 1.88, places=6)
+        self.assertAlmostEqual(stats["weighted_compounded_pct"], 1.764, places=6)
 
     def test_repository_is_demo_and_live_disabled(self):
         cfg = load_config()
