@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T01:47:00Z",
+  "updated_at": "2026-10-07T01:57:24Z",
   "interactive_lease": null,
   "current_branch": "research-daily-channel-breakout-v25",
-  "current_run": null,
+  "current_run": 37559595896,
   "current_workflow": ".github/workflows/daily-channel-breakout-v25.yml",
   "current_plan": "research/daily-channel-breakout-v25/PLAN.md",
-  "latest_research_checkpoint": "V24_REJECTED_V25_PREREGISTERED_IMPLEMENTING",
+  "latest_research_checkpoint": "V25_QUEUED_VALIDATION",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -656,8 +656,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Implement frozen V25 prior-only complete UTC daily channel breakout; pass full regression, canonical chronology and synthetic eight-shard pipeline; then launch exactly one run. V24 is completed and retired.",
-  "phase": "V25_IMPLEMENTING_NOT_DISPATCHED",
+  "next_action": "Observe actual Actions validation and eight DEV shards for run 37559595896; do not duplicate. Audit original 96-cell ledgers after stages finish. Final checkpoint records RESULT_READY_FOR_AUDIT or failure.",
+  "phase": "V25_QUEUED_VALIDATION",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -675,7 +675,7 @@
     "scope": "research-breadth-expansion-continuation-v15 implementation, tests, and one actual run"
   },
   "plan_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5",
-  "code_commit": null,
+  "code_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
   "current_result_locations": {
     "v15_development": "research-breadth-expansion-continuation-v15-dev-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/development",
     "v15_evidence": "research-breadth-expansion-continuation-v15-evidence-37025951533:research/breadth-expansion-continuation-v15/run-37025951533/complete-evidence",
@@ -805,10 +805,22 @@
   },
   "current_execution": {
     "version": "V25",
+    "run_id": 37559595896,
     "branch": "research-daily-channel-breakout-v25",
-    "state": "NOT_DISPATCHED",
-    "run_id": null,
-    "prereg_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5"
+    "code_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
+    "run_head_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
+    "plan_commit": "40361cafa861a86e7b0e2be9b47df362e1b842b5",
+    "state": "ACTUAL_RUN_QUEUED",
+    "workflow_status": "queued",
+    "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
+    "observed_at": "2026-10-07T01:57:24Z",
+    "local_regression": {
+      "tests": 573,
+      "failures": 0,
+      "errors": 0
+    },
+    "profitability_audited": false,
+    "account_daily_target_claim": false
   },
   "v8_attempt_failures": [
     {
@@ -1983,7 +1995,7 @@
       "No V12 market rerun, account growth claim or daily target claim."
     ]
   },
-  "current_run_url": null,
+  "current_run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
   "completed_v13_validation": {
     "observed_at": "2026-10-02T10:03:30Z",
     "run": 36992677948,
@@ -3857,7 +3869,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V25_IMPLEMENTING_NOT_DISPATCHED",
+    "phase": "V25_QUEUED_VALIDATION",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -4009,10 +4021,19 @@
     },
     "v25": {
       "branch": "research-daily-channel-breakout-v25",
-      "status": "PREREGISTERED_IMPLEMENTING",
+      "status": "ACTUAL_RUN_QUEUED",
       "cells": 96,
       "market_outcomes": 0,
-      "daily_target_claim": false
+      "daily_target_claim": false,
+      "run_id": 37559595896,
+      "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37559595896",
+      "code_commit": "68712bb25d53eee08ac802984d4f544d5a11dc95",
+      "trigger_commit": "4869af65facf606a8cb17979c0966c729e8cbfd9",
+      "local_tests": 573,
+      "local_test_failures": 0,
+      "local_test_errors": 0,
+      "economic_result_available": false,
+      "completion_checkpoint": "scripts/research_run_checkpoint.py guards current branch/run identity and writes audit pending from actual stage statuses"
     }
   },
   "completed_v16_validation": {
