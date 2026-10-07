@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T07:43:46Z",
+  "updated_at": "2026-10-07T07:46:06.412039+00:00",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-account-v26",
   "current_run": 37588740960,
   "current_workflow": ".github/workflows/daily-breakdown-account-v26.yml",
   "current_plan": "research/daily-breakdown-account-v26/PLAN.md",
-  "latest_research_checkpoint": "V26_ACTUAL_589_TESTS_AND_ORIGINAL_DEV_HASH_PASS",
+  "latest_research_checkpoint": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -979,8 +979,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Observe actual run 37588740960 validation, original DEV integrity, eight GATE scans, market hash validation, eight account probes and all 64 scenario audits. V25 rejection retained; final checkpoint records audit pending.",
-  "phase": "V26_RUNNING_HISTORICAL_GATE_SCANS",
+  "next_action": "Fetch actual terminal status and all 64 scenario/cluster/arithmetic outputs of 37588740960. V25 rejection remains; V26 is exploratory only.",
+  "phase": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -1139,40 +1139,12 @@
   },
   "current_execution": {
     "version": "V26",
-    "branch": "research-daily-breakdown-account-v26",
     "run_id": 37588740960,
-    "state": "V26_RUNNING_HISTORICAL_GATE_SCANS",
-    "workflow_status": "in_progress",
-    "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
-    "implementation_commit": "64cef63f752b894b49703e622c3bcbe57c177dbb",
-    "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
-    "execution_addendum_commit": "1633581b4f68f3367e18c2623b152582e5b9a9b8",
-    "observed_at": "2026-10-07T07:43:46Z",
-    "local_validation": {
-      "tests": 589,
-      "failures": 0,
-      "errors": 0,
-      "canonical_chronology": "PASS",
-      "synthetic64account_scenarios": "PASS"
-    },
-    "diagnostic_only": true,
-    "v25_rejection_retained": true,
-    "profitability_audited": false,
-    "account_daily_target_claim": false,
-    "server_validation": {
-      "tests": 589,
-      "failures": 0,
-      "errors": 0,
-      "canonical_chronology": "PASS",
-      "synthetic64pipeline": "PASS",
-      "checkpoint_identity": "PASS"
-    },
-    "original_dev_integrity": {
-      "status": "PASS",
-      "rows": 327848,
-      "shards": 8,
-      "original_run": 37559595896
-    },
+    "branch": "research-daily-breakdown-account-v26",
+    "code_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
+    "state": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
+    "workflow_status": "FINAL_CHECKPOINT_JOB_IN_PROGRESS",
+    "observed_at": "2026-10-07T07:46:06.412039+00:00",
     "stage_jobs": [
       {
         "id": 112684890106,
@@ -1237,10 +1209,32 @@
       {
         "id": 112686072173,
         "name": "prepare_market",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 112686691672,
+        "name": "preserve_cycle",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112686691938,
+        "name": "accounts",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 112686692918,
+        "name": "collect",
+        "status": "completed",
+        "conclusion": "skipped"
       }
-    ]
+    ],
+    "diagnostic_only": true,
+    "v25_rejection_retained": true,
+    "profitability_audited": false,
+    "account_daily_target_claim": false
   },
   "v8_attempt_failures": [
     {
@@ -4289,7 +4283,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V26_RUNNING_HISTORICAL_GATE_SCANS",
+    "phase": "V26_FAILED_OR_PARTIAL_AUDIT_PENDING",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
