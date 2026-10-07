@@ -9,6 +9,7 @@ from smc_demo_forward import (
     fetch_closed_1h,
     manage_pending_orders,
     order_size,
+    resolve_exchange_close,
     setup_age_hours,
     setup_expired_by_clock,
 )
@@ -165,6 +166,37 @@ def test_fetch_closed_1h_requires_latest_completed_hour():
     with patch("smc_demo_forward.now_ms", return_value=boundary + 20 * 60 * 1000):
         with pytest.raises(RuntimeError, match="STALE_1H_DATA"):
             fetch_closed_1h(stale_client, "ETHUSDT", 180)
+
+
+def test_resolve_exchange_close_uses_linear_short_return():
+    opened = 1_000_000
+    trade = {
+        "symbol": "ETHUSDT",
+        "side": "short",
+        "entry_avg_price": "100",
+        "opened_at_ms": opened,
+    }
+
+    class FakeClient:
+        def private_get(self, path, params):
+            assert path == "/api/v2/mix/order/orders-history"
+            return {
+                "entrustedList": [
+                    {
+                        "tradeSide": "close",
+                        "status": "filled",
+                        "uTime": opened + 60_000,
+                        "orderSource": "profit_market",
+                        "priceAvg": "90",
+                        "orderId": "close-1",
+                    }
+                ]
+            }
+
+    result = resolve_exchange_close(FakeClient(), trade, opened + 120_000)
+    assert result["reason"] == "TAKE_PROFIT"
+    assert result["return_pct"] == pytest.approx(10.0)
+    assert result["exit_avg_price"] == "90"
 
 
 def test_pending_order_is_cancelled_by_wall_clock_expiry():
