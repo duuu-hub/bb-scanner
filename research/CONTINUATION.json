@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-07T07:40:34Z",
+  "updated_at": "2026-10-07T07:43:46Z",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-account-v26",
   "current_run": 37588740960,
   "current_workflow": ".github/workflows/daily-breakdown-account-v26.yml",
   "current_plan": "research/daily-breakdown-account-v26/PLAN.md",
-  "latest_research_checkpoint": "V26_ACTUAL_RUN_REGISTERED_AFTER_589_PASS",
+  "latest_research_checkpoint": "V26_ACTUAL_589_TESTS_AND_ORIGINAL_DEV_HASH_PASS",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -967,7 +967,9 @@
     "v26_account_scenarios_planned": 64,
     "v26_actual_market_runs": 1,
     "v26_execution_attempts": 1,
-    "v26_local_tests_passed": 589
+    "v26_local_tests_passed": 589,
+    "v26_server_tests_passed": 589,
+    "v26_original_dev_rows_verified": 327848
   },
   "goal": {
     "max_hold_days": 7,
@@ -978,7 +980,7 @@
     "profit_cap": false
   },
   "next_action": "Observe actual run 37588740960 validation, original DEV integrity, eight GATE scans, market hash validation, eight account probes and all 64 scenario audits. V25 rejection retained; final checkpoint records audit pending.",
-  "phase": "V26_QUEUED_VALIDATION",
+  "phase": "V26_RUNNING_HISTORICAL_GATE_SCANS",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -1139,13 +1141,13 @@
     "version": "V26",
     "branch": "research-daily-breakdown-account-v26",
     "run_id": 37588740960,
-    "state": "ACTUAL_RUN_REGISTERED",
+    "state": "V26_RUNNING_HISTORICAL_GATE_SCANS",
     "workflow_status": "in_progress",
     "run_head_commit": "2c8146a81ef89b2ca02dc6813e17258fa5ded371",
     "implementation_commit": "64cef63f752b894b49703e622c3bcbe57c177dbb",
     "plan_commit": "fe223bc5fe375097cb342c6d85cd6b42222d15d5",
     "execution_addendum_commit": "1633581b4f68f3367e18c2623b152582e5b9a9b8",
-    "observed_at": "2026-10-07T07:40:34Z",
+    "observed_at": "2026-10-07T07:43:46Z",
     "local_validation": {
       "tests": 589,
       "failures": 0,
@@ -1156,7 +1158,89 @@
     "diagnostic_only": true,
     "v25_rejection_retained": true,
     "profitability_audited": false,
-    "account_daily_target_claim": false
+    "account_daily_target_claim": false,
+    "server_validation": {
+      "tests": 589,
+      "failures": 0,
+      "errors": 0,
+      "canonical_chronology": "PASS",
+      "synthetic64pipeline": "PASS",
+      "checkpoint_identity": "PASS"
+    },
+    "original_dev_integrity": {
+      "status": "PASS",
+      "rows": 327848,
+      "shards": 8,
+      "original_run": 37559595896
+    },
+    "stage_jobs": [
+      {
+        "id": 112684890106,
+        "name": "validate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685395291,
+        "name": "prepare_dev",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534917,
+        "name": "gate_scan (4)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534926,
+        "name": "gate_scan (5)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534939,
+        "name": "gate_scan (3)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534952,
+        "name": "gate_scan (1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534967,
+        "name": "gate_scan (7)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534978,
+        "name": "gate_scan (2)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685534979,
+        "name": "gate_scan (0)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112685535033,
+        "name": "gate_scan (6)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 112686072173,
+        "name": "prepare_market",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ]
   },
   "v8_attempt_failures": [
     {
@@ -4205,7 +4289,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V26_QUEUED_VALIDATION",
+    "phase": "V26_RUNNING_HISTORICAL_GATE_SCANS",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -4365,7 +4449,7 @@
       "audit_commit": "94f45e5779a66f5b6e200df63235fb4cb83000ca"
     },
     "v26": {
-      "status": "ACTUAL_RUN_REGISTERED",
+      "status": "V26_RUNNING_HISTORICAL_GATE_SCANS",
       "policies": 8,
       "planned_account_scenarios": 64,
       "diagnostic_only": true,
