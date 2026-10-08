@@ -51,7 +51,7 @@ def period(entry,exit):
     return "EXCLUDED_CROSS"
 def empty():
     return {"n":0,"wins20":0,"wins40":0,"gross_sum":0.,"pos20":0.,"neg20":0.,
-        "pos40":0.,"neg40":0.,"mae_sum":0.,"mae_over5":0,"worst40":0.,"best40":0.}
+        "pos40":0.,"neg40":0.,"mae_sum":0.,"mae_over5":0,"worst40":1e100,"best40":-1e100}
 def record(d, key, vals, adverse):
     v=d[key];g=vals;net20=g-.2;net40=g-.4
     v["n"]+=len(g);v["wins20"]+=int(np.count_nonzero(net20>0));v["wins40"]+=int(np.count_nonzero(net40>0))
@@ -66,7 +66,7 @@ def research(a,fn,engine_sha):
     assert len(allfiles)>0
     selected=[f for j,f in enumerate(allfiles) if j%a.shards==a.shard]
     agg=defaultdict(empty)
-    skipped_gap=0;skipped_short=0;skipped_split=0;raw_candidates=0;valid_entries=0;symbols=set()
+    skipped_short=0;skipped_split=0;raw_candidates=0;valid_entries=0;symbols=set()
     for k,file in enumerate(selected,1):
         sym=fn["_symbol"](file);symbols.add(sym)
         if sym in STABLE:continue
@@ -114,10 +114,18 @@ def research(a,fn,engine_sha):
                         if mode!="FOLLOW":direction=-direction
                         for hold in HOLDS:
                             # Exactly one theoretical trade per PSAR trend at specified age.
-                            # This also prevents same-symbol overlap for a given config.
-                            jj=js[js+hold<n]
-                            if not len(jj):continue
-                            dirn=direction[:len(jj)] # valid because max-hold eligible prefilter
+                           
+                            # Enforce no overlapping positions for this
+                            # symbol/config across consecutive PSAR flips.
+                            keep=[];last_exit_i=-1
+                            for off,idx in enumerate(js):
+                                if idx>=last_exit_i and idx+hold<n:
+                                    keep.append(off);last_exit_i=int(idx)+hold
+                            if not keep:continue
+                            keep=np.asarray(keep,dtype=np.int64)
+                            jj=js[keep]
+                            dirn=direction[keep]
+                            selected_side=bb[keep]
                             entry=ro[jj]; ex=ro[jj+hold]
                             gross=100.0*dirn*(ex/entry-1.)
                             future_h=np.array([rh[i:i+hold].max() for i in jj])
@@ -130,7 +138,7 @@ def research(a,fn,engine_sha):
                                 mask=dates==split
                                 if not np.any(mask):continue
                                 for b in (True,False):
-                                    which=mask & (bb==b)
+                                    which=mask & (selected_side==b)
                                     if not np.any(which):continue
                                     base=f"{a.tf}|{mode}|{'BULL' if b else 'BEAR'}|A{age}|D{dmin:g}|H{hold}"
                                     record(agg,base+"|"+split,gross[which],adverse[which])
@@ -153,7 +161,7 @@ def research(a,fn,engine_sha):
         "entry":"Market/taker at current timeframe OPEN, not a limit",
         "exit":"Market/taker at OPEN of candle entry+H, no TP/SL and no intra-bar fills",
         "cost":"20bp and 40bp all-in round-trip from entry notional, funding excluded",
-        "no_overlap":"At most one candidate per completed PSAR trend per configuration; separate configurations are counterfactual and can overlap; no account-level sizing claimed",
+        "no_overlap":"No overlapping open-to-open trades within each symbol/config across PSAR flips. Different configurations and symbols can overlap; no account-level sizing claimed",
         "splits":"TRAIN up to 2024-12-31 UTC, 2025+ SEEN_VALIDATION; boundary crossed excluded",
         "caveat":"No stop protection; risk metrics MAE diagnostic only. Execution/portfolio verification needed before demo.",
         "aggregates":dict(agg)}
