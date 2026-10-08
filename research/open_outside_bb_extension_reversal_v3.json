@@ -1,0 +1,36 @@
+{
+  "experiment_id": "OPEN_OUTSIDE_BB_EXTENSION_REVERSAL_V3",
+  "classification": "EXPLORATORY_REFINEMENT",
+  "setup": "Fresh >=5 or >=6 upper-BB breaches at exact 15m OPEN; freeze breached band prices.",
+  "extension_pct": [
+    1,
+    2,
+    3
+  ],
+  "max_wait_bars": 4,
+  "reversal_triggers": {
+    "RED_AFTER_EXTENSION": "After extension threshold has occurred, first completed 15m candle with close < open.",
+    "BREAK_PREV_LOW_AFTER_EXTENSION": "After extension, first completed 15m close < previous 15m low.",
+    "FAIL_SETUP_OPEN": "After extension, first completed 15m close < original setup OPEN."
+  },
+  "entry": "Next 15m OPEN after reversal confirmation.",
+  "targets": [
+    "far2",
+    "far3"
+  ],
+  "target_consumption_guard": "Exclude target variant if frozen target touched before entry.",
+  "stops_pct": [
+    3,
+    4,
+    5
+  ],
+  "max_hold": [
+    "2h",
+    "4h"
+  ],
+  "costs_roundtrip_bp": [
+    20,
+    40
+  ],
+  "selection_rule": "Fast conservative screen first; only a family positive in both pre-2025 and 2025+ gets canonical 1m replay."
+}
