@@ -1,0 +1,71 @@
+name: Ranked BB Reversion Targets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/open_outside_bb_rank_scan.py'
+      - 'scripts/open_outside_bb_rank_merge.py'
+      - '.github/workflows/ranked-bb-reversion.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen raw shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+      - name: Scan ranked BB targets
+        run: |
+          rm -rf out
+          PYTHONPATH=scripts python scripts/open_outside_bb_rank_scan.py --raw raw --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ranked-bb-partial-${{ matrix.shard }}
+          path: out/rank_events.csv.gz
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ranked-bb-partial-*
+          path: partials
+      - run: |
+          rm -rf merged
+          python scripts/open_outside_bb_rank_merge.py --partials partials --out merged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ranked-bb-reversion-merged-${{ github.run_id }}
+          path: |
+            merged/rank_summary.csv
+            merged/summary.json
+          retention-days: 30
