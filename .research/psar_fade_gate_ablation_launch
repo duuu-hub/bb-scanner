@@ -1,0 +1,22 @@
+{
+  "experiment": "PSAR_FADE_HALT_ABLATION",
+  "status": "EXPLORATORY",
+  "source_trade_ledger_run": 37741872209,
+  "source_risk_scan_run": 37741302968,
+  "hypothesis": "The negative account results despite positive average independent trade expectancy are caused by concentrated tie-breaking/position cap and/or drawdown-streak-day halt feedback. Isolate each risk gate without any signal recalculation.",
+  "configs": [
+    "CAPS_ONLY",
+    "DAILY_ONLY",
+    "STREAK_ONLY",
+    "WEEK_DD_ONLY",
+    "DAILY_STREAK",
+    "FULL"
+  ],
+  "risk": [
+    0.0025,
+    0.005
+  ],
+  "cost": "40bp per trade roundtrip, funding excluded",
+  "split": "TRAIN 2021-2024 and SEEN 2025-2026",
+  "limitation": "Realized-only MDD, ex-post selection, no production claims; tie ordering alphabetical and concurrent slots still bias outcomes; posthoc analysis cannot be treated as unseen confirmation"
+}
