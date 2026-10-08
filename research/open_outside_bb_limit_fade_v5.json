@@ -1,0 +1,36 @@
+{
+  "experiment_id": "OPEN_OUTSIDE_BB_LIMIT_FADE_V5",
+  "classification": "EXPLORATORY_REFINEMENT",
+  "setup": "Fresh >=5 or >=6 upper-BB breaches at exact 15m OPEN; freeze breached upper-band prices.",
+  "entry": "Place conceptual SHORT limit above setup OPEN; valid for next 4x15m bars. First touch fills at exact limit price.",
+  "entry_extensions_pct": [
+    0.5,
+    1,
+    2,
+    3,
+    4
+  ],
+  "targets": [
+    "near1",
+    "near2",
+    "near3"
+  ],
+  "target_definition": "Frozen setup-time breached BB rank; near1 is closest/highest breached BB.",
+  "target_consumption_guard": "Exclude if target was touched before fill.",
+  "stops_from_fill_pct": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "max_hold_from_fill": [
+    "2h",
+    "4h"
+  ],
+  "costs_roundtrip_bp": [
+    20,
+    40
+  ],
+  "fast_screen": "Conservative 15m: any target/stop touch in fill bar => loss; same later bar both => loss.",
+  "promotion_rule": "Only if both pre-2025 and 2025+ are positive under fast screen, rerun exact 1m chronology."
+}
