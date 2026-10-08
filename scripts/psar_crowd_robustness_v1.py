@@ -49,7 +49,7 @@ def main():
           for slots in (2,4,8):
             for order in ORDERS:
               rec=stats_rank(d0,sp,risk,slots,policy,order)
-              rec.update(strategy=name,crowd_min=crowd,rank=order,
+              rec.update(strategy=name,crowd_min=crowd,rank=order,slot_cap=slots,
                 independent_market_events=event_count,years=sorted(d0.year.unique().tolist()))
               out["results"].append(rec)
         # Leave one full calendar year out: same fixed risk/max slots and alphabetical.
