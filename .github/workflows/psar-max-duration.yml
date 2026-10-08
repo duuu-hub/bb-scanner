@@ -1,0 +1,23 @@
+name: PSAR Max Trend Duration Audit
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_max_duration_20261008']
+permissions: {contents: read, actions: read}
+jobs:
+  max-duration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download completed 8 event shards
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir artifacts && gh run download 37726795614 -R ${{ github.repository }} -p 'psar-peak-age-*-?' -D artifacts
+      - run: python scripts/psar_max_duration.py --root artifacts --out psar-max-trend-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-max-trend-report
+          path: psar-max-trend-report.json
