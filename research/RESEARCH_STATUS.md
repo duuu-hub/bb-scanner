@@ -694,3 +694,7 @@ V27 was preregistered at 1400c093121dd1d56c3ec8c094812714978a0523 before impleme
 [Actual V27 run 37761086287](https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287) is in progress on research-daily-breakdown-intraday-v27 at trigger/code head fbf329c27f4bff0d7f99febbbd4a14768ce2024a. The full unchanged eight-key short family is compared at 24h maximum holding, 0/15m delay, UNLIMITED/1/2 accepted KST entries per day, DEV/GATE, 20/40bp and guarded/unguarded: exactly 384 scenarios. Waiting-stop cancellation is causal, SL stays anchored at the nominal entry, TP uses actual fill risk, and all parent ambiguities use official 1m chronology. DEV and GATE are previously observed historical periods, not fresh OOS.
 
 Each of eight scan partitions and sixteen account partitions must be preserved on its separate permanent research branch with original SHA256 manifests. Aggregate results, cycle logs and partition references are separate, with final branch/run identity checkpoint. Actual validation/result completion still must be checked. No profitability, daily-target achievement or qualified candidate claim; never duplicate this active run or alter main/live state.
+
+## V27 actual stage checkpoint — 2026-10-08T10:19:57.221838+00:00
+
+Run 37761086287: V27_384_ACCOUNT_RESULTS_READY_FOR_AUDIT. Inspect final terminal status and all 384 account outputs. V25 rejection retained, economic audit pending, no daily-target claim.
