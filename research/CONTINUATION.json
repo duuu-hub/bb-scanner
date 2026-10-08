@@ -1,12 +1,12 @@
 {
   "status": "ACTIVE_SEARCH",
-  "updated_at": "2026-10-08T10:05:52.827Z",
+  "updated_at": "2026-10-08T10:08:50.447Z",
   "interactive_lease": null,
   "current_branch": "research-daily-breakdown-intraday-v27",
   "current_run": 37761086287,
   "current_workflow": ".github/workflows/daily-breakdown-intraday-v27.yml",
   "current_plan": "research/daily-breakdown-intraday-v27/PLAN.md",
-  "latest_research_checkpoint": "V27_ACTUAL_RUN_VALIDATION_IN_PROGRESS",
+  "latest_research_checkpoint": "V27_VALIDATED_ACTUAL_SCANS_IN_PROGRESS",
   "previous_results": {
     "v1_run": 36853787624,
     "v2_scout_run": 36858492497,
@@ -1724,7 +1724,9 @@
       "trigger_commit": "fbf329c27f4bff0d7f99febbbd4a14768ce2024a",
       "run_id": 37761086287,
       "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287",
-      "status": "ACTUAL_RUN_IN_PROGRESS_NO_PROFITABILITY_AUDIT"
+      "status": "V27_VALIDATED_ACTUAL_SCANS_IN_PROGRESS",
+      "validation_job": 113257384179,
+      "actual_validation_tests": 616
     }
   },
   "trial_counts": {
@@ -1910,8 +1912,8 @@
     ],
     "profit_cap": false
   },
-  "next_action": "Run 37761086287 is active. Check actual validate, 8 scan, prepare_market, 16 account, collect, preserve_cycle and final checkpoint jobs. Audit every actual result and permanent partition before any next hypothesis. No V27 profitability conclusion yet.",
-  "phase": "V27_ACTUAL_RUN_VALIDATION_IN_PROGRESS",
+  "next_action": "V27 actual 616-test validation, chronology and 384-scenario synthetic pipeline passed; all eight scan jobs are running. Check real scan/account/collect/evidence/checkpoint completion; audit all 384 original scenarios and 24 permanent partitions. No new run before audit, no profitability conclusion yet.",
+  "phase": "V27_VALIDATED_ACTUAL_SCANS_IN_PROGRESS",
   "last_failure": {
     "version": "V22",
     "run": 37147529513,
@@ -2048,10 +2050,10 @@
   },
   "current_execution": {
     "version": "V27",
-    "state": "ACTUAL_WORKFLOW_IN_PROGRESS",
+    "state": "ACTUAL_SCANS_IN_PROGRESS",
     "branch": "research-daily-breakdown-intraday-v27",
     "plan_commit": "1400c093121dd1d56c3ec8c094812714978a0523",
-    "observed_at": "2026-10-08T10:05:52.827Z",
+    "observed_at": "2026-10-08T10:08:50.447Z",
     "market_outcomes": null,
     "account_scenarios": 384,
     "profitability_audited": false,
@@ -2069,7 +2071,11 @@
     "workflow_status": "in_progress",
     "workflow_conclusion": null,
     "attempt": 1,
-    "account_scenarios_completed": 0
+    "account_scenarios_completed": 0,
+    "validation_tests_actual": 616,
+    "actual_validation_job": 113257384179,
+    "synthetic_account_scenarios_audited_actual": 384,
+    "scan_jobs_in_progress": 8
   },
   "v8_attempt_failures": [
     {
@@ -5118,7 +5124,7 @@
     "daily_target_claim": false
   },
   "actual_state": {
-    "phase": "V27_ACTUAL_RUN_VALIDATION_IN_PROGRESS",
+    "phase": "V27_VALIDATED_ACTUAL_SCANS_IN_PROGRESS",
     "v14": {
       "run": 36998066185,
       "validation_tests": 377,
@@ -5316,7 +5322,7 @@
       "branch": "research-daily-breakdown-intraday-v27",
       "plan_commit": "1400c093121dd1d56c3ec8c094812714978a0523",
       "implementation_commit": "d33aa0f7c3dd36ccb68c36d8b1e7e630a9ea0d40",
-      "status": "V27_ACTUAL_RUN_VALIDATION_IN_PROGRESS",
+      "status": "V27_VALIDATED_ACTUAL_SCANS_IN_PROGRESS",
       "policies": 16,
       "entry_keys": 8,
       "planned_account_scenarios": 384,
@@ -5338,7 +5344,11 @@
       "v25_rejection_retained": true,
       "run_id": 37761086287,
       "run_url": "https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287",
-      "run_head_commit": "fbf329c27f4bff0d7f99febbbd4a14768ce2024a"
+      "run_head_commit": "fbf329c27f4bff0d7f99febbbd4a14768ce2024a",
+      "actual_validation_tests": 616,
+      "validation_job": 113257384179,
+      "actual_validation_passed": true,
+      "scan_jobs_in_progress": 8
     }
   },
   "completed_v16_validation": {
@@ -5371,5 +5381,27 @@
     "source": "Downloaded actual Actions validation artifact and read logs; not market profitability."
   },
   "active_workflow_run": 37761086287,
-  "next_workflow_dispatched": true
+  "next_workflow_dispatched": true,
+  "completed_v27_validation": {
+    "run_id": 37761086287,
+    "job_id": 113257384179,
+    "status": "completed",
+    "conclusion": "success",
+    "regression_tests": 616,
+    "failures": 0,
+    "errors": 0,
+    "canonical_chronology_smoke": true,
+    "checkpoint_identity_selftest": true,
+    "synthetic_384_scenarios": true,
+    "markers": [
+      "2026-10-08T10:06:16.1147252Z Ran 616 tests in 61.368s",
+      "2026-10-08T10:06:16.1147927Z V27_TEST_RESULT 616 0 0 True",
+      "2026-10-08T10:06:16.6647120Z ALL_CHRONOLOGY_SMOKE_PASS",
+      "2026-10-08T10:06:16.6648984Z ALL_CANONICAL_INVARIANTS_PASS",
+      "2026-10-08T10:06:16.7843629Z V27_CHECKPOINT_IDENTITY_AND_NO_PROMOTION_PASS",
+      "2026-10-08T10:06:32.9964214Z V27_384_SCENARIOS_HASH_AND_ARITHMETIC_PASS",
+      "synthetic-v27/smoke.json"
+    ],
+    "observed_at": "2026-10-08T10:08:14.635Z"
+  }
 }
