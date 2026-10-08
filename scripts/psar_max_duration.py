@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 
 RUN=37726795614
+STABLE={"USDCUSDT","FDUSDUSDT","TUSDUSDT","USDPUSDT","DAIUSDT","BUSDUSDT","USDEUSDT","PYUSDUSDT","EURCUSDT","USD1USDT","USDDUSDT","USDXUSDT"}
 SHARDS=4
 def stamp(ms, tz=timezone.utc):
     return datetime.fromtimestamp(int(ms)/1000,tz=tz).isoformat()
@@ -58,12 +59,21 @@ def main():
                 x=df[(df.side==side)&((df.split==split) if split!="ALL" else True)]
                 assert len(x)>0
                 rep[side+"_"+split]=summarize(x)
+                for side in ("BULL","BEAR"):
+            # Exploratory post-hoc sensitivity, not the primary result.
+            x=df[(df.side==side)&(~df.symbol.isin(STABLE))]
+            assert len(x)>0
+            rep[side+"_NON_STABLE_ALL"]=summarize(x)
         report["frames"][tf]=rep
         for side in ("BULL","BEAR"):
             x=rep[side+"_ALL"]
             print("RESULT",tf,side,"N",x["n"],"MAX",x["max_bars"],
                   "p99",x["p99"],"maxcase",x["top10"][0],flush=True)
     Path(args.out).write_text(json.dumps(report,ensure_ascii=False,indent=2))
+    for tf,fr in report["frames"].items():
+        for side in ("BULL","BEAR"):
+            v=fr[side+"_NON_STABLE_ALL"]
+            print("NON_STABLE_MAX",tf,side,"N",v["n"],"MAX",v["max_bars"],"P99",v["p99"],"case",v["top10"][0],flush=True)
     print("MAX_TRENDS_AUDIT_PASS 8/8 shards, no overlap, metadata and source checksum consistent")
 
 if __name__=="__main__":main()
