@@ -1,0 +1,56 @@
+name: PSAR Age Distance Conditional Study
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_age_distance_20261008']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_age_distance_extended.py --audit-only
+  study:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h,4h], shard: [0,1,2,3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Fetch 5Y Binance UM 15m frozen OHLC
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_age_distance_extended.py --tf ${{ matrix.tf }} --shard ${{ matrix.shard }} --shards 4 --data data --out psar-age-dist-${{ matrix.tf }}-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-age-dist-${{ matrix.tf }}-${{ matrix.shard }}
+          path: psar-age-dist-${{ matrix.tf }}-${{ matrix.shard }}.json
+  merge:
+    needs: study
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h,4h]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-age-dist-${{ matrix.tf }}-*
+          path: merged
+      - run: python scripts/psar_age_distance_extended.py --merge --tf ${{ matrix.tf }} --shards 4 --data merged --out psar-age-distance-summary-${{ matrix.tf }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-age-distance-summary-${{ matrix.tf }}
+          path: psar-age-distance-summary-${{ matrix.tf }}.json
