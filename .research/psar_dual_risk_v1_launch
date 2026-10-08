@@ -1,0 +1,60 @@
+{
+  "experiment_id": "PSAR_DUAL_RISK_CONTAINMENT_V1",
+  "classification": "EXPLORATORY after previous SIGNAL selections inspected; no fresh OOS",
+  "hypothesis": "Extreme PSAR fade LONG, fade SHORT and trend-follow SHORT can survive realistic stop-market risk containment and 20/40bp all-in costs",
+  "data": {
+    "market": "Binance USDT-M Futures",
+    "source": "frozen 5Y 15m OHLC",
+    "artifact_run": 36095439671,
+    "signal_source_run": 37729000696,
+    "universe": "non stable USDT pairs; point-in-time survivorship possible"
+  },
+  "strategy": "4H PSAR OPEN canonical, PSAR flip-to-flip trend age, PSAR distance / prior closed ATR(14), hard 15m stop-market, TP only NEXT 15m OPEN after closed prior 15m CLOSE condition. Optional 4H PSAR flip close OPEN. No simultaneous intrabar order touches.",
+  "candidates": [
+    "FL12_D3",
+    "FL08_D3",
+    "FL12_D3p5",
+    "TS04_D5",
+    "TS04_D4p5",
+    "FS08_D5",
+    "FS08_D4p5"
+  ],
+  "grid": {
+    "stop_percent": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "soft_take_profit_percent": [
+      0,
+      3,
+      6,
+      9
+    ],
+    "flip_exit": [
+      "TIME",
+      "FLIP"
+    ],
+    "holds_by_candidate": [
+      4,
+      8
+    ]
+  },
+  "risk_policy_initial": {
+    "risk_budget_per_new_trade_of_equity": 0.005,
+    "max_notional_fraction": 0.25,
+    "max_concurrent_positions": 4,
+    "max_gross_exposure_fraction": 1,
+    "no_reentry_same_symbol": true,
+    "daily_loss_halt_fraction": 0.015,
+    "equity_drawdown_halt_fraction": 0.05
+  },
+  "signal_timestamp": "open of 4H bar, no same-bar high low close; PSAR projected at that OPEN from prior bars; ATR from prior completed 4H bars",
+  "exits": "Intrabar 15m stop-market with gap-open worse-price fill; profit condition evaluated on completed 15m CLOSE then exited next 15m OPEN. PSAR flip at 4H OPEN (optional) or max duration 4/8 4H bars",
+  "cost": "20bp and 40bp total round-trip notional; fees/slippage stress all-in, funding excluded",
+  "split": "TRAIN 2021-2024, SEEN VALIDATION 2025-2026; cross-boundary excluded",
+  "selection": "Rank within TRAIN by 40bp net per-trade mean; require adequate N, inspect neighboring stops and spread. Seen validation only falsification. No portfolio simulation in this run.",
+  "audit": "Causal PSAR, gap vs stop, long/short stop touches, deferred profit close confirmation, flip and timed OPEN exits, costs, split, completeness",
+  "cap_note": "Stop order is not guaranteed cap in illiquid gaps and funding is excluded; no 1m ambiguity because profit has NO INTRABAR TP order. Still not deployable without portfolio sizing, 30 audits+10 clean reproductions, forward paper."
+}
