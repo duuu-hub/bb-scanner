@@ -684,3 +684,13 @@ Corrected full-global market verifier passes 593 regressions, including the repr
 ## V26 actual stage checkpoint — 2026-10-07T08:03:34.197477+00:00
 
 Run [37590305587](https://github.com/duuu-hub/bb-scanner/actions/runs/37590305587): V26_ACCOUNT_DIAGNOSTIC_READY_FOR_AUDIT. Final checkpoint still completing; inspect final status and original account/cluster outputs. V25 remains rejected, V26 diagnostic only; no daily-target claim.
+
+## V26 verified terminal audit and V27 preregistered dispatch — 2026-10-08T10:06:39.959Z
+
+V26 run 37590305587 finished success, all 593 regressions and 64 account arithmetic audits passed. Audit commit 51560210b26816428983578fc2bf3803fbe05ef7 records no qualified candidate. All eight 2024 guarded 40bp accounts have negative residual realized P&L after arithmetic removal of the five best positive entry dates, with no capital reallocation. V25 remains rejected.
+
+V27 was preregistered at 1400c093121dd1d56c3ec8c094812714978a0523 before implementation or V27 market outcomes. Implementation d33aa0f7c3dd36ccb68c36d8b1e7e630a9ea0d40 passed 616 local tests (23 new plus 593 prior), shared canonical chronology smoke, checkpoint identity tests and the complete 8-source/16-policy/384-account synthetic pipeline. The initial synthetic fixture error and original failed log were retained; only the synthetic source fixture was corrected.
+
+[Actual V27 run 37761086287](https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287) is in progress on research-daily-breakdown-intraday-v27 at trigger/code head fbf329c27f4bff0d7f99febbbd4a14768ce2024a. The full unchanged eight-key short family is compared at 24h maximum holding, 0/15m delay, UNLIMITED/1/2 accepted KST entries per day, DEV/GATE, 20/40bp and guarded/unguarded: exactly 384 scenarios. Waiting-stop cancellation is causal, SL stays anchored at the nominal entry, TP uses actual fill risk, and all parent ambiguities use official 1m chronology. DEV and GATE are previously observed historical periods, not fresh OOS.
+
+Each of eight scan partitions and sixteen account partitions must be preserved on its separate permanent research branch with original SHA256 manifests. Aggregate results, cycle logs and partition references are separate, with final branch/run identity checkpoint. Actual validation/result completion still must be checked. No profitability, daily-target achievement or qualified candidate claim; never duplicate this active run or alter main/live state.
