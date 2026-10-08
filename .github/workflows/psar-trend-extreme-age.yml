@@ -1,0 +1,58 @@
+name: PSAR Trend Extreme Age Study
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_trend_extreme_age_run']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_trend_extreme_age.py --audit-only
+  analyze:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h, 4h], shard: [0, 1, 2, 3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen 5Y UM data
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir -p data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_trend_extreme_age.py --data data --tf ${{ matrix.tf }} --shard ${{ matrix.shard }} --shards 4 --out psar-peak-age-${{ matrix.tf }}-${{ matrix.shard }}.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-peak-age-${{ matrix.tf }}-${{ matrix.shard }}
+          path: |
+            psar-peak-age-${{ matrix.tf }}-${{ matrix.shard }}.csv
+            psar-peak-age-${{ matrix.tf }}-${{ matrix.shard }}.csv.meta.json
+  merge:
+    needs: analyze
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h, 4h]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-peak-age-${{ matrix.tf }}-*
+          path: merged
+      - run: python scripts/psar_trend_extreme_age.py --merge --tf ${{ matrix.tf }} --shards 4 --data merged --out psar-peak-age-summary-${{ matrix.tf }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-peak-age-summary-${{ matrix.tf }}
+          path: psar-peak-age-summary-${{ matrix.tf }}.json
