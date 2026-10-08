@@ -1,0 +1,115 @@
+name: S2 Context And 7of7 Compare
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/s2_all7_variants_5y.py'
+      - 'scripts/s2_all7_variants_5y_merge.py'
+      - 'scripts/s2_context_partial.py'
+      - 'scripts/s2_context_merge.py'
+      - '.github/workflows/s2-context-7of7.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: s2-context-7of7
+  cancel-in-progress: false
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen raw shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw s2base
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+          gh run download 37694316709 -R ${{ github.repository }} \
+            -n s2-current-rule-5y-merged-37694316709 -D s2base
+      - name: 7-of-7 variant replay
+        run: |
+          rm -rf variants
+          PYTHONPATH=scripts python scripts/s2_all7_variants_5y.py --raw raw --out variants
+      - name: Historical context partial
+        run: |
+          rm -rf context
+          python scripts/s2_context_partial.py \
+            --trades s2base/s2_trades_all.csv.gz \
+            --raw raw --out context
+      - uses: actions/upload-artifact@v4
+        with:
+          name: s2-context-7of7-partial-${{ matrix.shard }}
+          path: |
+            variants/variant_trades.csv.gz
+            variants/variant_meta.json
+            context/context_partial.csv.gz
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: s2-context-7of7-partial-*
+          path: partials
+      - name: Download fixed S2 base
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p s2base
+          gh run download 37694316709 -R ${{ github.repository }} \
+            -n s2-current-rule-5y-merged-37694316709 -D s2base
+      - name: Read current main forward state
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          git show origin/main:state/trading_state.json > forward_state.json
+      - name: Merge variants
+        run: |
+          rm -rf variant_merged
+          PYTHONPATH=scripts python scripts/s2_all7_variants_5y_merge.py --partials partials --out variant_merged
+      - name: Merge context
+        run: |
+          rm -rf context_merged
+          python scripts/s2_context_merge.py \
+            --partials partials \
+            --trades s2base/s2_trades_all.csv.gz \
+            --forward-state forward_state.json \
+            --out context_merged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: s2-context-7of7-merged-${{ github.run_id }}
+          path: |
+            variant_merged/variant_trades_all.csv.gz
+            variant_merged/summary_table.csv
+            variant_merged/yearly.csv
+            variant_merged/summary.json
+            context_merged/historical_s2_with_context.csv.gz
+            context_merged/forward_s2_context.csv
+            context_merged/summary.json
+          retention-days: 30
