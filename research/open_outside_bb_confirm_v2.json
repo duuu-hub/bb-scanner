@@ -1,0 +1,45 @@
+{
+  "experiment_id": "OPEN_OUTSIDE_BB_CONFIRM_V2",
+  "classification": "EXPLORATORY_REFINEMENT",
+  "setup": {
+    "thresholds": [
+      5,
+      6
+    ],
+    "definition": "At exact 15m OPEN, fresh transition to >=N breached upper BBs across 7 TFs using BB(20,2). Freeze breached-band prices at setup."
+  },
+  "confirmations": {
+    "RED_CLOSE": "First completed 15m candle after setup with close < open.",
+    "BREAK_PREV_LOW": "First completed 15m candle after setup with close < previous 15m low.",
+    "REENTER_NEAREST": "First completed 15m candle after setup with close <= frozen nearest breached upper BB.",
+    "REENTER_AND_BREAK_LOW": "First completed 15m candle after setup satisfying REENTER_NEAREST and close < previous 15m low."
+  },
+  "confirmation_window_bars": [
+    1,
+    2,
+    4
+  ],
+  "entry": "Next 15m OPEN after confirmation; no same-bar clairvoyance.",
+  "targets": [
+    "far2",
+    "far3"
+  ],
+  "target_definition": "Frozen setup-time breached upper BB rank; far1=farthest, far2=second farthest, far3=third farthest.",
+  "stop_pct": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "max_hold": [
+    "1h",
+    "2h",
+    "4h"
+  ],
+  "costs_roundtrip_bp": [
+    20,
+    40
+  ],
+  "chronology": "Use official Binance 1m for TP/SL collision resolution on executable trade; same 1m both => loss.",
+  "selection_rule": "Use this pass to identify robust confirmation families. No live promotion from same scan."
+}
