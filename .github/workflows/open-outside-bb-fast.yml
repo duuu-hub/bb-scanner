@@ -1,0 +1,76 @@
+name: Open Outside BB Fast Screen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/open_outside_bb_first_touch_fast.py'
+      - '.github/workflows/open-outside-bb-fast.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: open-outside-bb-fast
+  cancel-in-progress: false
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen raw shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+      - run: |
+          rm -rf out
+          PYTHONPATH=scripts python scripts/open_outside_bb_first_touch_fast.py --raw raw --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openbb-fast-partial-${{ matrix.shard }}
+          path: out/trades.csv.gz
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: openbb-fast-partial-*
+          path: partials
+      - run: |
+          mkdir -p metas
+          for d in partials/*; do echo '{"signals":{},"excluded":{}}' > "$d/meta.json"; done
+          rm -rf merged
+          python scripts/open_outside_bb_first_touch_merge.py --partials partials --out merged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openbb-fast-merged-${{ github.run_id }}
+          path: |
+            merged/summary_table.csv
+            merged/candidate_ranking.csv
+            merged/summary.json
+          retention-days: 30
