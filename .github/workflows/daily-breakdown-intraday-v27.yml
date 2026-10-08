@@ -1,0 +1,409 @@
+name: Daily Breakdown V27 Intraday Capacity and Latency
+'on':
+  push:
+    branches:
+    - research-daily-breakdown-intraday-v27
+    paths:
+    - .research/daily-breakdown-intraday-v27-run
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: daily-breakdown-intraday-v27-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Frozen input, causal execution, quota and full regression validation
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python -m py_compile scripts/daily_breakdown_intraday_v27.py scripts/research_intraday_checkpoint_v27.py
+        python scripts/validate_daily_breakdown_intraday_v27.py 2>&1 | tee v27-tests.log
+        python scripts/psar_chronology_smoke.py 2>&1 | tee chronology-smoke.log
+        python scripts/research_intraday_checkpoint_v27.py --self-test 2>&1 | tee checkpoint-selftest.log
+        python scripts/smoke_daily_breakdown_intraday_v27.py synthetic-v27 2>&1 | tee account-pipeline-smoke.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-validation
+        path: |-
+          v27-tests.log
+          chronology-smoke.log
+          checkpoint-selftest.log
+          account-pipeline-smoke.log
+          synthetic-v27/smoke.json
+          research/daily-breakdown-intraday-v27/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/cache@v4
+      id: source-cache
+      with:
+        path: data
+        key: frozen-source-36095439671-15m-shard-${{ matrix.shard }}
+    - name: Fetch and verify immutable source shard and BTC
+      shell: bash
+      run: |-
+        set -euo pipefail
+        if [ '${{ steps.source-cache.outputs.cache-hit }}' != 'true' ]; then
+         gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }} -D data
+        fi
+        gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+        gh run download 36095439671 -R ${{ github.repository }} -n rank5-binance-um-15m-5y-manifest-shard-${{ matrix.shard }} -D source-manifest
+        python scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json
+    - uses: actions/cache@v4
+      with:
+        path: cache/verified-1m
+        key: daily-breakdown-intraday-v27-1m-shard-${{ matrix.shard }}
+        restore-keys: |-
+          daily-channel-breakout-v25-dev-1m-shard-${{ matrix.shard }}
+          taker-absorption-release-v12-dev-1m-shard-${{ matrix.shard }}
+    - name: Canonical DEV and historical GATE scans without selection filtering
+      shell: bash
+      run: |-
+        set -euo pipefail
+        for stage in DEV GATE; do
+         python scripts/daily_breakdown_intraday_v27.py scan --stage "$stage" --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out scan-${{ matrix.shard }}/"$stage" --cache cache/verified-1m
+        done
+    - name: Preserve original partition on a separate research branch
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python scripts/research_evidence_archive.py archive --source scan-${{ matrix.shard }} --kind V27-scan-shard-${{ matrix.shard }} --out research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/scan-shard-${{ matrix.shard }}
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-intraday-v27-scan-shard-${{ matrix.shard }}-${{ github.run_id }}"
+        git add "research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/scan-shard-${{ matrix.shard }}"
+        git commit -m "Preserve V27 original scan-shard-${{ matrix.shard }} partition for run ${{ github.run_id }}"
+        git push origin HEAD
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-scan-${{ matrix.shard }}
+        path: scan-${{ matrix.shard }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: validate
+    permissions:
+      contents: write
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+  prepare_market:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-intraday-v27-scan-*
+        path: parts
+    - name: Verify all sixteen scans and full original source for account marks
+      shell: bash
+      run: |-
+        set -euo pipefail
+        gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D market
+        gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-manifest-shard-*' -D manifests
+        gh run download 36858492497 -R ${{ github.repository }} -n day-edge-v2-btc -D btc
+        python scripts/research_evidence_archive.py verify-source --data market --manifests manifests --expected-shards 8 --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json
+        python scripts/daily_breakdown_intraday_v27.py prepare-market --data market --btc btc/BTCUSDT.csv.gz --source-check source-check.json --parts parts --out account-market
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-market
+        path: account-market/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-market-manifest
+        path: |-
+          account-market/market_manifest.json
+          source-check.json
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: scan
+  accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-intraday-v27-scan-*
+        path: parts
+    - uses: actions/download-artifact@v4
+      with:
+        name: daily-breakdown-intraday-v27-market
+        path: account-market
+    - name: Actual constrained account replays for all three caps and both costs
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python scripts/daily_breakdown_intraday_v27.py accounts --data account-market --parts parts --probe-index ${{ matrix.probe }} --out result-${{ matrix.probe }}
+    - name: Preserve original partition on a separate research branch
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python scripts/research_evidence_archive.py archive --source result-${{ matrix.probe }} --kind V27-account-probe-${{ matrix.probe }} --out research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/account-probe-${{ matrix.probe }}
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-intraday-v27-account-probe-${{ matrix.probe }}-${{ github.run_id }}"
+        git add "research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/account-probe-${{ matrix.probe }}"
+        git commit -m "Preserve V27 original account-probe-${{ matrix.probe }} partition for run ${{ github.run_id }}"
+        git push origin HEAD
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-results-${{ matrix.probe }}
+        path: result-${{ matrix.probe }}/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: prepare_market
+    permissions:
+      contents: write
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        probe:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: daily-breakdown-intraday-v27-results-*
+        path: results
+    - name: Verify every scenario and original detail hash before material screens
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python scripts/daily_breakdown_intraday_v27.py collect --parts results --out research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/accounts
+    - name: Preserve all actual summaries and failed conditions
+      shell: bash
+      run: |-
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-intraday-v27-results-${{ github.run_id }}"
+        git add "research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/accounts"
+        git commit -m "Preserve all 384 V27 account scenarios and frozen screens"
+        git push origin HEAD
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: daily-breakdown-intraday-v27-collected
+        path: research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/accounts/
+        retention-days: 30
+        compression-level: 0
+        if-no-files-found: warn
+    needs: accounts
+    permissions:
+      contents: write
+      actions: read
+  preserve_cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Preserve exact partition references, complete or partial originals and logs
+      shell: bash
+      run: |-
+        set -euo pipefail
+        mkdir -p cycle-evidence/job-logs
+        gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts?per_page=100 > cycle-evidence/artifacts.json
+        gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100 > cycle-evidence/actions-jobs.json
+        python - <<'PARTITIONS'
+        import base64,json,os,subprocess
+        from pathlib import Path
+        repo=os.environ['GITHUB_REPOSITORY'];run=os.environ['GITHUB_RUN_ID'];prefix='research-daily-breakdown-intraday-v27'
+        items=[]
+        for kind,n in [('scan-shard',8),('account-probe',16)]:
+         for i in range(n):
+          label=f'{kind}-{i}';branch=f'{prefix}-{label}-{run}'
+          path=f'research/daily-breakdown-intraday-v27/run-{run}/{label}/EVIDENCE_MANIFEST.json'
+          try:
+           head=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/branches/{branch}'],text=True))['commit']['sha']
+           entry=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/contents/{path}?ref={head}'],text=True))
+           original=json.loads(base64.b64decode(entry['content']))
+           items.append(dict(label=label,branch=branch,commit=head,manifest_path=path,original=original))
+          except subprocess.CalledProcessError:
+           artifact='daily-breakdown-intraday-v27-'+('scan-' if kind=='scan-shard' else 'results-')+str(i)
+           dest=Path('cycle-evidence/partial-originals')/label
+           fetch=subprocess.run(['gh','run','download',run,'-R',repo,'-n',artifact,'-D',str(dest)])
+           items.append(dict(label=label,branch=branch,status='PARTITION_MISSING',partial_artifact_saved=fetch.returncode==0))
+        Path('cycle-evidence/partition-index.json').write_text(json.dumps(items,indent=2)+'\n')
+        PARTITIONS
+        python - <<'NAMES' > artifact-names.txt
+        import json
+        for x in json.load(open('cycle-evidence/artifacts.json'))['artifacts']:
+         if x['name'] in ['daily-breakdown-intraday-v27-validation','daily-breakdown-intraday-v27-market-manifest','daily-breakdown-intraday-v27-collected']:print(x['name'])
+        NAMES
+        while read artifact_name; do
+         if ! gh run download ${{ github.run_id }} -R ${{ github.repository }} -n "$artifact_name" -D "cycle-evidence/$artifact_name"; then
+          echo "$artifact_name" >> cycle-evidence/artifact-download-failures.txt
+         fi
+        done < artifact-names.txt
+        python - <<'JOBS' > completed-jobs.txt
+        import json
+        for x in json.load(open('cycle-evidence/actions-jobs.json'))['jobs']:
+         if x['status']=='completed' and x['conclusion']!='skipped':print(x['id'])
+        JOBS
+        while read job_id; do
+         gh api --allow-escape-sequences repos/${{ github.repository }}/actions/jobs/$job_id/logs > cycle-evidence/job-logs/$job_id.log
+        done < completed-jobs.txt
+        cp research/daily-breakdown-intraday-v27/PLAN.md research/daily-breakdown-intraday-v27/REGISTRY.json research/daily-breakdown-intraday-v27/FROZEN_CONTEXT.json cycle-evidence/
+        cp research/daily-channel-breakout-v25/V25_ACTUAL_REJECTION.json cycle-evidence/
+        cp research/daily-breakdown-account-v26/V26_ACTUAL_ACCOUNT_AUDIT.json cycle-evidence/
+        python scripts/research_evidence_archive.py archive --source cycle-evidence --kind V27-complete-or-partial-partition-index --out research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/complete-evidence
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git checkout -b "research-daily-breakdown-intraday-v27-evidence-${{ github.run_id }}"
+        git add "research/daily-breakdown-intraday-v27/run-${{ github.run_id }}/complete-evidence"
+        git commit -m "Preserve V27 source, chronology, partition manifests, failures and actual logs"
+        git push origin HEAD
+    needs:
+    - validate
+    - scan
+    - prepare_market
+    - accounts
+    - collect
+    permissions:
+      contents: write
+      actions: read
+    if: always()
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install pinned research dependencies
+      shell: bash
+      run: |-
+        set -euo pipefail
+        pip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5
+    - name: Record actual stage state without economic promotion
+      shell: bash
+      run: |-
+        set -euo pipefail
+        python scripts/research_intraday_checkpoint_v27.py
+    needs:
+    - validate
+    - scan
+    - prepare_market
+    - accounts
+    - collect
+    - preserve_cycle
+    permissions:
+      contents: write
+      actions: read
+    if: always()

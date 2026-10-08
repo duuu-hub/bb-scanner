@@ -80,7 +80,11 @@ def stop_loss_fraction(tr, fee):
     return price_loss + fee * (1 + price_ratio) + FUND_PER_DAY * max_hold * BAR / DAY
 
 
-def simulate(ledger, market, start, end, cost_bps=20, guarded=True, all_kst_days=False):
+def simulate(ledger, market, start, end, cost_bps=20, guarded=True, all_kst_days=False,
+             max_entries_per_kst_day=None):
+    if max_entries_per_kst_day is not None and (type(max_entries_per_kst_day) is not int
+                                              or max_entries_per_kst_day < 1):
+        raise ValueError('daily entry cap must be a positive integer or None')
     if end <= start or (end - start) % BAR:
         raise ValueError('invalid account interval')
     fee = cost_bps / 20000
@@ -180,6 +184,9 @@ def simulate(ledger, market, start, end, cost_bps=20, guarded=True, all_kst_days
             for tr in entries.get(ts, []):
                 if halted or blocked:
                     rejections["halted" if halted else "day_blocked"] += 1
+                    continue
+                if max_entries_per_kst_day is not None and day_entries >= max_entries_per_kst_day:
+                    rejections["day_entry_cap"] += 1
                     continue
                 sym = tr["symbol"]
                 if sym in active:

@@ -1,0 +1,176 @@
+{
+  "status": "PREEXECUTION_VALIDATION_PASS_NO_V27_MARKET_OUTCOMES",
+  "plan_commit": "1400c093121dd1d56c3ec8c094812714978a0523",
+  "tests": {
+    "total": 616,
+    "new": 23,
+    "prior": 593,
+    "failures": 0,
+    "errors": 0
+  },
+  "synthetic_pipeline": {
+    "synthetic_only": true,
+    "scan_shards": 16,
+    "policies": 16,
+    "independent_rows": 256,
+    "actual_account_scenarios_audited": 384,
+    "holding_limit_minutes": 1440,
+    "economic_profitability_claim": false
+  },
+  "workflow": {
+    "jobs": 7,
+    "expanded_jobs": 29,
+    "shell_steps": [
+      {
+        "job": "validate",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "validate",
+        "step": "Frozen input, causal execution, quota and full regression validation",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "scan",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "scan",
+        "step": "Fetch and verify immutable source shard and BTC",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "scan",
+        "step": "Canonical DEV and historical GATE scans without selection filtering",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "scan",
+        "step": "Preserve original partition on a separate research branch",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "prepare_market",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "prepare_market",
+        "step": "Verify all sixteen scans and full original source for account marks",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "accounts",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "accounts",
+        "step": "Actual constrained account replays for all three caps and both costs",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "accounts",
+        "step": "Preserve original partition on a separate research branch",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "collect",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "collect",
+        "step": "Verify every scenario and original detail hash before material screens",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "collect",
+        "step": "Preserve all actual summaries and failed conditions",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "preserve_cycle",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "preserve_cycle",
+        "step": "Preserve exact partition references, complete or partial originals and logs",
+        "bash_syntax": true,
+        "python_heredocs": [
+          "PARTITIONS",
+          "NAMES",
+          "JOBS"
+        ]
+      },
+      {
+        "job": "checkpoint",
+        "step": "Install pinned research dependencies",
+        "bash_syntax": true,
+        "python_heredocs": []
+      },
+      {
+        "job": "checkpoint",
+        "step": "Record actual stage state without economic promotion",
+        "bash_syntax": true,
+        "python_heredocs": []
+      }
+    ],
+    "anchors": false,
+    "push_paths": [
+      ".research/daily-breakdown-intraday-v27-run"
+    ]
+  },
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "dependencies": {
+    "pandas": "2.3.3",
+    "numpy": "2.3.3",
+    "numba": "0.62.1",
+    "requests": "2.32.5",
+    "pyyaml": "6.0.3"
+  },
+  "sha256": {
+    "scripts/relative_pullback_portfolio.py": "902d4c9dcf558f211a3b7a51d866abe3cc5e88fe671a6aa78b9ec538fb54db6d",
+    "scripts/daily_breakdown_intraday_v27.py": "61f3e9ada551045c75332a6ef9d8efc7da1a21adb54f50c749cedb07b53950ab",
+    "scripts/research_intraday_checkpoint_v27.py": "3f163814c45d1e3ec527f13d1d13aeca5767abc14f40e1e97e4b1259fb7b44f2",
+    "scripts/smoke_daily_breakdown_intraday_v27.py": "36baf474d9a10fd6356851866b00d0324d67bb2ef563aa491ea1704948f2c343",
+    "scripts/validate_daily_breakdown_intraday_v27.py": "51a1fc1c03d9099154ca638ff24c23b036e57e4d3d3491dc2912e633f6a8d131",
+    "tests/test_daily_breakdown_intraday_v27.py": "76c8fa0992c5dbbfee0199ebcd3d34932bc57bae5ba3cf23745e5bf8f4c6587d",
+    ".github/workflows/daily-breakdown-intraday-v27.yml": "04f0bb0605e41b9b793f82ef6c095c03bfb95e29043fdebaf194f0d8759a6666",
+    "research/daily-breakdown-intraday-v27/PLAN.md": "faa096260f1d6aff9edf5e6dcaf17f3af8f8bdc0fb371b04d0b8ed0f9fbb2d71",
+    "research/daily-breakdown-intraday-v27/REGISTRY.json": "b03035bd82bb7ca30ddee04deb886b2e4096c7c9598e7048b6904d62472bc7bd",
+    "research/daily-breakdown-intraday-v27/FROZEN_CONTEXT.json": "1a5266b4f9f79d40bc20cf8d794685806561f6366000e0183bab6977aaa4872d"
+  },
+  "logs_sha256": {
+    "checkpoint.log": "e3192a95d10a12a905465cabc500d940cb22296a1331dc3b971c14d97494eb16",
+    "chronology.log": "9f039c624f5e00d47bd726a7c3ee2644ed5fcf151fb3d1cc569cba2f4915a78b",
+    "focused-23.log": "018d70287b15b8e3842dc564bcfc502b7de27d180424775b509c14a9d34736b6",
+    "initial-synthetic-fixture-failure.log": "3b776bf1ed861296b25bcfe132b26a1ff22c031f8e7a3a5ead67a6fbcd17c7dc",
+    "regression-616.log": "90b541eff8def66b815df1f43f1804af8b73030b95d6ea678d9f38f7328f6473",
+    "synthetic-384.log": "d7750899e169ed8abd3eda9c0c8c2edd149c8e50eb1cec92ffe7666b20ed2c29"
+  },
+  "initial_fixture_failure_preserved": "LOCAL_FIXTURE_FAILURE.md",
+  "frozen_rules_changed": false,
+  "v25_rejection_retained": true,
+  "qualified_candidates": 0,
+  "market_outcomes_observed": 0,
+  "profitability_audited": false
+}
