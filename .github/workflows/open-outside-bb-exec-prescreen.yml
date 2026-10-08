@@ -47,6 +47,10 @@ jobs:
     needs: shard
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
       - uses: actions/download-artifact@v4
         with:
           pattern: open-outside-bb-exec-partial-*
