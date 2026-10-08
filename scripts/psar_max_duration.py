@@ -59,7 +59,7 @@ def main():
                 x=df[(df.side==side)&((df.split==split) if split!="ALL" else True)]
                 assert len(x)>0
                 rep[side+"_"+split]=summarize(x)
-                for side in ("BULL","BEAR"):
+        for side in ("BULL","BEAR"):
             # Exploratory post-hoc sensitivity, not the primary result.
             x=df[(df.side==side)&(~df.symbol.isin(STABLE))]
             assert len(x)>0
