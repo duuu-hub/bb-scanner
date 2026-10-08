@@ -1,0 +1,31 @@
+{
+  "experiment_id": "OPEN_OUTSIDE_BB_BREAKEVEN_AFTER_NEAR1_V6",
+  "classification": "EXPLORATORY_REFINEMENT",
+  "setup": "Fresh >=5 or >=6 upper-BB breaches at exact 15m OPEN.",
+  "entry": "SHORT at setup OPEN.",
+  "initial_stops_pct": [
+    4,
+    5,
+    6,
+    8
+  ],
+  "management": "When frozen near1 breached upper BB is touched before initial stop, arm breakeven stop at entry price for remaining position.",
+  "targets": [
+    "far2",
+    "far3"
+  ],
+  "max_hold": [
+    "2h",
+    "4h"
+  ],
+  "costs_roundtrip_bp": [
+    20,
+    40
+  ],
+  "conservative_fast_rules": [
+    "Before BE activation, same 15m bar containing near1/far target and initial SL => initial SL loss.",
+    "After BE activation, same 15m bar containing far target and breakeven => breakeven exit.",
+    "BE activation is effective from next 15m bar in fast screen."
+  ],
+  "promotion_rule": "Only robust positive pre-2025 and 2025+ gets exact 1m chronology."
+}
