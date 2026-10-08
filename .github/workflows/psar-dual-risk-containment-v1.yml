@@ -1,0 +1,54 @@
+name: PSAR Dual Risk Containment V1
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_dual_risk_v1_launch']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_dual_risk_containment_v1.py --audit
+  scan:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Frozen Binance 5Y 15m OHLC data
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_dual_risk_containment_v1.py --shards 4 --shard ${{ matrix.shard }} --data data --out risk-shard-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-dual-risk-shard-${{ matrix.shard }}
+          path: risk-shard-${{ matrix.shard }}.json
+  merge:
+    needs: scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-dual-risk-shard-*
+          path: merged
+      - run: python scripts/psar_dual_risk_containment_v1.py --merge --shards 4 --data merged --out psar-dual-risk-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-dual-risk-report
+          path: psar-dual-risk-report.json
