@@ -1,0 +1,57 @@
+name: PSAR Overextension Follow vs Fade V1
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_dual_extremes_v1_launch']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_stretch_dual_open_research.py --audit
+  scan:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h,4h], shard: [0,1,2,3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Fetch frozen 5Y Binance 15m data
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_stretch_dual_open_research.py --tf ${{ matrix.tf }} --shard ${{ matrix.shard }} --shards 4 --data data --out dual-${{ matrix.tf }}-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-dual-${{ matrix.tf }}-${{ matrix.shard }}
+          path: dual-${{ matrix.tf }}-${{ matrix.shard }}.json
+  merge:
+    needs: scan
+    strategy:
+      fail-fast: false
+      matrix: {tf: [1h,4h]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-dual-${{ matrix.tf }}-*
+          path: merged
+      - run: python scripts/psar_stretch_dual_open_research.py --merge --tf ${{ matrix.tf }} --shards 4 --data merged --out psar-dual-summary-${{ matrix.tf }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-dual-summary-${{ matrix.tf }}
+          path: psar-dual-summary-${{ matrix.tf }}.json
