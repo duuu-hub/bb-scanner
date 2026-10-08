@@ -1,0 +1,93 @@
+name: BB Open Upper-Lower Reversal V1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/bb_open_bidir_reversal_v1.py'
+      - 'scripts/bb_open_bidir_reversal_merge.py'
+      - 'research/bb_open_bidir_reversal_v1.json'
+      - '.github/workflows/bb-open-bidir-reversal-v1.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: bb-open-bidir-reversal-v1
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python -m py_compile scripts/bb_open_bidir_reversal_v1.py scripts/bb_open_bidir_reversal_merge.py
+      - run: PYTHONPATH=scripts python scripts/bb_open_bidir_reversal_v1.py --self-test
+
+  shard:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Fetch five-year frozen data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+      - name: Replay upper/lower confirmed reversals
+        run: |
+          PYTHONPATH=scripts python -u scripts/bb_open_bidir_reversal_v1.py --raw raw --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-bidir-v1-shard-${{ matrix.shard }}
+          path: |
+            out/trades.csv.gz
+            out/diagnostics.csv.gz
+            out/meta.json
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bb-bidir-v1-shard-*
+          path: partials
+      - run: python scripts/bb_open_bidir_reversal_merge.py --partials partials --out merged
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-bidir-v1-merged-${{ github.run_id }}
+          path: |
+            merged/all_trades.csv.gz
+            merged/all_diagnostics.csv.gz
+            merged/diagnostics_summary.csv
+            merged/summary_table.csv
+            merged/rank_40bp.csv
+            merged/summary.json
+          retention-days: 30
