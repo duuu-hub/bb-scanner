@@ -1,0 +1,70 @@
+{
+  "experiment_id": "BB_OPEN_OUTSIDE_BIDIRECTIONAL_REVERSAL_V1",
+  "class": "EXPLORATORY / PROVISIONAL until canonical first-touch audits",
+  "source_run": 36095439671,
+  "exchange": "Binance USD-M perpetual",
+  "market": "USDT perpetual",
+  "raw_tf": "15m",
+  "data_end": "2026-08-31",
+  "timestamp": "UTC ms",
+  "reference_engine": "scripts/s2_current_rule_5y.py existing official Binance 1m for parent collisions",
+  "rules": "AGENTS.md 2026-10-02 and RESEARCH_RULES.md 2026-10-02",
+  "setup": "at exact 15m OPEN; fresh crossing at least 5/6 of 7 Bollinger(20,2) upper or lower TF bands. Open-time BB uses 19 completed TF closes plus live OPEN. All 7 TF must have intact history. Frozen upper/lower band levels at setup.",
+  "sides": {
+    "SHORT": "open above upper BB",
+    "LONG": "open below lower BB"
+  },
+  "confirmation": {
+    "FIRST_BODY": "first confirmed 15m candle with opposite colored body among setup candle and next 3; enter next 15m OPEN",
+    "BREAK_SETUP_EXTREME": "first completed later 15m close below setup low (SHORT), above setup high (LONG), within next 4 bars; enter next open",
+    "RETURN_15M": "first completed 15m close within frozen setup 15m upper/lower BB within 4 bars; only when setup 15m was outside its own band; enter next open"
+  },
+  "time_cutoff": "confirmation must be observed after setup, entry at next exact 15m OPEN; reject entry past target",
+  "grid": {
+    "count": [
+      5,
+      6
+    ],
+    "directions": [
+      "SHORT",
+      "LONG"
+    ],
+    "confirmations": [
+      "FIRST_BODY",
+      "BREAK_SETUP_EXTREME",
+      "RETURN_15M"
+    ],
+    "targets": [
+      "far2",
+      "far3"
+    ],
+    "sl_pct": [
+      3,
+      5
+    ],
+    "hold_minutes": [
+      240
+    ],
+    "cost_roundtrip_bp": [
+      20,
+      40
+    ]
+  },
+  "target": "rank breached upper/lower TF bands by distance from setup OPEN; far2/far3; freeze target at setup time",
+  "exit": "market-entry next 15m OPEN, TP frozen BB, SL as % from actual entry, official Binance 1m for entry-parent or TP/SL-collision cases, time exit on first 15m open at 4h; same-symbol overlap forbidden per config",
+  "split": {
+    "TRAIN": "pre-2025-01-01 fully closed",
+    "VALIDATION_SEEN": "2025-01-01 onward; already inspected previously"
+  },
+  "limitations": [
+    "point-in-time universe not guaranteed due frozen currently available symbols",
+    "cross-exchange vs Bitget",
+    "funding excluded",
+    "market fills idealized at 15m open; slippage modeled as all-in roundtrip 20/40bp",
+    "no maker waits"
+  ],
+  "selection": "exploratory scan; do not claim clean OOS confirmation; report all configs including failures",
+  "criteria": "positive expectancy and PF>1 at 40bp both chronological splits, and portfolio MDD+occupancy audited before candidate promotion",
+  "companion_diagnostic": "symmetric lower band raw 15m/1h/4h revisit hit rates and upward MAE",
+  "postponed": "1m/5m confirmation requires full official 1m corpus, not inferred from 15m OHLC; if not completed in this run mark untested"
+}
