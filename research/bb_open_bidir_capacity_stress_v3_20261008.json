@@ -1,0 +1,89 @@
+{
+  "id": "BB_OPEN_BIDIR_CAPACITY_STRESS_V3_20261008",
+  "source": "V2 train-first screen over immutable V1 run 37757832008",
+  "purpose": "Test whether apparent 40bp PF>1 candidates generate realizable equity growth under concurrent signals; distinguish event-cluster edge from account deployability.",
+  "hypotheses": [
+    "Strong profit may be concentrated in synchronized crash-rebound clusters.",
+    "Capacity-aware causal selection by reward/risk may salvage enough edge.",
+    "Profit may vanish if extreme outlier wins are capped."
+  ],
+  "locked_candidates": [
+    {
+      "side": "LONG",
+      "threshold": 5,
+      "confirmation": "FIRST_BODY",
+      "target": "far2",
+      "stop_pct": 5,
+      "min_target_rr": 1.5
+    },
+    {
+      "side": "LONG",
+      "threshold": 5,
+      "confirmation": "FIRST_BODY",
+      "target": "far3",
+      "stop_pct": 5,
+      "min_target_rr": 1
+    },
+    {
+      "side": "LONG",
+      "threshold": 5,
+      "confirmation": "FIRST_BODY",
+      "target": "far3",
+      "stop_pct": 5,
+      "min_target_rr": 1.5
+    }
+  ],
+  "portfolio": {
+    "capital": 1,
+    "position_sizes_pct": [
+      10,
+      20,
+      30
+    ],
+    "slots": [
+      3,
+      6,
+      12
+    ],
+    "gross_exposure_cap_pct": 200,
+    "same_symbol_overlap": "forbidden",
+    "tie_breaks": [
+      "symbol_asc",
+      "rr_desc",
+      "target_distance_desc",
+      "delay_asc",
+      "deterministic_hash"
+    ],
+    "scenario": "close-on-realized exit time, not MTM",
+    "cost_bp": [
+      20,
+      40
+    ]
+  },
+  "stress": {
+    "positive_return_caps_pct": [
+      10,
+      15,
+      20
+    ],
+    "market_event_cluster_utc": [
+      "1h",
+      "4h"
+    ],
+    "concentration": "largest one-hour / one-day event, symbol, and top ten wins",
+    "years": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ]
+  },
+  "splits": {
+    "discovery": "2022-23",
+    "internal_check": "2024",
+    "validation_seen": "2025-26"
+  },
+  "selection": "No optimization against 2025-26; report every configured scenario. A candidate is rejected for account deployment if any chronological segment materially loses or capacity selection becomes order-sensitive.",
+  "limitations": "EXPLORATORY; not pristine OOS; 30+10 audit not completed; funding omitted; execution at 15m open idealized + all-in cost; MDD realized close only"
+}
