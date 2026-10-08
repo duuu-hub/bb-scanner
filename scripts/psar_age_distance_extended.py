@@ -73,9 +73,9 @@ def study(a,fn,enghash):
         symbol=fn["_symbol"](file)
         t,o,h,l,c=fn["load"](file)
         for first,last in fn["contiguous_segments"](t):
-            if last-first<m*(BURN+33):excluded_seg+=1;continue
+            if last-first<m*(BURN+3):excluded_seg+=1;continue
             rt,ro,rh,rl,rc=fn["resample"](t[first:last],o[first:last],h[first:last],l[first:last],c[first:last],m)
-            if len(rt)<=BURN+33:excluded_seg+=1;continue
+            if len(rt)<=BURN+3:excluded_seg+=1;continue
             sar,bull=fn["psar_open_projection"](rh,rl)
             preclose=np.r_[np.nan,rc[:-1]]
             tr=np.maximum(rh-rl,np.maximum(abs(rh-preclose),abs(rl-preclose)))
