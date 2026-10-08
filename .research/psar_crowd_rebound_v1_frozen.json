@@ -1,0 +1,65 @@
+{
+  "id": "PSAR_CROWD_REBOUND_V1",
+  "status": "RESEARCH_ONLY_EXPLORATORY_NOT_DEMO",
+  "source_repro_run": 37748920499,
+  "source_rank_stress_run": 37749172801,
+  "market": "Binance UM USDT perps (research); Bitget compatibility not tested",
+  "signal_bar": "4h OPEN",
+  "psar": {
+    "af_initial": 0.02,
+    "af_step": 0.02,
+    "af_max": 0.2,
+    "projection": "canonical from previously completed 4H bars only",
+    "trend": "BEAR",
+    "required_bar_number": 12
+  },
+  "atr": {
+    "timeframe": "4h",
+    "length": 14,
+    "source": "fully closed previous bars"
+  },
+  "entry_filters": {
+    "signed_distance_atr_min": 3.5,
+    "low6_condition": "current 4H OPEN <= min(low of previous 6 closed 4H bars) + 0.25 * previous-completed ATR14",
+    "crowd": "at least 4 DISTINCT symbols satisfying these SAME eligibility conditions at exactly current 4H OPEN (without knowing later high/low/close)"
+  },
+  "selection": {
+    "simultaneous_entry_rank": "larger (PSAR_OPEN - entry_open)/ATR14 first, ties symbol ascending",
+    "same_symbol_reentry": false,
+    "maximum_positions": 4,
+    "maximum_gross_notional_percent_of_equity": 100
+  },
+  "entry": {
+    "type": "market_taker",
+    "live_from": "the qualifying 4H candle exact OPEN"
+  },
+  "exit": {
+    "protective_stop": "6% below actual entry for LONG, stop-market, 15m touch research model; gap through stop exits at worse OPEN",
+    "profit_taking": "none in frozen V1",
+    "time_limit": "8 4H candles = 32 hours; exit at 4H OPEN after exactly 8 bars",
+    "psar_flip_exit": false
+  },
+  "risk_research": {
+    "max_planned_account_loss_per_position": 0.0025,
+    "size_formula": "notional / equity = min(0.25, 0.0025/(0.06 + 0.004)) = 0.0390625, also respect remaining gross cap",
+    "daily_realized_loss_pause": 0.015,
+    "stop_after_3_losses_pause_hours": 24,
+    "realized_equity_dd_pause": 0.05,
+    "drawdown_pause_days": 7
+  },
+  "cost_stress": "40bp total round trip including notional cost/slippage stress; funding excluded",
+  "measurement": {
+    "train_account_return_pct_farthest_first_025": 2.943,
+    "seen_account_return_pct_farthest_first_025": 7.925,
+    "train_independent_market_events": 7,
+    "seen_independent_market_events": 20
+  },
+  "limitations": [
+    "POSTHOC hypothesis using already-seen years; cannot infer expected future returns",
+    "Only 7 TRAIN independent events; very low signal frequency",
+    "Realized-only MDD not mark-to-market; liquidation, funding, live orderbook/slippage not simulated",
+    "Protective stop may slip beyond 6% during market gap",
+    "Not evaluated for combined LONG3 operations",
+    "No live/main/demo change approved or performed"
+  ]
+}
