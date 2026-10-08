@@ -1,0 +1,45 @@
+{
+  "id": "BB_OPEN_BIDIR_PORTFOLIO_BASKET_V4_20261008",
+  "status": "EXPLORATORY",
+  "rationale": "V3 six-slot 30pct sizing losses despite positive unclustered trade PF; test breadth-style basket rather than cherry-pick winners",
+  "fixed_candidates": [
+    "LONG 5TF FIRST_BODY far2 SL5 targetRR>=1.5",
+    "LONG 5TF FIRST_BODY far3 SL5 targetRR>=1.0",
+    "LONG 5TF FIRST_BODY far3 SL5 targetRR>=1.5"
+  ],
+  "scenarios": {
+    "slots": [
+      20,
+      40,
+      60,
+      100
+    ],
+    "position_notional_pct": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "max_total_gross_pct": 200,
+    "priorities": [
+      "symbol_asc",
+      "rr_desc",
+      "deterministic_hash"
+    ],
+    "cost_bp": 40
+  },
+  "robustness": {
+    "unit": "independent UTC 1-hour market event",
+    "bootstrap_samples": 1000,
+    "blocks": "UTC 1-hour event",
+    "report": "95% CI of event equal-weight average net trade PnL and event-level PF where meaningful; do not treat per-symbol trades as independent"
+  },
+  "limitations": [
+    "extreme simultaneous execution burden",
+    "liquidity and slippage not modeled by static 40bp",
+    "survivorship bias",
+    "funding excluded",
+    "not a production-ready strategy"
+  ],
+  "decision": "require 2022-23, 2024, 2025-26 positive account simulations with stable priority; and event bootstrap lower confidence bound >0, else reject as reliable practical edge"
+}
