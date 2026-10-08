@@ -1,0 +1,58 @@
+{
+  "experiment": "PSAR_EXTREME_DUAL_DIRECTIONS_V1",
+  "class": "EXPLORATORY",
+  "hypotheses": {
+    "FOLLOW": "A mature PSAR trend extended ≥3,4,5 prior-closed ATR may profit from same-direction OPEN→OPEN continuation",
+    "FADE": "The identical overextended PSAR trend may profit from opposite-direction OPEN→OPEN reversion",
+    "FADE_LOCAL": "Fade restricted to OPEN within .25 previous-closed ATR of six completed-bar local extreme"
+  },
+  "signal_time": "TF candle OPEN, PSAR canonical projection from prior-closed data, ATR(14) previous closed, trend age 4,8,12 precisely at bar OPEN",
+  "execution": "immediate market taker at signal TF OPEN; close market at TF OPEN 4 or 8 TF candles later; no same-bar TP or SL, no intrabar exit; no 1m tie risk; NOT deployable because unprotected",
+  "universe": "Binance UM 5Y 15m archive run 36095439671; currently available symbols (non-PTI survivorship), exclude stablecoin-USDT symbols explicit in script",
+  "grid": {
+    "tf": [
+      "1h",
+      "4h"
+    ],
+    "mode": [
+      "FOLLOW",
+      "FADE",
+      "FADE_LOCAL"
+    ],
+    "side": [
+      "BULL",
+      "BEAR"
+    ],
+    "trend_age": [
+      4,
+      8,
+      12
+    ],
+    "min_psar_distance_ATR": [
+      3,
+      4,
+      5
+    ],
+    "hold_candles": [
+      4,
+      8
+    ]
+  },
+  "account": "One trade per detected PSAR trend at one age per configuration, nonoverlap same symbol/config; independent symbol signals and counterfactual configs can overlap, portfolio not simulated",
+  "costs": "20bp and 40bp total roundtrip notional, taker slippage included notionally in these stress costs, funding EXCLUDED, no isolated maker credit",
+  "metrics": [
+    "gross/net 20bp and 40bp return % per trade",
+    "net40 PF",
+    "net40 win rate",
+    "MAE including intra-hold extremes",
+    "sample count",
+    "worst net40",
+    "yearly breakdown and symbol concentration"
+  ],
+  "split": "TRAIN 2021-2024; seen validation 2025-2026; exclude any train position extending into 2025",
+  "selection": "Rank parameter grid by TRAIN net40 mean only, minimum 200 TRAIN trades and 100 SEEN validation trades. SEEN is only falsification, never selection or retuning",
+  "required_checks": "Open projection future wick causality, ATR prior-close, time-limit OPEN accurate, fees and split smoke; every shard and merge present. This is EXPLORATORY only, cannot label validated or deploy without canonical stop/TP engine 1m collisions and 30+10 audits",
+  "risk_note": "No protective stop modeled. Actual strategy requires capped-loss exits and portfolio overlap simulation.",
+  "canonical_sha": "derived at run from scripts/psar_open_canonical_compare.py",
+  "branch_sha_before": "7aceef594ec946af30deb679da67ff15302f57ef"
+}
