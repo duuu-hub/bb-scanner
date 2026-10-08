@@ -1,0 +1,17 @@
+{
+  "experiment_id": "PSAR_FADE_ACCOUNT_V1",
+  "class": "EXPLORATORY portfolio overlay of historically screened and seen signal variants",
+  "scope": "4H PSAR extreme FADE_LOCAL BEAR LONG, age=12, distance >=3 or >=3.5 ATR, stop 6 or 8 pct, 4H flip/time exits, max hold 8 4H candles, market 4H OPEN",
+  "data": "Binance USDT-M Futures 15m 5Y artifact from GH run 36095439671; source signal run 37729000696; risk grid 37741302968",
+  "engine": "Reuse canonical PSAR OPEN-time and prior-closed ATR14 via verified psar_dual_risk_containment_v1.py; stops 15m hard-market with gaps",
+  "risk_comparison": [
+    "0.25 pct account risk per position",
+    "0.50 pct account risk per position"
+  ],
+  "cost": "40bp roundtrip including nominal slippage; no funding; 20bp per-trade metrics remain in ledger",
+  "account": "starting cash 10k; max 4 trades at a time, max 25 pct notional per symbol and 100 pct gross, same-symbol duplicate disallowed, position nominal=min(25 pct equity, risk fraction/(stop_pct+0.4 pct))",
+  "halt": "Stop new entries that UTC day if realized net daily pnl <=-1.5 pct of day-start equity, pause 24h after 3 consecutive loss exits, pause 7 UTC days if realized equity dd 5 pct from prior peak",
+  "splits": "TRAIN 2021-2024, SEEN VALIDATION 2025-2026, independent beginning equity each split; cross-split trades excluded",
+  "metrics": "realized-only account return, approximation CAGR, realized-only MDD, accepted/blocked, max concurrency, annual realized pnl, profit factor",
+  "not_validated": "No MTM liquidation or intrabar account drawdown, no 30+10 audits, historical listing survivorship, 2025-2026 previously seen, not true OOS; risk cap can fail across gaps and illiquidity. No main or runtime modification."
+}
