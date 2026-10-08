@@ -1,0 +1,39 @@
+{
+  "experiment": "PSAR_AGE_DISTANCE_BREAKOUT_20261008",
+  "class": "EXPLORATORY",
+  "scope": "Descriptive conditional probability study, NO ENTRY OR PNL",
+  "hypothesis": "Current PSAR trend age and OPEN-time distance / prior-closed ATR predict probability of a new direction-favorable trend extreme before next flip",
+  "data": "Binance USDT-M Futures 15m five-year artifacts GH run 36095439671, 1h/4h exactly resampled",
+  "ages": [
+    2,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24,
+    32
+  ],
+  "distance_bins_ATR": [
+    "0-0.5",
+    "0.5-1",
+    "1-2",
+    "2-3",
+    "3-5",
+    "5+"
+  ],
+  "labels": [
+    "new favorable high/low any time prior next PSAR flip",
+    "new favorable high/low within next 4 or 8 TF candles",
+    "flip within next 4 or 8 candles"
+  ],
+  "time": "Current TF candle OPEN, observable PSAR and prior confirmed ATR14; outcomes use future OHLC only as retrospective labels",
+  "cohort": "All symbols and sensitivity excluding identified stablecoin-stablecoin or stablecoin-USDT spot-pegged pairs",
+  "exclusions": "Censored PSAR trends at data gaps/edges, missing ATR, segments shorter than 103 TF candles",
+  "engine": "canonical open projection from scripts/psar_open_canonical_compare.py, AF0=.02 STEP=.02 MAX=.2",
+  "split": "TRAIN through 2024-12-31 UTC; 2025+ SEEN VALIDATION, results not pristine holdout",
+  "unit": "Per PSAR trend at pre-selected bar age, some samples share trend and correlated assets",
+  "costs": "N/A no trades or fills; 1m chronology not required",
+  "acceptance": "8 shards, 2 frame merges, input integrity and projected PSAR causality checks, audit successes; exploratory only",
+  "caveat": "Non point-in-time universe survivorship; do not interpret probabilities as an executable trading edge"
+}
