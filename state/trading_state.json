@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791459057501,
+  "last_run_ms": 1791459959070,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -366,7 +366,10 @@
     "SHORT3:S2:OGNUSDT:1791456300000",
     "SHORT3:S1:OGNUSDT:1791457200000",
     "LONG3:L1:ERAUSDT:1791458100000",
-    "SHORT3:S2:CTSIUSDT:1791459000000"
+    "SHORT3:S2:CTSIUSDT:1791459000000",
+    "SHORT3:S3:OGNUSDT:1791459900000",
+    "LONG3:L1:STRKUSDT:1791459900000",
+    "SHORT3:S2:STRKUSDT:1791459900000"
   ],
   "signal_shadow_closed": [
     {
@@ -13501,11 +13504,10 @@
       "strategy": "S1",
       "symbol": "OGNUSDT",
       "tp": 0.029403
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791459956338,
       "deadline_ms": 1791469800000,
       "detected_price": 0.03176,
       "last_checked_ms": 1791459000000,
@@ -13532,7 +13534,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.03176,
+      "shadow_exit_price": 0.033030399999999994,
+      "shadow_return_pct": -3.999999999999981,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:CTSIUSDT:1791455400000",
       "signal_time_ms": 1791455400000,
@@ -13543,6 +13548,7 @@
     },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1791459956338,
       "deadline_ms": 1791501300000,
       "detected_price": 0.07267,
       "last_checked_ms": 1791459000000,
@@ -13569,7 +13575,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.07267,
+      "shadow_exit_price": 0.0690365,
+      "shadow_return_pct": -5.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:ERAUSDT:1791458100000",
       "signal_time_ms": 1791458100000,
@@ -13577,12 +13586,14 @@
       "strategy": "L1",
       "symbol": "ERAUSDT",
       "tp": 0.07993700000000001
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791473400000,
       "detected_price": 0.0325,
-      "last_checked_ms": 1791459000000,
+      "last_checked_ms": 1791459900000,
       "market_snapshot": {
         "alt_median_4h_pct": 1.254930082466843,
         "alt_positive_4h_pct": 84.01727861771059,
@@ -13614,6 +13625,121 @@
       "strategy": "S2",
       "symbol": "CTSIUSDT",
       "tp": 0.02925
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791463500000,
+      "detected_price": 0.03538,
+      "last_checked_ms": 1791459900000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 1.254930082466843,
+        "alt_positive_4h_pct": 84.01727861771059,
+        "btc_1h_pct": -0.08703704151424851,
+        "btc_24h_pct": -1.125,
+        "btc_4h_pct": -0.5379164941803904,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4909445397101475,
+        "eth_24h_pct": -1.24,
+        "eth_4h_pct": -1.1453929534025464,
+        "eth_btc_relative_strength_24h_pct": -0.11499999999999999,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-08T10:35:23.565589+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S3"
+      ],
+      "max_hold_minutes": 60,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.03538,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S3:OGNUSDT:1791459900000",
+      "signal_time_ms": 1791459900000,
+      "sl": 0.037149,
+      "strategy": "S3",
+      "symbol": "OGNUSDT",
+      "tp": 0.031842
+    },
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1791503100000,
+      "detected_price": 0.061394,
+      "last_checked_ms": 1791459900000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 1.254930082466843,
+        "alt_positive_4h_pct": 84.01727861771059,
+        "btc_1h_pct": -0.08703704151424851,
+        "btc_24h_pct": -1.125,
+        "btc_4h_pct": -0.5379164941803904,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4909445397101475,
+        "eth_24h_pct": -1.24,
+        "eth_4h_pct": -1.1453929534025464,
+        "eth_btc_relative_strength_24h_pct": -0.11499999999999999,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-08T10:35:23.565589+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S2"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.061394,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:STRKUSDT:1791459900000",
+      "signal_time_ms": 1791459900000,
+      "sl": 0.058324299999999996,
+      "strategy": "L1",
+      "symbol": "STRKUSDT",
+      "tp": 0.06753340000000001
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791474300000,
+      "detected_price": 0.061394,
+      "last_checked_ms": 1791459900000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 1.254930082466843,
+        "alt_positive_4h_pct": 84.01727861771059,
+        "btc_1h_pct": -0.08703704151424851,
+        "btc_24h_pct": -1.125,
+        "btc_4h_pct": -0.5379164941803904,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4909445397101475,
+        "eth_24h_pct": -1.24,
+        "eth_4h_pct": -1.1453929534025464,
+        "eth_btc_relative_strength_24h_pct": -0.11499999999999999,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-08T10:35:23.565589+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S2"
+      ],
+      "max_hold_minutes": 240,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.061394,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S2:STRKUSDT:1791459900000",
+      "signal_time_ms": 1791459900000,
+      "sl": 0.06384976,
+      "strategy": "S2",
+      "symbol": "STRKUSDT",
+      "tp": 0.0552546
     }
   ],
   "spread_shadow_closed": [],
