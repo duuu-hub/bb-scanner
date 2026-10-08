@@ -1,0 +1,14 @@
+# Open-outside BB bidirectional reversal V1 — findings (2026-10-08)
+
+- Repository `duuu-hub/bb-scanner`; research branch `research-rank5-binance-15m-5y`; tested commit `1588f5ecebae1038f8f25e927d7696c63aa8c844`.
+- Full canonical 1m chronology workflow: [run 37757832008](https://github.com/duuu-hub/bb-scanner/actions/runs/37757832008). COMPLETED success, 8/8 shards and merge artifact `bb-bidir-v1-merged-37757832008` (ID 11543115958).
+- Frozen Binance USD-M perpetual 15m archive from run 36095439671, effective trades 2022 through 2026-08. 2021-24 TRAIN and 2025-26 VALIDATION_SEEN (not pristine OOS). Funding excluded, account portfolio not validated; currently-listed-symbol survivorship risk.
+- Setup: 15m OPEN outside 5/6 of 7 upper (SHORT) or lower (LONG) BB(20,2). Target fixed at setup-time far2/far3 breached boundary. Entry at OPEN after one of three 15m confirmation rules: FIRST_BODY, BREAK_SETUP_EXTREME, RETURN_15M. Stop 3%/5% actual entry, timeout 4h, round-trip costs 20/40bp.
+- 48 configurations, 928,712 *parameterized trade rows* (heavily shared events; NOT independent samples). **Every configuration PF <1 under both 20 and 40bp**; both sides negative expectancy.
+- Highest ALL PF20: SHORT >=6, FIRST_BODY, far2, stop5: 21,309 rows, PF20=0.8197, EV20=-0.2905% / trade, PF40=0.7119, EV40=-0.4905%.
+- Same strategy TRAIN: n=11,515, PF20=0.8157, EV20=-0.2692%, PF40=0.6972, EV40=-0.4692%. VALIDATION_SEEN: n=9,794, PF20=0.8234, EV20=-0.3156%, PF40=0.7262, EV40=-0.5156%.
+- Best LONG by ALL PF20: LONG >=6, FIRST_BODY, far2, stop3: n=16,582, PF20=0.7672, EV20=-0.2901%.
+- Raw revisit diagnostics from same run: SHORT >=6 far2 n26,561, 4h touch47.05%, target median distance3.06%, adverse 4h median2.54%; LONG >=6 far2 n18,939, 4h touch34.85%, target median distance3.04%, adverse median2.12%. *Touches not chronology-adjusted executable fills.*
+- 13/13 1m chronology smoke passed; audits 30+10 and portfolio MTM not completed, so EXPLORATORY/PROVISIONAL and rejected as a profitable candidate.
+- **Report formatting bug in original merge**: `scripts/bb_open_bidir_reversal_merge.py` `stats()` returns the exit-rate percentage key `sl_pct`, which overwrites the configured stop value `sl_pct` in `summary_table.csv`. As a result `rank_40bp.csv` was empty and the summary `sl_pct` column displayed rates like 26.08 instead of 3 or 5. The source `all_trades.csv.gz` retains correct `sl_pct` stop settings [3,5] and the PF/EV results were independently recomputed from the raw ledger for these findings. Do not use the malformed summary `sl_pct` or empty rank file. A follow-up code fix should rename exit-rate to `sl_exit_pct` and perform a lightweight remerge without rerunning all 1m archive processing.
+- NEXT: no parameter promotion; if exploring, separate 1m and 5m confirmation hypotheses and preregister true unseen forward validation. Do not treat `RETURN_15M` same as an immediate entry.
