@@ -1,0 +1,123 @@
+{
+  "id": "BB_OPEN_BIDIR_CONTEXT_EDGE_SCAN_V2_20261008",
+  "status": "EXPLORATORY",
+  "hypothesis": "The negative overall bidirectional BB open-outside strategy may contain stable profitable causal subregimes; do not retune exit rules post hoc.",
+  "frozen_input": {
+    "repo": "duuu-hub/bb-scanner",
+    "ref_run": 37757832008,
+    "artifact_id": 11543115958,
+    "branch": "research-rank5-binance-15m-5y",
+    "source_run": 36095439671,
+    "trade_file": "all_trades.csv.gz",
+    "diagnostic_file": "all_diagnostics.csv.gz",
+    "trade_count_expected": 928712
+  },
+  "fixed_rules": {
+    "side": [
+      "SHORT",
+      "LONG"
+    ],
+    "setup_threshold": [
+      5,
+      6
+    ],
+    "confirmation": [
+      "FIRST_BODY",
+      "BREAK_SETUP_EXTREME",
+      "RETURN_15M"
+    ],
+    "target": [
+      "far2",
+      "far3"
+    ],
+    "sl_pct": [
+      3,
+      5
+    ],
+    "max_hold_h": 4,
+    "cost_bp": [
+      20,
+      40
+    ],
+    "signal_causality": "only features available by 15m OPEN of fill",
+    "smoke": "previous run passed 13/13; this scan must not alter chronology",
+    "same_symbol_overlap": "already blocked inside base config",
+    "validation_class": "2025-26 VALIDATION_SEEN"
+  },
+  "splits": {
+    "discovery": "2022-01-01 through 2023-12-31",
+    "internal_check": "2024-01-01 through 2024-12-31",
+    "falsification": "2025-01-01 through 2026-08-31 already-seen"
+  },
+  "feature_families": {
+    "entry_target_distance_pct": [
+      "gte:0.5",
+      "gte:1.0",
+      "gte:1.5",
+      "gte:2.0",
+      "gte:3.0",
+      "gte:4.0",
+      "lte:1.0",
+      "lte:2.0",
+      "lte:3.0",
+      "range:1:3",
+      "range:2:5"
+    ],
+    "setup_target_distance_pct": [
+      "gte:1.0",
+      "gte:2.0",
+      "gte:3.0",
+      "gte:5.0",
+      "lte:3.0"
+    ],
+    "pre_entry_move_favorable_pct": [
+      "gte:0",
+      "gte:0.5",
+      "gte:1",
+      "gte:2",
+      "lte:0",
+      "lte:-0.5"
+    ],
+    "confirmation_delay_minutes": [
+      "eq:15",
+      "eq:30",
+      "lte:30",
+      "gte:30",
+      "gte:45"
+    ],
+    "concurrent_overheated_setup_events": [
+      "gte:5",
+      "gte:15",
+      "gte:30",
+      "lte:3",
+      "lte:10"
+    ],
+    "same_side_signal_dominance": [
+      "gte:0.7",
+      "lte:0.5"
+    ],
+    "utc_hour": [
+      "0to7",
+      "8to15",
+      "16to23"
+    ],
+    "weekday": [
+      "mon_to_fri",
+      "sat_sun"
+    ],
+    "entry_target_rr": [
+      "gte:0.75",
+      "gte:1.0",
+      "gte:1.5"
+    ]
+  },
+  "selection": "Independent one-filter scans per frozen base configuration; demand n>=150 on 2022-23 and >=75 on 2024 and PF40>1.03 on both internal splits; rank by minimum split PF40 and stability across year/symbol; inspect 2025-26 only for frozen passers. Exploratory; any winner must be revalidated genuinely forward.",
+  "portfolio": "only candidate selection then account simulation fixed sizing 30% notional, 6 concurrent slots, 200% gross cap, same-symbol disallowed, non-MTM unless otherwise labeled.",
+  "limits": [
+    "survivorship-biased symbols possible",
+    "funding excluded",
+    "round-trip all-in 20bp/40bp nominal costs only",
+    "shared events and multiple-testing false discoveries",
+    "unseen forward not yet collected"
+  ]
+}
