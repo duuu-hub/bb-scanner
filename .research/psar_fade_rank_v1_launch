@@ -1,0 +1,22 @@
+{
+  "id": "PSAR_FADE_SIMULTANEOUS_RANK_AUDIT",
+  "class": "EXPLORATORY posthoc",
+  "data": "Frozen canonical trades from GH run 37741872209",
+  "hypothesis": "Account performance for PSAR fade depends on contemporaneous tie ranking of simultaneous symbols.",
+  "rankings": [
+    "alphabetical",
+    "farthest PSAR distance first",
+    "nearest PSAR distance first"
+  ],
+  "account_gates": [
+    "CAPS_ONLY",
+    "FULL"
+  ],
+  "risk_fractions": [
+    0.0025,
+    0.005
+  ],
+  "split": "TRAIN 2021-2024 and 2025+ SEEN",
+  "cost": "40bp roundtrip",
+  "note": "ranking preselection on seen same dataset, do not call new OOS or validated; no main modifications"
+}
