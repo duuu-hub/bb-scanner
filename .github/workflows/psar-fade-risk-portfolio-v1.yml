@@ -1,0 +1,54 @@
+name: PSAR Fade Risk-Capped Portfolio V1
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_fade_portfolio_v1_launch']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_fade_risk_portfolio_v1.py --audit
+  ledger:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Frozen 5Y Binance 15m data
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/psar_fade_risk_portfolio_v1.py --shard ${{ matrix.shard }} --shards 4 --data data --out portfolio-ledger-${{ matrix.shard }}.csv.gz --meta portfolio-meta-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-risk-portfolio-shard-${{ matrix.shard }}
+          path: |
+            portfolio-ledger-${{ matrix.shard }}.csv.gz
+            portfolio-meta-${{ matrix.shard }}.json
+  merge:
+    needs: ledger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psar-risk-portfolio-shard-*
+          path: merged
+      - run: python scripts/psar_fade_risk_portfolio_v1.py --merge --shards 4 --data merged --out psar-risk-portfolio-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-risk-portfolio-report
+          path: psar-risk-portfolio-report.json
