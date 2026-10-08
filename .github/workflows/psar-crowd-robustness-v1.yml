@@ -1,0 +1,24 @@
+name: PSAR Crowd Signal Robustness V1
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/psar_crowd_robustness_launch']
+permissions: {contents: read, actions: read}
+jobs:
+  robust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/psar_crowd_robustness_v1.py --audit
+      - name: Frozen PSAR risk ledgers
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 37741872209 -R ${{ github.repository }} -p 'psar-risk-portfolio-shard-*' -D data
+      - run: python scripts/psar_crowd_robustness_v1.py --data data --out psar-crowd-robustness.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psar-crowd-robustness-report
+          path: psar-crowd-robustness.json
