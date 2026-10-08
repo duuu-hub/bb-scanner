@@ -1,0 +1,19 @@
+{
+  "experiment": "PSAR_TREND_EXTREME_AGE_20261008",
+  "hypothesis": "Completed PSAR bullish highs and bearish lows concentrate at particular bar ages, conditional on completed run length",
+  "source_data_run": 36095439671,
+  "timeframes": [
+    "1h",
+    "4h"
+  ],
+  "sides": [
+    "BULL",
+    "BEAR"
+  ],
+  "analysis": "exploratory descriptive (no entry order or PnL)",
+  "cutoff": "TRAIN through 2024-12-31 UTC; 2025-2026 SEEN_VALIDATION",
+  "engine": "scripts/psar_open_canonical_compare.py, OPEN-time projected PSAR AF 0.02, step 0.02, max 0.2; 100 bar burn-in",
+  "measure": "earliest wick HIGH/BULL, LOW/BEAR within completed flip-to-flip run; normalized lifespan, conditional on survival",
+  "audit": "causal open-time PSAR and exact resampling; 8 data shards + 2 merge jobs",
+  "costs": "not applicable"
+}
