@@ -1,0 +1,89 @@
+name: BB Open Symmetric Diagnostic Fast
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/bb_open_bidir_diagnostic_fast.py'
+      - '.github/workflows/bb-open-bidir-diag-fast.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Fetch frozen 5y 15m shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+      - name: Calculate lower and upper revisit diagnostics
+        run: |
+          PYTHONPATH=scripts python -u scripts/bb_open_bidir_diagnostic_fast.py --raw raw --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-bidir-diag-fast-partial-${{ matrix.shard }}
+          path: out/diagnostics.csv.gz
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bb-bidir-diag-fast-partial-*
+          path: partials
+      - name: Aggregate chronological splits
+        run: |
+          python - <<'PY'
+          import glob, pandas as pd
+          from pathlib import Path
+          fs=glob.glob('partials/**/diagnostics.csv.gz',recursive=True)
+          if len(fs)!=8:raise RuntimeError(f'Missing shard: {len(fs)}')
+          d=pd.concat([pd.read_csv(f,compression='gzip') for f in fs],ignore_index=True)
+          cutoff=int(pd.Timestamp('2025-01-01',tz='UTC').timestamp()*1000)
+          d['split']=d.signal_ts.map(lambda x:'TRAIN' if x<cutoff else 'VALIDATION_SEEN')
+          out=Path('merged');out.mkdir(exist_ok=True)
+          d.to_csv(out/'all_diagnostics.csv.gz',index=False,compression='gzip')
+          rows=[]
+          for (sp,side,n,tg),g in d.groupby(['split','side','threshold','target']):
+              rows.append(dict(split=sp,side=side,threshold=n,target=tg,n=len(g),
+                 median_target_pct=g.distance_pct.median(),
+                 hit_1h_pct=g.raw_hit_1h.mean()*100,
+                 hit_4h_pct=g.raw_hit_4h.mean()*100,
+                 median_adverse_4h_pct=g.adverse_4h_pct.median()))
+          t=pd.DataFrame(rows).sort_values(['split','side','threshold','target'])
+          t.to_csv(out/'summary.csv',index=False)
+          print(t.to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-bidir-diag-fast-merged-${{ github.run_id }}
+          path: |
+            merged/all_diagnostics.csv.gz
+            merged/summary.csv
+          retention-days: 30
