@@ -1,0 +1,46 @@
+{
+  "experiment_id": "PSAR_SYNCHRONIZED_OVERSOLD_CROWD_V1",
+  "scope": "Post-hoc exploratory account study of cohort co-occurrence signals from frozen PSAR 4H risk ledger; no live/main changes",
+  "hypothesis": "Near-simultaneous 4H extreme oversold conditions across many altcoin USDT perpetual symbols are a stronger entry regime for rebound LONG than isolated extreme-oversold signals",
+  "signal": "4H PSAR BEAR 12th bar OPEN and price <= 6 prior-closed 4H lows +0.25 ATR14, PSAR distance >=3 or 3.5 ATR, original frozen ledger",
+  "data": "Binance UM 15m archive run 36095439671; frozen full execution and entry/exit signal ledger 37741872209 commit 7937e6bca49556e9abc1b47985e758c6cd435127",
+  "price_execution": "Original 4H OPEN taker entry, 15m intrabar single STOP MARKET 6 or 8 pct, gaps worse OPEN; PSAR flip or max 8 strategy bars on OPEN",
+  "indicator_causality": "Crowd count distinct currently eligible symbols for IDENTICAL policy and entry timestamp; no current candle future OHLC or future returns; other variables frozen in source ledger",
+  "grid": {
+    "policies": [
+      "P3_SL6_TIME",
+      "P3_SL6_FLIP",
+      "P3p5_SL6_TIME",
+      "P3p5_SL6_FLIP",
+      "P3p5_SL8_FLIP"
+    ],
+    "min_crowd": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      12,
+      16
+    ],
+    "max_slots": [
+      2,
+      4,
+      8
+    ],
+    "risk_per_trade_account": [
+      0.0025,
+      0.005
+    ],
+    "halting": [
+      "FULL",
+      "CAPS_ONLY"
+    ]
+  },
+  "cost": "40bp total round-trip all-in slippage stress, no funding",
+  "account": "Cash $10k each period, no leverage >100% total gross, max symbol25% notional, same-symbol reentry disabled, stop%-based position sizing; when FULL day loss1.5%, consecutive3, equityDD5% pause.",
+  "split": "2021-24 TRAIN; 2025-26 SEEN (not true untouched OOS). Exclude trades spanning split boundary.",
+  "selection": "Rank training account net return less 0.5*realized-only MDD after minimum 24 actual account trades, >=7 independent train market-event timestamps and >=3 train years. Inspect seen as a falsification ONLY. Analyze rare-event instability.",
+  "validation": "Frozen ledger sha match, all four shards and 856 files, baseline 6 portfolio results exactly reproduced, risk and time tests inherited. Further 30-check + 10-clean and true forward needed before admission.",
+  "caveats": "Post-hoc hypothesis because earlier 2021-26 crowd results already inspected; probability of overfit high. Realized-only MDD is an underestimate, no funding or orderbook, survivorship, not a daily frequency strategy; preserving failures."
+}
