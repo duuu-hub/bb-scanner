@@ -698,3 +698,13 @@ Each of eight scan partitions and sixteen account partitions must be preserved o
 ## V27 actual stage checkpoint — 2026-10-08T10:19:57.221838+00:00
 
 Run 37761086287: V27_384_ACCOUNT_RESULTS_READY_FOR_AUDIT. Inspect final terminal status and all 384 account outputs. V25 rejection retained, economic audit pending, no daily-target claim.
+
+## V27 verified terminal results audit — 2026-10-08T10:30:11.319Z
+
+[Run 37761086287](https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287) finished success at 2026-10-08T10:20:05Z (19:20:05 KST), all 29 jobs success. Actual 616/616 regressions, chronology and complete synthetic 384-account smoke passed. Original 856-file frozen source/BTC hashes were verified, DEV/GATE scans produced 44,946/20,299 parameterized outcomes, and all 384 constrained account scenarios completed.
+
+The post-run root audit verified every original summary/audit and 1,152 archived detail SHA256 entries across 16 permanent account branches (1,248 original account files, 237,852,165 bytes). All 64 primary guarded 40bp cap1/2 trade ledgers and full calendars were independently reread and reconciled for P&L, PF, holding, accepted KST caps, costs, funding, year returns and best-date concentration. The exact eight scan plus sixteen account heads match the final permanent cycle index; no partition missing. [Verified report](https://github.com/duuu-hub/bb-scanner/blob/research-daily-breakdown-intraday-v27/research/daily-breakdown-intraday-v27/audits/ACTUAL_INTRADAY_RESULTS.md), audit commit 11bf04d38b9ab83046660e21eedc3c07a92995cb; aggregate result head 973a13cbc9b6caf5d93e60c82ba71959dc5f432b; cycle evidence head 435e4a7aa0d47a922ed1d624710371820db56a76.
+
+Economic outcome: zero further-audit flags, zero qualified candidates, daily account goal unmet, V25 rejection retained. Primary 40bp guarded 2024 returns range -5.5828408332% to +0.0569732264%; just 1/32 positive. The best observed primary GATE account has PF 1.0041040456, MDD 2.6890894627%, N262, calendar-day mean +0.0002729361%. All 32 turn negative after arithmetic removal of the best five positive entry dates. Primary 64 accounts have 14,555 executions; 13,994 (96.14565%) end by fixed TIME exit. This diagnostic did not establish useful 24h account growth.
+
+Keep every failure and raw reference. No V25/V26/V27 duplicate, no ad-hoc cap/hold/delay tuning or promotion. Next: inspect prior rejected mechanisms before preregistering a distinct causal intraday entry/stop design with execution costs and truthful data-observation labels. Previously observed DEV/GATE are not pristine OOS; KST boundary and partial-year labels remain explicit. No main/live change.
