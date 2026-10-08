@@ -1,0 +1,378 @@
+﻿2026-10-08T10:06:39.3923827Z Current runner version: '2.337.0'
+2026-10-08T10:06:39.3943153Z ##[group]Runner Image Provisioner
+2026-10-08T10:06:39.3943861Z Hosted Compute Agent
+2026-10-08T10:06:39.3944284Z Version: 20261002.596
+2026-10-08T10:06:39.3944752Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-08T10:06:39.3945268Z Build Date: 2026-10-02T22:28:27Z
+2026-10-08T10:06:39.3945738Z Worker ID: {a57272eb-fce7-4298-b299-c69a0da67891}
+2026-10-08T10:06:39.3946317Z Region: centralus
+2026-10-08T10:06:39.3946716Z Cloud: Azure
+2026-10-08T10:06:39.3947115Z ##[endgroup]
+2026-10-08T10:06:39.3948029Z ##[group]Operating System
+2026-10-08T10:06:39.3948436Z Ubuntu
+2026-10-08T10:06:39.3949177Z 24.04.5
+2026-10-08T10:06:39.3949552Z LTS
+2026-10-08T10:06:39.3949923Z ##[endgroup]
+2026-10-08T10:06:39.3950326Z ##[group]Runner Image
+2026-10-08T10:06:39.3951053Z Image: ubuntu-24.04
+2026-10-08T10:06:39.3951514Z Version: 20261004.327.1
+2026-10-08T10:06:39.3952449Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-08T10:06:39.3953566Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-08T10:06:39.3954253Z ##[endgroup]
+2026-10-08T10:06:39.3955187Z ##[group]GITHUB_TOKEN Permissions
+2026-10-08T10:06:39.3957048Z Actions: read
+2026-10-08T10:06:39.3957499Z Contents: write
+2026-10-08T10:06:39.3957928Z Metadata: read
+2026-10-08T10:06:39.3958319Z ##[endgroup]
+2026-10-08T10:06:39.3959810Z Secret source: Actions
+2026-10-08T10:06:39.3960695Z Cache mode: write
+2026-10-08T10:06:39.3961246Z Prepare workflow directory
+2026-10-08T10:06:39.4357677Z Prepare all required actions
+2026-10-08T10:06:39.4393755Z Getting action download info
+2026-10-08T10:06:39.7170162Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-08T10:06:39.8879340Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-08T10:06:40.1126228Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-08T10:06:40.5219914Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-08T10:06:41.1172562Z Complete job name: scan (3)
+2026-10-08T10:06:41.1801811Z ##[group]Run actions/checkout@v4
+2026-10-08T10:06:41.1802876Z with:
+2026-10-08T10:06:41.1803590Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:06:41.1809528Z   token: ***
+2026-10-08T10:06:41.1810255Z   ssh-strict: true
+2026-10-08T10:06:41.1811196Z   ssh-user: git
+2026-10-08T10:06:41.1811989Z   persist-credentials: true
+2026-10-08T10:06:41.1812766Z   clean: true
+2026-10-08T10:06:41.1813472Z   sparse-checkout-cone-mode: true
+2026-10-08T10:06:41.1814339Z   fetch-depth: 1
+2026-10-08T10:06:41.1815038Z   fetch-tags: false
+2026-10-08T10:06:41.1815761Z   show-progress: true
+2026-10-08T10:06:41.1816532Z   lfs: false
+2026-10-08T10:06:41.1817203Z   submodules: false
+2026-10-08T10:06:41.1817985Z   set-safe-directory: true
+2026-10-08T10:06:41.1818793Z   allow-unsafe-pr-checkout: false
+2026-10-08T10:06:41.1819809Z env:
+2026-10-08T10:06:41.1825299Z   GH_TOKEN: ***
+2026-10-08T10:06:41.1826025Z ##[endgroup]
+2026-10-08T10:06:41.2608143Z Syncing repository: duuu-hub/bb-scanner
+2026-10-08T10:06:41.2610833Z ##[group]Getting Git version info
+2026-10-08T10:06:41.2611936Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:06:41.2613797Z [command]/usr/bin/git version
+2026-10-08T10:06:41.2681857Z git version 2.55.0
+2026-10-08T10:06:41.2702096Z ##[endgroup]
+2026-10-08T10:06:41.2712763Z Temporarily overriding HOME='/home/runner/work/_temp/fba81bb1-acf4-4453-81e9-143cb8406eef' before making global git config changes
+2026-10-08T10:06:41.2714898Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:06:41.2716576Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:06:41.3610882Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:06:41.3618462Z ##[group]Initializing the repository
+2026-10-08T10:06:41.3621904Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:06:41.4728788Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-08T10:06:41.4730801Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-08T10:06:41.4732669Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-08T10:06:41.4734083Z hint: call:
+2026-10-08T10:06:41.4734755Z hint:
+2026-10-08T10:06:41.4735610Z hint: 	git config --global init.defaultBranch <name>
+2026-10-08T10:06:41.4736603Z hint:
+2026-10-08T10:06:41.4737653Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-08T10:06:41.4739136Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-08T10:06:41.4740237Z hint:
+2026-10-08T10:06:41.4741102Z hint: 	git branch -m <name>
+2026-10-08T10:06:41.4741869Z hint:
+2026-10-08T10:06:41.4743122Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-08T10:06:41.4744690Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-08T10:06:41.4747336Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:06:41.5313276Z ##[endgroup]
+2026-10-08T10:06:41.5314567Z ##[group]Disabling automatic garbage collection
+2026-10-08T10:06:41.5316347Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-08T10:06:41.5409745Z ##[endgroup]
+2026-10-08T10:06:41.5411240Z ##[group]Setting up auth
+2026-10-08T10:06:41.5416046Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:06:41.5441389Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:06:41.5819184Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:06:41.5845523Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:06:41.5997913Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:06:41.6022610Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:06:41.6166968Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-08T10:06:41.7010155Z ##[endgroup]
+2026-10-08T10:06:41.7011898Z ##[group]Fetching the repository
+2026-10-08T10:06:41.7020350Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fbf329c27f4bff0d7f99febbbd4a14768ce2024a:refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:06:42.9888365Z From https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:06:42.9889301Z  * [new ref]         fbf329c27f4bff0d7f99febbbd4a14768ce2024a -> origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:06:42.9891715Z ##[endgroup]
+2026-10-08T10:06:42.9892126Z ##[group]Determining the checkout info
+2026-10-08T10:06:42.9893609Z ##[endgroup]
+2026-10-08T10:06:42.9898496Z [command]/usr/bin/git sparse-checkout disable
+2026-10-08T10:06:42.9944439Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-08T10:06:42.9967305Z ##[group]Checking out the ref
+2026-10-08T10:06:42.9970749Z [command]/usr/bin/git checkout --progress --force -B research-daily-breakdown-intraday-v27 refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:06:43.1793310Z Switched to a new branch 'research-daily-breakdown-intraday-v27'
+2026-10-08T10:06:43.1795720Z branch 'research-daily-breakdown-intraday-v27' set up to track 'origin/research-daily-breakdown-intraday-v27'.
+2026-10-08T10:06:43.1802432Z ##[endgroup]
+2026-10-08T10:06:43.1833821Z [command]/usr/bin/git log -1 --format=%H
+2026-10-08T10:06:43.1851615Z fbf329c27f4bff0d7f99febbbd4a14768ce2024a
+2026-10-08T10:06:43.2049689Z ##[group]Run actions/setup-python@v5
+2026-10-08T10:06:43.2050019Z with:
+2026-10-08T10:06:43.2050238Z   python-version: 3.12
+2026-10-08T10:06:43.2050723Z   check-latest: false
+2026-10-08T10:06:43.2052386Z   token: ***
+2026-10-08T10:06:43.2052623Z   update-environment: true
+2026-10-08T10:06:43.2052895Z   allow-prereleases: false
+2026-10-08T10:06:43.2053130Z   freethreaded: false
+2026-10-08T10:06:43.2053354Z env:
+2026-10-08T10:06:43.2054869Z   GH_TOKEN: ***
+2026-10-08T10:06:43.2055079Z ##[endgroup]
+2026-10-08T10:06:43.2970734Z ##[group]Installed versions
+2026-10-08T10:06:43.3036340Z (node:2080) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:06:43.3037016Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:06:43.3037482Z Successfully set up CPython (3.12.15)
+2026-10-08T10:06:43.3038141Z ##[endgroup]
+2026-10-08T10:06:43.3138532Z ##[group]Run set -euo pipefail
+2026-10-08T10:06:43.3138911Z [36;1mset -euo pipefail[0m
+2026-10-08T10:06:43.3139299Z [36;1mpip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5[0m
+2026-10-08T10:06:43.3328951Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:06:43.3329353Z env:
+2026-10-08T10:06:43.3331842Z   GH_TOKEN: ***
+2026-10-08T10:06:43.3332443Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:43.3333255Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:06:43.3334079Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:43.3334714Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:43.3335352Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:43.3336044Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:06:43.3337196Z ##[endgroup]
+2026-10-08T10:06:44.1715610Z Collecting pandas==2.3.3
+2026-10-08T10:06:44.2457002Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-08T10:06:44.4375156Z Collecting numpy==2.3.3
+2026-10-08T10:06:44.4502662Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-08T10:06:44.5227035Z Collecting numba==0.62.1
+2026-10-08T10:06:44.5350681Z   Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+2026-10-08T10:06:44.5578113Z Collecting requests==2.32.5
+2026-10-08T10:06:44.5701306Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2026-10-08T10:06:44.5904847Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-08T10:06:44.6028107Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-08T10:06:44.6342781Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-08T10:06:44.6466987Z   Downloading pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-08T10:06:44.6678754Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-08T10:06:44.6801241Z   Downloading tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-08T10:06:44.7214370Z Collecting llvmlite<0.46,>=0.45.0dev0 (from numba==0.62.1)
+2026-10-08T10:06:44.7342258Z   Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2026-10-08T10:06:44.8133999Z Collecting charset_normalizer<4,>=2 (from requests==2.32.5)
+2026-10-08T10:06:44.8259023Z   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+2026-10-08T10:06:44.8485880Z Collecting idna<4,>=2.5 (from requests==2.32.5)
+2026-10-08T10:06:44.8608872Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-08T10:06:44.8851935Z Collecting urllib3<3,>=1.21.1 (from requests==2.32.5)
+2026-10-08T10:06:44.8977458Z   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+2026-10-08T10:06:44.9215967Z Collecting certifi>=2017.4.17 (from requests==2.32.5)
+2026-10-08T10:06:44.9341928Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-08T10:06:44.9590254Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-08T10:06:44.9712139Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-08T10:06:44.9865626Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-08T10:06:45.1920724Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 66.9 MB/s  0:00:00
+2026-10-08T10:06:45.2045398Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-08T10:06:45.3321700Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 130.3 MB/s  0:00:00
+2026-10-08T10:06:45.3448162Z Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.8 MB)
+2026-10-08T10:06:45.3612223Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 239.0 MB/s  0:00:00
+2026-10-08T10:06:45.3736500Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-10-08T10:06:45.3878857Z Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+2026-10-08T10:06:45.4117946Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-08T10:06:45.4262322Z Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (56.3 MB)
+2026-10-08T10:06:45.8543785Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.3/56.3 MB 131.7 MB/s  0:00:00
+2026-10-08T10:06:45.8678577Z Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-08T10:06:45.8820937Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-08T10:06:45.8994743Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-08T10:06:45.9141361Z Downloading pytz-2026.5-py2.py3-none-any.whl (506 kB)
+2026-10-08T10:06:45.9296534Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-08T10:06:45.9436665Z Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-08T10:06:46.1117330Z Installing collected packages: pytz, urllib3, tzdata, six, numpy, llvmlite, idna, charset_normalizer, certifi, requests, python-dateutil, numba, pandas
+2026-10-08T10:06:52.5667407Z 
+2026-10-08T10:06:52.5680768Z Successfully installed certifi-2026.7.22 charset_normalizer-3.5.2 idna-3.20 llvmlite-0.45.1 numba-0.62.1 numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.5 requests-2.32.5 six-1.17.0 tzdata-2026.5 urllib3-2.8.0
+2026-10-08T10:06:52.6430983Z ##[group]Run actions/cache@v4
+2026-10-08T10:06:52.6431235Z with:
+2026-10-08T10:06:52.6431488Z   path: data
+2026-10-08T10:06:52.6431716Z   key: frozen-source-36095439671-15m-shard-3
+2026-10-08T10:06:52.6432009Z   enableCrossOsArchive: false
+2026-10-08T10:06:52.6432259Z   fail-on-cache-miss: false
+2026-10-08T10:06:52.6432492Z   lookup-only: false
+2026-10-08T10:06:52.6432727Z   save-always: false
+2026-10-08T10:06:52.6432950Z env:
+2026-10-08T10:06:52.6434714Z   GH_TOKEN: ***
+2026-10-08T10:06:52.6434984Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.6435356Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:06:52.6435719Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.6436047Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.6436412Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.6436795Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:06:52.6437120Z ##[endgroup]
+2026-10-08T10:06:52.7155224Z (node:2119) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:06:52.7155757Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:06:52.8525182Z Cache not found for input keys: frozen-source-36095439671-15m-shard-3
+2026-10-08T10:06:52.8592354Z ##[group]Run set -euo pipefail
+2026-10-08T10:06:52.8592647Z [36;1mset -euo pipefail[0m
+2026-10-08T10:06:52.8592887Z [36;1mif [ '' != 'true' ]; then[0m
+2026-10-08T10:06:52.8593304Z [36;1m gh run download 36095439671 -R duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-data-shard-3 -D data[0m
+2026-10-08T10:06:52.8593684Z [36;1mfi[0m
+2026-10-08T10:06:52.8594036Z [36;1mgh run download 36858492497 -R duuu-hub/bb-scanner -n day-edge-v2-btc -D btc[0m
+2026-10-08T10:06:52.8594550Z [36;1mgh run download 36095439671 -R duuu-hub/bb-scanner -n rank5-binance-um-15m-5y-manifest-shard-3 -D source-manifest[0m
+2026-10-08T10:06:52.8595345Z [36;1mpython scripts/research_evidence_archive.py verify-source --data data --manifests source-manifest --baseline research/path-efficiency-resumption-v23/FROZEN_INPUT_HASHES.json --out source-check.json[0m
+2026-10-08T10:06:52.8629284Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:06:52.8629690Z env:
+2026-10-08T10:06:52.8631712Z   GH_TOKEN: ***
+2026-10-08T10:06:52.8631999Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.8632354Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:06:52.8632732Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.8633059Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.8633371Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:06:52.8633714Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:06:52.8634029Z ##[endgroup]
+2026-10-08T10:07:13.3672253Z FROZEN_SOURCE_VERIFIED 106 files 31 prior SHA256 matches
+2026-10-08T10:07:13.4159485Z ##[group]Run actions/cache@v4
+2026-10-08T10:07:13.4159742Z with:
+2026-10-08T10:07:13.4159996Z   path: cache/verified-1m
+2026-10-08T10:07:13.4160274Z   key: daily-breakdown-intraday-v27-1m-shard-3
+2026-10-08T10:07:13.4160951Z   restore-keys: daily-channel-breakout-v25-dev-1m-shard-3
+taker-absorption-release-v12-dev-1m-shard-3
+2026-10-08T10:07:13.4161422Z   enableCrossOsArchive: false
+2026-10-08T10:07:13.4161660Z   fail-on-cache-miss: false
+2026-10-08T10:07:13.4161897Z   lookup-only: false
+2026-10-08T10:07:13.4162137Z   save-always: false
+2026-10-08T10:07:13.4162337Z env:
+2026-10-08T10:07:13.4164370Z   GH_TOKEN: ***
+2026-10-08T10:07:13.4164630Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.4165051Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:07:13.4165439Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.4165784Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.4166561Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.4166934Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:07:13.4167263Z ##[endgroup]
+2026-10-08T10:07:13.4923546Z (node:2162) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:07:13.4924239Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:07:13.6540733Z Cache not found for input keys: daily-breakdown-intraday-v27-1m-shard-3, daily-channel-breakout-v25-dev-1m-shard-3, taker-absorption-release-v12-dev-1m-shard-3
+2026-10-08T10:07:13.6601738Z ##[group]Run set -euo pipefail
+2026-10-08T10:07:13.6602094Z [36;1mset -euo pipefail[0m
+2026-10-08T10:07:13.6602350Z [36;1mfor stage in DEV GATE; do[0m
+2026-10-08T10:07:13.6602934Z [36;1m python scripts/daily_breakdown_intraday_v27.py scan --stage "$stage" --data data --btc btc/BTCUSDT.csv.gz --source-check source-check.json --out scan-3/"$stage" --cache cache/verified-1m[0m
+2026-10-08T10:07:13.6603563Z [36;1mdone[0m
+2026-10-08T10:07:13.6637440Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:07:13.6637729Z env:
+2026-10-08T10:07:13.6639463Z   GH_TOKEN: ***
+2026-10-08T10:07:13.6639777Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.6640261Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:07:13.6640756Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.6641085Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.6641519Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:13.6641861Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:07:13.6642166Z ##[endgroup]
+2026-10-08T10:07:20.3533782Z V27_SCAN DEV 32 106 1895
+2026-10-08T10:07:23.7732369Z V27_SCAN DEV 48 106 3392
+2026-10-08T10:07:32.4967476Z V27_SCAN_COMPLETE DEV 4422 20
+2026-10-08T10:07:41.2852015Z V27_SCAN GATE 32 106 1037
+2026-10-08T10:07:45.5167009Z V27_SCAN GATE 48 106 1634
+2026-10-08T10:07:48.7815481Z V27_SCAN GATE 64 106 1990
+2026-10-08T10:07:57.5378024Z V27_SCAN_COMPLETE GATE 2321 19
+2026-10-08T10:07:57.5938840Z ##[group]Run set -euo pipefail
+2026-10-08T10:07:57.5939250Z [36;1mset -euo pipefail[0m
+2026-10-08T10:07:57.5940087Z [36;1mpython scripts/research_evidence_archive.py archive --source scan-3 --kind V27-scan-shard-3 --out research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3[0m
+2026-10-08T10:07:57.5941134Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-08T10:07:57.5941639Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-08T10:07:57.5942293Z [36;1mgit checkout -b "research-daily-breakdown-intraday-v27-scan-shard-3-37761086287"[0m
+2026-10-08T10:07:57.5942966Z [36;1mgit add "research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3"[0m
+2026-10-08T10:07:57.5943550Z [36;1mgit commit -m "Preserve V27 original scan-shard-3 partition for run 37761086287"[0m
+2026-10-08T10:07:57.5944071Z [36;1mgit push origin HEAD[0m
+2026-10-08T10:07:57.5991023Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:07:57.5991477Z env:
+2026-10-08T10:07:57.5993994Z   GH_TOKEN: ***
+2026-10-08T10:07:57.5994457Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:57.5994962Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:07:57.5995550Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:57.5996015Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:57.5996456Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:07:57.5996984Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:07:57.5997359Z ##[endgroup]
+2026-10-08T10:07:57.8104290Z EVIDENCE_ARCHIVED V27-scan-shard-3 16 files 870925 bytes
+2026-10-08T10:07:57.8549889Z Switched to a new branch 'research-daily-breakdown-intraday-v27-scan-shard-3-37761086287'
+2026-10-08T10:07:57.9970675Z [research-daily-breakdown-intraday-v27-scan-shard-3-37761086287 0aac3fa] Preserve V27 original scan-shard-3 partition for run 37761086287
+2026-10-08T10:07:57.9971275Z  17 files changed, 6658 insertions(+)
+2026-10-08T10:07:57.9971810Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/EVIDENCE_MANIFEST.json
+2026-10-08T10:07:57.9972400Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/exclusions.csv
+2026-10-08T10:07:57.9972973Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/frozen_context.json
+2026-10-08T10:07:57.9973586Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/independent_candidates.csv.gz
+2026-10-08T10:07:57.9974179Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/minute_inputs.json
+2026-10-08T10:07:57.9974766Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/minute_slices.json
+2026-10-08T10:07:57.9975312Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/registry.json
+2026-10-08T10:07:57.9976070Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/scan_meta.json
+2026-10-08T10:07:57.9976630Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/DEV/source_check.json
+2026-10-08T10:07:57.9977174Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/exclusions.csv
+2026-10-08T10:07:57.9977774Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/frozen_context.json
+2026-10-08T10:07:57.9978367Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/independent_candidates.csv.gz
+2026-10-08T10:07:57.9978991Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/minute_inputs.json
+2026-10-08T10:07:57.9979650Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/minute_slices.json
+2026-10-08T10:07:57.9980232Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/registry.json
+2026-10-08T10:07:57.9980957Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/scan_meta.json
+2026-10-08T10:07:57.9981507Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/scan-shard-3/files/GATE/source_check.json
+2026-10-08T10:08:01.5401658Z remote: 
+2026-10-08T10:08:01.5402763Z remote: Create a pull request for 'research-daily-breakdown-intraday-v27-scan-shard-3-37761086287' on GitHub by visiting:        
+2026-10-08T10:08:01.5403713Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-daily-breakdown-intraday-v27-scan-shard-3-37761086287        
+2026-10-08T10:08:01.5404460Z remote: 
+2026-10-08T10:08:01.5410832Z To https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:08:01.5411418Z  * [new branch]      HEAD -> research-daily-breakdown-intraday-v27-scan-shard-3-37761086287
+2026-10-08T10:08:01.5501632Z ##[group]Run actions/upload-artifact@v4
+2026-10-08T10:08:01.5502035Z with:
+2026-10-08T10:08:01.5502300Z   name: daily-breakdown-intraday-v27-scan-3
+2026-10-08T10:08:01.5502617Z   path: scan-3/
+2026-10-08T10:08:01.5502828Z   retention-days: 30
+2026-10-08T10:08:01.5503084Z   compression-level: 0
+2026-10-08T10:08:01.5503349Z   if-no-files-found: warn
+2026-10-08T10:08:01.5503588Z   overwrite: false
+2026-10-08T10:08:01.5503832Z   include-hidden-files: false
+2026-10-08T10:08:01.5504077Z env:
+2026-10-08T10:08:01.5505957Z   GH_TOKEN: ***
+2026-10-08T10:08:01.5506248Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:08:01.5506628Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:08:01.5507013Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:08:01.5507353Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:08:01.5507706Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:08:01.5508150Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:08:01.5508477Z ##[endgroup]
+2026-10-08T10:08:01.6703907Z (node:2219) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:08:01.6704565Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:08:01.6784151Z With the provided path, there will be 16 files uploaded
+2026-10-08T10:08:01.6787317Z Artifact name is valid!
+2026-10-08T10:08:01.6787676Z Root directory input is valid!
+2026-10-08T10:08:01.9526298Z Beginning upload of artifact content to blob storage
+2026-10-08T10:08:01.9830011Z (node:2219) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-08T10:08:02.3660752Z Uploaded bytes 873131
+2026-10-08T10:08:02.4102411Z Finished uploading artifact content to blob storage!
+2026-10-08T10:08:02.4103256Z SHA256 digest of uploaded artifact zip is c7b02d7a9d7d066ba41e8e247e611400980bbdfbb923ac5faebd83567cda0885
+2026-10-08T10:08:02.4104119Z Finalizing artifact upload
+2026-10-08T10:08:02.6472923Z Artifact daily-breakdown-intraday-v27-scan-3.zip successfully finalized. Artifact ID 11541589551
+2026-10-08T10:08:02.6473702Z Artifact daily-breakdown-intraday-v27-scan-3 has been successfully uploaded! Final size is 873131 bytes. Artifact ID is 11541589551
+2026-10-08T10:08:02.6479064Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287/artifacts/11541589551
+2026-10-08T10:08:02.6606359Z Post job cleanup.
+2026-10-08T10:08:02.7357975Z (node:2232) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:08:02.7358638Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:08:02.7436739Z [warning]Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.
+2026-10-08T10:08:02.7506710Z Post job cleanup.
+2026-10-08T10:08:02.8251543Z (node:2245) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:08:02.8252070Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:08:02.8373996Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/bb-scanner/bb-scanner --files-from manifest.txt --use-compress-program zstdmt
+2026-10-08T10:08:03.1642646Z (node:2245) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-08T10:08:04.1556471Z Sent 28546645 of 229873237 (12.4%), 27.2 MBs/sec
+2026-10-08T10:08:05.1028243Z Sent 229873237 of 229873237 (100.0%), 112.6 MBs/sec
+2026-10-08T10:08:05.2081611Z Cache saved with key: frozen-source-36095439671-15m-shard-3
+2026-10-08T10:08:05.2184149Z Post job cleanup.
+2026-10-08T10:08:05.3025879Z (node:2265) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:08:05.3026859Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:08:05.3191501Z Post job cleanup.
+2026-10-08T10:08:05.3849749Z [command]/usr/bin/git version
+2026-10-08T10:08:05.3878460Z git version 2.55.0
+2026-10-08T10:08:05.3902804Z Temporarily overriding HOME='/home/runner/work/_temp/2af1eb7f-5458-4302-ba04-8d9db42612d9' before making global git config changes
+2026-10-08T10:08:05.3903819Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:08:05.3906779Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:08:05.3935082Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:08:05.3960621Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:08:05.4115635Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:08:05.4133206Z http.https://github.com/.extraheader
+2026-10-08T10:08:05.4139919Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-08T10:08:05.4163312Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:08:05.4323731Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:08:05.4347421Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:08:05.4609281Z Cleaning up orphan processes
+2026-10-08T10:08:05.4795849Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4, actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

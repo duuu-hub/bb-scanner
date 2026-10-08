@@ -1,0 +1,389 @@
+﻿2026-10-08T10:18:17.6626390Z Current runner version: '2.337.0'
+2026-10-08T10:18:17.6650381Z ##[group]Runner Image Provisioner
+2026-10-08T10:18:17.6651330Z Hosted Compute Agent
+2026-10-08T10:18:17.6652186Z Version: 20261002.596
+2026-10-08T10:18:17.6652807Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-08T10:18:17.6653589Z Build Date: 2026-10-02T22:28:27Z
+2026-10-08T10:18:17.6654256Z Worker ID: {b9cd0929-ba13-4de3-92e6-61252a7fe3a6}
+2026-10-08T10:18:17.6654932Z Region: westus3
+2026-10-08T10:18:17.6655539Z Cloud: Azure
+2026-10-08T10:18:17.6656062Z ##[endgroup]
+2026-10-08T10:18:17.6657674Z ##[group]Operating System
+2026-10-08T10:18:17.6658288Z Ubuntu
+2026-10-08T10:18:17.6658783Z 24.04.5
+2026-10-08T10:18:17.6659324Z LTS
+2026-10-08T10:18:17.6659844Z ##[endgroup]
+2026-10-08T10:18:17.6660738Z ##[group]Runner Image
+2026-10-08T10:18:17.6661369Z Image: ubuntu-24.04
+2026-10-08T10:18:17.6662220Z Version: 20261004.327.1
+2026-10-08T10:18:17.6663555Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-08T10:18:17.6665084Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-08T10:18:17.6666033Z ##[endgroup]
+2026-10-08T10:18:17.6667222Z ##[group]GITHUB_TOKEN Permissions
+2026-10-08T10:18:17.6669563Z Actions: read
+2026-10-08T10:18:17.6670180Z Contents: write
+2026-10-08T10:18:17.6670784Z Metadata: read
+2026-10-08T10:18:17.6671324Z ##[endgroup]
+2026-10-08T10:18:17.6673668Z Secret source: Actions
+2026-10-08T10:18:17.6674577Z Cache mode: write
+2026-10-08T10:18:17.6675283Z Prepare workflow directory
+2026-10-08T10:18:17.7173823Z Prepare all required actions
+2026-10-08T10:18:17.7224658Z Getting action download info
+2026-10-08T10:18:18.0538388Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-08T10:18:18.1430203Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-08T10:18:18.2698692Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-08T10:18:18.9935158Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-08T10:18:19.2864990Z Complete job name: collect
+2026-10-08T10:18:19.3731296Z ##[group]Run actions/checkout@v4
+2026-10-08T10:18:19.3733238Z with:
+2026-10-08T10:18:19.3734199Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:18:19.3743136Z   token: ***
+2026-10-08T10:18:19.3744076Z   ssh-strict: true
+2026-10-08T10:18:19.3744988Z   ssh-user: git
+2026-10-08T10:18:19.3745949Z   persist-credentials: true
+2026-10-08T10:18:19.3746963Z   clean: true
+2026-10-08T10:18:19.3747895Z   sparse-checkout-cone-mode: true
+2026-10-08T10:18:19.3749045Z   fetch-depth: 1
+2026-10-08T10:18:19.3749974Z   fetch-tags: false
+2026-10-08T10:18:19.3750920Z   show-progress: true
+2026-10-08T10:18:19.3751986Z   lfs: false
+2026-10-08T10:18:19.3752978Z   submodules: false
+2026-10-08T10:18:19.3753973Z   set-safe-directory: true
+2026-10-08T10:18:19.3755090Z   allow-unsafe-pr-checkout: false
+2026-10-08T10:18:19.3756500Z env:
+2026-10-08T10:18:19.3765451Z   GH_TOKEN: ***
+2026-10-08T10:18:19.3766418Z ##[endgroup]
+2026-10-08T10:18:19.4841758Z Syncing repository: duuu-hub/bb-scanner
+2026-10-08T10:18:19.4845086Z ##[group]Getting Git version info
+2026-10-08T10:18:19.4846611Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:18:19.4848706Z [command]/usr/bin/git version
+2026-10-08T10:18:19.4887537Z git version 2.55.0
+2026-10-08T10:18:19.4907370Z ##[endgroup]
+2026-10-08T10:18:19.4924309Z Temporarily overriding HOME='/home/runner/work/_temp/e4725b33-7ae5-4163-b69d-bf2695098580' before making global git config changes
+2026-10-08T10:18:19.4928229Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:18:19.4931645Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:18:19.4977605Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:18:19.4982975Z ##[group]Initializing the repository
+2026-10-08T10:18:19.4988664Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:18:19.5080003Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-08T10:18:19.5082954Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-08T10:18:19.5085170Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-08T10:18:19.5086802Z hint: call:
+2026-10-08T10:18:19.5087849Z hint:
+2026-10-08T10:18:19.5089067Z hint: 	git config --global init.defaultBranch <name>
+2026-10-08T10:18:19.5090896Z hint:
+2026-10-08T10:18:19.5092626Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-08T10:18:19.5094595Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-08T10:18:19.5096094Z hint:
+2026-10-08T10:18:19.5096974Z hint: 	git branch -m <name>
+2026-10-08T10:18:19.5097988Z hint:
+2026-10-08T10:18:19.5099375Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-08T10:18:19.5102517Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-08T10:18:19.5107290Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:18:19.5140218Z ##[endgroup]
+2026-10-08T10:18:19.5142189Z ##[group]Disabling automatic garbage collection
+2026-10-08T10:18:19.5144349Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-08T10:18:19.5176543Z ##[endgroup]
+2026-10-08T10:18:19.5178035Z ##[group]Setting up auth
+2026-10-08T10:18:19.5183797Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:18:19.5216208Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:18:19.5531202Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:18:19.5569628Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:18:19.5782509Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:18:19.5818680Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:18:19.6010305Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-08T10:18:19.6045815Z ##[endgroup]
+2026-10-08T10:18:19.6047750Z ##[group]Fetching the repository
+2026-10-08T10:18:19.6056469Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fbf329c27f4bff0d7f99febbbd4a14768ce2024a:refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:18:21.3276942Z From https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:18:21.3278985Z  * [new ref]         fbf329c27f4bff0d7f99febbbd4a14768ce2024a -> origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:18:21.3282103Z ##[endgroup]
+2026-10-08T10:18:21.3283099Z ##[group]Determining the checkout info
+2026-10-08T10:18:21.3284059Z ##[endgroup]
+2026-10-08T10:18:21.3290643Z [command]/usr/bin/git sparse-checkout disable
+2026-10-08T10:18:21.3338669Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-08T10:18:21.3366592Z ##[group]Checking out the ref
+2026-10-08T10:18:21.3372434Z [command]/usr/bin/git checkout --progress --force -B research-daily-breakdown-intraday-v27 refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:18:21.5894784Z Switched to a new branch 'research-daily-breakdown-intraday-v27'
+2026-10-08T10:18:21.5896823Z branch 'research-daily-breakdown-intraday-v27' set up to track 'origin/research-daily-breakdown-intraday-v27'.
+2026-10-08T10:18:21.5905623Z ##[endgroup]
+2026-10-08T10:18:21.5945061Z [command]/usr/bin/git log -1 --format=%H
+2026-10-08T10:18:21.5967918Z fbf329c27f4bff0d7f99febbbd4a14768ce2024a
+2026-10-08T10:18:21.6228617Z ##[group]Run actions/setup-python@v5
+2026-10-08T10:18:21.6229150Z with:
+2026-10-08T10:18:21.6229529Z   python-version: 3.12
+2026-10-08T10:18:21.6229919Z   check-latest: false
+2026-10-08T10:18:21.6232877Z   token: ***
+2026-10-08T10:18:21.6233284Z   update-environment: true
+2026-10-08T10:18:21.6233712Z   allow-prereleases: false
+2026-10-08T10:18:21.6234145Z   freethreaded: false
+2026-10-08T10:18:21.6234520Z env:
+2026-10-08T10:18:21.6237035Z   GH_TOKEN: ***
+2026-10-08T10:18:21.6237395Z ##[endgroup]
+2026-10-08T10:18:21.7555244Z ##[group]Installed versions
+2026-10-08T10:18:21.7635265Z (node:2065) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:18:21.7636550Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:18:21.7637266Z Successfully set up CPython (3.12.15)
+2026-10-08T10:18:21.7638242Z ##[endgroup]
+2026-10-08T10:18:21.7823240Z ##[group]Run set -euo pipefail
+2026-10-08T10:18:21.7823952Z [36;1mset -euo pipefail[0m
+2026-10-08T10:18:21.7824703Z [36;1mpip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5[0m
+2026-10-08T10:18:21.8061923Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:18:21.8062456Z env:
+2026-10-08T10:18:21.8065308Z   GH_TOKEN: ***
+2026-10-08T10:18:21.8065770Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:21.8066301Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:18:21.8066827Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:21.8067295Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:21.8067772Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:21.8068255Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:18:21.8068675Z ##[endgroup]
+2026-10-08T10:18:22.7696920Z Collecting pandas==2.3.3
+2026-10-08T10:18:22.8268034Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-08T10:18:23.0904671Z Collecting numpy==2.3.3
+2026-10-08T10:18:23.0942200Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-08T10:18:23.2019608Z Collecting numba==0.62.1
+2026-10-08T10:18:23.2067017Z   Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+2026-10-08T10:18:23.2329541Z Collecting requests==2.32.5
+2026-10-08T10:18:23.2364549Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2026-10-08T10:18:23.2567150Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-08T10:18:23.2599651Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-08T10:18:23.3005262Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-08T10:18:23.3042217Z   Downloading pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-08T10:18:23.3350189Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-08T10:18:23.3384296Z   Downloading tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-08T10:18:23.3947135Z Collecting llvmlite<0.46,>=0.45.0dev0 (from numba==0.62.1)
+2026-10-08T10:18:23.3998693Z   Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2026-10-08T10:18:23.5236281Z Collecting charset_normalizer<4,>=2 (from requests==2.32.5)
+2026-10-08T10:18:23.5272732Z   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+2026-10-08T10:18:23.5689187Z Collecting idna<4,>=2.5 (from requests==2.32.5)
+2026-10-08T10:18:23.5724385Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-08T10:18:23.5992368Z Collecting urllib3<3,>=1.21.1 (from requests==2.32.5)
+2026-10-08T10:18:23.6026816Z   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+2026-10-08T10:18:23.6267607Z Collecting certifi>=2017.4.17 (from requests==2.32.5)
+2026-10-08T10:18:23.6301287Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-08T10:18:23.6502179Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-08T10:18:23.6533349Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-08T10:18:23.6603792Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-08T10:18:23.7804966Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 106.0 MB/s  0:00:00
+2026-10-08T10:18:23.7841588Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-08T10:18:23.9397459Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 108.2 MB/s  0:00:00
+2026-10-08T10:18:23.9436378Z Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.8 MB)
+2026-10-08T10:18:23.9780866Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 114.4 MB/s  0:00:00
+2026-10-08T10:18:23.9815657Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-10-08T10:18:23.9870548Z Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+2026-10-08T10:18:24.0150499Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-08T10:18:24.0204916Z Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (56.3 MB)
+2026-10-08T10:18:24.9143856Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.3/56.3 MB 62.9 MB/s  0:00:00
+2026-10-08T10:18:24.9182503Z Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-08T10:18:25.1542648Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-08T10:18:25.1603160Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-08T10:18:25.1663079Z Downloading pytz-2026.5-py2.py3-none-any.whl (506 kB)
+2026-10-08T10:18:25.1737782Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-08T10:18:25.1785810Z Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-08T10:18:25.4103243Z Installing collected packages: pytz, urllib3, tzdata, six, numpy, llvmlite, idna, charset_normalizer, certifi, requests, python-dateutil, numba, pandas
+2026-10-08T10:18:35.3079348Z 
+2026-10-08T10:18:35.3103434Z Successfully installed certifi-2026.7.22 charset_normalizer-3.5.2 idna-3.20 llvmlite-0.45.1 numba-0.62.1 numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.5 requests-2.32.5 six-1.17.0 tzdata-2026.5 urllib3-2.8.0
+2026-10-08T10:18:35.4236595Z ##[group]Run actions/download-artifact@v4
+2026-10-08T10:18:35.4236980Z with:
+2026-10-08T10:18:35.4237336Z   pattern: daily-breakdown-intraday-v27-results-*
+2026-10-08T10:18:35.4237767Z   path: results
+2026-10-08T10:18:35.4238071Z   merge-multiple: false
+2026-10-08T10:18:35.4238453Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:18:35.4238807Z   run-id: 37761086287
+2026-10-08T10:18:35.4239104Z env:
+2026-10-08T10:18:35.4241942Z   GH_TOKEN: ***
+2026-10-08T10:18:35.4242309Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:35.4242861Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:18:35.4243376Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:35.4243811Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:35.4244294Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:35.4244741Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:18:35.4245264Z ##[endgroup]
+2026-10-08T10:18:35.5864974Z (node:2108) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:18:35.5865811Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:18:35.8205889Z Found 27 artifact(s)
+2026-10-08T10:18:35.8207231Z Filtering artifacts by pattern 'daily-breakdown-intraday-v27-results-*'
+2026-10-08T10:18:35.8228932Z Preparing to download the following artifacts:
+2026-10-08T10:18:35.8230308Z - daily-breakdown-intraday-v27-results-10 (ID: 11543295223, Size: 13331582, Expected Digest: sha256:94727c5056402b4e22958f8c79aae666b172d1b7b7065df94ae0893cda5c2089)
+2026-10-08T10:18:35.8231778Z - daily-breakdown-intraday-v27-results-2 (ID: 11543150963, Size: 18789154, Expected Digest: sha256:ccafd53e9e9d8b9b555c58885f31fd5860dd94b828b9a532cbbe90e5505047b3)
+2026-10-08T10:18:35.8233371Z - daily-breakdown-intraday-v27-results-15 (ID: 11543096463, Size: 10458356, Expected Digest: sha256:f44f7f0e4fafb484f5ed5119f552c341820dd753cfafd5a1d941f96977ea39f2)
+2026-10-08T10:18:35.8235085Z - daily-breakdown-intraday-v27-results-1 (ID: 11543095713, Size: 22226833, Expected Digest: sha256:bc3aa977511cbc7ed6997313bd718399816768edb5ac200bd4a5a698acbfc898)
+2026-10-08T10:18:35.8236706Z - daily-breakdown-intraday-v27-results-5 (ID: 11543031114, Size: 14310000, Expected Digest: sha256:c5f30fb9ee1171e7076bc7810da087f1cd95299a95e0b20a6bfcb259cd6980f6)
+2026-10-08T10:18:35.8238519Z - daily-breakdown-intraday-v27-results-13 (ID: 11542727683, Size: 11868269, Expected Digest: sha256:760eb1d1238079bee03d6dccc1e94a935171fdd614a5e5da311aac4d8df56e4e)
+2026-10-08T10:18:35.8239809Z - daily-breakdown-intraday-v27-results-9 (ID: 11542563322, Size: 15547506, Expected Digest: sha256:a1b3040eb453e3979e73c78f594c157ca5d7b4e3c897e8c5fc9aa3d3af618790)
+2026-10-08T10:18:35.8241034Z - daily-breakdown-intraday-v27-results-3 (ID: 11542472740, Size: 18717295, Expected Digest: sha256:3ee26724a9080549a3ad202290a0087750d8efc53e1d51a146d8cc769d7b15d3)
+2026-10-08T10:18:35.8242565Z - daily-breakdown-intraday-v27-results-14 (ID: 11542413232, Size: 10474235, Expected Digest: sha256:208902bb42a25afce83a5ef9ddd672d3806df803bf2e3c6a87a1d4fdd023caa4)
+2026-10-08T10:18:35.8243871Z - daily-breakdown-intraday-v27-results-6 (ID: 11542353167, Size: 12370403, Expected Digest: sha256:1fc1a8f38f9d39e4682a0b8e1c8a2b04d0a8f2057102d5c99d5828e76ed5a67e)
+2026-10-08T10:18:35.8245346Z - daily-breakdown-intraday-v27-results-11 (ID: 11542338769, Size: 13316461, Expected Digest: sha256:8e6b582a9ece3962da4c29e124cafa5df4ff2fad569be8285d25fd7128ff7385)
+2026-10-08T10:18:35.8246635Z - daily-breakdown-intraday-v27-results-12 (ID: 11542288946, Size: 11981140, Expected Digest: sha256:c2aad9a2e0a3aac289ac2a446e9c4ed299771fe1a8f2791204d73efd04f913ba)
+2026-10-08T10:18:35.8248170Z - daily-breakdown-intraday-v27-results-0 (ID: 11542264322, Size: 22381228, Expected Digest: sha256:c0cfed5950409e3695860976286d5db828d680906add7b9eb3c245c12461feee)
+2026-10-08T10:18:35.8249734Z - daily-breakdown-intraday-v27-results-8 (ID: 11542253724, Size: 15663162, Expected Digest: sha256:a1116dd6ed78534b6342c8d17a071ab6fe75e7b1fb2b205ecf1f23d4038e37c8)
+2026-10-08T10:18:35.8251207Z - daily-breakdown-intraday-v27-results-7 (ID: 11542248539, Size: 12316567, Expected Digest: sha256:398f191d2a1fb752805309e23b42d25ff8bfcbc61cbb925fe9594ce72e744769)
+2026-10-08T10:18:35.8252622Z - daily-breakdown-intraday-v27-results-4 (ID: 11541959141, Size: 14433542, Expected Digest: sha256:65354de073b7ee5bc1fa85aaaa50731cb6a71630700350700f4b29f7d537bc5a)
+2026-10-08T10:18:36.0523518Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-accee968-89f4-5173-884d-177c85b12135/artifacts/86bd00f49505afb791a497fc2dcd54a2d091aa2d770612530464396d398e022c.zip
+2026-10-08T10:18:36.0525717Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-10
+2026-10-08T10:18:36.1717258Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-e01eb230-6b72-50ab-af82-6cb8fc4bd11b/artifacts/55cc406fb644907bf452b0b651a1e126d53f1e5b6a22c19e4314b5e284011cd6.zip
+2026-10-08T10:18:36.1719379Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-15
+2026-10-08T10:18:36.1777020Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-b8ed78e7-9b00-53a8-9e91-be1f51b30545/artifacts/8ac21f504a1846ab1101fe3bd42983229ec89b852b2f10637f0e3e1842277163.zip
+2026-10-08T10:18:36.1778611Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-5
+2026-10-08T10:18:36.1883783Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-c5d0e82b-0f1d-5f65-a73e-fe27eaab8b7e/artifacts/d543907831a685ab3235f30ae0a9b1a45dcc002b55e1e0f63f13acce0ca51387.zip
+2026-10-08T10:18:36.1885940Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-2
+2026-10-08T10:18:36.1905183Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-a954ce62-3886-53fd-9057-53798809ae82/artifacts/047e5faf5aafd3f324646ba489645ca658dd32ca62dfc19c0305ba2e99421cba.zip
+2026-10-08T10:18:36.1907344Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-3
+2026-10-08T10:18:36.1936228Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-e649a452-baeb-5b37-bebe-3e2962cc597d/artifacts/513694c4f66bcb3c7cf55b8a12be4be6f256fdce68b66241e72b0de1cb95bc36.zip
+2026-10-08T10:18:36.1937774Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-13
+2026-10-08T10:18:36.1969438Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-c9b9a026-2c9f-5375-b6ee-f55cfa643c8a/artifacts/783e82005ddb819250bdf8c917e3dfdb9a0a28800a815af65fbc6f7ee3e2828f.zip
+2026-10-08T10:18:36.1972218Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-1
+2026-10-08T10:18:36.2109472Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-2c1756fc-aad2-5fc5-83c4-c89feef4e629/artifacts/2de63e5746c79fca9d4dfc3cc4fef24331c4065742f1ed80aa0144d84be9bf3e.zip
+2026-10-08T10:18:36.2112509Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-11
+2026-10-08T10:18:36.2202750Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-beef7087-287c-58b4-a5bf-5729f4dcb29b/artifacts/35e8632b08ee48e6c0de112060fbbb98b8ec775f86e84ac491a5ef45f5a96537.zip
+2026-10-08T10:18:36.2204370Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-9
+2026-10-08T10:18:36.2324634Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-cda43dfd-4580-5b2e-b143-085124c3e114/artifacts/e115379e870f39ea8641a74f389c7b63861efe87b4ff7e6ff0bbbdff8c6fe765.zip
+2026-10-08T10:18:36.2326449Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-14
+2026-10-08T10:18:36.2367270Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-28a45e54-99cd-5ff1-9490-377922efc2b7/artifacts/dc44cf4ad5dbf4ed7c1c112fca8d2bee1383d0e9ebf98149dc330dd694eafe59.zip
+2026-10-08T10:18:36.2368786Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-0
+2026-10-08T10:18:36.2469427Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-5d12ff40-0c61-5996-853c-f87e058c243c/artifacts/786c933597911b895eb25b3a48d81f56d4ff0b9b33f80ac020f308d4de069658.zip
+2026-10-08T10:18:36.2471004Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-8
+2026-10-08T10:18:36.2495519Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-8a686a87-7558-5fd4-95c8-66bd1323e85b/artifacts/fc280a5c1fa4346869488e0bd0ce2b7d71e2091426ab3d59fa84d0a22ee34eef.zip
+2026-10-08T10:18:36.2497692Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-4
+2026-10-08T10:18:36.2987538Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-0621a6f1-b01a-5d7d-8a38-f310292d89d0/artifacts/7395c2f9b9fea12a1df15d6236dd5f79200371489ee4ed07f90d68218201225f.zip
+2026-10-08T10:18:36.2989760Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-12
+2026-10-08T10:18:36.3210264Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-b79188cf-8d37-5b31-a838-60d8235f5ebf/artifacts/65f7bb1d47e3eab7f77727596274b4fa2968385946da5c910bc435906491c6f2.zip
+2026-10-08T10:18:36.3212382Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-6
+2026-10-08T10:18:36.3232253Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-7d587ec4-a78f-5e94-9e93-cf44bdbd8564/artifacts/87634f74a17a47ff58d6d680df85d05003871199629fd94c82dedad3145afb27.zip
+2026-10-08T10:18:36.3234692Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/results/daily-breakdown-intraday-v27-results-7
+2026-10-08T10:18:36.3464691Z (node:2108) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-08T10:18:37.3917566Z SHA256 digest of downloaded artifact is 94727c5056402b4e22958f8c79aae666b172d1b7b7065df94ae0893cda5c2089
+2026-10-08T10:18:37.3918914Z Artifact download completed successfully.
+2026-10-08T10:18:37.5834008Z SHA256 digest of downloaded artifact is f44f7f0e4fafb484f5ed5119f552c341820dd753cfafd5a1d941f96977ea39f2
+2026-10-08T10:18:37.5835025Z Artifact download completed successfully.
+2026-10-08T10:18:37.5946221Z SHA256 digest of downloaded artifact is 760eb1d1238079bee03d6dccc1e94a935171fdd614a5e5da311aac4d8df56e4e
+2026-10-08T10:18:37.5961855Z Artifact download completed successfully.
+2026-10-08T10:18:37.6448918Z SHA256 digest of downloaded artifact is 208902bb42a25afce83a5ef9ddd672d3806df803bf2e3c6a87a1d4fdd023caa4
+2026-10-08T10:18:37.6450290Z Artifact download completed successfully.
+2026-10-08T10:18:37.6997195Z SHA256 digest of downloaded artifact is c2aad9a2e0a3aac289ac2a446e9c4ed299771fe1a8f2791204d73efd04f913ba
+2026-10-08T10:18:37.6998461Z Artifact download completed successfully.
+2026-10-08T10:18:37.7950411Z SHA256 digest of downloaded artifact is c5f30fb9ee1171e7076bc7810da087f1cd95299a95e0b20a6bfcb259cd6980f6
+2026-10-08T10:18:37.7951676Z Artifact download completed successfully.
+2026-10-08T10:18:37.8127684Z SHA256 digest of downloaded artifact is 1fc1a8f38f9d39e4682a0b8e1c8a2b04d0a8f2057102d5c99d5828e76ed5a67e
+2026-10-08T10:18:37.8128926Z Artifact download completed successfully.
+2026-10-08T10:18:37.8257164Z SHA256 digest of downloaded artifact is 65354de073b7ee5bc1fa85aaaa50731cb6a71630700350700f4b29f7d537bc5a
+2026-10-08T10:18:37.8258404Z Artifact download completed successfully.
+2026-10-08T10:18:37.8385574Z SHA256 digest of downloaded artifact is 8e6b582a9ece3962da4c29e124cafa5df4ff2fad569be8285d25fd7128ff7385
+2026-10-08T10:18:37.8386610Z Artifact download completed successfully.
+2026-10-08T10:18:37.8653359Z SHA256 digest of downloaded artifact is a1b3040eb453e3979e73c78f594c157ca5d7b4e3c897e8c5fc9aa3d3af618790
+2026-10-08T10:18:37.8654367Z Artifact download completed successfully.
+2026-10-08T10:18:37.9081301Z SHA256 digest of downloaded artifact is 398f191d2a1fb752805309e23b42d25ff8bfcbc61cbb925fe9594ce72e744769
+2026-10-08T10:18:37.9082417Z Artifact download completed successfully.
+2026-10-08T10:18:37.9701254Z SHA256 digest of downloaded artifact is a1116dd6ed78534b6342c8d17a071ab6fe75e7b1fb2b205ecf1f23d4038e37c8
+2026-10-08T10:18:37.9702543Z Artifact download completed successfully.
+2026-10-08T10:18:37.9867682Z SHA256 digest of downloaded artifact is 3ee26724a9080549a3ad202290a0087750d8efc53e1d51a146d8cc769d7b15d3
+2026-10-08T10:18:37.9882591Z Artifact download completed successfully.
+2026-10-08T10:18:37.9998854Z SHA256 digest of downloaded artifact is ccafd53e9e9d8b9b555c58885f31fd5860dd94b828b9a532cbbe90e5505047b3
+2026-10-08T10:18:38.0000134Z Artifact download completed successfully.
+2026-10-08T10:18:38.1517094Z SHA256 digest of downloaded artifact is c0cfed5950409e3695860976286d5db828d680906add7b9eb3c245c12461feee
+2026-10-08T10:18:38.1517949Z Artifact download completed successfully.
+2026-10-08T10:18:38.1913572Z SHA256 digest of downloaded artifact is bc3aa977511cbc7ed6997313bd718399816768edb5ac200bd4a5a698acbfc898
+2026-10-08T10:18:38.1915075Z Artifact download completed successfully.
+2026-10-08T10:18:38.1915799Z Total of 16 artifact(s) downloaded
+2026-10-08T10:18:38.1923278Z Download artifact has finished successfully
+2026-10-08T10:18:38.2115225Z ##[group]Run set -euo pipefail
+2026-10-08T10:18:38.2115819Z [36;1mset -euo pipefail[0m
+2026-10-08T10:18:38.2116717Z [36;1mpython scripts/daily_breakdown_intraday_v27.py collect --parts results --out research/daily-breakdown-intraday-v27/run-37761086287/accounts[0m
+2026-10-08T10:18:38.2158432Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:18:38.2159078Z env:
+2026-10-08T10:18:38.2162232Z   GH_TOKEN: ***
+2026-10-08T10:18:38.2163061Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:38.2163745Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:18:38.2164476Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:38.2165121Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:38.2165758Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:38.2166488Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:18:38.2167194Z ##[endgroup]
+2026-10-08T10:18:39.4613935Z V27_384_SCENARIOS_HASH_AND_ARITHMETIC_PASS
+2026-10-08T10:18:39.5237565Z ##[group]Run set -euo pipefail
+2026-10-08T10:18:39.5238364Z [36;1mset -euo pipefail[0m
+2026-10-08T10:18:39.5239262Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-08T10:18:39.5240342Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-08T10:18:39.5241796Z [36;1mgit checkout -b "research-daily-breakdown-intraday-v27-results-37761086287"[0m
+2026-10-08T10:18:39.5243167Z [36;1mgit add "research/daily-breakdown-intraday-v27/run-37761086287/accounts"[0m
+2026-10-08T10:18:39.5244336Z [36;1mgit commit -m "Preserve all 384 V27 account scenarios and frozen screens"[0m
+2026-10-08T10:18:39.5245310Z [36;1mgit push origin HEAD[0m
+2026-10-08T10:18:39.5304947Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:18:39.5306091Z env:
+2026-10-08T10:18:39.5310706Z   GH_TOKEN: ***
+2026-10-08T10:18:39.5311949Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:39.5313297Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:18:39.5314348Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:39.5315680Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:39.5316641Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:39.5317648Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:18:39.5318487Z ##[endgroup]
+2026-10-08T10:18:39.5446599Z Switched to a new branch 'research-daily-breakdown-intraday-v27-results-37761086287'
+2026-10-08T10:18:39.7418239Z [research-daily-breakdown-intraday-v27-results-37761086287 973a13c] Preserve all 384 V27 account scenarios and frozen screens
+2026-10-08T10:18:39.7419552Z  7 files changed, 30014 insertions(+)
+2026-10-08T10:18:39.7420593Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/audit.json
+2026-10-08T10:18:39.7421935Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/cluster_diagnostics.json
+2026-10-08T10:18:39.7422829Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/decision.json
+2026-10-08T10:18:39.7423746Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/material_screen.json
+2026-10-08T10:18:39.7424692Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/summary.csv
+2026-10-08T10:18:39.7425506Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/summary.json
+2026-10-08T10:18:39.7426417Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/accounts/year_quarter.csv
+2026-10-08T10:18:43.7442964Z remote: 
+2026-10-08T10:18:43.7444090Z remote: Create a pull request for 'research-daily-breakdown-intraday-v27-results-37761086287' on GitHub by visiting:        
+2026-10-08T10:18:43.7445238Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-daily-breakdown-intraday-v27-results-37761086287        
+2026-10-08T10:18:43.7446174Z remote: 
+2026-10-08T10:18:43.7453618Z To https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:18:43.7454916Z  * [new branch]      HEAD -> research-daily-breakdown-intraday-v27-results-37761086287
+2026-10-08T10:18:43.7557497Z ##[group]Run actions/upload-artifact@v4
+2026-10-08T10:18:43.7558163Z with:
+2026-10-08T10:18:43.7558718Z   name: daily-breakdown-intraday-v27-collected
+2026-10-08T10:18:43.7559497Z   path: research/daily-breakdown-intraday-v27/run-37761086287/accounts/
+2026-10-08T10:18:43.7560553Z   retention-days: 30
+2026-10-08T10:18:43.7561072Z   compression-level: 0
+2026-10-08T10:18:43.7562233Z   if-no-files-found: warn
+2026-10-08T10:18:43.7562807Z   overwrite: false
+2026-10-08T10:18:43.7563303Z   include-hidden-files: false
+2026-10-08T10:18:43.7563884Z env:
+2026-10-08T10:18:43.7566654Z   GH_TOKEN: ***
+2026-10-08T10:18:43.7567248Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:43.7567985Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+2026-10-08T10:18:43.7568688Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:43.7569383Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:43.7570179Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+2026-10-08T10:18:43.7570847Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+2026-10-08T10:18:43.7571712Z ##[endgroup]
+2026-10-08T10:18:43.9185573Z (node:2146) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:18:43.9187095Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:18:43.9270049Z With the provided path, there will be 7 files uploaded
+2026-10-08T10:18:43.9275779Z Artifact name is valid!
+2026-10-08T10:18:43.9276715Z Root directory input is valid!
+2026-10-08T10:18:44.2746336Z Beginning upload of artifact content to blob storage
+2026-10-08T10:18:44.3119032Z (node:2146) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-08T10:18:44.9116889Z Uploaded bytes 1914779
+2026-10-08T10:18:44.9764612Z Finished uploading artifact content to blob storage!
+2026-10-08T10:18:44.9765985Z SHA256 digest of uploaded artifact zip is 4755d9f3c2707c117e557cac4ddd24d5ad3f99845cc25a3cda213ffb70dd2da5
+2026-10-08T10:18:44.9766871Z Finalizing artifact upload
+2026-10-08T10:18:45.2211175Z Artifact daily-breakdown-intraday-v27-collected.zip successfully finalized. Artifact ID 11542608474
+2026-10-08T10:18:45.2213234Z Artifact daily-breakdown-intraday-v27-collected has been successfully uploaded! Final size is 1914779 bytes. Artifact ID is 11542608474
+2026-10-08T10:18:45.2218071Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287/artifacts/11542608474
+2026-10-08T10:18:45.2390809Z Post job cleanup.
+2026-10-08T10:18:45.3603329Z (node:2158) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:18:45.3604867Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:18:45.3763965Z Post job cleanup.
+2026-10-08T10:18:45.4693580Z [command]/usr/bin/git version
+2026-10-08T10:18:45.4733938Z git version 2.55.0
+2026-10-08T10:18:45.4783363Z Temporarily overriding HOME='/home/runner/work/_temp/9fd73a16-1155-4b87-a64d-182c5be6c1be' before making global git config changes
+2026-10-08T10:18:45.4784942Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:18:45.4786330Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:18:45.4832742Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:18:45.4877208Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:18:45.5203384Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:18:45.5226183Z http.https://github.com/.extraheader
+2026-10-08T10:18:45.5237253Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-08T10:18:45.5276966Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:18:45.5497394Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:18:45.5525624Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:18:45.5881255Z Cleaning up orphan processes
+2026-10-08T10:18:45.6318447Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

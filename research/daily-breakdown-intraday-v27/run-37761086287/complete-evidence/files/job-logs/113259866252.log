@@ -1,0 +1,474 @@
+﻿2026-10-08T10:13:39.9928941Z Current runner version: '2.337.0'
+2026-10-08T10:13:39.9948344Z ##[group]Runner Image Provisioner
+2026-10-08T10:13:39.9948900Z Hosted Compute Agent
+2026-10-08T10:13:39.9949299Z Version: 20260901.588
+2026-10-08T10:13:39.9949698Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-08T10:13:39.9950172Z Build Date: 2026-09-01T19:56:44Z
+2026-10-08T10:13:39.9950627Z Worker ID: {35ff9aac-58f4-4d63-8592-c5dabc33289d}
+2026-10-08T10:13:39.9951060Z Azure Region: westus3
+2026-10-08T10:13:39.9951468Z ##[endgroup]
+2026-10-08T10:13:39.9952260Z ##[group]Operating System
+2026-10-08T10:13:39.9952660Z Ubuntu
+2026-10-08T10:13:39.9953024Z 24.04.5
+2026-10-08T10:13:39.9953341Z LTS
+2026-10-08T10:13:39.9954060Z ##[endgroup]
+2026-10-08T10:13:39.9954446Z ##[group]Runner Image
+2026-10-08T10:13:39.9954834Z Image: ubuntu-24.04
+2026-10-08T10:13:39.9955202Z Version: 20260927.320.1
+2026-10-08T10:13:39.9955998Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-08T10:13:39.9956931Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-08T10:13:39.9957525Z ##[endgroup]
+2026-10-08T10:13:39.9958290Z ##[group]GITHUB_TOKEN Permissions
+2026-10-08T10:13:39.9959678Z Actions: read
+2026-10-08T10:13:39.9960102Z Contents: write
+2026-10-08T10:13:39.9960481Z Metadata: read
+2026-10-08T10:13:39.9960813Z ##[endgroup]
+2026-10-08T10:13:39.9962263Z Secret source: Actions
+2026-10-08T10:13:39.9962805Z Cache mode: write
+2026-10-08T10:13:39.9963315Z Prepare workflow directory
+2026-10-08T10:13:40.1095069Z Prepare all required actions
+2026-10-08T10:13:40.1128308Z Getting action download info
+2026-10-08T10:13:40.4193175Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-08T10:13:40.4979341Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-08T10:13:40.6117076Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-08T10:13:41.5014167Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-08T10:13:41.7112500Z Complete job name: accounts (8)
+2026-10-08T10:13:41.7701650Z ##[group]Run actions/checkout@v4
+2026-10-08T10:13:41.7702452Z with:
+2026-10-08T10:13:41.7702992Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:13:41.7708173Z   token: ***
+2026-10-08T10:13:41.7708701Z   ssh-strict: true
+2026-10-08T10:13:41.7709240Z   ssh-user: git
+2026-10-08T10:13:41.7709789Z   persist-credentials: true
+2026-10-08T10:13:41.7710391Z   clean: true
+2026-10-08T10:13:41.7710943Z   sparse-checkout-cone-mode: true
+2026-10-08T10:13:41.7711595Z   fetch-depth: 1
+2026-10-08T10:13:41.7712138Z   fetch-tags: false
+2026-10-08T10:13:41.7712678Z   show-progress: true
+2026-10-08T10:13:41.7713228Z   lfs: false
+2026-10-08T10:13:41.7714000Z   submodules: false
+2026-10-08T10:13:41.7714565Z   set-safe-directory: true
+2026-10-08T10:13:41.7715201Z   allow-unsafe-pr-checkout: false
+2026-10-08T10:13:41.7715990Z env:
+2026-10-08T10:13:41.7720561Z   GH_TOKEN: ***
+2026-10-08T10:13:41.7721080Z ##[endgroup]
+2026-10-08T10:13:41.8433672Z Syncing repository: duuu-hub/bb-scanner
+2026-10-08T10:13:41.8436358Z ##[group]Getting Git version info
+2026-10-08T10:13:41.8437598Z Working directory is '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:13:41.8439461Z [command]/usr/bin/git version
+2026-10-08T10:13:41.8498940Z git version 2.55.0
+2026-10-08T10:13:41.8514176Z ##[endgroup]
+2026-10-08T10:13:41.8529839Z Temporarily overriding HOME='/home/runner/work/_temp/204c6ab2-8a10-45b8-81ce-878d62e1e1c0' before making global git config changes
+2026-10-08T10:13:41.8532418Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:13:41.8535244Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:13:41.8584388Z Deleting the contents of '/home/runner/work/bb-scanner/bb-scanner'
+2026-10-08T10:13:41.8587447Z ##[group]Initializing the repository
+2026-10-08T10:13:41.8590811Z [command]/usr/bin/git init /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:13:41.8755940Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-08T10:13:41.8757861Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-08T10:13:41.8760306Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-08T10:13:41.8761842Z hint: call:
+2026-10-08T10:13:41.8762684Z hint:
+2026-10-08T10:13:41.8763901Z hint: 	git config --global init.defaultBranch <name>
+2026-10-08T10:13:41.8765120Z hint:
+2026-10-08T10:13:41.8766259Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-08T10:13:41.8768170Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-08T10:13:41.8769642Z hint:
+2026-10-08T10:13:41.8770503Z hint: 	git branch -m <name>
+2026-10-08T10:13:41.8771412Z hint:
+2026-10-08T10:13:41.8772642Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-08T10:13:41.8776295Z Initialized empty Git repository in /home/runner/work/bb-scanner/bb-scanner/.git/
+2026-10-08T10:13:41.8779242Z [command]/usr/bin/git remote add origin https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:13:41.8825463Z ##[endgroup]
+2026-10-08T10:13:41.8826442Z ##[group]Disabling automatic garbage collection
+2026-10-08T10:13:41.8828966Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-08T10:13:41.8866161Z ##[endgroup]
+2026-10-08T10:13:41.8867687Z ##[group]Setting up auth
+2026-10-08T10:13:41.8872845Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:13:41.8908519Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:13:41.9229533Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:13:41.9260333Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:13:41.9441082Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:13:41.9471207Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:13:41.9649910Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-08T10:13:41.9684407Z ##[endgroup]
+2026-10-08T10:13:41.9685342Z ##[group]Fetching the repository
+2026-10-08T10:13:41.9691156Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fbf329c27f4bff0d7f99febbbd4a14768ce2024a:refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:13:44.3676545Z From https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:13:44.3677458Z  * [new ref]         fbf329c27f4bff0d7f99febbbd4a14768ce2024a -> origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:13:44.3742833Z ##[endgroup]
+2026-10-08T10:13:44.3744057Z ##[group]Determining the checkout info
+2026-10-08T10:13:44.3744649Z ##[endgroup]
+2026-10-08T10:13:44.3745030Z [command]/usr/bin/git sparse-checkout disable
+2026-10-08T10:13:44.3745791Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-08T10:13:44.3768739Z ##[group]Checking out the ref
+2026-10-08T10:13:44.3773305Z [command]/usr/bin/git checkout --progress --force -B research-daily-breakdown-intraday-v27 refs/remotes/origin/research-daily-breakdown-intraday-v27
+2026-10-08T10:13:44.5619810Z Switched to a new branch 'research-daily-breakdown-intraday-v27'
+2026-10-08T10:13:44.5631882Z branch 'research-daily-breakdown-intraday-v27' set up to track 'origin/research-daily-breakdown-intraday-v27'.
+2026-10-08T10:13:44.5642513Z ##[endgroup]
+2026-10-08T10:13:44.5684629Z [command]/usr/bin/git log -1 --format=%H
+2026-10-08T10:13:44.5709380Z fbf329c27f4bff0d7f99febbbd4a14768ce2024a
+2026-10-08T10:13:44.5908002Z ##[group]Run actions/setup-python@v5
+2026-10-08T10:13:44.5908221Z with:
+2026-10-08T10:13:44.5908347Z   python-version: 3.12
+2026-10-08T10:13:44.5908483Z   check-latest: false
+2026-10-08T10:13:44.5909897Z   token: ***
+2026-10-08T10:13:44.5910033Z   update-environment: true
+2026-10-08T10:13:44.5910191Z   allow-prereleases: false
+2026-10-08T10:13:44.5910339Z   freethreaded: false
+2026-10-08T10:13:44.5910470Z env:
+2026-10-08T10:13:44.5911807Z   GH_TOKEN: ***
+2026-10-08T10:13:44.5911929Z ##[endgroup]
+2026-10-08T10:13:44.7077335Z ##[group]Installed versions
+2026-10-08T10:13:44.7148788Z (node:2117) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:13:44.7149245Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:13:44.7149931Z Successfully set up CPython (3.12.14)
+2026-10-08T10:13:44.7150485Z ##[endgroup]
+2026-10-08T10:13:44.7296710Z ##[group]Run set -euo pipefail
+2026-10-08T10:13:44.7297063Z [36;1mset -euo pipefail[0m
+2026-10-08T10:13:44.7297442Z [36;1mpip install pandas==2.3.3 numpy==2.3.3 numba==0.62.1 requests==2.32.5[0m
+2026-10-08T10:13:44.7570596Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:13:44.7570889Z env:
+2026-10-08T10:13:44.7572564Z   GH_TOKEN: ***
+2026-10-08T10:13:44.7572759Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:44.7573032Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:13:44.7573289Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:44.7573639Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:44.7573877Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:44.7574112Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:13:44.7574335Z ##[endgroup]
+2026-10-08T10:13:45.6066493Z Collecting pandas==2.3.3
+2026-10-08T10:13:45.6541786Z   Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2026-10-08T10:13:45.8577948Z Collecting numpy==2.3.3
+2026-10-08T10:13:45.8613323Z   Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-08T10:13:45.9609705Z Collecting numba==0.62.1
+2026-10-08T10:13:45.9651296Z   Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+2026-10-08T10:13:45.9865262Z Collecting requests==2.32.5
+2026-10-08T10:13:45.9899957Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2026-10-08T10:13:46.0082332Z Collecting python-dateutil>=2.8.2 (from pandas==2.3.3)
+2026-10-08T10:13:46.0112302Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-08T10:13:46.0432979Z Collecting pytz>=2020.1 (from pandas==2.3.3)
+2026-10-08T10:13:46.0465608Z   Downloading pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+2026-10-08T10:13:46.0648903Z Collecting tzdata>=2022.7 (from pandas==2.3.3)
+2026-10-08T10:13:46.0679862Z   Downloading tzdata-2026.5-py2.py3-none-any.whl.metadata (1.4 kB)
+2026-10-08T10:13:46.1109237Z Collecting llvmlite<0.46,>=0.45.0dev0 (from numba==0.62.1)
+2026-10-08T10:13:46.1149130Z   Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2026-10-08T10:13:46.2051823Z Collecting charset_normalizer<4,>=2 (from requests==2.32.5)
+2026-10-08T10:13:46.2088648Z   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+2026-10-08T10:13:46.2284398Z Collecting idna<4,>=2.5 (from requests==2.32.5)
+2026-10-08T10:13:46.2316400Z   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-08T10:13:46.2539432Z Collecting urllib3<3,>=1.21.1 (from requests==2.32.5)
+2026-10-08T10:13:46.2579350Z   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+2026-10-08T10:13:46.2788816Z Collecting certifi>=2017.4.17 (from requests==2.32.5)
+2026-10-08T10:13:46.2819954Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-08T10:13:46.3005214Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas==2.3.3)
+2026-10-08T10:13:46.3041333Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-08T10:13:46.3104671Z Downloading pandas-2.3.3-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.4 MB)
+2026-10-08T10:13:46.4677957Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 81.2 MB/s  0:00:00
+2026-10-08T10:13:46.4710867Z Downloading numpy-2.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.6 MB)
+2026-10-08T10:13:46.6384039Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.6/16.6 MB 100.2 MB/s  0:00:00
+2026-10-08T10:13:46.6426943Z Downloading numba-0.62.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.8 MB)
+2026-10-08T10:13:46.9578136Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 11.3 MB/s  0:00:00
+2026-10-08T10:13:46.9614530Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-10-08T10:13:46.9673849Z Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+2026-10-08T10:13:46.9722986Z Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-10-08T10:13:46.9790822Z Downloading llvmlite-0.45.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (56.3 MB)
+2026-10-08T10:13:47.4835533Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 56.3/56.3 MB 111.5 MB/s  0:00:00
+2026-10-08T10:13:47.4869668Z Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-08T10:13:47.4914329Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-08T10:13:47.4960017Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-08T10:13:47.5011002Z Downloading pytz-2026.5-py2.py3-none-any.whl (506 kB)
+2026-10-08T10:13:47.5065338Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-08T10:13:47.5108247Z Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+2026-10-08T10:13:47.6669952Z Installing collected packages: pytz, urllib3, tzdata, six, numpy, llvmlite, idna, charset_normalizer, certifi, requests, python-dateutil, numba, pandas
+2026-10-08T10:13:54.5567369Z 
+2026-10-08T10:13:54.5580502Z Successfully installed certifi-2026.7.22 charset_normalizer-3.5.2 idna-3.20 llvmlite-0.45.1 numba-0.62.1 numpy-2.3.3 pandas-2.3.3 python-dateutil-2.9.0.post0 pytz-2026.5 requests-2.32.5 six-1.17.0 tzdata-2026.5 urllib3-2.8.0
+2026-10-08T10:13:54.6499059Z ##[group]Run actions/download-artifact@v4
+2026-10-08T10:13:54.6499230Z with:
+2026-10-08T10:13:54.6499378Z   pattern: daily-breakdown-intraday-v27-scan-*
+2026-10-08T10:13:54.6499553Z   path: parts
+2026-10-08T10:13:54.6499676Z   merge-multiple: false
+2026-10-08T10:13:54.6499815Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:13:54.6499958Z   run-id: 37761086287
+2026-10-08T10:13:54.6500086Z env:
+2026-10-08T10:13:54.6501606Z   GH_TOKEN: ***
+2026-10-08T10:13:54.6501769Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:54.6502013Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:13:54.6502251Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:54.6502468Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:54.6502686Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:54.6502903Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:13:54.6503104Z ##[endgroup]
+2026-10-08T10:13:54.7704051Z (node:2156) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:13:54.7704653Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:13:54.9996567Z Found 14 artifact(s)
+2026-10-08T10:13:54.9997165Z Filtering artifacts by pattern 'daily-breakdown-intraday-v27-scan-*'
+2026-10-08T10:13:55.0012167Z Preparing to download the following artifacts:
+2026-10-08T10:13:55.0012861Z - daily-breakdown-intraday-v27-scan-2 (ID: 11542940306, Size: 993880, Expected Digest: sha256:a0c636863079934c5c70ba835d30f6125fa98ecd12991067453593ae119d1867)
+2026-10-08T10:13:55.0013998Z - daily-breakdown-intraday-v27-scan-7 (ID: 11542855827, Size: 880240, Expected Digest: sha256:73f857260b52a3a3feacbf8c3263e08b396207d14601b5660e640d068a207df6)
+2026-10-08T10:13:55.0014986Z - daily-breakdown-intraday-v27-scan-4 (ID: 11542851005, Size: 2400410, Expected Digest: sha256:24a02ae5c5998635de74fed85b51d5321c2fdb58115969c7f1072fce41aef5eb)
+2026-10-08T10:13:55.0016000Z - daily-breakdown-intraday-v27-scan-0 (ID: 11542437176, Size: 1159518, Expected Digest: sha256:17bb9d65e2a87defb7d4a169e1d93e5624a5a19f3c6f19858e3e6880b6d59810)
+2026-10-08T10:13:55.0016980Z - daily-breakdown-intraday-v27-scan-6 (ID: 11542272357, Size: 897805, Expected Digest: sha256:ee0dea98388097d3d7401c772c6755e349d22aa6e2cf47c8d3b3c86fa5856bbc)
+2026-10-08T10:13:55.0017996Z - daily-breakdown-intraday-v27-scan-1 (ID: 11542247692, Size: 1080607, Expected Digest: sha256:6b1ef0ad37b7ca2e596424a2ababe7f96a31f932b30a7ac7e4496c812410cc22)
+2026-10-08T10:13:55.0019080Z - daily-breakdown-intraday-v27-scan-5 (ID: 11541979123, Size: 1125360, Expected Digest: sha256:8ae74372daf18d01a6232baf9c1d1bcdcb42baffccdd9b7ff18f43cbf65186b1)
+2026-10-08T10:13:55.0021635Z - daily-breakdown-intraday-v27-scan-3 (ID: 11541589551, Size: 873131, Expected Digest: sha256:c7b02d7a9d7d066ba41e8e247e611400980bbdfbb923ac5faebd83567cda0885)
+2026-10-08T10:13:55.2181313Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-50d29c47-f01a-526c-8bdf-939fc5b29489/artifacts/c672171a93febe480b0e98a560e24da0252dc498850671723b74eb78a4d840b0.zip
+2026-10-08T10:13:55.2182142Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-2
+2026-10-08T10:13:55.3441187Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-cef9ae8b-3231-51f5-9bd5-2fdf1dad8a12/artifacts/743d9ace10993854455d95f302cd99d241c18c90f9bc8e03ff4c571913be67a1.zip
+2026-10-08T10:13:55.3442600Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-5
+2026-10-08T10:13:55.3492616Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-d7dd7542-af21-5c5b-b1f3-7e59491ab03f/artifacts/83159ec54af8e2d6fd0fb7a85d959435365203d6438417f4f1bf428e030b4485.zip
+2026-10-08T10:13:55.3494247Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-0
+2026-10-08T10:13:55.3546219Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-656536ac-acac-54cd-b983-bfff6cd0363e/artifacts/37d9cc6a8585afdae24f300f7188da0c2837a19f6eb790763c130244e5d272b8.zip
+2026-10-08T10:13:55.3547762Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-7
+2026-10-08T10:13:55.3551708Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-85883125-0c89-5481-8573-9c31cfbdb114/artifacts/5ee1b3afec1de98915e3769e97ecbabe410f8806b1e6851db8a3b3b85ef8bfd2.zip
+2026-10-08T10:13:55.3552701Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-4
+2026-10-08T10:13:55.3619616Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-c49e8761-0664-587a-8337-f75c95bbde50/artifacts/8694a3b3a54f3051a10e654c6d417016a953548987821f1b3ea60ba814844205.zip
+2026-10-08T10:13:55.3621451Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-3
+2026-10-08T10:13:55.3669572Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-0494cf29-45fd-5732-9b7a-7b049132b106/artifacts/154e484c56d4af4b7e20b28db23f17290f7205f26fcc7355eb67ab53c42c4ab3.zip
+2026-10-08T10:13:55.3670908Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-1
+2026-10-08T10:13:55.3728652Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-c1b324f0-dd23-55b3-83eb-adda64e2542a/artifacts/f4b38043bd3f22e137da3e9983e59187353c83d8e826b221cb734780d682991e.zip
+2026-10-08T10:13:55.3729954Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/parts/daily-breakdown-intraday-v27-scan-6
+2026-10-08T10:13:55.4576065Z (node:2156) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-08T10:13:55.8544890Z SHA256 digest of downloaded artifact is a0c636863079934c5c70ba835d30f6125fa98ecd12991067453593ae119d1867
+2026-10-08T10:13:55.8545271Z Artifact download completed successfully.
+2026-10-08T10:13:55.9518317Z SHA256 digest of downloaded artifact is 73f857260b52a3a3feacbf8c3263e08b396207d14601b5660e640d068a207df6
+2026-10-08T10:13:55.9518916Z Artifact download completed successfully.
+2026-10-08T10:13:55.9714883Z SHA256 digest of downloaded artifact is 8ae74372daf18d01a6232baf9c1d1bcdcb42baffccdd9b7ff18f43cbf65186b1
+2026-10-08T10:13:55.9715503Z Artifact download completed successfully.
+2026-10-08T10:13:55.9868811Z SHA256 digest of downloaded artifact is c7b02d7a9d7d066ba41e8e247e611400980bbdfbb923ac5faebd83567cda0885
+2026-10-08T10:13:55.9869235Z Artifact download completed successfully.
+2026-10-08T10:13:55.9871085Z SHA256 digest of downloaded artifact is ee0dea98388097d3d7401c772c6755e349d22aa6e2cf47c8d3b3c86fa5856bbc
+2026-10-08T10:13:55.9871579Z Artifact download completed successfully.
+2026-10-08T10:13:55.9958654Z SHA256 digest of downloaded artifact is 6b1ef0ad37b7ca2e596424a2ababe7f96a31f932b30a7ac7e4496c812410cc22
+2026-10-08T10:13:55.9959099Z Artifact download completed successfully.
+2026-10-08T10:13:56.0556304Z SHA256 digest of downloaded artifact is 17bb9d65e2a87defb7d4a169e1d93e5624a5a19f3c6f19858e3e6880b6d59810
+2026-10-08T10:13:56.0556679Z Artifact download completed successfully.
+2026-10-08T10:13:56.1169228Z SHA256 digest of downloaded artifact is 24a02ae5c5998635de74fed85b51d5321c2fdb58115969c7f1072fce41aef5eb
+2026-10-08T10:13:56.1169594Z Artifact download completed successfully.
+2026-10-08T10:13:56.1169804Z Total of 8 artifact(s) downloaded
+2026-10-08T10:13:56.1174005Z Download artifact has finished successfully
+2026-10-08T10:13:56.1344941Z ##[group]Run actions/download-artifact@v4
+2026-10-08T10:13:56.1345141Z with:
+2026-10-08T10:13:56.1345300Z   name: daily-breakdown-intraday-v27-market
+2026-10-08T10:13:56.1345499Z   path: account-market
+2026-10-08T10:13:56.1345658Z   merge-multiple: false
+2026-10-08T10:13:56.1345822Z   repository: duuu-hub/bb-scanner
+2026-10-08T10:13:56.1345994Z   run-id: 37761086287
+2026-10-08T10:13:56.1346142Z env:
+2026-10-08T10:13:56.1347612Z   GH_TOKEN: ***
+2026-10-08T10:13:56.1347801Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:56.1348075Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:13:56.1348348Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:56.1348596Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:56.1348844Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:13:56.1349097Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:13:56.1349503Z ##[endgroup]
+2026-10-08T10:13:56.2418321Z Downloading single artifact
+2026-10-08T10:13:56.2517968Z (node:2169) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:13:56.2518568Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:13:56.5080911Z Preparing to download the following artifacts:
+2026-10-08T10:13:56.5081833Z - daily-breakdown-intraday-v27-market (ID: 11542771746, Size: 1378253313, Expected Digest: sha256:1d71ccafec5f709fef4e9c424c28a098503e78c21fc53283bdf2d5ee4a38504a)
+2026-10-08T10:13:56.7186986Z Redirecting to blob download url: https://productionresultssa4.blob.core.windows.net/actions-results/98d100a2-fb61-8202-8026-5607807f0e12/workflow-job-run-8ef1f133-5b35-5ae8-98a8-791bb321fa0d/artifacts/708810cd0c6369a0dfbf41c705db2d968328bfc05077395571b1e49b3eeccf9f.zip
+2026-10-08T10:13:56.7188259Z Starting download of artifact to: /home/runner/work/bb-scanner/bb-scanner/account-market
+2026-10-08T10:13:56.9799613Z (node:2169) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-08T10:16:02.5025012Z SHA256 digest of downloaded artifact is 1d71ccafec5f709fef4e9c424c28a098503e78c21fc53283bdf2d5ee4a38504a
+2026-10-08T10:16:02.5025512Z Artifact download completed successfully.
+2026-10-08T10:16:02.5025721Z Total of 1 artifact(s) downloaded
+2026-10-08T10:16:02.5030121Z Download artifact has finished successfully
+2026-10-08T10:16:02.5163410Z ##[group]Run set -euo pipefail
+2026-10-08T10:16:02.5163875Z [36;1mset -euo pipefail[0m
+2026-10-08T10:16:02.5164230Z [36;1mpython scripts/daily_breakdown_intraday_v27.py accounts --data account-market --parts parts --probe-index 8 --out result-8[0m
+2026-10-08T10:16:02.5218294Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:16:02.5218523Z env:
+2026-10-08T10:16:02.5219950Z   GH_TOKEN: ***
+2026-10-08T10:16:02.5220173Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:16:02.5220451Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:16:02.5220724Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:16:02.5220971Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:16:02.5221217Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:16:02.5221468Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:16:02.5221721Z ##[endgroup]
+2026-10-08T10:16:45.4092456Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded 603 9.72659391138877
+2026-10-08T10:16:46.5666896Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic 603 9.72659391138877
+2026-10-08T10:16:47.7202218Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded 603 4.10582887218951
+2026-10-08T10:16:48.8754729Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic 603 4.10582887218951
+2026-10-08T10:16:49.8082453Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded 245 4.737936093495887
+2026-10-08T10:16:50.7421081Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic 245 4.737936093495887
+2026-10-08T10:16:51.6866971Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded 245 2.4847678087461356
+2026-10-08T10:16:52.6318914Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic 245 2.4847678087461356
+2026-10-08T10:16:53.6534342Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded 389 5.070260992530007
+2026-10-08T10:16:54.6825873Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic 389 5.070260992530007
+2026-10-08T10:16:55.7123264Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded 389 1.5869643221272156
+2026-10-08T10:16:56.7470942Z V27_ACCOUNT DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic 389 1.5869643221272156
+2026-10-08T10:16:57.3105634Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded 309 0.19437400316697495
+2026-10-08T10:16:57.8655215Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic 309 0.19437400316697495
+2026-10-08T10:16:58.4261432Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded 309 -2.063093813318495
+2026-10-08T10:16:58.9815162Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic 309 -2.063093813318495
+2026-10-08T10:16:59.4198116Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded 123 0.8324755232001602
+2026-10-08T10:16:59.8826772Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic 123 0.8324755232001602
+2026-10-08T10:17:00.3292067Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded 123 -0.17367097522539288
+2026-10-08T10:17:00.7760098Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic 123 -0.17367097522539288
+2026-10-08T10:17:01.2685332Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded 203 0.9259550891319135
+2026-10-08T10:17:01.7569316Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic 203 0.9259550891319135
+2026-10-08T10:17:02.2532875Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded 203 -0.6659200554588796
+2026-10-08T10:17:02.7441414Z V27_ACCOUNT GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic 203 -0.6659200554588796
+2026-10-08T10:17:02.8527788Z ##[group]Run set -euo pipefail
+2026-10-08T10:17:02.8528034Z [36;1mset -euo pipefail[0m
+2026-10-08T10:17:02.8528484Z [36;1mpython scripts/research_evidence_archive.py archive --source result-8 --kind V27-account-probe-8 --out research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8[0m
+2026-10-08T10:17:02.8528972Z [36;1mgit config user.name "github-actions[bot]"[0m
+2026-10-08T10:17:02.8529262Z [36;1mgit config user.email "41898282+github-actions[bot]@users.noreply.github.com"[0m
+2026-10-08T10:17:02.8529642Z [36;1mgit checkout -b "research-daily-breakdown-intraday-v27-account-probe-8-37761086287"[0m
+2026-10-08T10:17:02.8530033Z [36;1mgit add "research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8"[0m
+2026-10-08T10:17:02.8530391Z [36;1mgit commit -m "Preserve V27 original account-probe-8 partition for run 37761086287"[0m
+2026-10-08T10:17:02.8530657Z [36;1mgit push origin HEAD[0m
+2026-10-08T10:17:02.8587364Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-08T10:17:02.8587612Z env:
+2026-10-08T10:17:02.8589049Z   GH_TOKEN: ***
+2026-10-08T10:17:02.8589252Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:02.8589535Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:17:02.8589817Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:02.8590066Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:02.8590317Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:02.8590574Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:17:02.8590794Z ##[endgroup]
+2026-10-08T10:17:03.1313455Z EVIDENCE_ARCHIVED V27-account-probe-8 78 files 15642674 bytes
+2026-10-08T10:17:03.1922409Z Switched to a new branch 'research-daily-breakdown-intraday-v27-account-probe-8-37761086287'
+2026-10-08T10:17:03.5066183Z [research-daily-breakdown-intraday-v27-account-probe-8-37761086287 c8cff1e] Preserve V27 original account-probe-8 partition for run 37761086287
+2026-10-08T10:17:03.5066696Z  79 files changed, 17009 insertions(+)
+2026-10-08T10:17:03.5067040Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/EVIDENCE_MANIFEST.json
+2026-10-08T10:17:03.5067804Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/audit.json
+2026-10-08T10:17:03.5068317Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/cluster_diagnostics.json
+2026-10-08T10:17:03.5069198Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5070241Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5071128Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5071809Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5072511Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5073201Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5074058Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5074893Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5075543Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5076222Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5076912Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5077635Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5078307Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5078962Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5079610Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5080289Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5080982Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5081673Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5082444Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5083100Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5084011Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5085043Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5086073Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5087110Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5087953Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5088634Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5089463Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5090172Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5090894Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5091608Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5092316Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5093002Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5093864Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5094571Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5095288Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5096009Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/DEV__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5096706Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5097944Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5098783Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5099458Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5100157Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5100848Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5101532Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5102182Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5103179Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5104061Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5104752Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5105445Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP1__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5106119Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5106780Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5107432Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5108113Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5108805Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5109499Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5110180Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5110831Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5111580Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5112257Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5112946Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5113963Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAP2__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5114907Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5115639Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/daily.csv
+2026-10-08T10:17:03.5116317Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5117127Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5117843Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5118565Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__20bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5119268Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/curve.csv.gz
+2026-10-08T10:17:03.5119948Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/daily.csv
+2026-10-08T10:17:03.5120636Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__guarded/trades.csv.gz
+2026-10-08T10:17:03.5121339Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/curve.csv.gz
+2026-10-08T10:17:03.5122066Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/daily.csv
+2026-10-08T10:17:03.5122795Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/details/GATE__DAILY_S-1_D20_ANY_A15__H96__R20__D0__CAPUNLIMITED__40bp__unguarded_diagnostic/trades.csv.gz
+2026-10-08T10:17:03.5123396Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/result_manifest.json
+2026-10-08T10:17:03.5124007Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/summary.csv
+2026-10-08T10:17:03.5124445Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/summary.json
+2026-10-08T10:17:03.5124870Z  create mode 100644 research/daily-breakdown-intraday-v27/run-37761086287/account-probe-8/files/year_quarter.csv
+2026-10-08T10:17:08.3679928Z remote: 
+2026-10-08T10:17:08.3680603Z remote: Create a pull request for 'research-daily-breakdown-intraday-v27-account-probe-8-37761086287' on GitHub by visiting:        
+2026-10-08T10:17:08.3681545Z remote:      https://github.com/duuu-hub/bb-scanner/pull/new/research-daily-breakdown-intraday-v27-account-probe-8-37761086287        
+2026-10-08T10:17:08.3682092Z remote: 
+2026-10-08T10:17:08.3692967Z To https://github.com/duuu-hub/bb-scanner
+2026-10-08T10:17:08.3693697Z  * [new branch]      HEAD -> research-daily-breakdown-intraday-v27-account-probe-8-37761086287
+2026-10-08T10:17:08.3785910Z ##[group]Run actions/upload-artifact@v4
+2026-10-08T10:17:08.3786113Z with:
+2026-10-08T10:17:08.3786282Z   name: daily-breakdown-intraday-v27-results-8
+2026-10-08T10:17:08.3786485Z   path: result-8/
+2026-10-08T10:17:08.3786632Z   retention-days: 30
+2026-10-08T10:17:08.3786788Z   compression-level: 0
+2026-10-08T10:17:08.3786957Z   if-no-files-found: warn
+2026-10-08T10:17:08.3787115Z   overwrite: false
+2026-10-08T10:17:08.3787269Z   include-hidden-files: false
+2026-10-08T10:17:08.3787437Z env:
+2026-10-08T10:17:08.3788807Z   GH_TOKEN: ***
+2026-10-08T10:17:08.3789001Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:08.3789280Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-08T10:17:08.3789550Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:08.3789801Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:08.3790069Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-08T10:17:08.3790326Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-08T10:17:08.3790540Z ##[endgroup]
+2026-10-08T10:17:08.4959156Z (node:2254) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:17:08.4959830Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:17:08.5102430Z With the provided path, there will be 78 files uploaded
+2026-10-08T10:17:08.5107282Z Artifact name is valid!
+2026-10-08T10:17:08.5107660Z Root directory input is valid!
+2026-10-08T10:17:08.8420936Z Beginning upload of artifact content to blob storage
+2026-10-08T10:17:08.8918800Z (node:2254) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-08T10:17:09.7038595Z Uploaded bytes 8388608
+2026-10-08T10:17:09.9458332Z Uploaded bytes 15663162
+2026-10-08T10:17:10.0083226Z Finished uploading artifact content to blob storage!
+2026-10-08T10:17:10.0083922Z SHA256 digest of uploaded artifact zip is a1116dd6ed78534b6342c8d17a071ab6fe75e7b1fb2b205ecf1f23d4038e37c8
+2026-10-08T10:17:10.0085378Z Finalizing artifact upload
+2026-10-08T10:17:10.2559318Z Artifact daily-breakdown-intraday-v27-results-8.zip successfully finalized. Artifact ID 11542253724
+2026-10-08T10:17:10.2560094Z Artifact daily-breakdown-intraday-v27-results-8 has been successfully uploaded! Final size is 15663162 bytes. Artifact ID is 11542253724
+2026-10-08T10:17:10.2564121Z Artifact download URL: https://github.com/duuu-hub/bb-scanner/actions/runs/37761086287/artifacts/11542253724
+2026-10-08T10:17:10.2709373Z Post job cleanup.
+2026-10-08T10:17:10.3533796Z (node:2267) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-08T10:17:10.3534261Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-08T10:17:10.3692328Z Post job cleanup.
+2026-10-08T10:17:10.4331994Z [command]/usr/bin/git version
+2026-10-08T10:17:10.4365195Z git version 2.55.0
+2026-10-08T10:17:10.4395334Z Temporarily overriding HOME='/home/runner/work/_temp/816de2f5-b6f5-4001-971c-6492aa17551f' before making global git config changes
+2026-10-08T10:17:10.4396083Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T10:17:10.4398595Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/bb-scanner/bb-scanner
+2026-10-08T10:17:10.4437000Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T10:17:10.4472309Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T10:17:10.4698667Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T10:17:10.4729359Z http.https://github.com/.extraheader
+2026-10-08T10:17:10.4746375Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-08T10:17:10.4791247Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T10:17:10.5059263Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T10:17:10.5101598Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T10:17:10.5430249Z Cleaning up orphan processes
+2026-10-08T10:17:10.5625043Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/download-artifact@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
