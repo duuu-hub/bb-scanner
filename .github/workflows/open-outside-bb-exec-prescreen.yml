@@ -1,0 +1,79 @@
+name: Open Outside BB Exec Prescreen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths:
+      - 'scripts/open_outside_bb_exec_prescreen.py'
+      - '.github/workflows/open-outside-bb-exec-prescreen.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  shard:
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Download frozen raw shard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p raw
+          gh run download 36095439671 -R ${{ github.repository }} \
+            -n "rank5-binance-um-15m-5y-data-shard-${{ matrix.shard }}" -D raw
+      - run: |
+          rm -rf out
+          PYTHONPATH=scripts python scripts/open_outside_bb_exec_prescreen.py --raw raw --out out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: open-outside-bb-exec-partial-${{ matrix.shard }}
+          path: out/prescreen.csv
+          retention-days: 30
+
+  merge:
+    needs: shard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: open-outside-bb-exec-partial-*
+          path: partials
+      - name: Merge additive prescreen statistics
+        run: |
+          python - <<'PY'
+          import glob,pandas as pd,os
+          fs=glob.glob('partials/**/prescreen.csv',recursive=True)
+          z=pd.concat([pd.read_csv(f) for f in fs],ignore_index=True)
+          keys=['fresh_atleast','stop_pct','hold_h','segment']
+          sums=['n','wins','gross_sum','gp20','gl20','gp40','gl40','target','sl','time','entryloss','dist_sum']
+          m=z.groupby(keys,as_index=False)[sums].sum()
+          m['wr_pct']=m.wins/m.n*100
+          m['avg_gross_pct']=m.gross_sum/m.n
+          m['avg_target_dist_pct']=m.dist_sum/m.n
+          m['pf20']=m.gp20/m.gl20
+          m['pf40']=m.gp40/m.gl40
+          m['target_pct']=m.target/m.n*100
+          m['entryloss_pct']=m.entryloss/m.n*100
+          os.makedirs('merged',exist_ok=True)
+          m.to_csv('merged/prescreen_merged.csv',index=False)
+          best=m[m.segment.isin(['TRAIN','SEEN'])].sort_values(['segment','pf20'],ascending=[True,False]).groupby('segment').head(12)
+          print(best.to_string(index=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: open-outside-bb-exec-merged-${{ github.run_id }}
+          path: merged/prescreen_merged.csv
+          retention-days: 30
