@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791633657148,
+  "last_run_ms": 1791634558197,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -437,7 +437,8 @@
     "SHORT3:S2:ARPAUSDT:1791627300000",
     "LONG3:L1:WALUSDT:1791630000000",
     "SHORT3:S2:BATUSDT:1791632700000",
-    "LONG3:L3:BATUSDT:1791633600000"
+    "LONG3:L3:BATUSDT:1791633600000",
+    "SHORT3:S1:BATUSDT:1791634500000"
   ],
   "signal_shadow_closed": [
     {
@@ -16571,11 +16572,10 @@
       "strategy": "S2",
       "symbol": "ARPAUSDT",
       "tp": 0.012096
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791634556898,
       "deadline_ms": 1791647100000,
       "detected_price": 0.14299,
       "last_checked_ms": 1791633600000,
@@ -16602,7 +16602,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.14299,
+      "shadow_exit_price": 0.14870960000000003,
+      "shadow_return_pct": -4.000000000000021,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:BATUSDT:1791632700000",
       "signal_time_ms": 1791632700000,
@@ -16610,12 +16613,14 @@
       "strategy": "S2",
       "symbol": "BATUSDT",
       "tp": 0.128691
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791676800000,
       "detected_price": 0.1464,
-      "last_checked_ms": 1791633600000,
+      "last_checked_ms": 1791634500000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.33804548248309585,
         "alt_positive_4h_pct": 33.909287257019436,
@@ -16647,6 +16652,43 @@
       "strategy": "L3",
       "symbol": "BATUSDT",
       "tp": 0.16104000000000002
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791677700000,
+      "detected_price": 0.15187,
+      "last_checked_ms": 1791634500000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.33804548248309585,
+        "alt_positive_4h_pct": 33.909287257019436,
+        "btc_1h_pct": 0.07006946541829873,
+        "btc_24h_pct": -0.563,
+        "btc_4h_pct": 0.027895215427142794,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.10948597737290289,
+        "eth_24h_pct": -0.42500000000000004,
+        "eth_4h_pct": 0.04809619238477225,
+        "eth_btc_relative_strength_24h_pct": 0.1379999999999999,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-10T10:55:49.961626+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.15187,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S1:BATUSDT:1791634500000",
+      "signal_time_ms": 1791634500000,
+      "sl": 0.15794480000000002,
+      "strategy": "S1",
+      "symbol": "BATUSDT",
+      "tp": 0.136683
     }
   ],
   "spread_shadow_closed": [],
