@@ -48,7 +48,7 @@ def bb_open(rop,rclose):
     basis=(sm+rop)/20.
     stdev=np.sqrt(np.maximum(0.,(sq+rop*rop)/20.-basis*basis))
     upper=basis+SIGMA*stdev;lower=basis-SIGMA*stdev
-    valid=np.isfinite(upper)&np.isfinite(lower)&(upper>0)&(lower>0)
+    valid=np.isfinite(upper)&np.isfinite(lower)&(upper>0)
     return valid,upper,lower
 
 def live_tf(ts,p15,times,close,step):
@@ -74,7 +74,7 @@ def live_tf(ts,p15,times,close,step):
     var=np.maximum(0.,(q[j]-q[j-19]+p15[sample]**2)/20.-mean*mean)
     upper[sample]=mean+SIGMA*np.sqrt(var)
     lower[sample]=mean-SIGMA*np.sqrt(var)
-    valid=np.isfinite(upper)&np.isfinite(lower)&(upper>0)&(lower>0)
+    valid=np.isfinite(upper)&np.isfinite(lower)&(upper>0)
     return valid,upper,lower
 
 def tf_states(ts,op,hi,lo,cl,fn):
@@ -118,7 +118,7 @@ def smoke(fn):
     trend=np.arange(100,dtype=float)+100
     eval_ts=np.arange(4*80*BAR,4*81*BAR,BAR,dtype=np.int64)
     valid,lup,llo=live_tf(eval_ts,np.array([1000.,1000.,1000.,1000.]),times,trend,4)
-    assert len(valid)==4 and valid.all() and (lup<1000).all()
+    assert len(valid)==4 and valid.all() and (lup<1000).all()\n    assert (llo<0).all()  # BB lower band may be negative; do not exclude extreme upper setups
     assert START<CUTOFF
     assert all(h<=COOLDOWN for h in HOLDS)
     # TF open-time projection does NOT reference future H/L/C.
