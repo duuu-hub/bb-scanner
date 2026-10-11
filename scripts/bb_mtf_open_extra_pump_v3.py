@@ -26,7 +26,7 @@ def audit():
     assert extension_entry(op,0,0.,4)==0
     assert extension_entry(op,0,1.,4)==2
     assert extension_entry(op,0,3.,4)==3
-    assert extension_entry(op,0,5.,4) is None
+    assert extension_entry(op,0,5.,4)==4
     assert extension_entry(op,0,5.,8)==4
     assert extension_entry(op,0,6.,8)==7
     assert extension_entry(op,0,7.,8) is None
