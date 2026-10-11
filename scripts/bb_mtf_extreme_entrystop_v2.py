@@ -59,11 +59,6 @@ def simulate(ts,op,hi,lo,cl,entry_i,side,stop,hold,exitmode,setup_bb):
     if end>=len(ts) or int(ts[end])-et!=hold*BAR:return None
     mfe=0.;mae=0.
     for j in range(entry_i,end+1):
-        if j<end:
-            # futures price movement from entry to any high/low, descriptive only
-            fave=((entry-float(lo[j]))/entry*100 if short else (float(hi[j])-entry)/entry*100)
-            adv=((float(hi[j])-entry)/entry*100 if short else (entry-float(lo[j]))/entry*100)
-            mfe=max(mfe,fave);mae=max(mae,adv)
         px=float(op[j])
         crossed_open=px>=level if short else px<=level
         if crossed_open:
@@ -80,6 +75,10 @@ def simulate(ts,op,hi,lo,cl,entry_i,side,stop,hold,exitmode,setup_bb):
                 return {"exit_ts":int(ts[j]),"exit_price":px,"reason":"BB15_CONFIRMED_NEXT_OPEN",
                         "gross_pct":(entry-px)/entry*100 if short else (px-entry)/entry*100,
                         "mae_pct":mae,"mfe_pct":mfe}
+        # Only collect intrabar excursion if still in the position after OPEN exits.
+        fave=((entry-float(lo[j]))/entry*100 if short else (float(hi[j])-entry)/entry*100)
+        adv=((float(hi[j])-entry)/entry*100 if short else (entry-float(lo[j]))/entry*100)
+        mfe=max(mfe,fave);mae=max(mae,adv)
         touched=float(hi[j])>=level if short else float(lo[j])<=level
         if touched:
             return {"exit_ts":int(ts[j])+BAR,"exit_price":level,"reason":"STOP_TOUCH",
