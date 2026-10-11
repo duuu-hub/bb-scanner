@@ -1,0 +1,71 @@
+{
+  "experiment_id": "BB_MTF_EXTREME_ENTRYSTOP_V2",
+  "classification": "EXPLORATORY; previous 5Y upper-band metrics viewed; new parameters post hoc",
+  "repository": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "source_data": "Binance UM USDT 15m official frozen archive, run 36095439671, 856 raw files from currently-listed symbols; survivorship bias",
+  "source_signal_study": {
+    "run_id": 38111910409,
+    "sha": "0080b40d3f629586c84e71bf2df6995543476f20"
+  },
+  "hypothesis": "Strict actual TF OPEN upper-BB extreme shorts have conditional fade edge only after reversal confirmation; no-confirm immediate short suffers extreme adverse runup. Lower-BB reverse LONG is symmetric control.",
+  "signal_condition": "BB20 population sigma2, first 19 prior closed TF closes and current actual TF OPEN; fresh simultaneous outside condition. 32x15m per-symbol signal cooldown.",
+  "groups": {
+    "ALL7": [
+      "1D",
+      "12H",
+      "4H",
+      "2H",
+      "1H",
+      "30M",
+      "15M"
+    ],
+    "DAY4": [
+      "1D",
+      "4H",
+      "1H",
+      "15M"
+    ],
+    "NO_DAY6": [
+      "12H",
+      "4H",
+      "2H",
+      "1H",
+      "30M",
+      "15M"
+    ]
+  },
+  "direction": [
+    "UPPER=>SHORT",
+    "LOWER=>LONG"
+  ],
+  "confirm": [
+    "NOW at setup OPEN",
+    "FIRST_REVERSE_BODY: first closed opposite-body 15M candle among 4, enter next OPEN",
+    "BREAK_SETUP_EXTREME: first close across setup 15M low/high among 4, enter next OPEN",
+    "RETURN_INSIDE_15M_BB: first close back through frozen setup 15M upper/lower, enter next OPEN"
+  ],
+  "hard_stop_pct": [
+    3,
+    5,
+    8,
+    12
+  ],
+  "exit": [
+    "single intrabar protective stop-market with worse-gap-OPEN fill",
+    "soft TP: prior completed 15M closes within frozen setup 15M BB, next OPEN market exit",
+    "TIME: 2h/4h/8h from entry at exact 15M OPEN"
+  ],
+  "horizons_bars": [
+    8,
+    16,
+    32
+  ],
+  "chronology": "Only one intrabar price order=STOP, so no simultaneous hard TP/SL competition; run repository 1m mandatory 8-scenario smoke. STOP_TOUCH timestamp accounted at 15M candle close, conservative occupancy.",
+  "costs": "20bp and 40bp TOTAL round-trip all-in, funding excluded; stop-touch at price (gap 15M OPEN worse, no orderbook micro slippage)",
+  "split": "TRAIN 2021-2024, SEEN 2025+ already viewed (not pristine OOS); discard train spans with full maximum holding horizon over cutoff",
+  "portfolio": "Portfolio per grid: cash 10000, 0.25pct planned account risk per trade, same-symbol duplicate disabled, max 4 concurrent, <=25% notional each, <=100% gross, order contemporaneous candidate by descending setup BB15 distance, 40bp fees; no daily drawdown halts; exit-realized drawdown only.",
+  "selection_rule": "Rank TRAIN portfolio total return minus 0.5x realized-only MDD, only if at least 55 TRAIN trade records, 20 distinct TRAIN setup UTC days, >=3 TRAIN calendar years, >=35 accepted portfolio trades. Freeze selection before viewing seen. Seen treated only falsification; need new forward.",
+  "audit": "Source canonical opening causality, s2_current_rule_5y mandatory 1m chronology 8 scenarios, single stop + deferred soft TP, stop-gap, TF cutoff, four shards + fully accounting ledger, code commit SHA. 30 named / 10 clean remain required for Demo.",
+  "status": "Research-only, main/LONG3/demo untouched."
+}
