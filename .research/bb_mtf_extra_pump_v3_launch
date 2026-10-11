@@ -1,0 +1,40 @@
+{
+  "experiment_id": "BB_MTF_OPEN_EXTRA_PUMP_V3",
+  "classification": "EXPLORATORY posthoc after V1/V2 studies",
+  "source_repo": "duuu-hub/bb-scanner",
+  "branch": "research-rank5-binance-15m-5y",
+  "data_run": 36095439671,
+  "source_strict_open_run": 38111910409,
+  "source_v2_risk_run": 38178524284,
+  "rationale": "V2 closed-15m bearish confirmations reduced SHORT profitability. Test whether waiting for 15m OPEN to extend further ABOVE initial synchronized outside-BB setup OPEN improves entry price and account edge without lookahead or optimistic maker fills.",
+  "groups": [
+    "ALL7",
+    "DAY4",
+    "NO_DAY6"
+  ],
+  "direction": "UPPER SHORT only",
+  "threshold_extension_pct": [
+    0,
+    1,
+    2,
+    3,
+    5
+  ],
+  "entry_wait_following_15m_bars": [
+    4,
+    8
+  ],
+  "entry_timestamp": "Extension>0: first following 15M OPEN that is >=setup OPEN*(1+X/100); if same 15M candle high touches extension but subsequent OPEN does not, NO fill. Extension=0: setup current 15M OPEN immediate taker.",
+  "exits": {
+    "one_price_triggered_intrabar": "STOP MARKET, 5/8/12 pct, touch at stop price; worse 15M OPEN gap",
+    "soft_profit": "prior fully CLOSED 15M candle below FROZEN setup 15M upper BB; exit next 15M OPEN",
+    "time": "2/4/8h after fill at next 15M OPEN"
+  },
+  "bands": "Strict 1D~15M BB20x2 each CURRENT TF actual OPEN with prior 19 CLOSED TF closes, source V1",
+  "costs": "20bp/40bp TOTAL roundtrip all-in; funding excluded",
+  "split": "TRAIN 2021-24, seen 2025+; full hold endpoint must not cross split",
+  "portfolio": "$10k, 0.25pct account planned stop risk/position including .4pct cost sizing, max4, max25pct notional each, <=100pct aggregate, one position per symbol, rank same-time by setup BB15 distance. Equity/MDD realized only.",
+  "selection": "TRAIN return less .5x realized-only MDD; min 35 TRAIN trades, 18 distinct setup days, 3 calendar years, >=28 account fills. SEEN falsification only; not untouched OOS.",
+  "audit": "Mandatory source 1m chronology smoke, V2 single intrabar stop and soft TP next 15m OPEN smoke, causal observed 15m OPEN-only market entry, no future candle H/L/C used, complete 4 shards. 30 checks +10 independent clean rounds remain before any demo.",
+  "limitations": "Current listed historical Binance UM survivor universe, no funding, no orderbook stop slippage, no MTM account MDD; intentionally NOT live or demo; main untouched."
+}
