@@ -1,0 +1,56 @@
+name: BB MTF Extreme Short Reversal Risk V2
+on:
+  push:
+    branches: [research-rank5-binance-15m-5y]
+    paths: ['.research/bb_mtf_extreme_v2_launch']
+permissions: {contents: read, actions: read}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - run: python scripts/bb_mtf_extreme_entrystop_v2.py --audit
+  shards:
+    needs: audit
+    strategy:
+      fail-fast: false
+      matrix: {shard: [0,1,2,3]}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - name: Frozen 5Y Binance UM 15m OHLC
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: mkdir data && gh run download 36095439671 -R ${{ github.repository }} -p 'rank5-binance-um-15m-5y-data-shard-*' -D data
+      - run: python scripts/bb_mtf_extreme_entrystop_v2.py --shards 4 --shard ${{ matrix.shard }} --data data --out bb-risk-shard-${{ matrix.shard }}.csv.gz --meta bb-risk-meta-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-mtf-risk-shard-${{ matrix.shard }}
+          path: |
+            bb-risk-shard-${{ matrix.shard }}.csv.gz
+            bb-risk-meta-${{ matrix.shard }}.json
+  merge:
+    needs: shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install pandas==2.3.3 numpy==2.3.3
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bb-mtf-risk-shard-*
+          path: merged
+      - run: python scripts/bb_mtf_extreme_entrystop_v2.py --merge --shards 4 --data merged --out bb-mtf-extreme-risk-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb-mtf-extreme-risk-report
+          path: bb-mtf-extreme-risk-report.json
