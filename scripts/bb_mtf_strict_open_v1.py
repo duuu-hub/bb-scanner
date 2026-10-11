@@ -118,7 +118,8 @@ def smoke(fn):
     trend=np.arange(100,dtype=float)+100
     eval_ts=np.arange(4*80*BAR,4*81*BAR,BAR,dtype=np.int64)
     valid,lup,llo=live_tf(eval_ts,np.array([1000.,1000.,1000.,1000.]),times,trend,4)
-    assert len(valid)==4 and valid.all() and (lup<1000).all()\n    assert (llo<0).all()  # BB lower band may be negative; do not exclude extreme upper setups
+    assert len(valid)==4 and valid.all() and (lup<1000).all()
+    assert (llo<0).all()  # BB lower band may be negative; do not exclude extreme upper setups
     assert START<CUTOFF
     assert all(h<=COOLDOWN for h in HOLDS)
     # TF open-time projection does NOT reference future H/L/C.
