@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791743466509,
+  "last_run_ms": 1791744362897,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -513,7 +513,8 @@
     "LONG3:L2:SUSDT:1791738900000",
     "SHORT3:S3:NEARUSDT:1791739800000",
     "SHORT3:S3:METISUSDT:1791739800000",
-    "SHORT3:S1:WUSDT:1791740700000"
+    "SHORT3:S1:WUSDT:1791740700000",
+    "SHORT3:S1:WUSDT:1791744300000"
   ],
   "signal_shadow_closed": [
     {
@@ -19510,11 +19511,10 @@
       "strategy": "S3",
       "symbol": "METISUSDT",
       "tp": 3.3588000000000005
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1791744358591,
       "deadline_ms": 1791744300000,
       "detected_price": 0.06633,
       "last_checked_ms": 1791743460000,
@@ -19541,7 +19541,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.06633,
+      "shadow_exit_price": 0.06856,
+      "shadow_return_pct": 3.3619779888436603,
       "side": "LONG",
       "signal_id": "LONG3:L1:CFXUSDT:1791701100000",
       "signal_time_ms": 1791701100000,
@@ -19551,10 +19554,53 @@
       "tp": 0.072963
     },
     {
+      "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791744358591,
+      "deadline_ms": 1791783900000,
+      "detected_price": 0.01939,
+      "last_checked_ms": 1791743460000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.969618616677459,
+        "alt_positive_4h_pct": 82.93736501079914,
+        "btc_1h_pct": 0.029323101239797644,
+        "btc_24h_pct": 1.001,
+        "btc_4h_pct": 1.0506351977843442,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.21193092621664134,
+        "eth_24h_pct": 1.431,
+        "eth_4h_pct": 1.5739852988175151,
+        "eth_btc_relative_strength_24h_pct": 0.43000000000000016,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-11T14:58:03.471084+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
+      "shadow_entry_price": 0.01939,
+      "shadow_exit_price": 0.020165600000000002,
+      "shadow_return_pct": -4.000000000000011,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S1:WUSDT:1791740700000",
+      "signal_time_ms": 1791740700000,
+      "sl": 0.020165600000000002,
+      "strategy": "S1",
+      "symbol": "WUSDT",
+      "tp": 0.017451
+    }
+  ],
+  "signal_shadow_open": [
+    {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791772200000,
       "detected_price": 0.9033,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.9137635636779051,
         "alt_positive_4h_pct": 16.414686825053995,
@@ -19591,7 +19637,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791773100000,
       "detected_price": 0.9285,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.9137635636779051,
         "alt_positive_4h_pct": 16.414686825053995,
@@ -19628,7 +19674,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791775800000,
       "detected_price": 0.0569,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -19665,7 +19711,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791775800000,
       "detected_price": 0.9568,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -19702,7 +19748,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791747900000,
       "detected_price": 0.9549,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -19739,7 +19785,7 @@
       "actual_execution": "REJECT:MAKER_PRICE_BELOW_ENTRY_RANGE",
       "deadline_ms": 1791777600000,
       "detected_price": 5.7849,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -19776,7 +19822,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791780300000,
       "detected_price": 0.06273,
-      "last_checked_ms": 1791743460000,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -19812,20 +19858,20 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
-      "deadline_ms": 1791783900000,
-      "detected_price": 0.01939,
-      "last_checked_ms": 1791743460000,
+      "deadline_ms": 1791787500000,
+      "detected_price": 0.02076,
+      "last_checked_ms": 1791744360000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
-        "btc_1h_pct": 0.029323101239797644,
-        "btc_24h_pct": 1.001,
-        "btc_4h_pct": 1.0506351977843442,
+        "btc_1h_pct": -0.37925892044614606,
+        "btc_24h_pct": 0.776,
+        "btc_4h_pct": 0.6508291814090184,
         "btc_volatility_state": "NORMAL",
-        "eth_1h_pct": -0.21193092621664134,
-        "eth_24h_pct": 1.431,
-        "eth_4h_pct": 1.5739852988175151,
-        "eth_btc_relative_strength_24h_pct": 0.43000000000000016,
+        "eth_1h_pct": -0.3487238358835576,
+        "eth_24h_pct": 1.028,
+        "eth_4h_pct": 1.1581732630394193,
+        "eth_btc_relative_strength_24h_pct": 0.252,
         "market_regime": "BULLISH",
         "regime_snapshot_time": "2026-10-11T14:58:03.471084+00:00",
         "total3_24h_pct": null,
@@ -19834,18 +19880,19 @@
         "total3es_4h_pct": null
       },
       "matched_strategies": [
-        "S1"
+        "S1",
+        "S3"
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
-      "shadow_entry_price": 0.01939,
+      "shadow_entry_price": 0.02076,
       "side": "SHORT",
-      "signal_id": "SHORT3:S1:WUSDT:1791740700000",
-      "signal_time_ms": 1791740700000,
-      "sl": 0.020165600000000002,
+      "signal_id": "SHORT3:S1:WUSDT:1791744300000",
+      "signal_time_ms": 1791744300000,
+      "sl": 0.021590400000000003,
       "strategy": "S1",
       "symbol": "WUSDT",
-      "tp": 0.017451
+      "tp": 0.018684000000000003
     }
   ],
   "spread_shadow_closed": [],
