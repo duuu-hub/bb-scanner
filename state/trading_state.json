@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791774964946,
+  "last_run_ms": 1791775866838,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -542,7 +542,9 @@
     "LONG3:L1:ZESTUSDT:1791773100000",
     "LONG3:L2:WUSDT:1791774000000",
     "LONG3:L3:ZKUSDT:1791774000000",
-    "SHORT3:S3:AZTECUSDT:1791774900000"
+    "SHORT3:S3:AZTECUSDT:1791774900000",
+    "LONG3:L3:TIAUSDT:1791775800000",
+    "SHORT3:S2:AXLUSDT:1791775800000"
   ],
   "signal_shadow_closed": [
     {
@@ -20532,11 +20534,10 @@
       "strategy": "L1",
       "symbol": "ZESTUSDT",
       "tp": 0.245927
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1791775860071,
       "deadline_ms": 1791775800000,
       "detected_price": 0.0569,
       "last_checked_ms": 1791774960000,
@@ -20563,7 +20564,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "TAKE_PROFIT",
       "shadow_entry_price": 0.0569,
+      "shadow_exit_price": 0.06259,
+      "shadow_return_pct": 10.0,
       "side": "LONG",
       "signal_id": "LONG3:L3:AXLUSDT:1791732600000",
       "signal_time_ms": 1791732600000,
@@ -20574,6 +20578,7 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791775860071,
       "deadline_ms": 1791775800000,
       "detected_price": 0.9568,
       "last_checked_ms": 1791774960000,
@@ -20600,7 +20605,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.9568,
+      "shadow_exit_price": 0.8969,
+      "shadow_return_pct": 6.260451505016722,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:APTUSDT:1791732600000",
       "signal_time_ms": 1791732600000,
@@ -20610,10 +20618,53 @@
       "tp": 0.86112
     },
     {
+      "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791775860071,
+      "deadline_ms": 1791783000000,
+      "detected_price": 0.01966,
+      "last_checked_ms": 1791774960000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.13109596224436526,
+        "alt_positive_4h_pct": 40.172786177105834,
+        "btc_1h_pct": -0.14114957559675512,
+        "btc_24h_pct": 0.84,
+        "btc_4h_pct": 0.3499932855005161,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.05315734969266739,
+        "eth_24h_pct": 1.158,
+        "eth_4h_pct": 0.5621828064767964,
+        "eth_btc_relative_strength_24h_pct": 0.31799999999999995,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-11T22:58:13.486033+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S2"
+      ],
+      "max_hold_minutes": 240,
+      "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
+      "shadow_entry_price": 0.01966,
+      "shadow_exit_price": 0.0204464,
+      "shadow_return_pct": -4.0,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S2:AZTECUSDT:1791768600000",
+      "signal_time_ms": 1791768600000,
+      "sl": 0.0204464,
+      "strategy": "S2",
+      "symbol": "AZTECUSDT",
+      "tp": 0.017694
+    }
+  ],
+  "signal_shadow_open": [
+    {
       "actual_execution": "REJECT:MAKER_PRICE_BELOW_ENTRY_RANGE",
       "deadline_ms": 1791777600000,
       "detected_price": 5.7849,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -20650,7 +20701,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791788400000,
       "detected_price": 0.02247,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.969618616677459,
         "alt_positive_4h_pct": 82.93736501079914,
@@ -20688,7 +20739,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791792900000,
       "detected_price": 0.05793,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.40128410914928025,
         "alt_positive_4h_pct": 65.2267818574514,
@@ -20725,7 +20776,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791801900000,
       "detected_price": 0.34698,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.40128410914928025,
         "alt_positive_4h_pct": 65.2267818574514,
@@ -20762,7 +20813,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791776700000,
       "detected_price": 0.09071,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -20799,7 +20850,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791780300000,
       "detected_price": 0.864,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -20833,47 +20884,10 @@
       "tp": 0.7776
     },
     {
-      "actual_execution": "SHADOW_ONLY",
-      "deadline_ms": 1791783000000,
-      "detected_price": 0.01966,
-      "last_checked_ms": 1791774960000,
-      "market_snapshot": {
-        "alt_median_4h_pct": -0.13109596224436526,
-        "alt_positive_4h_pct": 40.172786177105834,
-        "btc_1h_pct": -0.14114957559675512,
-        "btc_24h_pct": 0.84,
-        "btc_4h_pct": 0.3499932855005161,
-        "btc_volatility_state": "NORMAL",
-        "eth_1h_pct": -0.05315734969266739,
-        "eth_24h_pct": 1.158,
-        "eth_4h_pct": 0.5621828064767964,
-        "eth_btc_relative_strength_24h_pct": 0.31799999999999995,
-        "market_regime": "NEUTRAL",
-        "regime_snapshot_time": "2026-10-11T22:58:13.486033+00:00",
-        "total3_24h_pct": null,
-        "total3_4h_pct": null,
-        "total3es_24h_pct": null,
-        "total3es_4h_pct": null
-      },
-      "matched_strategies": [
-        "S2"
-      ],
-      "max_hold_minutes": 240,
-      "portfolio": "SHORT3",
-      "shadow_entry_price": 0.01966,
-      "side": "SHORT",
-      "signal_id": "SHORT3:S2:AZTECUSDT:1791768600000",
-      "signal_time_ms": 1791768600000,
-      "sl": 0.0204464,
-      "strategy": "S2",
-      "symbol": "AZTECUSDT",
-      "tp": 0.017694
-    },
-    {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791814500000,
       "detected_price": 0.01637,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -20910,7 +20924,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791816300000,
       "detected_price": 0.02801,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -20948,7 +20962,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791777600000,
       "detected_price": 0.02878,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -20987,7 +21001,7 @@
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791817200000,
       "detected_price": 0.01663,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.13109596224436526,
         "alt_positive_4h_pct": 40.172786177105834,
@@ -21024,7 +21038,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791778500000,
       "detected_price": 0.01985,
-      "last_checked_ms": 1791774960000,
+      "last_checked_ms": 1791775860000,
       "market_snapshot": {
         "alt_median_4h_pct": 0.27688047992617815,
         "alt_positive_4h_pct": 59.611231101511876,
@@ -21056,6 +21070,80 @@
       "strategy": "S3",
       "symbol": "AZTECUSDT",
       "tp": 0.017865
+    },
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1791819000000,
+      "detected_price": 0.5994,
+      "last_checked_ms": 1791775860000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.27688047992617815,
+        "alt_positive_4h_pct": 59.611231101511876,
+        "btc_1h_pct": -0.22715857314828947,
+        "btc_24h_pct": 0.8959999999999999,
+        "btc_4h_pct": -0.06142513483057277,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.2568426005803315,
+        "eth_24h_pct": 1.5699999999999998,
+        "eth_4h_pct": 0.3562664225801093,
+        "eth_btc_relative_strength_24h_pct": 0.6739999999999999,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-12T02:52:19.700251+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L3"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.5994,
+      "side": "LONG",
+      "signal_id": "LONG3:L3:TIAUSDT:1791775800000",
+      "signal_time_ms": 1791775800000,
+      "sl": 0.575424,
+      "strategy": "L3",
+      "symbol": "TIAUSDT",
+      "tp": 0.6593400000000001
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791790200000,
+      "detected_price": 0.06164,
+      "last_checked_ms": 1791775860000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.27688047992617815,
+        "alt_positive_4h_pct": 59.611231101511876,
+        "btc_1h_pct": -0.22715857314828947,
+        "btc_24h_pct": 0.8959999999999999,
+        "btc_4h_pct": -0.06142513483057277,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.2568426005803315,
+        "eth_24h_pct": 1.5699999999999998,
+        "eth_4h_pct": 0.3562664225801093,
+        "eth_btc_relative_strength_24h_pct": 0.6739999999999999,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-12T02:52:19.700251+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S2"
+      ],
+      "max_hold_minutes": 240,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.06164,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S2:AXLUSDT:1791775800000",
+      "signal_time_ms": 1791775800000,
+      "sl": 0.0641056,
+      "strategy": "S2",
+      "symbol": "AXLUSDT",
+      "tp": 0.055476000000000004
     }
   ],
   "spread_shadow_closed": [],
