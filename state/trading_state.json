@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791902758472,
+  "last_run_ms": 1791903657978,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -589,7 +589,8 @@
     "LONG3:L1:SUSDT:1791899100000",
     "SHORT3:S2:SUSDT:1791899100000",
     "LONG3:L1:AVAUSDT:1791901800000",
-    "SHORT3:S1:AVAUSDT:1791901800000"
+    "SHORT3:S1:AVAUSDT:1791901800000",
+    "SHORT3:S2:AVAUSDT:1791903600000"
   ],
   "signal_shadow_closed": [
     {
@@ -22973,11 +22974,10 @@
       "strategy": "S1",
       "symbol": "AVAUSDT",
       "tp": 0.25263
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1791903656147,
       "deadline_ms": 1791904500000,
       "detected_price": 0.17324,
       "last_checked_ms": 1791902700000,
@@ -23005,7 +23005,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "TAKE_PROFIT",
       "shadow_entry_price": 0.17324,
+      "shadow_exit_price": 0.190564,
+      "shadow_return_pct": 10.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:BATUSDT:1791861300000",
       "signal_time_ms": 1791861300000,
@@ -23013,12 +23016,14 @@
       "strategy": "L1",
       "symbol": "BATUSDT",
       "tp": 0.190564
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791941400000,
       "detected_price": 0.07132,
-      "last_checked_ms": 1791902700000,
+      "last_checked_ms": 1791903600000,
       "market_snapshot": {
         "alt_median_4h_pct": -2.072777521879332,
         "alt_positive_4h_pct": 6.047516198704104,
@@ -23055,7 +23060,7 @@
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1791913500000,
       "detected_price": 0.0725,
-      "last_checked_ms": 1791902700000,
+      "last_checked_ms": 1791903600000,
       "market_snapshot": {
         "alt_median_4h_pct": -2.072777521879332,
         "alt_positive_4h_pct": 6.047516198704104,
@@ -23088,6 +23093,44 @@
       "strategy": "S2",
       "symbol": "SUSDT",
       "tp": 0.06525
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791918000000,
+      "detected_price": 0.2814,
+      "last_checked_ms": 1791903600000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -2.072777521879332,
+        "alt_positive_4h_pct": 6.047516198704104,
+        "btc_1h_pct": 0.3920061029451638,
+        "btc_24h_pct": 1.153,
+        "btc_4h_pct": 0.3074108706533796,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.6446971362337406,
+        "eth_24h_pct": -0.241,
+        "eth_4h_pct": 0.8240240240240171,
+        "eth_btc_relative_strength_24h_pct": -1.3940000000000001,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-10-13T10:41:02.177456+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S2"
+      ],
+      "max_hold_minutes": 240,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.2814,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S2:AVAUSDT:1791903600000",
+      "signal_time_ms": 1791903600000,
+      "sl": 0.29265599999999997,
+      "strategy": "S2",
+      "symbol": "AVAUSDT",
+      "tp": 0.25326
     }
   ],
   "spread_shadow_closed": [],
