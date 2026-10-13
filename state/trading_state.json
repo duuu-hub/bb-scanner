@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1791859554842,
+  "last_run_ms": 1791860456441,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -577,7 +577,8 @@
     "SHORT3:S2:INITUSDT:1791837000000",
     "SHORT3:S3:STXUSDT:1791837900000",
     "SHORT3:S2:SKLUSDT:1791856800000",
-    "LONG3:L1:QUSDT:1791858600000"
+    "LONG3:L1:QUSDT:1791858600000",
+    "SHORT3:S3:SKLUSDT:1791860400000"
   ],
   "signal_shadow_closed": [
     {
@@ -22505,11 +22506,10 @@
       "strategy": "S2",
       "symbol": "INITUSDT",
       "tp": 0.114723
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1791860455042,
       "deadline_ms": 1791871200000,
       "detected_price": 0.005746,
       "last_checked_ms": 1791859500000,
@@ -22536,7 +22536,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.005746,
+      "shadow_exit_price": 0.0059758400000000005,
+      "shadow_return_pct": -4.000000000000009,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:SKLUSDT:1791856800000",
       "signal_time_ms": 1791856800000,
@@ -22544,12 +22547,14 @@
       "strategy": "S2",
       "symbol": "SKLUSDT",
       "tp": 0.0051714000000000005
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
       "deadline_ms": 1791901800000,
       "detected_price": 0.035484,
-      "last_checked_ms": 1791859500000,
+      "last_checked_ms": 1791860400000,
       "market_snapshot": {
         "alt_median_4h_pct": -1.2934853227806964,
         "alt_positive_4h_pct": 13.174946004319654,
@@ -22581,6 +22586,43 @@
       "strategy": "L1",
       "symbol": "QUSDT",
       "tp": 0.0390324
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1791864000000,
+      "detected_price": 0.005688,
+      "last_checked_ms": 1791860400000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -1.2934853227806964,
+        "alt_positive_4h_pct": 13.174946004319654,
+        "btc_1h_pct": 0.5053998301177032,
+        "btc_24h_pct": -1.061,
+        "btc_4h_pct": 0.8721185136109533,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.9961598726993648,
+        "eth_24h_pct": -2.175,
+        "eth_4h_pct": 0.9363387047044203,
+        "eth_btc_relative_strength_24h_pct": -1.1139999999999999,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-10-12T22:47:14.905201+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S3"
+      ],
+      "max_hold_minutes": 60,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.005688,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S3:SKLUSDT:1791860400000",
+      "signal_time_ms": 1791860400000,
+      "sl": 0.005972400000000001,
+      "strategy": "S3",
+      "symbol": "SKLUSDT",
+      "tp": 0.005119200000000001
     }
   ],
   "spread_shadow_closed": [],
