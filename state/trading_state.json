@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792255556455,
+  "last_run_ms": 1792256456252,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -660,7 +660,8 @@
     "SHORT3:S1:QUSDT:1792251900000",
     "SHORT3:S2:AVAUSDT:1792253700000",
     "SHORT3:S1:AVAUSDT:1792254600000",
-    "LONG3:L1:AVAUSDT:1792255500000"
+    "LONG3:L1:AVAUSDT:1792255500000",
+    "SHORT3:S3:AVAUSDT:1792256400000"
   ],
   "signal_shadow_closed": [
     {
@@ -26062,11 +26063,10 @@
       "strategy": "S1",
       "symbol": "AVAUSDT",
       "tp": 0.3258
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1792256455054,
       "deadline_ms": 1792298700000,
       "detected_price": 0.3794,
       "last_checked_ms": 1792255500000,
@@ -26094,7 +26094,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.3794,
+      "shadow_exit_price": 0.36043,
+      "shadow_return_pct": -5.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:AVAUSDT:1792255500000",
       "signal_time_ms": 1792255500000,
@@ -26102,6 +26105,45 @@
       "strategy": "L1",
       "symbol": "AVAUSDT",
       "tp": 0.41734000000000004
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "deadline_ms": 1792260000000,
+      "detected_price": 0.3686,
+      "last_checked_ms": 1792256400000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.9363295880149725,
+        "alt_positive_4h_pct": 13.174946004319654,
+        "btc_1h_pct": -0.12346605114001985,
+        "btc_24h_pct": -0.173,
+        "btc_4h_pct": -0.32681342794519397,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.292197415879103,
+        "eth_24h_pct": -1.105,
+        "eth_4h_pct": -0.9683483250748304,
+        "eth_btc_relative_strength_24h_pct": -0.9319999999999999,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-17T14:39:59.676207+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "S3"
+      ],
+      "max_hold_minutes": 60,
+      "portfolio": "SHORT3",
+      "shadow_entry_price": 0.3686,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S3:AVAUSDT:1792256400000",
+      "signal_time_ms": 1792256400000,
+      "sl": 0.38703,
+      "strategy": "S3",
+      "symbol": "AVAUSDT",
+      "tp": 0.33174
     }
   ],
   "spread_shadow_closed": [],
