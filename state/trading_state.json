@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792198854874,
+  "last_run_ms": 1792199756240,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -640,7 +640,8 @@
     "SHORT3:S1:ARIAUSDT:1792168200000",
     "SHORT3:S2:ARIAUSDT:1792169100000",
     "SHORT3:S3:ARIAUSDT:1792187100000",
-    "SHORT3:S1:QUSDT:1792198800000"
+    "SHORT3:S1:QUSDT:1792198800000",
+    "LONG3:L1:QUSDT:1792199700000"
   ],
   "signal_shadow_closed": [
     {
@@ -25213,11 +25214,10 @@
       "strategy": "S3",
       "symbol": "ARIAUSDT",
       "tp": 0.039042
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792199754940,
       "deadline_ms": 1792242000000,
       "detected_price": 0.063673,
       "last_checked_ms": 1792198800000,
@@ -25244,7 +25244,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.063673,
+      "shadow_exit_price": 0.06621992,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:QUSDT:1792198800000",
       "signal_time_ms": 1792198800000,
@@ -25252,6 +25255,46 @@
       "strategy": "S1",
       "symbol": "QUSDT",
       "tp": 0.057305699999999994
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1792242900000,
+      "detected_price": 0.066637,
+      "last_checked_ms": 1792199700000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.7248520710059214,
+        "alt_positive_4h_pct": 83.36933045356372,
+        "btc_1h_pct": -0.1019489152610853,
+        "btc_24h_pct": -1.0630000000000002,
+        "btc_4h_pct": -0.19843698738131188,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.005781588119657677,
+        "eth_24h_pct": -0.931,
+        "eth_4h_pct": 0.19697258108568594,
+        "eth_btc_relative_strength_24h_pct": 0.13200000000000012,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-16T22:43:04.694101+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.066637,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:QUSDT:1792199700000",
+      "signal_time_ms": 1792199700000,
+      "sl": 0.06330515,
+      "strategy": "L1",
+      "symbol": "QUSDT",
+      "tp": 0.07330070000000001
     }
   ],
   "spread_shadow_closed": [],
