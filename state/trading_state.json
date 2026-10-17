@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792256456252,
+  "last_run_ms": 1792257356579,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -661,7 +661,8 @@
     "SHORT3:S2:AVAUSDT:1792253700000",
     "SHORT3:S1:AVAUSDT:1792254600000",
     "LONG3:L1:AVAUSDT:1792255500000",
-    "SHORT3:S3:AVAUSDT:1792256400000"
+    "SHORT3:S3:AVAUSDT:1792256400000",
+    "LONG3:L2:QUSDT:1792257300000"
   ],
   "signal_shadow_closed": [
     {
@@ -26105,11 +26106,10 @@
       "strategy": "L1",
       "symbol": "AVAUSDT",
       "tp": 0.41734000000000004
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792257355183,
       "deadline_ms": 1792260000000,
       "detected_price": 0.3686,
       "last_checked_ms": 1792256400000,
@@ -26136,7 +26136,10 @@
       ],
       "max_hold_minutes": 60,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.3686,
+      "shadow_exit_price": 0.38703,
+      "shadow_return_pct": -5.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S3:AVAUSDT:1792256400000",
       "signal_time_ms": 1792256400000,
@@ -26144,6 +26147,45 @@
       "strategy": "S3",
       "symbol": "AVAUSDT",
       "tp": 0.33174
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1792260900000,
+      "detected_price": 0.118045,
+      "last_checked_ms": 1792257300000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.9363295880149725,
+        "alt_positive_4h_pct": 13.174946004319654,
+        "btc_1h_pct": -0.09809043249522365,
+        "btc_24h_pct": 0.303,
+        "btc_4h_pct": -0.24204961526139712,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.19078745448060097,
+        "eth_24h_pct": -0.023,
+        "eth_4h_pct": -0.6510529553345412,
+        "eth_btc_relative_strength_24h_pct": -0.326,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-17T14:39:59.676207+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L2"
+      ],
+      "max_hold_minutes": 60,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.118045,
+      "side": "LONG",
+      "signal_id": "LONG3:L2:QUSDT:1792257300000",
+      "signal_time_ms": 1792257300000,
+      "sl": 0.115093875,
+      "strategy": "L2",
+      "symbol": "QUSDT",
+      "tp": 0.1298495
     }
   ],
   "spread_shadow_closed": [],
