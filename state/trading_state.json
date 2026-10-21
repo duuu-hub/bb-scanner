@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792599357780,
+  "last_run_ms": 1792600259840,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -728,7 +728,8 @@
     "SHORT3:S1:IRYSUSDT:1792593900000",
     "LONG3:L2:IRYSUSDT:1792594800000",
     "LONG3:L1:ALTUSDT:1792599300000",
-    "SHORT3:S1:ALTUSDT:1792599300000"
+    "SHORT3:S1:ALTUSDT:1792599300000",
+    "LONG3:L2:ALTUSDT:1792600200000"
   ],
   "signal_shadow_closed": [
     {
@@ -28923,11 +28924,10 @@
       "strategy": "L2",
       "symbol": "IRYSUSDT",
       "tp": 0.022253000000000002
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1792600256933,
       "deadline_ms": 1792642500000,
       "detected_price": 0.011605,
       "last_checked_ms": 1792599300000,
@@ -28955,7 +28955,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.011605,
+      "shadow_exit_price": 0.01102475,
+      "shadow_return_pct": -5.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:ALTUSDT:1792599300000",
       "signal_time_ms": 1792599300000,
@@ -28966,6 +28969,7 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792600256933,
       "deadline_ms": 1792642500000,
       "detected_price": 0.011605,
       "last_checked_ms": 1792599300000,
@@ -28993,7 +28997,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.011605,
+      "shadow_exit_price": 0.0120692,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:ALTUSDT:1792599300000",
       "signal_time_ms": 1792599300000,
@@ -29001,6 +29008,47 @@
       "strategy": "S1",
       "symbol": "ALTUSDT",
       "tp": 0.0104445
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1792603800000,
+      "detected_price": 0.012873,
+      "last_checked_ms": 1792600200000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.6962818320477959,
+        "alt_positive_4h_pct": 79.22077922077922,
+        "btc_1h_pct": 0.34488112267694326,
+        "btc_24h_pct": 2.613,
+        "btc_4h_pct": 1.298475998592985,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 0.22029337800504312,
+        "eth_24h_pct": 2.749,
+        "eth_4h_pct": 1.4948578832294057,
+        "eth_btc_relative_strength_24h_pct": 0.13600000000000012,
+        "market_regime": "BULLISH",
+        "regime_snapshot_time": "2026-10-21T13:16:29.446414+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S1"
+      ],
+      "max_hold_minutes": 60,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.012873,
+      "side": "LONG",
+      "signal_id": "LONG3:L2:ALTUSDT:1792600200000",
+      "signal_time_ms": 1792600200000,
+      "sl": 0.012551175000000001,
+      "strategy": "L2",
+      "symbol": "ALTUSDT",
+      "tp": 0.014160300000000002
     }
   ],
   "spread_shadow_closed": [],
