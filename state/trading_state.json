@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792769456645,
+  "last_run_ms": 1792770359072,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -750,7 +750,9 @@
     "SHORT3:S2:IRYSUSDT:1792752300000",
     "LONG3:L1:IRYSUSDT:1792754100000",
     "LONG3:L1:IRYSUSDT:1792769400000",
-    "SHORT3:S1:IRYSUSDT:1792769400000"
+    "SHORT3:S1:IRYSUSDT:1792769400000",
+    "LONG3:L1:BIRBUSDT:1792770300000",
+    "SHORT3:S1:BIRBUSDT:1792770300000"
   ],
   "signal_shadow_closed": [
     {
@@ -29866,11 +29868,10 @@
       "strategy": "S2",
       "symbol": "PEPEUSDT",
       "tp": 4.50162e-06
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "closed_at_ms": 1792770356294,
       "deadline_ms": 1792812600000,
       "detected_price": 0.06226,
       "last_checked_ms": 1792769400000,
@@ -29899,7 +29900,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "LONG3",
+      "shadow_close_reason": "TAKE_PROFIT",
       "shadow_entry_price": 0.06226,
+      "shadow_exit_price": 0.068486,
+      "shadow_return_pct": 10.0,
       "side": "LONG",
       "signal_id": "LONG3:L1:IRYSUSDT:1792769400000",
       "signal_time_ms": 1792769400000,
@@ -29910,6 +29914,7 @@
     },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792770356294,
       "deadline_ms": 1792812600000,
       "detected_price": 0.06226,
       "last_checked_ms": 1792769400000,
@@ -29938,7 +29943,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.06226,
+      "shadow_exit_price": 0.0647504,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:IRYSUSDT:1792769400000",
       "signal_time_ms": 1792769400000,
@@ -29946,6 +29954,90 @@
       "strategy": "S1",
       "symbol": "IRYSUSDT",
       "tp": 0.056034
+    },
+    {
+      "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792770358186,
+      "deadline_ms": 1792813500000,
+      "detected_price": 0.09442,
+      "last_checked_ms": 1792770300000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.07719027402546264,
+        "alt_positive_4h_pct": 52.48380129589633,
+        "btc_1h_pct": -0.45111182560921836,
+        "btc_24h_pct": -0.003,
+        "btc_4h_pct": -0.2921602840787463,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4301102027781001,
+        "eth_24h_pct": 0.42300000000000004,
+        "eth_4h_pct": -0.016243029033391476,
+        "eth_btc_relative_strength_24h_pct": 0.42600000000000005,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-23T10:32:53.781917+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
+      "shadow_entry_price": 0.09442,
+      "shadow_exit_price": 0.0981968,
+      "shadow_return_pct": -4.0,
+      "side": "SHORT",
+      "signal_id": "SHORT3:S1:BIRBUSDT:1792770300000",
+      "signal_time_ms": 1792770300000,
+      "sl": 0.0981968,
+      "strategy": "S1",
+      "symbol": "BIRBUSDT",
+      "tp": 0.08497800000000001
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1792813500000,
+      "detected_price": 0.09442,
+      "last_checked_ms": 1792770300000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.07719027402546264,
+        "alt_positive_4h_pct": 52.48380129589633,
+        "btc_1h_pct": -0.45111182560921836,
+        "btc_24h_pct": -0.003,
+        "btc_4h_pct": -0.2921602840787463,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4301102027781001,
+        "eth_24h_pct": 0.42300000000000004,
+        "eth_4h_pct": -0.016243029033391476,
+        "eth_btc_relative_strength_24h_pct": 0.42600000000000005,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-23T10:32:53.781917+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "L2",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.09442,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:BIRBUSDT:1792770300000",
+      "signal_time_ms": 1792770300000,
+      "sl": 0.089699,
+      "strategy": "L1",
+      "symbol": "BIRBUSDT",
+      "tp": 0.10386200000000001
     }
   ],
   "spread_shadow_closed": [],
