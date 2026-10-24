@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1792832456162,
+  "last_run_ms": 1792833358291,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -772,7 +772,8 @@
     "LONG3:L1:INUSDT:1792821600000",
     "LONG3:L1:ORDERUSDT:1792829700000",
     "SHORT3:S1:ORDERUSDT:1792829700000",
-    "SHORT3:S1:ORDERUSDT:1792832400000"
+    "SHORT3:S1:ORDERUSDT:1792832400000",
+    "LONG3:L1:WETUSDT:1792833300000"
   ],
   "signal_shadow_closed": [
     {
@@ -30861,11 +30862,10 @@
       "strategy": "S1",
       "symbol": "ORDERUSDT",
       "tp": 0.047493
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1792833357093,
       "deadline_ms": 1792875600000,
       "detected_price": 0.05907,
       "last_checked_ms": 1792832400000,
@@ -30894,7 +30894,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.05907,
+      "shadow_exit_price": 0.0614328,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:ORDERUSDT:1792832400000",
       "signal_time_ms": 1792832400000,
@@ -30902,6 +30905,45 @@
       "strategy": "S1",
       "symbol": "ORDERUSDT",
       "tp": 0.053163
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1792876500000,
+      "detected_price": 0.06983,
+      "last_checked_ms": 1792833300000,
+      "market_snapshot": {
+        "alt_median_4h_pct": 0.10333247222940045,
+        "alt_positive_4h_pct": 55.72354211663067,
+        "btc_1h_pct": -0.17348770973933947,
+        "btc_24h_pct": -1.3639999999999999,
+        "btc_4h_pct": -0.2413070675746365,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.4671874473887949,
+        "eth_24h_pct": -1.6049999999999998,
+        "eth_4h_pct": -0.6232008908873099,
+        "eth_btc_relative_strength_24h_pct": -0.24099999999999988,
+        "market_regime": "NEUTRAL",
+        "regime_snapshot_time": "2026-10-24T05:23:43.231994+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.06983,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:WETUSDT:1792833300000",
+      "signal_time_ms": 1792833300000,
+      "sl": 0.0663385,
+      "strategy": "L1",
+      "symbol": "WETUSDT",
+      "tp": 0.076813
     }
   ],
   "spread_shadow_closed": [],
