@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1793107859450,
+  "last_run_ms": 1793108759616,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -807,7 +807,8 @@
     "SHORT3:S2:REZUSDT:1793094300000",
     "LONG3:L1:BEATUSDT:1793106000000",
     "SHORT3:S1:HAEDALUSDT:1793106000000",
-    "SHORT3:S2:INITUSDT:1793106000000"
+    "SHORT3:S2:INITUSDT:1793106000000",
+    "LONG3:L1:HAEDALUSDT:1793108700000"
   ],
   "signal_shadow_closed": [
     {
@@ -32316,11 +32317,10 @@
       "strategy": "L1",
       "symbol": "BEATUSDT",
       "tp": 0.10725000000000001
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1793108757807,
       "deadline_ms": 1793108700000,
       "detected_price": 0.005165,
       "last_checked_ms": 1793107800000,
@@ -32347,7 +32347,10 @@
       ],
       "max_hold_minutes": 240,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "MAX_HOLD",
       "shadow_entry_price": 0.005165,
+      "shadow_exit_price": 0.00523,
+      "shadow_return_pct": -1.2584704743465633,
       "side": "SHORT",
       "signal_id": "SHORT3:S2:REZUSDT:1793094300000",
       "signal_time_ms": 1793094300000,
@@ -32355,12 +32358,14 @@
       "strategy": "S2",
       "symbol": "REZUSDT",
       "tp": 0.004648500000000001
-    },
+    }
+  ],
+  "signal_shadow_open": [
     {
       "actual_execution": "SHADOW_ONLY",
       "deadline_ms": 1793120400000,
       "detected_price": 0.16723,
-      "last_checked_ms": 1793107800000,
+      "last_checked_ms": 1793108700000,
       "market_snapshot": {
         "alt_median_4h_pct": -0.12774655084312192,
         "alt_positive_4h_pct": 40.8207343412527,
@@ -32392,6 +32397,44 @@
       "strategy": "S2",
       "symbol": "INITUSDT",
       "tp": 0.150507
+    },
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1793151900000,
+      "detected_price": 0.02753,
+      "last_checked_ms": 1793108700000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.12774655084312192,
+        "alt_positive_4h_pct": 40.8207343412527,
+        "btc_1h_pct": -0.19821852347121638,
+        "btc_24h_pct": 0.492,
+        "btc_4h_pct": 0.598145573019937,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": -0.23015502247974995,
+        "eth_24h_pct": 0.924,
+        "eth_4h_pct": 0.8334055271593366,
+        "eth_btc_relative_strength_24h_pct": 0.43200000000000005,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-10-27T09:22:42.993766+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.02753,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:HAEDALUSDT:1793108700000",
+      "signal_time_ms": 1793108700000,
+      "sl": 0.026153499999999996,
+      "strategy": "L1",
+      "symbol": "HAEDALUSDT",
+      "tp": 0.030283
     }
   ],
   "spread_shadow_closed": [],
