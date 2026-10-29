@@ -26,8 +26,8 @@ def get_zip(url):
  return None
 
 def parse_date(s):
- if pd.api.types.is_numeric_dtype(s):
-  v=pd.to_numeric(s,errors="coerce")
+ v=pd.to_numeric(s,errors="coerce")
+ if v.notna().sum()>=max(1,len(s)*.9):
   m=v.dropna().median()
   unit="us" if m>1e14 else ("ms" if m>1e11 else "s")
   return pd.to_datetime(v,unit=unit,utc=True,errors="coerce")
@@ -83,7 +83,7 @@ f["date"]=pd.to_datetime(f.date,utc=True)
 old=f.set_index("date")["funding"].astype(float).sort_index()
 fund_parts=[old.to_frame("funding")];fund_files=[];missing_funding=[]
 fundbase="https://data.binance.vision/data/futures/um"
-for p in ["2026-08","2026-09"]:
+for p in ["2026-08","2026-09","2026-10"]:
  url=f"{fundbase}/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{p}.zip"
  raw=get_zip(url)
  print("FUNDING_MONTH_RAW",p,raw.head(4).to_string(index=False,header=False) if raw is not None else "NONE")
@@ -179,7 +179,8 @@ out={
  "spot_source":"Binance Vision official Spot BTCUSDT 1h","funding_source":"Binance Vision official USD-M BTCUSDT fundingRate + source historical feather",
  "spot_archive_count":len(spot_files),"spot_missing_archives":missing_spot,
  "funding_archive_count":len(fund_files),"funding_files":fund_files,"funding_missing_archives":missing_funding,
- "funding_last_actual":str(fund.index.max()),"funding_missing_hours_forward":gap_hours,
+ "funding_last_actual":str(fund.index.max()),
+ "funding_events_after_freeze":int((fund.index>=FREEZE).sum()),"funding_missing_hours_forward":gap_hours,
  "spot_missing_hours_forward":len(missing_hours),
  "price_cross_up_count":int(fw.cross_up.sum()),"price_cross_exit_count":int(fw.cross_exit.sum()),
  "eligible_entry_signals":int(fw.entry_eligible.sum()),
