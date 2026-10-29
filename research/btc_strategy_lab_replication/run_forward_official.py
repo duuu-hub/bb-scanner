@@ -194,6 +194,18 @@ out={
           "Any funding gap over 8h blocks new entries, never treated as the original early-history NaN exception.",
           "Open position is marked to market with estimated exit fee; no forced closing."]
 }
+
+# Separate third-party diagnostic only: never certify trades from this feed.
+try:
+ import re,html as htmlmod
+ from bs4 import BeautifulSoup
+ response=S.get("https://pandabull.io/perpetuals-funding/binance/BTCUSDT",timeout=25)
+ rawtext=BeautifulSoup(response.text,"html.parser").get_text(" ",strip=True)
+ matches=re.findall(r"(2026-10-\d{2}\s+\d{2}:00\s+UTC)\s+([+-]?\d+(?:\.\d+)?)%",rawtext)
+ print("THIRD_PARTY_PANDABULL_STATUS",response.status_code,"html_bytes",len(response.content),"oct_rate_rows",len(matches),"first",matches[:3],"last",matches[-3:])
+ out["third_party_funding_observations"]=len(matches)
+except Exception as e:print("THIRD_PARTY_ERROR",str(e)[:200])
+
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
 with open(OUT,"w") as f:json.dump(out,f,indent=2,ensure_ascii=False)
 print("RESULT",json.dumps({k:out[k] for k in ("last_completed_candle_utc","funding_last_actual","spot_missing_archives","funding_missing_archives","funding_missing_hours_forward","spot_missing_hours_forward","price_cross_up_count","price_cross_exit_count","eligible_entry_signals","closed_trade_count","open_position","equity_net_cost_pct","mdd_net_cost_pct","forward_certified")},indent=2))
