@@ -106,29 +106,30 @@ for p in pd.period_range("2026-08",NOW.to_period("M"),freq="M"):
  print("FUNDING_MONTH_PARSED",p, a.head(3).to_string() if a is not None else "NONE",str(a.index.min()) if a is not None else "",str(a.index.max()) if a is not None else "")
  if a is None or a.empty:missing_funding.append(str(p));continue
  fund_parts.append(a);fund_files.append(str(p))
-for d in pd.date_range("2026-10-01","2026-10-28",freq="D"):
- day=d.strftime("%Y-%m-%d")
- url=f"{fundbase}/daily/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{day}.zip"
- a=funding_parse(get_zip(url))
- if a is None or a.empty:missing_funding.append(day);continue
- fund_parts.append(a);fund_files.append(day)
+# Binance Vision publishes fundingRate monthly, not daily.
+# Current-month funding must come from the official Futures settlement-history REST endpoint.
 
 # API fallback for funding if archives unavailable; do not silently fill missing.
 if missing_funding:
- try:
-  start=int(pd.Timestamp("2026-08-20T00:00:00Z").timestamp()*1000)
-  end=int(NOW.timestamp()*1000)
-  url="https://fapi.binance.com/fapi/v1/fundingRate"
-  r=S.get(url,params={"symbol":"BTCUSDT","startTime":start,"endTime":end,"limit":1000},timeout=25)
-  if r.ok:
+ start=int(pd.Timestamp("2026-08-20T00:00:00Z").timestamp()*1000)
+ end=int(NOW.timestamp()*1000)
+ params={"symbol":"BTCUSDT","startTime":start,"endTime":end,"limit":1000}
+ for host in ["fapi.binance.com","fapi1.binance.com","fapi2.binance.com","fapi3.binance.com","fapi4.binance.com"]:
+  try:
+   r=S.get(f"https://{host}/fapi/v1/fundingRate",params=params,timeout=12)
+   if not r.ok:
+    print("FUNDING_API_STATUS",host,r.status_code,r.text[:120]);continue
    rows=r.json()
-   if isinstance(rows,list) and rows:
-    ff=pd.DataFrame(rows)
-    ff["date"]=pd.to_datetime(ff.fundingTime,unit="ms",utc=True)
-    ff["funding"]=pd.to_numeric(ff.fundingRate)
-    fund_parts.append(ff.set_index("date")[["funding"]]);fund_files.append("fapi-fallback")
-  else:print("FUNDING_API_STATUS",r.status_code,r.text[:120])
- except Exception as e:print("FUNDING_API_ERROR",str(e)[:180])
+   if not isinstance(rows,list) or not rows:
+    print("FUNDING_API_EMPTY",host);continue
+   ff=pd.DataFrame(rows)
+   ff["date"]=pd.to_datetime(ff.fundingTime,unit="ms",utc=True)
+   ff["funding"]=pd.to_numeric(ff.fundingRate)
+   fund_parts.append(ff.set_index("date")[["funding"]])
+   fund_files.append("official-fapi:"+host)
+   print("FUNDING_API_SUCCESS",host,len(ff),"through",ff.date.max())
+   break
+  except Exception as e:print("FUNDING_API_ERROR",host,str(e)[:180])
 fund=pd.concat(fund_parts).sort_index()
 fund=fund[~fund.index.duplicated(keep="last")]
 fund=fund.loc[:LAST_COMPLETED]
@@ -216,6 +217,27 @@ out={
 
 
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
+CERTIFIED_OUT="research/btc_strategy_lab_replication/out/forward_official_last_certified.json"
+if out["forward_certified"]:
+ with open(CERTIFIED_OUT,"w") as f:json.dump(out,f,indent=2,ensure_ascii=False)
+else:
+ # Never overwrite verified forward PnL with an artificial 0% when current funding is unavailable.
+ out["uncertified_model_equity_suppressed"]=True
+ out["equity_net_cost_pct"]=None
+ out["mdd_net_cost_pct"]=None
+ out["closed_trade_count"]=None
+ out["open_position"]=None
+ try:
+  verified=json.load(open(CERTIFIED_OUT))
+  out["last_certified_checkpoint"]={
+   "last_completed_candle_utc":verified["last_completed_candle_utc"],
+   "funding_last_actual":verified["funding_last_actual"],
+   "closed_trades":verified["closed_trades"],
+   "closed_trade_count":verified["closed_trade_count"],
+   "equity_net_cost_pct":verified["equity_net_cost_pct"],
+   "mdd_net_cost_pct":verified["mdd_net_cost_pct"],
+   "open_position":verified["open_position"]}
+ except Exception as e:print("LAST_CERTIFIED_CHECKPOINT_ERROR",str(e)[:160])
 # Preserve the last certified checkpoint when the official funding API is temporarily geo-blocked.
 if os.path.exists(OUT) and not out["forward_certified"]:
  try:
