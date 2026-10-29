@@ -69,7 +69,7 @@ for p in pd.period_range("2019-01",str(NOW.to_period("M")-1),freq="M"):
  x=spot_parse(get_zip(url))
  if x is None:missing_spot.append(str(p));continue
  spot_parts.append(x);spot_files.append(str(p))
-for d in pd.date_range("2026-10-01",LAST_YESTERDAY,freq="D"):
+for d in pd.date_range(pd.Timestamp("2026-10-01T00:00:00Z"),LAST_YESTERDAY,freq="D"):
  day=d.strftime("%Y-%m-%d")
  url=f"{base}/daily/klines/BTCUSDT/1h/BTCUSDT-1h-{day}.zip"
  x=spot_parse(get_zip(url))
