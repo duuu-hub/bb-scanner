@@ -85,14 +85,17 @@ fund_parts=[old.to_frame("funding")];fund_files=[];missing_funding=[]
 fundbase="https://data.binance.vision/data/futures/um"
 for p in ["2026-08","2026-09"]:
  url=f"{fundbase}/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{p}.zip"
- a=funding_parse(get_zip(url))
- if a is None:missing_funding.append(p);continue
+ raw=get_zip(url)
+ print("FUNDING_MONTH_RAW",p,raw.head(4).to_string(index=False,header=False) if raw is not None else "NONE")
+ a=funding_parse(raw)
+ print("FUNDING_MONTH_PARSED",p, a.head(3).to_string() if a is not None else "NONE",str(a.index.min()) if a is not None else "",str(a.index.max()) if a is not None else "")
+ if a is None or a.empty:missing_funding.append(p);continue
  fund_parts.append(a);fund_files.append(p)
 for d in pd.date_range("2026-10-01","2026-10-28",freq="D"):
  day=d.strftime("%Y-%m-%d")
  url=f"{fundbase}/daily/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{day}.zip"
  a=funding_parse(get_zip(url))
- if a is None:missing_funding.append(day);continue
+ if a is None or a.empty:missing_funding.append(day);continue
  fund_parts.append(a);fund_files.append(day)
 
 # API fallback for funding if archives unavailable; do not silently fill missing.
