@@ -6,10 +6,11 @@
   "funding_source": "Binance Vision official USD-M BTCUSDT fundingRate + source historical feather",
   "spot_archive_count": 121,
   "spot_missing_archives": [],
-  "funding_archive_count": 2,
+  "funding_archive_count": 3,
   "funding_files": [
     "2026-08",
-    "2026-09"
+    "2026-09",
+    "fapi-fallback"
   ],
   "funding_missing_archives": [
     "2026-10",
@@ -42,13 +43,15 @@
     "2026-10-27",
     "2026-10-28"
   ],
-  "funding_last_actual": "2026-09-30 16:00:00.002000+00:00",
-  "funding_events_after_freeze": 19,
-  "funding_missing_hours_forward": 671,
+  "funding_last_actual": "2026-10-28 16:00:00.003000+00:00",
+  "funding_events_after_freeze": 103,
+  "pre_freeze_window_crosses": 0,
+  "pre_freeze_window_eligible_entries": 0,
+  "funding_missing_hours_forward": 0,
   "spot_missing_hours_forward": 0,
   "price_cross_up_count": 10,
   "price_cross_exit_count": 14,
-  "eligible_entry_signals": 0,
+  "eligible_entry_signals": 7,
   "signals_since_prior_checkpoint": [
     {
       "time": "2026-10-15 03:00:00+00:00",
@@ -69,22 +72,22 @@
     {
       "time": "2026-10-19 02:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 67.33796296296296,
+      "funding_valid": true,
       "eligible": false
     },
     {
       "time": "2026-10-19 12:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 69.51388888888889,
+      "funding_valid": true,
       "eligible": false
     },
     {
       "time": "2026-10-20 14:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 82.91666666666667,
+      "funding_valid": true,
       "eligible": false
     },
     {
@@ -128,9 +131,9 @@
     {
       "time": "2026-10-08 06:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 18.63425925925926,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-08 15:00:00+00:00",
@@ -139,44 +142,44 @@
     {
       "time": "2026-10-09 11:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 20.462962962962962,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-09 14:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 21.944444444444443,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-10 05:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 24.375,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-12 13:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 20.671296296296298,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-12 19:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 20.25462962962963,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-13 02:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
-      "eligible": false
+      "funding_pct": 20.925925925925924,
+      "funding_valid": true,
+      "eligible": true
     },
     {
       "time": "2026-10-15 03:00:00+00:00",
@@ -197,22 +200,22 @@
     {
       "time": "2026-10-19 02:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 67.33796296296296,
+      "funding_valid": true,
       "eligible": false
     },
     {
       "time": "2026-10-19 12:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 69.51388888888889,
+      "funding_valid": true,
       "eligible": false
     },
     {
       "time": "2026-10-20 14:00:00+00:00",
       "type": "EMA600_CROSS_UP",
-      "funding_pct": null,
-      "funding_valid": false,
+      "funding_pct": 82.91666666666667,
+      "funding_valid": true,
       "eligible": false
     },
     {
@@ -252,15 +255,55 @@
       "type": "EMA_MINUS2_CROSS_DOWN"
     }
   ],
-  "events": [],
-  "closed_trades": [],
-  "closed_trade_count": 0,
+  "events": [
+    {
+      "time": "2026-10-08 07:00:00+00:00",
+      "type": "ENTRY",
+      "price": 82885.38
+    },
+    {
+      "time": "2026-10-08 16:00:00+00:00",
+      "type": "EXIT_EMA",
+      "price": 81037.99
+    },
+    {
+      "time": "2026-10-09 12:00:00+00:00",
+      "type": "ENTRY",
+      "price": 83246.82
+    },
+    {
+      "time": "2026-10-15 04:00:00+00:00",
+      "type": "EXIT_EMA",
+      "price": 80928.0
+    }
+  ],
+  "closed_trades": [
+    {
+      "entry": "2026-10-08 07:00:00+00:00",
+      "exit": "2026-10-08 16:00:00+00:00",
+      "entry_price": 82885.38,
+      "exit_price": 81037.99,
+      "gross_return_pct": -2.2288490443067244,
+      "net_return_pct": -2.424293575067149,
+      "reason": "EMA-2%"
+    },
+    {
+      "entry": "2026-10-09 12:00:00+00:00",
+      "exit": "2026-10-15 04:00:00+00:00",
+      "entry_price": 83246.82,
+      "exit_price": 80928.0,
+      "gross_return_pct": -2.7854757695249033,
+      "net_return_pct": -2.979807603461615,
+      "reason": "EMA-2%"
+    }
+  ],
+  "closed_trade_count": 2,
   "open_position": false,
-  "equity_net_cost_pct": 0.0,
-  "mdd_net_cost_pct": 0.0,
+  "equity_net_cost_pct": -5.331861894248702,
+  "mdd_net_cost_pct": -5.4094012471113455,
   "cost_per_side_pct": 0.1,
   "roundtrip_cost_approx_pct": 0.2,
-  "forward_certified": false,
+  "forward_certified": true,
   "notes": [
     "Historical candles and funding only warm indicators; PnL starts at 1 on freeze date.",
     "Original next-open entry/exit, EMA-2%, trailing15%, and 0.1% per-side execution retained.",
