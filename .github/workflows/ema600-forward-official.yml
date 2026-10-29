@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: research-btc-strategy-lab-replication
-      - run: pip install pandas numpy pyarrow requests
+      - run: pip install pandas numpy pyarrow requests beautifulsoup4
       - name: Audit official spot and funding data
         run: python research/btc_strategy_lab_replication/run_forward_official.py
       - name: Commit checkpoint
