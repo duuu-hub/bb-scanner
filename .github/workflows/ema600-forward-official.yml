@@ -1,0 +1,27 @@
+name: EMA600 F55 official forward audit
+on:
+  push:
+    branches: [research-btc-strategy-lab-replication]
+    paths:
+      - 'research/btc_strategy_lab_replication/run_forward_official.py'
+      - '.github/workflows/ema600-forward-official.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research-btc-strategy-lab-replication
+      - run: pip install pandas numpy pyarrow requests
+      - name: Audit official spot and funding data
+        run: python research/btc_strategy_lab_replication/run_forward_official.py
+      - name: Commit checkpoint
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/btc_strategy_lab_replication/out/forward_official_checkpoint.json
+          git diff --cached --quiet || git commit -m "research: record official EMA600 F55 forward checkpoint"
+          git push
