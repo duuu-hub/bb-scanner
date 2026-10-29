@@ -9,6 +9,9 @@ OUT="research/btc_strategy_lab_replication/out/forward_official_checkpoint.json"
 FREEZE=pd.Timestamp("2026-09-24T14:00:00Z")
 CHECKPOINT=pd.Timestamp("2026-10-14T17:00:00Z")
 COST=.001
+NOW=pd.Timestamp.now(tz="UTC")
+LAST_COMPLETED=NOW.floor("h")-pd.Timedelta(hours=1)
+LAST_YESTERDAY=NOW.floor("D")-pd.Timedelta(days=1)
 S=requests.Session()
 def get_zip(url):
  for k in range(3):
@@ -61,21 +64,33 @@ def funding_parse(a):
 
 spot_parts=[];spot_files=[];missing_spot=[]
 base="https://data.binance.vision/data/spot"
-for p in pd.period_range("2019-01","2026-09",freq="M"):
+for p in pd.period_range("2019-01",str(NOW.to_period("M")-1),freq="M"):
  url=f"{base}/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-{p}.zip"
  x=spot_parse(get_zip(url))
  if x is None:missing_spot.append(str(p));continue
  spot_parts.append(x);spot_files.append(str(p))
-for d in pd.date_range("2026-10-01","2026-10-28",freq="D"):
+for d in pd.date_range("2026-10-01",LAST_YESTERDAY,freq="D"):
  day=d.strftime("%Y-%m-%d")
  url=f"{base}/daily/klines/BTCUSDT/1h/BTCUSDT-1h-{day}.zip"
  x=spot_parse(get_zip(url))
  if x is None:missing_spot.append(day);continue
  spot_parts.append(x);spot_files.append(day)
+# Official Binance Spot REST endpoint for today's already completed 1h candles.
+try:
+ url="https://data-api.binance.vision/api/v3/klines"
+ start_ms=int(NOW.floor("D").timestamp()*1000)
+ end_ms=int((LAST_COMPLETED+pd.Timedelta(hours=1)).timestamp()*1000)-1
+ resp=S.get(url,params={"symbol":"BTCUSDT","interval":"1h","startTime":start_ms,"endTime":end_ms,"limit":1000},timeout=25)
+ if resp.ok and isinstance(resp.json(),list) and resp.json():
+  x=spot_parse(pd.DataFrame(resp.json()))
+  if x is not None:
+   spot_parts.append(x);spot_files.append("spot-rest-today")
+ else:print("SPOT_TODAY_API_STATUS",resp.status_code,resp.text[:120])
+except Exception as e:print("SPOT_TODAY_API_ERROR",str(e)[:160])
 if not spot_parts:raise RuntimeError("No official spot data retrieved")
 spot=pd.concat(spot_parts).sort_index()
 spot=spot[~spot.index.duplicated(keep="last")]
-spot=spot.loc[:pd.Timestamp("2026-10-28T23:00:00Z")]
+spot=spot.loc[:LAST_COMPLETED]
 
 # Source funding provides historical lookback through 2026-08-21.
 f=pd.read_feather("research/btc_strategy_lab_replication/source_data/funding.feather")
@@ -83,7 +98,7 @@ f["date"]=pd.to_datetime(f.date,utc=True)
 old=f.set_index("date")["funding"].astype(float).sort_index()
 fund_parts=[old.to_frame("funding")];fund_files=[];missing_funding=[]
 fundbase="https://data.binance.vision/data/futures/um"
-for p in ["2026-08","2026-09","2026-10"]:
+for p in pd.period_range("2026-08",NOW.to_period("M"),freq="M"):
  url=f"{fundbase}/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{p}.zip"
  raw=get_zip(url)
  print("FUNDING_MONTH_RAW",p,raw.head(4).to_string(index=False,header=False) if raw is not None else "NONE")
@@ -102,7 +117,7 @@ for d in pd.date_range("2026-10-01","2026-10-28",freq="D"):
 if missing_funding:
  try:
   start=int(pd.Timestamp("2026-08-20T00:00:00Z").timestamp()*1000)
-  end=int(pd.Timestamp("2026-10-29T00:00:00Z").timestamp()*1000)
+  end=int(NOW.timestamp()*1000)
   url="https://fapi.binance.com/fapi/v1/fundingRate"
   r=S.get(url,params={"symbol":"BTCUSDT","startTime":start,"endTime":end,"limit":1000},timeout=25)
   if r.ok:
@@ -116,7 +131,7 @@ if missing_funding:
  except Exception as e:print("FUNDING_API_ERROR",str(e)[:180])
 fund=pd.concat(fund_parts).sort_index()
 fund=fund[~fund.index.duplicated(keep="last")]
-fund=fund.loc[:pd.Timestamp("2026-10-28T23:00:00Z")]
+fund=fund.loc[:LAST_COMPLETED]
 
 # No forward-fill past an 8h settlement interval; preserve the original 72h / 180d rank formula.
 h=spot.copy()
@@ -141,7 +156,7 @@ h["entry_eligible"]=h.cross_up&h.funding_valid&(h.funding_pct<55)
 # Start a completely independent forward equity curve; do not import pre-freeze PnL.
 pre=h.loc[(h.index>=pd.Timestamp("2026-09-23T17:00:00Z"))&(h.index<FREEZE)]
 print("PRE_FREEZE",{"cross_up":int(pre.cross_up.sum()),"eligible":int(pre.entry_eligible.sum()),"exit_cross":int(pre.cross_exit.sum())})
-fw=h.loc[(h.index>=FREEZE)&(h.index<=pd.Timestamp("2026-10-28T23:00:00Z"))].copy()
+fw=h.loc[(h.index>=FREEZE)&(h.index<=LAST_COMPLETED)].copy()
 missing_hours=pd.date_range(fw.index.min(),fw.index.max(),freq="h",tz="UTC").difference(fw.index)
 gap_hours=int(fw.funding.isna().sum())
 signals=[];trades=[];events=[]
@@ -192,77 +207,13 @@ out={
  "equity_net_cost_pct":float((eq[-1]-1)*100) if len(eq) else None,
  "mdd_net_cost_pct":mdd,"cost_per_side_pct":COST*100,"roundtrip_cost_approx_pct":2*COST*100,
  "forward_certified":len(missing_hours)==0 and gap_hours==0 and not missing_spot and bool(fund_files),
+ "data_provenance":"Official Binance Vision archive + official Binance Futures fundingRate REST. Fills are simulated, not live exchange orders.",
  "notes":["Historical candles and funding only warm indicators; PnL starts at 1 on freeze date.",
           "Original next-open entry/exit, EMA-2%, trailing15%, and 0.1% per-side execution retained.",
           "Any funding gap over 8h blocks new entries, never treated as the original early-history NaN exception.",
           "Open position is marked to market with estimated exit fee; no forced closing."]
 }
 
-
-# NON-CERTIFIED research cross-check from Pandabull's publicly displayed
-# rounded Binance BTCUSDT 8h rates (0.0001 percentage-point resolution).
-# These observations NEVER replace official funding in the certified result.
-provisional_rates_pct={
- 1:[.0080,.0046,.0070],2:[.0027,.0100,.0012],3:[.0046,.0004,.0045],
- 4:[-.0013,.0035,.0038],5:[.0075,.0042,-.0015],6:[-.0025,-.0016,.0022],
- 7:[-.0007,-.0037,.0012],8:[-.0010,-.0012,.0034],9:[.0018,.0052,.0013],
- 10:[.0052,-.0004,.0005],11:[-.0027,-.0010,.0013],12:[.0006,.0019,.0019],
- 13:[.0067,.0083,.0035],14:[-.0010,.0015,-.0018],15:[-.0041,.0066,.0018],
- 16:[.0054,.0068,.0043],17:[.0100,.0037,.0037],18:[.0064,.0060,.0058],
- 19:[.0050,.0100,.0080],20:[.0092,.0071,.0079],21:[.0065,.0085,.0049],
- 22:[.0005,-.0014,.0013],23:[.0054,.0071,.0100],24:[.0039,.0034,.0010],
- 25:[.0094,.0060,.0080],26:[.0017,.0079,.0100],27:[.0100,.0087,.0100],
- 28:[.0054,.0079,.0080]}
-prov_rows=[(pd.Timestamp(f"2026-10-{day:02d}T{hour:02d}:00:00Z")+pd.Timedelta(milliseconds=1),rate/100)
-           for day,vals in provisional_rates_pct.items() for hour,rate in zip([0,8,16],vals)]
-prov_fund=pd.concat([fund.loc[fund.index<pd.Timestamp("2026-10-01T00:00:00Z"),"funding"],pd.Series(dict(prov_rows))]).sort_index()
-p=h.copy()
-p["funding"]=prov_fund.reindex(p.index,method="ffill",tolerance=pd.Timedelta("8h"))
-p["funding_3d"]=p.funding.rolling(72,min_periods=24).mean()
-p["funding_pct"]=p.funding_3d.rolling(4320,min_periods=720).rank(pct=True)*100
-p["funding_valid"]=p.funding.notna().rolling(72,min_periods=72).sum().eq(72)&p.funding_pct.notna()
-p["entry_eligible"]=p.cross_up&p.funding_valid&(p.funding_pct<55)
-pfw=p.loc[fw.index].copy()
-peq=1.;ppos=False;pe=0.;ppeak=0.;ppending=None;peqs=[];ptrades=[];pevents=[];psignals=[]
-for dt,r in pfw.iterrows():
- if ppending=="buy" and not ppos:
-  pe=float(r.open);ppeak=pe;ppos=True;pet=dt;peq*=1-COST;pevents.append({"time":str(dt),"type":"ENTRY","price":pe});ppending=None
- elif ppending=="sell" and ppos:
-  price=float(r.open);peq*=price/pe*(1-COST);ptrades.append({"entry":str(pet),"exit":str(dt),"net_return_pct":((price/pe)*(1-COST)**2-1)*100,"reason":"EMA-2%"});ppos=False;ppending=None
-  pevents.append({"time":str(dt),"type":"EXIT_EMA","price":price})
- if ppos:
-  ppeak=max(ppeak,float(r.high));pstop=ppeak*.85
-  if r.low<=pstop:
-   price=min(float(r.open),pstop);peq*=price/pe*(1-COST)
-   ptrades.append({"entry":str(pet),"exit":str(dt),"net_return_pct":((price/pe)*(1-COST)**2-1)*100,"reason":"trailing15"})
-   pevents.append({"time":str(dt),"type":"EXIT_TRAILING","price":price});ppos=False;ppending=None
- if bool(r.cross_up):
-  psignals.append({"time":str(dt),"funding_pct":round(float(r.funding_pct),3) if pd.notna(r.funding_pct) else None,"eligible":bool(r.entry_eligible)})
- if not ppos and bool(r.entry_eligible):ppending="buy"
- elif ppos and bool(r.cross_exit):ppending="sell"
- peqs.append(peq*(float(r.close)/pe*(1-COST) if ppos else 1))
-peqs=np.array(peqs)
-out["provisional_third_party_diagnostic"]={
- "funding_source":"Pandabull Binance BTCUSDT public table (rounded 4 decimals of percent; NOT original exchange records)",
- "rate_count":len(prov_rows),
- "eligible_crosses":int(pfw.entry_eligible.sum()),
- "candidate_crosses":psignals,
- "events":pevents,"closed_trades":ptrades,"closed_trade_count":len(ptrades),"open_position":ppos,
- "net_cost_return_pct":float((peqs[-1]-1)*100),
- "net_cost_mdd_pct":float(np.min(peqs/np.maximum.accumulate(peqs)-1)*100),
- "officially_certified":False}
-print("PROVISIONAL_DIAGNOSTIC",json.dumps(out["provisional_third_party_diagnostic"],indent=2))
-
-# Separate third-party diagnostic only: never certify trades from this feed.
-try:
- import re,html as htmlmod
- from bs4 import BeautifulSoup
- response=S.get("https://pandabull.io/perpetuals-funding/binance/BTCUSDT",timeout=25)
- rawtext=BeautifulSoup(response.text,"html.parser").get_text(" ",strip=True)
- matches=re.findall(r"(2026-10-\d{2}\s+\d{2}:00\s+UTC)\s+([+-]?\d+(?:\.\d+)?)%",rawtext)
- print("THIRD_PARTY_PANDABULL_STATUS",response.status_code,"html_bytes",len(response.content),"oct_rate_rows",len(matches),"first",matches[:3],"last",matches[-3:])
- out["third_party_funding_observations"]=len(matches)
-except Exception as e:print("THIRD_PARTY_ERROR",str(e)[:200])
 
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
 with open(OUT,"w") as f:json.dump(out,f,indent=2,ensure_ascii=False)
