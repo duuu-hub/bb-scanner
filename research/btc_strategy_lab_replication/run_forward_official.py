@@ -139,6 +139,8 @@ h["entry_eligible"]=h.cross_up&h.funding_valid&(h.funding_pct<55)
 
 # The freeze date was confirmed flat in the earlier 2026-05 to 2026-09 historical run.
 # Start a completely independent forward equity curve; do not import pre-freeze PnL.
+pre=h.loc[(h.index>=pd.Timestamp("2026-09-23T17:00:00Z"))&(h.index<FREEZE)]
+print("PRE_FREEZE",{"cross_up":int(pre.cross_up.sum()),"eligible":int(pre.entry_eligible.sum()),"exit_cross":int(pre.cross_exit.sum())})
 fw=h.loc[(h.index>=FREEZE)&(h.index<=pd.Timestamp("2026-10-28T23:00:00Z"))].copy()
 missing_hours=pd.date_range(fw.index.min(),fw.index.max(),freq="h",tz="UTC").difference(fw.index)
 gap_hours=int(fw.funding.isna().sum())
@@ -180,7 +182,8 @@ out={
  "spot_archive_count":len(spot_files),"spot_missing_archives":missing_spot,
  "funding_archive_count":len(fund_files),"funding_files":fund_files,"funding_missing_archives":missing_funding,
  "funding_last_actual":str(fund.index.max()),
- "funding_events_after_freeze":int((fund.index>=FREEZE).sum()),"funding_missing_hours_forward":gap_hours,
+ "funding_events_after_freeze":int((fund.index>=FREEZE).sum()),
+ "pre_freeze_window_crosses":int(pre.cross_up.sum()),"pre_freeze_window_eligible_entries":int(pre.entry_eligible.sum()),"funding_missing_hours_forward":gap_hours,
  "spot_missing_hours_forward":len(missing_hours),
  "price_cross_up_count":int(fw.cross_up.sum()),"price_cross_exit_count":int(fw.cross_exit.sum()),
  "eligible_entry_signals":int(fw.entry_eligible.sum()),
