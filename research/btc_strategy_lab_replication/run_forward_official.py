@@ -195,6 +195,61 @@ out={
           "Open position is marked to market with estimated exit fee; no forced closing."]
 }
 
+
+# NON-CERTIFIED research cross-check from Pandabull's publicly displayed
+# rounded Binance BTCUSDT 8h rates (0.0001 percentage-point resolution).
+# These observations NEVER replace official funding in the certified result.
+provisional_rates_pct={
+ 1:[.0080,.0046,.0070],2:[.0027,.0100,.0012],3:[.0046,.0004,.0045],
+ 4:[-.0013,.0035,.0038],5:[.0075,.0042,-.0015],6:[-.0025,-.0016,.0022],
+ 7:[-.0007,-.0037,.0012],8:[-.0010,-.0012,.0034],9:[.0018,.0052,.0013],
+ 10:[.0052,-.0004,.0005],11:[-.0027,-.0010,.0013],12:[.0006,.0019,.0019],
+ 13:[.0067,.0083,.0035],14:[-.0010,.0015,-.0018],15:[-.0041,.0066,.0018],
+ 16:[.0054,.0068,.0043],17:[.0100,.0037,.0037],18:[.0064,.0060,.0058],
+ 19:[.0050,.0100,.0080],20:[.0092,.0071,.0079],21:[.0065,.0085,.0049],
+ 22:[.0005,-.0014,.0013],23:[.0054,.0071,.0100],24:[.0039,.0034,.0010],
+ 25:[.0094,.0060,.0080],26:[.0017,.0079,.0100],27:[.0100,.0087,.0100],
+ 28:[.0054,.0079,.0080]}
+prov_rows=[(pd.Timestamp(f"2026-10-{day:02d}T{hour:02d}:00:00Z")+pd.Timedelta(milliseconds=1),rate/100)
+           for day,vals in provisional_rates_pct.items() for hour,rate in zip([0,8,16],vals)]
+prov_fund=pd.concat([fund.loc[fund.index<pd.Timestamp("2026-10-01T00:00:00Z"),"funding"],pd.Series(dict(prov_rows))]).sort_index()
+p=h.copy()
+p["funding"]=prov_fund.reindex(p.index,method="ffill",tolerance=pd.Timedelta("8h"))
+p["funding_3d"]=p.funding.rolling(72,min_periods=24).mean()
+p["funding_pct"]=p.funding_3d.rolling(4320,min_periods=720).rank(pct=True)*100
+p["funding_valid"]=p.funding.notna().rolling(72,min_periods=72).sum().eq(72)&p.funding_pct.notna()
+p["entry_eligible"]=p.cross_up&p.funding_valid&(p.funding_pct<55)
+pfw=p.loc[fw.index].copy()
+peq=1.;ppos=False;pe=0.;ppeak=0.;ppending=None;peqs=[];ptrades=[];pevents=[];psignals=[]
+for dt,r in pfw.iterrows():
+ if ppending=="buy" and not ppos:
+  pe=float(r.open);ppeak=pe;ppos=True;pet=dt;peq*=1-COST;pevents.append({"time":str(dt),"type":"ENTRY","price":pe});ppending=None
+ elif ppending=="sell" and ppos:
+  price=float(r.open);peq*=price/pe*(1-COST);ptrades.append({"entry":str(pet),"exit":str(dt),"net_return_pct":((price/pe)*(1-COST)**2-1)*100,"reason":"EMA-2%"});ppos=False;ppending=None
+  pevents.append({"time":str(dt),"type":"EXIT_EMA","price":price})
+ if ppos:
+  ppeak=max(ppeak,float(r.high));pstop=ppeak*.85
+  if r.low<=pstop:
+   price=min(float(r.open),pstop);peq*=price/pe*(1-COST)
+   ptrades.append({"entry":str(pet),"exit":str(dt),"net_return_pct":((price/pe)*(1-COST)**2-1)*100,"reason":"trailing15"})
+   pevents.append({"time":str(dt),"type":"EXIT_TRAILING","price":price});ppos=False;ppending=None
+ if bool(r.cross_up):
+  psignals.append({"time":str(dt),"funding_pct":round(float(r.funding_pct),3) if pd.notna(r.funding_pct) else None,"eligible":bool(r.entry_eligible)})
+ if not ppos and bool(r.entry_eligible):ppending="buy"
+ elif ppos and bool(r.cross_exit):ppending="sell"
+ peqs.append(peq*(float(r.close)/pe*(1-COST) if ppos else 1))
+peqs=np.array(peqs)
+out["provisional_third_party_diagnostic"]={
+ "funding_source":"Pandabull Binance BTCUSDT public table (rounded 4 decimals of percent; NOT original exchange records)",
+ "rate_count":len(prov_rows),
+ "eligible_crosses":int(pfw.entry_eligible.sum()),
+ "candidate_crosses":psignals,
+ "events":pevents,"closed_trades":ptrades,"closed_trade_count":len(ptrades),"open_position":ppos,
+ "net_cost_return_pct":float((peqs[-1]-1)*100),
+ "net_cost_mdd_pct":float(np.min(peqs/np.maximum.accumulate(peqs)-1)*100),
+ "officially_certified":False}
+print("PROVISIONAL_DIAGNOSTIC",json.dumps(out["provisional_third_party_diagnostic"],indent=2))
+
 # Separate third-party diagnostic only: never certify trades from this feed.
 try:
  import re,html as htmlmod
