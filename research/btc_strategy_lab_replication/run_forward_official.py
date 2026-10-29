@@ -104,8 +104,8 @@ for p in pd.period_range("2026-08",NOW.to_period("M"),freq="M"):
  print("FUNDING_MONTH_RAW",p,raw.head(4).to_string(index=False,header=False) if raw is not None else "NONE")
  a=funding_parse(raw)
  print("FUNDING_MONTH_PARSED",p, a.head(3).to_string() if a is not None else "NONE",str(a.index.min()) if a is not None else "",str(a.index.max()) if a is not None else "")
- if a is None or a.empty:missing_funding.append(p);continue
- fund_parts.append(a);fund_files.append(p)
+ if a is None or a.empty:missing_funding.append(str(p));continue
+ fund_parts.append(a);fund_files.append(str(p))
 for d in pd.date_range("2026-10-01","2026-10-28",freq="D"):
  day=d.strftime("%Y-%m-%d")
  url=f"{fundbase}/daily/fundingRate/BTCUSDT/BTCUSDT-fundingRate-{day}.zip"
@@ -216,6 +216,17 @@ out={
 
 
 os.makedirs(os.path.dirname(OUT),exist_ok=True)
+# Preserve the last certified checkpoint when the official funding API is temporarily geo-blocked.
+if os.path.exists(OUT) and not out["forward_certified"]:
+ try:
+  prev=json.load(open(OUT))
+  if prev.get("forward_certified"):
+   out["previous_certified_checkpoint"]={
+    "last_completed_candle_utc":prev["last_completed_candle_utc"],
+    "closed_trades":prev["closed_trades"],
+    "equity_net_cost_pct":prev["equity_net_cost_pct"],
+    "mdd_net_cost_pct":prev["mdd_net_cost_pct"]}
+ except Exception as e:print("PREVIOUS_CHECKPOINT_ERROR",str(e)[:120])
 with open(OUT,"w") as f:json.dump(out,f,indent=2,ensure_ascii=False)
 print("RESULT",json.dumps({k:out[k] for k in ("last_completed_candle_utc","funding_last_actual","spot_missing_archives","funding_missing_archives","funding_missing_hours_forward","spot_missing_hours_forward","price_cross_up_count","price_cross_exit_count","eligible_entry_signals","closed_trade_count","open_position","equity_net_cost_pct","mdd_net_cost_pct","forward_certified")},indent=2))
 print("NEW_SIGNALS",json.dumps(new,indent=2))
