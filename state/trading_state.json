@@ -42,7 +42,7 @@
       "tp": "0.3096"
     }
   ],
-  "last_run_ms": 1795403754998,
+  "last_run_ms": 1795404657277,
   "open_trades": [],
   "pending_entries": [],
   "processed_signal_ids": [
@@ -960,7 +960,8 @@
     "LONG3:L2:PIEVERSEUSDT:1795339800000",
     "SHORT3:S1:PIEVERSEUSDT:1795339800000",
     "SHORT3:S2:ELSAUSDT:1795341600000",
-    "SHORT3:S1:ELSAUSDT:1795403700000"
+    "SHORT3:S1:ELSAUSDT:1795403700000",
+    "LONG3:L1:ELSAUSDT:1795404600000"
   ],
   "signal_shadow_closed": [
     {
@@ -38873,11 +38874,10 @@
       "strategy": "S2",
       "symbol": "ELSAUSDT",
       "tp": 0.076338
-    }
-  ],
-  "signal_shadow_open": [
+    },
     {
       "actual_execution": "SHADOW_ONLY",
+      "closed_at_ms": 1795404655849,
       "deadline_ms": 1795446900000,
       "detected_price": 0.09395,
       "last_checked_ms": 1795403700000,
@@ -38904,7 +38904,10 @@
       ],
       "max_hold_minutes": 720,
       "portfolio": "SHORT3",
+      "shadow_close_reason": "STOP_LOSS",
       "shadow_entry_price": 0.09395,
+      "shadow_exit_price": 0.097708,
+      "shadow_return_pct": -4.0,
       "side": "SHORT",
       "signal_id": "SHORT3:S1:ELSAUSDT:1795403700000",
       "signal_time_ms": 1795403700000,
@@ -38912,6 +38915,46 @@
       "strategy": "S1",
       "symbol": "ELSAUSDT",
       "tp": 0.084555
+    }
+  ],
+  "signal_shadow_open": [
+    {
+      "actual_execution": "REJECT:DEMO_SYMBOL_UNSUPPORTED",
+      "deadline_ms": 1795447800000,
+      "detected_price": 0.09709,
+      "last_checked_ms": 1795404600000,
+      "market_snapshot": {
+        "alt_median_4h_pct": -0.39966089378709047,
+        "alt_positive_4h_pct": 25.59652928416486,
+        "btc_1h_pct": 1.1241599683752712,
+        "btc_24h_pct": 3.5740000000000003,
+        "btc_4h_pct": 0.6106004565574086,
+        "btc_volatility_state": "NORMAL",
+        "eth_1h_pct": 1.4176036223086497,
+        "eth_24h_pct": 4.134,
+        "eth_4h_pct": 0.43854299173449185,
+        "eth_btc_relative_strength_24h_pct": 0.56,
+        "market_regime": "BEARISH",
+        "regime_snapshot_time": "2026-11-22T23:14:09.880983+00:00",
+        "total3_24h_pct": null,
+        "total3_4h_pct": null,
+        "total3es_24h_pct": null,
+        "total3es_4h_pct": null
+      },
+      "matched_strategies": [
+        "L1",
+        "S1"
+      ],
+      "max_hold_minutes": 720,
+      "portfolio": "LONG3",
+      "shadow_entry_price": 0.09709,
+      "side": "LONG",
+      "signal_id": "LONG3:L1:ELSAUSDT:1795404600000",
+      "signal_time_ms": 1795404600000,
+      "sl": 0.0922355,
+      "strategy": "L1",
+      "symbol": "ELSAUSDT",
+      "tp": 0.106799
     }
   ],
   "spread_shadow_closed": [],
